@@ -12,6 +12,8 @@ class ScaffoldManager:
     DOCS_STRUCTURE = [
         "x-ipe-docs/requirements",
         "x-ipe-docs/planning",
+        "x-ipe-docs/planning/tasks",
+        "x-ipe-docs/planning/features",
         "x-ipe-docs/ideas",
         "x-ipe-docs/config",
         "x-ipe-docs/themes",
@@ -377,31 +379,38 @@ class ScaffoldManager:
             self.created.append(target_file)
     
     def copy_planning_templates(self) -> None:
-        """Copy planning templates (features.md, task-board.md) to x-ipe-docs/planning/."""
-        planning_source = self._get_resource_path("planning")
-        if planning_source is None or not planning_source.exists():
-            return
-        
-        target_dir = self.project_root / "x-ipe-docs" / "planning"
-        
-        # Copy each planning file individually (don't overwrite existing)
-        planning_files = ["features.md", "task-board.md"]
-        for filename in planning_files:
-            source_file = planning_source / filename
-            target_file = target_dir / filename
-            
-            if not source_file.exists():
-                continue
-                
-            if target_file.exists():
-                if not self.force:
-                    self.skipped.append(target_file)
-                    continue
-            
+        """Initialize JSON-based planning board files (tasks + features)."""
+        planning_dir = self.project_root / "x-ipe-docs" / "planning"
+
+        # Tasks: create tasks-index.json with empty entries
+        tasks_dir = planning_dir / "tasks"
+        index_file = tasks_dir / "tasks-index.json"
+        if not index_file.exists():
             if not self.dry_run:
-                target_dir.mkdir(parents=True, exist_ok=True)
-                shutil.copy2(source_file, target_file)
-            self.created.append(target_file)
+                tasks_dir.mkdir(parents=True, exist_ok=True)
+                index_file.write_text(json.dumps(
+                    {"_version": "1.0", "version": "1.0", "entries": {}},
+                    indent=2,
+                ) + "\n")
+            self.created.append(index_file)
+        else:
+            if not self.force:
+                self.skipped.append(index_file)
+
+        # Features: create features.json with empty features list
+        features_dir = planning_dir / "features"
+        features_file = features_dir / "features.json"
+        if not features_file.exists():
+            if not self.dry_run:
+                features_dir.mkdir(parents=True, exist_ok=True)
+                features_file.write_text(json.dumps(
+                    {"_version": "1.0", "features": []},
+                    indent=2,
+                ) + "\n")
+            self.created.append(features_file)
+        else:
+            if not self.force:
+                self.skipped.append(features_file)
     
     def copy_themes(self) -> None:
         """Copy default theme to x-ipe-docs/themes/."""

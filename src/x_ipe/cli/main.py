@@ -238,7 +238,7 @@ def init(ctx: click.Context, force: bool, dry_run: bool, no_skills: bool, no_mcp
     # Copy config files (copilot-prompt.json, tools.json, .env.example)
     scaffold.copy_config_files()
     
-    # Copy planning templates (features.md, task-board.md)
+    # Initialize JSON-based planning boards (tasks + features)
     scaffold.copy_planning_templates()
     
     # Copy default theme

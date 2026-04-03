@@ -185,3 +185,52 @@ All 8 decisions align with KISS/YAGNI/DRY principles and existing project patter
 
 ### Follow-up
 > None. All questions answered. Proceed to specification writing with these decisions as constraints. The grep patterns in Q3 should be documented in the spec's acceptance criteria section.
+
+---
+
+## DAO-112: FEATURE-057-E Cleanup & Scaffold Update — Refinement Decisions
+
+- **Timestamp:** 2026-04-03T17:15:00Z
+- **Task ID:** TASK-1075
+- **Feature ID:** FEATURE-057-E
+- **Workflow:** x-ipe-workflow-task-execution
+- **Calling Skill:** x-ipe-task-based-feature-refinement
+- **Source:** ai
+- **Disposition:** answer
+- **Confidence:** 0.88
+
+### Message
+> Agent Drift 🌊 (TASK-1075) requests decisions on 4 cleanup/scaffold questions for FEATURE-057-E. Context: FEATURE-057-C migrated all data to JSON, FEATURE-057-D updated all skill references to use the new JSON board manager. FEATURE-057-E is the final cleanup pass — removing old artifacts and updating scaffold.py.
+
+### Guidance Returned
+
+> **Q1 — Old markdown board files (`task-board.md`, `features.md`): Decision → (b) Delete entirely.**
+>
+> Rationale: 057-C migrated all data to JSON. 057-D updated all skill references. No code reads these files anymore — they are dead artifacts. Git history (`git log --all -- x-ipe-docs/planning/task-board.md`) provides full recovery if ever needed. Keeping .bak files is clutter that never gets cleaned up. Clean break over lingering artifacts. Note: the `task-board-archive-*.md` files in the same directory should also be deleted — they are snapshots of the old format and equally dead.
+>
+> **Q2 — Old skill directories (`x-ipe+all+task-board-management/`, `x-ipe+feature+feature-board-management/`): Decision → (c) Add a redirect SKILL.md that points to `x-ipe-tool-task-board-manager`.**
+>
+> Rationale: Agents or cached instructions may still reference the old skill names. A redirect SKILL.md acts as a graceful 301 — anyone who lands there learns the new location immediately. The redirect should be minimal: "⚠️ This skill has been replaced by `x-ipe-tool-task-board-manager`. Load that skill instead." Strip all other files (references/, templates/) from the old directories — only the redirect SKILL.md remains. Plan to delete these redirect stubs after 2–3 sprints once all references are confirmed gone.
+>
+> **Q3 — scaffold.py update: Decision → (a) Create empty JSON directory structure only.**
+>
+> Rationale: scaffold.py's job is structural initialization, not workflow execution. It should create `tasks/` with a valid empty `tasks-index.json` (`{"_version": "1.0", "version": "1.0", "entries": {}}`) and `features/` with a valid empty `features.json` (`{"_version": "1.0", "features": []}`). Running `task_create.py` during scaffolding (option b) creates a chicken-and-egg problem — the first task should be created when real work begins, not at project setup. Remove the old `features.md` / `task-board.md` template copy logic. KISS.
+>
+> **Q4 — Task board template (`x-ipe-workflow-task-execution/templates/task-board.md`): Decision → (b) Delete — scaffold.py handles init.**
+>
+> Rationale: This markdown template was consumed by scaffold.py to create the initial board. Since scaffold.py will now create JSON structures directly (per Q3), the template is unused. A markdown template for a JSON system is misleading. The JSON "template" lives in scaffold.py's code as the empty structure — no separate template file needed. Delete the dead file. Keep `task-record.yaml` if it's still used elsewhere.
+
+### Rationale
+> Four decisions form a coherent cleanup strategy: (1) delete dead files that git preserves, (2) redirect old skill names for graceful transition, (3) scaffold creates JSON structure not MD templates, (4) delete dead template that scaffold no longer uses. Each decision follows KISS and prefers the most reversible option — git history is the universal safety net, and redirect stubs handle the skill discovery transition period.
+
+### Suggested Skills
+> suggested_skills:
+>   - skill_name: "x-ipe-task-based-feature-refinement"
+>     match_strength: "strong"
+>     reason: "Calling skill is feature refinement — these decisions feed directly into the FEATURE-057-E specification"
+>     execution_steps:
+>       - phase: "2. Write Specification"
+>         step: "2.1 Create specification document incorporating DAO decisions"
+
+### Follow-up
+> None. All 4 questions answered with clear decisions and rationale. Drift should proceed to write the FEATURE-057-E specification incorporating these decisions as constraints. Acceptance criteria should include: (1) task-board.md and features.md deleted, (2) old skill dirs contain only redirect SKILL.md, (3) scaffold.py creates JSON structures, (4) old task-board.md template deleted.

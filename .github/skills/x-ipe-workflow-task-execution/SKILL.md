@@ -521,5 +521,4 @@ BLOCKING: Do NOT maintain a hardcoded registry. Skills are auto-discovered.
 ## Templates & Examples
 
 - `templates/task-record.yaml` - Task data template
-- `templates/task-board.md` - Task tracking board
 - [references/examples.md](.github/skills/x-ipe-workflow-task-execution/references/examples.md) - Full workflow examples, request matching patterns, and git strategy rules
