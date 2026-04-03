@@ -67,7 +67,7 @@ input:
 
 ```xml
 <input_init>
-  <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
+  <field name="task_id" source="x-ipe-tool-task-board-manager (auto-generated)" />
   <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
   <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})">
     NOTE: workflow.name is the {name} part from workflow-{name}.json filename — it is NOT the idea folder name.

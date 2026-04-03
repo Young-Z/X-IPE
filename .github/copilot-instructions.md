@@ -14,7 +14,7 @@
 1. **Generate a random nickname** from this pool:
    - Nova, Echo, Flux, Bolt, Sage, Pixel, Cipher, Spark, Drift, Pulse, Vex, Atom, Onyx, Rune, Zephyr, Quill, Ember, Frost, Haze, Ink
 2. **Validate nickname against task board:**
-   - Check `x-ipe-docs/planning/task-board.md` Active Tasks section
+   - Query active tasks via `x-ipe-tool-task-board-manager` (task_query.py --status in_progress)
    - If another session has `🔄 in_progress` tasks with the same nickname → pick a different name from the pool
    - If the in_progress task was started by your current session (same context) → keep the name
    - Repeat until you find an unused name
@@ -33,7 +33,7 @@
 
 Before calling **any** file-editing tool (`edit`, `create`, or writing code via `bash`), you MUST have:
 1. ✅ Classified the request into a task-based skill (from auto-discovery)
-2. ✅ Created a task on `task-board.md`
+2. ✅ Created a task on the task board (via `x-ipe-tool-task-board-manager`)
 3. ✅ Loaded the corresponding skill (via `skill` tool or by reading its `SKILL.md`)
 4. ✅ Reached the skill's implementation step that permits code changes
 
@@ -59,19 +59,18 @@ If ANY of these are missing → **STOP. Do not touch code.**
 
 ## ⚠️ CRITICAL: Task Board is THE Source of Truth
 
-**The task board (`x-ipe-docs/planning/task-board.md`) is MANDATORY for ALL work.**
+**The task board (JSON-based, managed by `x-ipe-tool-task-board-manager`) is MANDATORY for ALL work.**
 
 ### Before ANY Work:
-1. **Create task on task-board.md** using `x-ipe+all+task-board-management` skill
+1. **Create task** using `x-ipe-tool-task-board-manager` skill
 2. **Verify task exists** on board (Step 2 of x-ipe-workflow-task-execution)
 3. **Only then** proceed to actual work
 
 ### After Completing Work:
-1. **Update task-board.md** - move task to Completed section
-2. **Update Quick Stats** - increment completed count
+1. **Update task status** — set to completed via `x-ipe-tool-task-board-manager`
 
 ### ⛔ NEVER:
-- Use `manage_todo_list` as a substitute for task-board.md (that's VS Code internal only)
+- Use `manage_todo_list` as a substitute for the JSON task board (that's VS Code internal only)
 - Start work without a task ID on the board
 - Complete work without updating the board
 
@@ -81,7 +80,7 @@ If ANY of these are missing → **STOP. Do not touch code.**
 
 ### Mandatory Workflow
 
-All work follows the Pre-Flight Checklist below. Use `x-ipe+all+task-board-management` to create/update tasks.
+All work follows the Pre-Flight Checklist below. Use `x-ipe-tool-task-board-manager` to create/update tasks.
 
 ### Task-Based Skill Identification
 
@@ -106,7 +105,7 @@ BLOCKING: Do NOT maintain a hardcoded registry. Skills are auto-discovered.
 
 ```
 1. What task-based skill is this? → Scan `.github/skills/x-ipe-task-based-*/` descriptions
-2. Did I create a task on task-board.md? → If NO, STOP and create it
+2. Did I create a task on the task board? → If NO, STOP and create it
 3. Did I load the corresponding skill? → If NO, STOP and load it
 4. Am I following the skill's procedure? → If NO, STOP and read it
 5. Has the skill reached the step that permits code changes? → If NO, STOP

@@ -66,7 +66,7 @@ input:
 
 ```xml
 <input_init>
-  <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
+  <field name="task_id" source="x-ipe-tool-task-board-manager (auto-generated)" />
   <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
   <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
   <field name="process_preference.interaction_mode" source="from caller (x-ipe-workflow-task-execution) or default 'interact-with-human'" />
@@ -77,14 +77,14 @@ input:
       3. ELSE → IF interaction_mode == "dao-represent-human-to-interact": derive from workflow context or x-ipe-dao-end-user-representative; ELSE: ask human for feature_id
     </steps>
   </field>
-  <field name="feature_title" source="feature specification OR features.md">
+  <field name="feature_title" source="feature specification OR features.json">
     <steps>
       1. Query feature board for feature_id → extract title
       2. ELIF x-ipe-docs/features/{feature_id}/specification.md exists → extract title
       3. ELSE → IF interaction_mode == "dao-represent-human-to-interact": derive from feature_id context; ELSE: ask human
     </steps>
   </field>
-  <field name="feature_version" source="features.md OR default '1.0.0'">
+  <field name="feature_version" source="features.json OR default '1.0.0'">
     <steps>
       1. Query feature board for feature_id → extract version
       2. ELIF not found → default to "1.0.0"

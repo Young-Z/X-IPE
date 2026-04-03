@@ -10,16 +10,16 @@ Category: feature-stage
 Description: "Implement user login feature with authentication"
 
 MANDATORY: Create tasks on board BEFORE proceeding
-→ Load x-ipe+all+task-board-management skill
+→ Load x-ipe-tool-task-board-manager skill
 → Create: TASK-001 (Code Implementation) - status: pending
 → Create: TASK-002 (Feature Closing) - status: pending
-→ Verify all tasks appear in Active Tasks section of task-board.md
+→ Verify all tasks visible via x-ipe-tool-task-board-manager query
 ```
 
 ### Step 2: DoR
 
 ```
-[pass] Read task-board.md
+[pass] Query task board via x-ipe-tool-task-board-manager
 [pass] Find TASK-001 in Active Tasks section
 [pass] Confirm status: pending (valid for starting)
 [pass] Git repository initialized
@@ -43,8 +43,8 @@ Output:
 ### Step 4: Closing
 
 ```
-Load: x-ipe+all+task-board-management → Update TASK-001 to completed
-Load: x-ipe+feature+feature-board-management → Update feature status
+Load: x-ipe-tool-task-board-manager → Update TASK-001 to completed
+Load: x-ipe-tool-task-board-manager → Update feature status
 Output:
   category_level_change_summary: "FEATURE-001 updated to Done Code Implementation"
 ```

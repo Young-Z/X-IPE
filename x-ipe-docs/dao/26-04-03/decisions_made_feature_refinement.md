@@ -145,3 +145,43 @@ All 8 decisions align with KISS/YAGNI/DRY principles and existing project patter
 | 7 | Emoji status | Strip emoji, normalize | ✅ done → done, 🔄 in_progress → in_progress |
 | 8 | Post-migration | Keep originals as .bak | Cleanup in 057-E |
 
+
+---
+
+## DAO-111: FEATURE-057-D Skill Updates for JSON Board Migration — Refinement Decisions
+
+- **Timestamp:** 2026-04-03T16:30:00+0800
+- **Task ID:** TASK-1075
+- **Feature ID:** FEATURE-057-D
+- **Workflow:** feature-pipeline
+- **Calling Skill:** x-ipe-task-based-feature-refinement
+- **Source:** ai
+- **Disposition:** instruction
+- **Confidence:** 0.93
+
+### Message
+> 5 refinement questions for FEATURE-057-D (Skill Updates for JSON Board Migration) covering: scope/batching strategy for ~34 skill updates, update pattern abstraction level, testing strategy, backward compatibility, and old skill name handling.
+
+### Decisions
+
+| # | Question | Decision | Rationale |
+|---|----------|----------|-----------|
+| 1 | Scope: batch all, logical groups, or critical-only? | **(a) Update ALL ~34 skills in one batch commit** | These are documentation-only changes (SKILL.md text). Agents read skills fresh each invocation — no cached versions. Grouping adds process overhead for what is essentially find-and-replace. The "blast radius" is text in instructions, not runtime code. A post-update grep verification (Q3) catches any misses. One atomic commit is easier to revert than scattered partial updates. |
+| 2 | Update pattern: explicit script paths, abstract language, or cross-skill reference? | **Hybrid (b)+(c): Abstract language that names the target skill** — e.g. "Use `x-ipe-tool-task-board-manager` to create the task" or "Use `x-ipe-tool-feature-board-manager` to update feature status" | Pure script paths (option a) are fragile — args/paths change, all 34 skills break. Pure cross-references (option c) force agents to load a second skill mid-step, adding latency. The hybrid names the skill (discoverable, agents can invoke it) while keeping language abstract (no hardcoded `python .github/skills/.../scripts/task_create.py --title`). DRY — board manager skill owns the procedure details. |
+| 3 | Testing: grep, CI lint, or nothing? | **(a) Grep verification** — after all updates, run grep for `task-board.md`, `features.md`, `x-ipe+all+task-board-management`, and `x-ipe+feature+feature-board-management` across all SKILL.md files | Quick, effective, one-time. YAGNI on CI lint infrastructure for a migration that runs once. Option (c) is too cavalier for 34 files — one missed reference creates confusion. The grep also serves as the acceptance criterion for the feature. |
+| 4 | Backward compatibility: all-at-once or deprecation notices first? | **(a) Update all at once** — agents pick up new instructions on next invocation | Skills have no caching layer — each agent loads SKILL.md fresh. Deprecation notices add a whole extra pass (write notices → wait → write real updates) for zero benefit. There is no "breaking change" risk since the old markdown files will still exist as .bak (per 057-C decision). |
+| 5 | Old skill names (`x-ipe+all+task-board-management`, `x-ipe+feature+feature-board-management`): update refs, remove old, or create wrappers? | **(a) Update all references to new skill names, keep old skills for cleanup in 057-E** | Follows the established 057 pattern: 057-C keeps originals as .bak, 057-E handles cleanup. FEATURE-057-D's scope is "update references" — deleting or wrapping old skills is a separate concern. Clean separation of feature scope. One thing at a time. |
+
+### Rationale
+> All 5 decisions follow KISS/YAGNI/DRY principles and maintain consistency with the 057-series migration pattern (057-C: migrate data + keep originals, 057-E: cleanup). Key theme: minimize ceremony for documentation-only changes while ensuring completeness via grep verification. Confidence is high because the migration pattern is well-established and all changes are easily reversible (git revert of single commit).
+
+### Suggested Skills
+> - skill_name: "x-ipe-task-based-feature-refinement"
+>   match_strength: "strong"
+>   reason: "These are specification-level refinement decisions for FEATURE-057-D"
+>   execution_steps:
+>     - phase: "2. Write Specification"
+>       step: "2.1 Create specification document incorporating DAO decisions"
+
+### Follow-up
+> None. All questions answered. Proceed to specification writing with these decisions as constraints. The grep patterns in Q3 should be documented in the spec's acceptance criteria section.

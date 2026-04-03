@@ -17,7 +17,7 @@ Step 3.1: Read Change Request
   change_request: "Add bulk import to product management"
 
 Step 3.2: Identify Affected Features
-  - Search features.md for "product management"
+  - Search features.json (via x-ipe-tool-task-board-manager) for "product management"
   - Found: FEATURE-012 (Product Management Module)
   - Check if bulk import exists → Not found
 
@@ -65,7 +65,7 @@ reasoning: |
   This significantly expands the scope beyond the existing feature.
   
 affected_artifacts:
-  - x-ipe-docs/planning/features.md (new feature to add)
+  - x-ipe-docs/planning/features/features.json (new feature to add)
   - x-ipe-docs/requirements/EPIC-013/FEATURE-013-A/ (new folder to create)
 
 task_output_links:
@@ -85,7 +85,7 @@ Step 3.1: Read Change Request
   change_request: "Auto-save settings page"
 
 Step 3.2: Identify Affected Features
-  - Search features.md for "settings"
+  - Search features.json (via x-ipe-tool-task-board-manager) for "settings"
   - Found: FEATURE-005 (User Settings)
   
 Step 3.3: Classify Scope

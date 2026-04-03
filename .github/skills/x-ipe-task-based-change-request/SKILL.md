@@ -62,14 +62,14 @@ input:
 
   # Context (from project)
   requirement_details_path: "x-ipe-docs/requirements/requirement-details.md"
-  features_path: "x-ipe-docs/planning/features.md"
+  features_path: "x-ipe-docs/planning/features/features.json"
 ```
 
 ### Input Initialization
 
 ```xml
 <input_init>
-  <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
+  <field name="task_id" source="x-ipe-tool-task-board-manager (auto-generated)" />
   <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
   <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
   <field name="process_preference.interaction_mode" source="from caller (x-ipe-workflow-task-execution) or default 'interact-with-human'" />
@@ -77,7 +77,7 @@ input:
   <field name="business_justification" source="from human input" />
   <field name="extra_context_reference" source="from workflow context or N/A" />
   <field name="requirement_details_path" source="auto-detect from x-ipe-docs/requirements/ (default: x-ipe-docs/requirements/requirement-details.md)" />
-  <field name="features_path" source="default x-ipe-docs/planning/features.md" />
+  <field name="features_path" source="default x-ipe-docs/planning/features/features.json" />
 </input_init>
 ```
 
@@ -101,7 +101,7 @@ input:
   </checkpoint>
   <checkpoint required="true">
     <name>Feature board exists</name>
-    <verification>x-ipe-docs/planning/features.md exists</verification>
+    <verification>x-ipe-docs/planning/features/features.json exists</verification>
   </checkpoint>
   <checkpoint required="recommended">
     <name>Requestor identified</name>
@@ -194,7 +194,7 @@ BLOCKING: Large-scope CRs require human confirmation of the proposed feature cha
       <action>
         0. Resolve extra_context_reference inputs (closing-report, specification)
         1. READ requirement-details.md: understand project scope, identify related requirements
-        2. READ features.md: list all features, note statuses, identify related features
+        2. READ features.json (via x-ipe-tool-task-board-manager): list all features, note statuses, identify related features
         3. FOR EACH related feature: read specification if exists (ACs, user stories, out-of-scope)
         4. IF CR involves UI/UX changes:
            a. Check FEATURE-XXX/mockups/ for existing mockups

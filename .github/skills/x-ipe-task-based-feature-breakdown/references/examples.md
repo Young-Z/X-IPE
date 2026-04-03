@@ -52,7 +52,7 @@
    FEATURE-003-C (Confirmation)
    ```
 
-5. Update features.md:
+5. Update feature status via x-ipe-tool-task-board-manager:
 
    | ID | Name | Status | Dependencies | Priority |
    |----|------|--------|--------------|----------|
@@ -86,7 +86,7 @@ dependencies_mapped: Yes
 priority_assigned: Yes
 
 task_output_links:
-  - x-ipe-docs/planning/features.md
+  - x-ipe-docs/planning/features/features.json
   - x-ipe-docs/requirements/EPIC-001/FEATURE-001-A/
   - x-ipe-docs/requirements/EPIC-001/FEATURE-001-B/
   - ... (10 feature folders across 3 Epics)
@@ -143,7 +143,7 @@ task_output_links:
 3. Link to Existing:
    - All depend on FEATURE-004-A (Product Management - existing)
 
-4. Update features.md with new entries
+4. Update features.json with new entries (via x-ipe-tool-task-board-manager)
 
 5. Output:
    source: Change Request
@@ -219,7 +219,7 @@ FEATURE-005: Add to Cart Functionality
 
 3. Result: 100% coverage → Remove FEATURE-001 from:
    - requirement-details.md (parent section removed)
-   - features.md (via feature-board-management: archive FEATURE-001)
+   - features.json (via feature-board-management: archive FEATURE-001)
    - Log: "Parent FEATURE-001 fully covered by A/B/C, removed"
 
 4. Output:

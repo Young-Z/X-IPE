@@ -346,7 +346,7 @@ For EACH section in collection template order:
 1. Update manifest: `status` → "complete", `completed_at` → ISO 8601
 2. Populate Output Result: `extraction_status`, `quality_score`, `quality_label`, `kb_output_path`
 3. Set `task_output_links[]`: extraction_report.md, manifest paths
-4. Update task-board.md → completed
+4. Update task status → completed (via x-ipe-tool-task-board-manager)
 5. IF extraction_status == "complete" or "partial":
    - Remove ENTIRE session folder `{checkpoint_path}` (manifest, content, feedback, screenshots, packed — all)
    - Rationale: all useful output is already in `.intake/{extraction_id}/`; checkpoint was temporary

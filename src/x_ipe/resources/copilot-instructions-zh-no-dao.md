@@ -14,7 +14,7 @@
 1. **从以下名称池中随机选择一个昵称：**
    - Nova, Echo, Flux, Bolt, Sage, Pixel, Cipher, Spark, Drift, Pulse, Vex, Atom, Onyx, Rune, Zephyr, Quill, Ember, Frost, Haze, Ink
 2. **验证昵称是否已被使用：**
-   - 检查 `x-ipe-docs/planning/task-board.md` 的活跃任务部分
+   - 通过 `x-ipe-tool-task-board-manager` (task_query.py --status in_progress) 查询活跃任务
    - 如果有其他会话使用相同昵称且状态为 `🔄 in_progress` → 换一个名字
    - 如果是当前会话的任务 → 保留原名
    - 重复直到找到未使用的名字
@@ -33,7 +33,7 @@
 
 在调用任何文件编辑工具（`edit`、`create` 或通过 `bash` 写代码）之前，你必须：
 1. ✅ 已将请求分类到对应的任务技能（通过自动发现）
-2. ✅ 已在 `task-board.md` 上创建任务
+2. ✅ 已通过 `x-ipe-tool-task-board-manager` 创建任务
 3. ✅ 已加载对应技能（通过 `skill` 工具或阅读其 `SKILL.md`）
 4. ✅ 已到达技能流程中允许修改代码的步骤
 
@@ -59,19 +59,19 @@
 
 ## ⚠️ 关键：任务看板是唯一的真实来源
 
-**任务看板 (`x-ipe-docs/planning/task-board.md`) 是所有工作的必备工具。**
+**任务看板（JSON格式，由 `x-ipe-tool-task-board-manager` 管理）是所有工作的必备工具。**
 
 ### 开始任何工作之前：
-1. **在 task-board.md 上创建任务** 使用 `x-ipe+all+task-board-management` 技能
+1. **使用 `x-ipe-tool-task-board-manager` 技能创建任务**
 2. **验证任务已在看板上**（x-ipe-workflow-task-execution 的第2步）
 3. **然后才能** 开始实际工作
 
 ### 完成工作之后：
-1. **更新 task-board.md** — 将任务移至已完成部分
+1. **更新任务状态** — 通过 `x-ipe-tool-task-board-manager` 设为已完成
 2. **更新 Quick Stats** — 增加完成计数
 
 ### ⛔ 绝对不要：
-- 用 `manage_todo_list` 替代 task-board.md（那是 VS Code 内部功能）
+- 用 `manage_todo_list` 替代 JSON 任务看板（那是 VS Code 内部功能）
 - 在看板上没有任务ID就开始工作
 - 完成工作后不更新看板
 
@@ -81,7 +81,7 @@
 
 ### 强制工作流
 
-所有工作遵循下方的预检清单。使用 `x-ipe+all+task-board-management` 创建/更新任务。
+所有工作遵循下方的预检清单。使用 `x-ipe-tool-task-board-manager` 创建/更新任务。
 
 ### 任务技能识别
 
@@ -106,7 +106,7 @@
 
 ```
 1. 这是什么任务技能？ → 扫描 `.github/skills/x-ipe-task-based-*/` 描述
-2. 我在 task-board.md 上创建了任务吗？ → 如果没有，停下来创建
+2. 我在任务看板上创建了任务吗？ → 如果没有，停下来创建
 3. 我加载了对应的技能吗？ → 如果没有，停下来加载
 4. 我在按照技能的流程执行吗？ → 如果没有，停下来阅读
 5. 技能流程是否已到达允许修改代码的步骤？ → 如果没有，停下来

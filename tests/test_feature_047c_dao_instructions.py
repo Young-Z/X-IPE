@@ -37,7 +37,7 @@ class TestRepoLocalInstructions:
         """Still enforces skill-first workflow."""
         content = self._read()
         assert "Skill-First" in content
-        assert "task-board.md" in content
+        assert "x-ipe-tool-task-board-manager" in content
 
     def test_no_internal_backbone_exposed(self):
         """No 道 or 7-step backbone in instructions."""
@@ -139,7 +139,7 @@ class TestNoDaoEnglishInstructions:
         """No-DAO variant still enforces skill-first workflow."""
         content = self._read()
         assert "Skill-First" in content
-        assert "task-board.md" in content
+        assert "x-ipe-tool-task-board-manager" in content
 
     def test_mentions_dao_for_within_skill(self):
         """No-DAO variant still mentions DAO in within-skill context."""
@@ -183,7 +183,7 @@ class TestNoDaoChineseInstructions:
         """No-DAO ZH variant still enforces skill-first workflow."""
         content = self._read()
         assert "技能优先" in content
-        assert "task-board.md" in content
+        assert "x-ipe-tool-task-board-manager" in content
 
 
 class TestNoDaoTemplateInstructions:
@@ -204,7 +204,7 @@ class TestNoDaoTemplateInstructions:
         """Template no-DAO variant still enforces skill-first workflow."""
         content = self._read()
         assert "Skill-First" in content
-        assert "task-board.md" in content
+        assert "x-ipe-tool-task-board-manager" in content
 
     def test_keeps_interaction_mode_note(self):
         """Template no-DAO variant still references interaction_mode."""

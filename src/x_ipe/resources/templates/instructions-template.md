@@ -21,7 +21,7 @@
 1. **Generate a random nickname** from this pool:
    - Nova, Echo, Flux, Bolt, Sage, Pixel, Cipher, Spark, Drift, Pulse, Vex, Atom, Onyx, Rune, Zephyr, Quill, Ember, Frost, Haze, Ink
 2. **Validate nickname against task board:**
-   - Check `x-ipe-docs/planning/task-board.md` Active Tasks section
+   - Query active tasks via `x-ipe-tool-task-board-manager` (task_query.py --status in_progress)
    - If another session has `🔄 in_progress` tasks with the same nickname → pick a different name from the pool
    - If the in_progress task was started by your current session (same context) → keep the name
    - Repeat until you find an unused name
@@ -41,7 +41,7 @@
 Before calling **any** file-editing tool (`edit`, `create`, or writing code via `bash`), you MUST have:
 1. ✅ Processed the message through `x-ipe-dao-end-user-representative` (disposition = `instruction`)
 2. ✅ Classified the request into a task-based skill
-3. ✅ Created a task on `task-board.md`
+3. ✅ Created a task via `x-ipe-tool-task-board-manager`
 4. ✅ Loaded the corresponding skill (via `skill` tool or by reading its `SKILL.md`)
 5. ✅ Reached the skill's implementation step that permits code changes
 
@@ -68,19 +68,18 @@ If ANY of these are missing → **STOP. Do not touch code.**
 
 ## ⚠️ CRITICAL: Task Board is THE Source of Truth
 
-**The task board (`x-ipe-docs/planning/task-board.md`) is MANDATORY for ALL work.**
+**The task board (JSON-based, managed by `x-ipe-tool-task-board-manager`) is MANDATORY for ALL work.**
 
 ### Before ANY Work:
-1. **Create task on task-board.md** using `x-ipe+all+task-board-management` skill
+1. **Create task** using `x-ipe-tool-task-board-manager` skill
 2. **Verify task exists** on board (Step 2 of x-ipe-workflow-task-execution)
 3. **Only then** proceed to actual work
 
 ### After Completing Work:
-1. **Update task-board.md** - move task to Completed section
-2. **Update Quick Stats** - increment completed count
-
+1. **Update task status** — set to completed via `x-ipe-tool-task-board-manager`
+2. 
 ### ⛔ NEVER:
-- Use `manage_todo_list` as a substitute for task-board.md (that's VS Code internal only)
+- Use `manage_todo_list` as a substitute for the JSON task board (that's VS Code internal only)
 - Start work without a task ID on the board
 - Complete work without updating the board
 
@@ -94,11 +93,11 @@ If ANY of these are missing → **STOP. Do not touch code.**
 
 1. **Process message through DAO** — call `x-ipe-dao-end-user-representative` to interpret user intent
 2. **Classify the work** into a task-based skill using auto-discovery (scan `.github/skills/x-ipe-task-based-*/`)
-3. **Create task on task-board.md** via `x-ipe+all+task-board-management` skill ← **BLOCKING**
+3. **Create task via x-ipe-tool-task-board-manager** via `x-ipe-tool-task-board-manager` skill ← **BLOCKING**
 4. **Load the corresponding skill** from `.github/skills/` folder
 5. **Follow the skill's execution procedure** step-by-step
 6. **Complete the skill's Definition of Done (DoD)** before marking complete
-7. **Update task-board.md** with completion status ← **MANDATORY**
+7. **Update task status** via `x-ipe-tool-task-board-manager` ← **MANDATORY**
 
 ### Task-Based Skill Identification
 
@@ -124,7 +123,7 @@ BLOCKING: Do NOT maintain a hardcoded registry. Skills are auto-discovered.
 ```
 0. Did I process this message through DAO? → If NO, STOP and call x-ipe-dao-end-user-representative
 1. What task-based skill is this? → Scan `.github/skills/x-ipe-task-based-*/` descriptions
-2. Did I create a task on task-board.md? → If NO, STOP and create it
+2. Did I create a task on the task board? → If NO, STOP and create it
 3. Did I load the corresponding skill? → If NO, STOP and load it
 4. Am I following the skill's procedure? → If NO, STOP and read it
 5. Has the skill reached the step that permits code changes? → If NO, STOP
@@ -141,9 +140,9 @@ BLOCKING: Do NOT maintain a hardcoded registry. Skills are auto-discovered.
 
 **Forbidden Actions:**
 - ❌ Processing user messages without going through DAO first
-- ❌ Starting work without creating task on task-board.md first
-- ❌ Using `manage_todo_list` as a substitute for task-board.md
-- ❌ Completing work without updating task-board.md
+- ❌ Starting work without creating a task via x-ipe-tool-task-board-manager first
+- ❌ Using `manage_todo_list` as a substitute for the JSON task board
+- ❌ Completing work without updating the task board
 - ❌ Jumping straight to code without checking for existing tests
 - ❌ Fixing bugs without writing a failing test first
 - ❌ Implementing features without reading technical design
@@ -152,12 +151,12 @@ BLOCKING: Do NOT maintain a hardcoded registry. Skills are auto-discovered.
 
 **Required Actions:**
 - ✅ Always process user messages through `x-ipe-dao-end-user-representative` FIRST
-- ✅ Always create task on task-board.md BEFORE starting work
+- ✅ Always create task via x-ipe-tool-task-board-manager BEFORE starting work
 - ✅ Always identify task-based skill first
 - ✅ Always load and follow the corresponding skill
 - ✅ Always check prerequisites (DoR) before starting
 - ✅ Always complete Definition of Done (DoD) before finishing
-- ✅ Always update task-board.md AFTER completing work
+- ✅ Always update task status via x-ipe-tool-task-board-manager AFTER completing work
 
 ---
 

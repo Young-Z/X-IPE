@@ -10,7 +10,7 @@
 
 **Context:**
 - Feature: FEATURE-001 (User Authentication)
-- From Feature Breakdown: Basic entry in features.md
+- From Feature Breakdown: Basic entry in features.json
 - Task: Create detailed specification
 
 ### Execution Flow
@@ -57,7 +57,7 @@
 6. Create Specification:
    x-ipe-docs/requirements/EPIC-001/FEATURE-001-A/specification.md
 
-7. Update features.md:
+7. Update feature status via x-ipe-tool-task-board-manager:
    - Status: Draft → Specified
 
 8. Resume Task Flow from x-ipe-workflow-task-execution skill
@@ -82,7 +82,7 @@ acceptance_criteria: 16
 
 task_output_links:
   - x-ipe-docs/requirements/EPIC-001/FEATURE-001-A/specification.md
-  - x-ipe-docs/planning/features.md (status updated)
+  - x-ipe-docs/planning/features/features.json (status updated)
 ```
 
 ---
@@ -126,21 +126,21 @@ task_output_links:
 
 ## Example 3: Missing Feature Entry (Blocked)
 
-**Scenario:** Feature not in features.md
+**Scenario:** Feature not in features.json
 
 ```
-1. Look up FEATURE-099 in features.md
+1. Look up FEATURE-099 in features.json (via x-ipe-tool-task-board-manager)
    → NOT FOUND
 
 2. BLOCKED:
-   "FEATURE-099 not found in x-ipe-docs/planning/features.md
+   "FEATURE-099 not found in x-ipe-docs/planning/features/features.json
     
     Feature Refinement requires an existing feature entry.
     This feature may need to go through Feature Breakdown first."
 
 3. Options:
    A) Run Feature Breakdown to create the feature
-   B) Manually add entry to features.md
+   B) Manually add entry to features.json via x-ipe-tool-task-board-manager
 
 4. Wait for human decision
 ```
@@ -179,7 +179,7 @@ task_output_links:
 
 5. If human declines:
    → Proceed with single large specification
-   → Mark as "Complex" in features.md
+   → Mark as "Complex" in features.json
 ```
 
 ---

@@ -52,7 +52,7 @@ interaction_mode: "interact-with-human"  # Options: interact-with-human | dao-re
 | Category | Description | Additional Skill |
 |----------|-------------|------------------|
 | Standalone | No category-level tracking | (none) |
-| feature-stage | Feature board tracking | x-ipe+feature+feature-board-management |
+| feature-stage | Feature board tracking | x-ipe-tool-task-board-manager |
 
 ---
 

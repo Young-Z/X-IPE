@@ -20,11 +20,11 @@ Orchestrate a multi-skill workflow for development tasks by:
 
 ## Important Notes
 
-BLOCKING: Tasks MUST be created on task-board.md BEFORE any work begins. Step 2 will reject tasks not found on the board.
+BLOCKING: Tasks MUST be created via x-ipe-tool-task-board-manager BEFORE any work begins. Step 2 will reject tasks not found on the board.
 
 CRITICAL: This skill does NOT implement task logic itself — it coordinates task-based skills and category skills.
 
-MANDATORY: NEVER use `manage_todo_list` (VS Code internal) as substitute for task-board.md (project tracking).
+MANDATORY: NEVER use `manage_todo_list` (VS Code internal) as substitute for the JSON task board (project tracking).
 
 **Note:** If Agent does not have skill capability, go to `.github/skills/` folder to learn skills. SKILL.md is the entry point for each skill.
 
@@ -69,7 +69,7 @@ input:
 ```xml
 <input_init>
   <!-- Task fields (resolved during Step 1 Planning) -->
-  <field name="task.task_id" source="x-ipe+all+task-board-management (auto-generated on create)" />
+  <field name="task.task_id" source="x-ipe-tool-task-board-manager (auto-generated on create)" />
   <field name="task.task_based_skill" source="Auto-discovery: match request against .github/skills/x-ipe-task-based-*/SKILL.md descriptions" />
   <field name="task.task_description" source="Summarize from human request (max 50 words)" />
   <field name="task.category" source="Read from matched skill's Output Result `category` field" />
@@ -138,7 +138,7 @@ BLOCKING: Category is read from the skill's own Output Result section (`category
 
 | Category | Closing Skill | Required? |
 |----------|--------------|-----------|
-| feature-stage | x-ipe+feature+feature-board-management | Yes |
+| feature-stage | x-ipe-tool-task-board-manager | Yes |
 | ideation-stage | (none) | N/A |
 | requirement-stage | (none) | N/A |
 | code-refactoring-stage | x-ipe+feature+quality-board-management | No (optional) |
@@ -172,7 +172,7 @@ deferred → in_progress
 <definition_of_ready>
   <checkpoint required="true">
     <name>Task Exists on Board</name>
-    <verification>Task {task_id} found in Active Tasks section of x-ipe-docs/planning/task-board.md</verification>
+    <verification>Task {task_id} found via x-ipe-tool-task-board-manager query</verification>
     <on_failure>STOP, return to Step 1 to create task on board</on_failure>
   </checkpoint>
   <checkpoint required="true">
@@ -202,16 +202,16 @@ deferred → in_progress
 
 | Step | Name | Action | Mandatory Output | Next Step |
 |------|------|--------|------------------|-----------|
-| 1 | Planning | Match request, create task(s) on board | Tasks visible on task-board.md | → Step 2 |
+| 1 | Planning | Match request, create task(s) on board | Tasks visible via task board query | → Step 2 |
 | 2 | Global DoR | Verify prerequisites | All checks pass | → Step 3 (pass) or STOP (fail) |
 | 3 | Execute | Load task-based skill, do work | Skill output collected | → Step 4 |
 | 4 | Closing | Load category skills, update boards | Boards updated | → Step 5 |
 | 5 | Global DoD | Validate, output summary | Summary displayed | → Step 6 (pass) or STOP (manual) |
 | 6 | 继续执行（Continue Execute） | Resolve process_preference mode, route next | Next action decided | → Step 1 (auto) or WAIT for human (manual/stop_for_question) |
 
-BLOCKING: Step 1 → Step 2: task must be created on task-board.md.
-BLOCKING: Step 3 → Step 4: x-ipe+all+task-board-management skill must be loaded.
-BLOCKING: Step 4 → Step 5: task-board.md must be updated.
+BLOCKING: Step 1 → Step 2: task must be created via x-ipe-tool-task-board-manager.
+BLOCKING: Step 3 → Step 4: x-ipe-tool-task-board-manager skill must be loaded.
+BLOCKING: Step 4 → Step 5: task board must be updated via x-ipe-tool-task-board-manager.
 
 ---
 
@@ -234,14 +234,14 @@ BLOCKING: Step 4 → Step 5: task-board.md must be updated.
          - IF task not exists → Create with status: pending
          - ELSE IF exists AND assigned to you → Continue
          - ELSE → STOP
-      5. MANDATORY: Load x-ipe+all+task-board-management skill to create/update tasks on board
+      5. MANDATORY: Load x-ipe-tool-task-board-manager skill to create/update tasks on board
          → This step CANNOT be skipped
          → Tasks MUST appear on board BEFORE proceeding to Step 2
       6. IF task-based skill defines next_task_based_skill → Create ALL chained tasks upfront
       7. VERIFICATION: Confirm all tasks are visible on task board before proceeding
     </actions>
     <output>Task Data Model with core fields populated AND tasks created on board</output>
-    <gate>All tasks visible on task-board.md</gate>
+    <gate>All tasks visible via task board query</gate>
   </step_1>
 
   <step_2>
@@ -249,7 +249,7 @@ BLOCKING: Step 4 → Step 5: task-board.md must be updated.
     <actions>
       GATE CHECK: This step validates that Step 1 was completed correctly.
 
-      1. Read task board at x-ipe-docs/planning/task-board.md
+      1. Query task board via x-ipe-tool-task-board-manager (task_query.py)
       2. Search for {task_id} in Active Tasks section
       3. IF task NOT found:
          → STOP execution
@@ -317,7 +317,7 @@ BLOCKING: Step 4 → Step 5: task-board.md must be updated.
   <step_4>
     <name>Category Closing</name>
     <actions>
-      1. MANDATORY: Load skill x-ipe+all+task-board-management
+      1. MANDATORY: Load skill x-ipe-tool-task-board-manager
          → Update task status on board
          → Pass Task Data Model
 
@@ -335,7 +335,7 @@ BLOCKING: Step 4 → Step 5: task-board.md must be updated.
     </category_skill_mapping>
     <note>If category skill not found, execution continues without error. Category-level change summary will be null if skipped.</note>
     <output>category_level_change_summary added to Task Data Model (or null)</output>
-    <gate>task-board.md updated</gate>
+    <gate>task board updated via x-ipe-tool-task-board-manager</gate>
   </step_4>
 
   <step_5>
@@ -469,7 +469,7 @@ output:
 <definition_of_done>
   <checkpoint required="true">
     <name>Task Board Updated</name>
-    <verification>Task status updated on task-board.md</verification>
+    <verification>Task status updated via x-ipe-tool-task-board-manager</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>Category Changes Committed</name>
@@ -510,7 +510,7 @@ BLOCKING: Do NOT maintain a hardcoded registry. Skills are auto-discovered.
 
 | Error | Cause | Recovery |
 |-------|-------|----------|
-| `TASK_NOT_ON_BOARD` | Task not found on task-board.md | Return to Step 1, create task on board |
+| `TASK_NOT_ON_BOARD` | Task not found via x-ipe-tool-task-board-manager query | Return to Step 1, create task on board |
 | `INVALID_STATUS` | Task status not valid for starting | STOP, log invalid status |
 | `SKILL_NOT_FOUND` | Task-based or category skill missing | Fail for task-based skills; skip for optional category skills |
 | `GIT_NOT_INITIALIZED` | No git repository | Invoke x-ipe-tool-git-version-control skill to init |

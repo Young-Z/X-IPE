@@ -10,7 +10,7 @@ description: Initialize a new project with standard folder structure and documen
 Set up or onboard to a project with consistent folder structure and documentation by:
 1. Scanning existing project structure (if any)
 2. Creating standard `x-ipe-docs/` folder hierarchy
-3. Initializing task board via `x-ipe+all+task-board-management` skill
+3. Initializing task board via `x-ipe-tool-task-board-manager` skill
 4. Creating baseline documentation files
 
 ---
@@ -55,7 +55,7 @@ input:
 
 ```xml
 <input_init>
-  <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
+  <field name="task_id" source="x-ipe-tool-task-board-manager (auto-generated)" />
   <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
   <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
   <field name="process_preference.interaction_mode" source="from caller (x-ipe-workflow-task-execution) or default 'interact-with-human'" />
@@ -83,12 +83,12 @@ input:
 |------|------|--------|------|
 | 1 | Scan Existing | Check if project exists, read structure if so | Scan complete |
 | 2 | Create Structure | Create `x-ipe-docs/` directories and root files | Folders created |
-| 3 | Init Task Board | Call x-ipe+all+task-board-management skill | Task board created |
+| 3 | Init Task Board | Call x-ipe-tool-task-board-manager skill | Task board created |
 | 4 | Init Docs | Create `lessons_learned.md` | Docs initialized |
 | 5.1 | Decide Next Action | DAO-assisted next task decision | Next action decided |
 | 5.2 | Execute Next Action | Load skill, generate plan, execute | Execution started |
 
-BLOCKING: Step 3 MUST use x-ipe+all+task-board-management skill (not manual file creation).
+BLOCKING: Step 3 MUST use x-ipe-tool-task-board-manager skill (not manual file creation).
 BLOCKING: Existing projects - only ADD missing files, do NOT restructure.
 
 ---
@@ -134,13 +134,13 @@ BLOCKING: Existing projects - only ADD missing files, do NOT restructure.
   <step_3>
     <name>Initialize Task Board</name>
     <action>
-      1. Load skill: x-ipe+all+task-board-management
+      1. Load skill: x-ipe-tool-task-board-manager
       2. Execute: Operation 1 - Init Task Board
     </action>
     <constraints>
-      - BLOCKING: Must use x-ipe+all+task-board-management skill, not manual file creation
+      - BLOCKING: Must use x-ipe-tool-task-board-manager skill, not manual file creation
     </constraints>
-    <output>x-ipe-docs/planning/task-board.md created</output>
+    <output>Task board initialized (JSON files in x-ipe-docs/planning/tasks/)</output>
   </step_3>
 
   <step_4>
@@ -213,7 +213,7 @@ task_completion_output:
   workflow:
     name: "{from input}"
   task_output_links:
-    - "x-ipe-docs/planning/task-board.md"
+    - "x-ipe-docs/planning/tasks/"
   # Dynamic attributes
   project_structure_created: true | false
 ```
@@ -231,8 +231,8 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
     <verification>Verify x-ipe-docs/planning/, x-ipe-docs/reference/, x-ipe-docs/project-management-guideline/ directories exist</verification>
   </checkpoint>
   <checkpoint required="true">
-    <name>Task board initialized via x-ipe+all+task-board-management</name>
-    <verification>Verify x-ipe-docs/planning/task-board.md exists and was created by x-ipe+all+task-board-management skill</verification>
+    <name>Task board initialized via x-ipe-tool-task-board-manager</name>
+    <verification>Verify x-ipe-docs/planning/tasks/ directory exists with tasks-index.json, created by x-ipe-tool-task-board-manager skill</verification>
   </checkpoint>
 </definition_of_done>
 ```
@@ -249,7 +249,7 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 **Then:**
 ```
 1. Create only: x-ipe-docs/planning/
-2. Init task board (via x-ipe+all+task-board-management)
+2. Init task board (via x-ipe-tool-task-board-manager)
 3. Initialize: README.md, .gitignore
 4. Skip: x-ipe-docs/reference/, x-ipe-docs/project-management-guideline/ (add later)
 ```
@@ -272,7 +272,7 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 |--------------|---------|------------|
 | Restructure existing project | Breaks working code | Add missing files only |
 | Create empty placeholder files | Noise, maintenance burden | Create when needed |
-| Skip task board | No task tracking | Always init via x-ipe+all+task-board-management |
+| Skip task board | No task tracking | Always init via x-ipe-tool-task-board-manager |
 | Copy template blindly | May not fit tech stack | Adapt to project |
 
 ---

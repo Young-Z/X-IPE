@@ -266,7 +266,7 @@ operation_output:
 for each group in execution_plan.groups (sequentially):
     for each unit_index in group (in PARALLEL if group has multiple units):
         unit = instruction_units[unit_index]
-        create task on task-board.md
+        create task via x-ipe-tool-task-board-manager
         load suggested skill (or general work if suggested_skills is empty)
         execute following skill steps exactly
     wait for all units in this group to complete before starting next group

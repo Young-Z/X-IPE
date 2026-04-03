@@ -18,7 +18,7 @@ Create architecture diagrams and system design visualizations for refined ideas 
 
 ## Important Notes
 
-BLOCKING: Learn `x-ipe-workflow-task-execution` and `x-ipe+all+task-board-management` skills before executing this skill.
+BLOCKING: Learn `x-ipe-workflow-task-execution` and `x-ipe-tool-task-board-manager` skills before executing this skill.
 
 **Note:** If Agent does not have skill capability, go to `.github/skills/` folder to learn skills. SKILL.md is the entry point.
 
@@ -76,7 +76,7 @@ input:
 
 ```xml
 <input_init>
-  <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
+  <field name="task_id" source="x-ipe-tool-task-board-manager (auto-generated)" />
   <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
   <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
   <field name="process_preference.interaction_mode" source="from caller (x-ipe-workflow-task-execution) or default 'interact-with-human'" />

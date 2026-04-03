@@ -344,7 +344,7 @@ This skill **MUST** call the feature-board-management skill to create features o
 
 ### Why Integration Matters
 
-1. **Creates centralized tracking** - Single source of truth at x-ipe-docs/requirements/features.md
+1. **Creates centralized tracking** - Single source of truth at x-ipe-docs/planning/features/features.json
 2. **Initializes status** - All features start with status "Planned"
 3. **Enables queries** - Other skills can query feature board for Feature Data Model
 4. **Supports lifecycle** - Board tracks features through all phases
@@ -352,7 +352,7 @@ This skill **MUST** call the feature-board-management skill to create features o
 ### Call Format
 
 ```
-CALL x-ipe+feature+feature-board-management skill:
+CALL x-ipe-tool-task-board-manager skill:
   operation: create_or_update_features
   features:
     - feature_id: FEATURE-001-A
@@ -369,4 +369,4 @@ CALL x-ipe+feature+feature-board-management skill:
       dependencies: [FEATURE-001-A]
 ```
 
-**See:** `skills/x-ipe+feature+feature-board-management/SKILL.md` for full operation details
+**See:** `skills/x-ipe-tool-task-board-manager/SKILL.md` for full operation details

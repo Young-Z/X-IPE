@@ -266,8 +266,8 @@ skill_types:
     purpose: Orchestration skill that is called when all related task-based skills in a category finish their work
     naming_convention: "x-ipe-{category}-{operation-name}"
     examples:
-      - x-ipe-x-ipe+all+task-board-management
-      - x-ipe+feature+feature-board-management
+      - x-ipe-tool-task-board-manager
+      - x-ipe-tool-task-board-manager
       
   x-ipe-tool:
     purpose: Utility functions and tool integrations

@@ -97,7 +97,7 @@ input:
 <definition_of_ready>
   <checkpoint required="true">
     <name>Task Exists</name>
-    <verification>Task exists on task-board.md with status pending or in_progress</verification>
+    <verification>Task exists in task board (via x-ipe-tool-task-board-manager query) with status pending or in_progress</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>Input Validated</name>
@@ -385,7 +385,7 @@ input:
       1. Update manifest: status → "complete", completed_at → ISO 8601
       2. Populate Output Result with extraction_status, quality_score, quality_label, kb_output_path
       3. Clean up session: IF success/partial → remove entire session folder (all output already in .intake/); IF failed → preserve for debugging
-      4. Update task-board.md → completed
+      4. Update task status → completed (via x-ipe-tool-task-board-manager)
     </action>
     <constraints>
       - On success: remove entire .x-ipe-checkpoint/session-{timestamp}/ (output is in .intake/)

@@ -82,9 +82,9 @@ quality_metrics: { max_active_items: 50, archive_after_days: 30, complexity: med
 
 ```yaml
 # Only showing fields that differ from template defaults
-skill_name: "x-ipe-x-ipe+all+task-board-management"
+skill_name: "x-ipe-tool-task-board-manager"
 managed_category: "task"
-board_path: "x-ipe-docs/planning/task-board.md"
+board_path: "x-ipe-docs/planning/tasks/"
 
 entity_schema:  # Extended fields
   type:        { type: enum, values: [feature, bug, chore, spike] }
@@ -97,7 +97,7 @@ sections:
 ## Example: Feature Board Management
 
 ```yaml
-skill_name: "x-ipe+feature+feature-board-management"
+skill_name: "x-ipe-tool-task-board-manager"
 managed_category: "feature-stage"
 board_path: "x-ipe-docs/planning/feature-board.md"
 

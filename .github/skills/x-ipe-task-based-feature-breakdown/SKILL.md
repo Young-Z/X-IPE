@@ -24,7 +24,7 @@ BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skil
 
 **Workflow Mode:** When `execution_mode == "workflow-mode"`, the completion step MUST run the workflow update script via bash: `python3 .github/skills/x-ipe-tool-x-ipe-app-interactor/scripts/workflow_update_action.py` with `workflow_name` from `workflow.name` input, `action` from `workflow.action` input, `status: "done"`, and a `deliverables` keyed dict using ONLY the extract tags defined in `workflow-template.json` for this action (format: `{"tag-name": "path/to/file"}`). Do NOT pass a flat list of file paths. Verify the script exits with code 0 before marking the task complete.
 
-MANDATORY: This skill MUST call feature-board-management to create features on the board. Never edit features.md manually.
+MANDATORY: This skill MUST call feature-board-management to create features on the board. Never edit features.json manually.
 
 MANDATORY: Every feature MUST have a feature ID in the format `FEATURE-{nnn}-{X}` (e.g., FEATURE-035-A, FEATURE-035-B) where `{nnn}` matches the parent Epic number. Features are created as sub-folders under the parent `EPIC-{nnn}/` folder.
 
@@ -39,7 +39,7 @@ See [references/breakdown-guidelines.md](.github/skills/x-ipe-task-based-feature
 
 Additional notes:
 - All features are consolidated in requirement-details.md (no individual feature.md files)
-- Feature board (features.md) is the status tracking system
+- Feature board (features.json) is the status tracking system
 - Feature specifications are created later during Feature Refinement
 - Keep feature descriptions concise (50 words max) in the table
 
@@ -82,7 +82,7 @@ input:
 
 ```xml
 <input_init>
-  <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
+  <field name="task_id" source="x-ipe-tool-task-board-manager (auto-generated)" />
   <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
   <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
   <field name="process_preference.interaction_mode" source="from caller (x-ipe-workflow-task-execution) or default 'interact-with-human'" />
@@ -312,7 +312,7 @@ BLOCKING (auto): Proceed after DoD verification; resolve open questions via x-ip
         2. Add Feature List table:
            | Feature ID | Epic ID | Feature Title | Version | Brief Description | Feature Dependency |
         3. Add detailed sections for each feature
-        4. CALL x-ipe+feature+feature-board-management skill to create all features
+        4. CALL x-ipe-tool-task-board-manager skill to create all features
         5. IF parts exist: update requirement-details-index.md
         6. IF features were split: run parent dedup check (100% coverage → remove parent)
       </action>
@@ -438,7 +438,7 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
   </checkpoint>
   <checkpoint required="true">
     <name>All features have status Planned</name>
-    <verification>Check features.md shows status "Planned" for all new features</verification>
+    <verification>Check features.json shows status "Planned" for all new features</verification>
   </checkpoint>
   <checkpoint required="if-applicable">
     <name>Index updated (if parts exist)</name>

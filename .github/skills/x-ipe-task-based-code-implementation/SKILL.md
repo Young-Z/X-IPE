@@ -92,7 +92,7 @@ input:
 
 ```xml
 <input_init>
-  <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
+  <field name="task_id" source="x-ipe-tool-task-board-manager (auto-generated)" />
   <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
   <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
   <field name="process_preference.interaction_mode" source="from caller (x-ipe-workflow-task-execution) or default 'interact-with-human'" />
@@ -172,7 +172,7 @@ BLOCKING: Step 3.1 special-case delegations run BEFORE semantic routing.
     <step_1_1>
       <name>Query Feature Board</name>
       <action>
-        1. CALL x-ipe+feature+feature-board-management skill with operation=query_feature
+        1. CALL x-ipe-tool-task-board-manager skill with operation=query_feature
         2. RECEIVE Feature Data Model (feature_id, title, version, status, specification_link, technical_design_link)
       </action>
       <constraints>

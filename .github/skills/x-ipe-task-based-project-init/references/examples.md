@@ -6,7 +6,7 @@
 project-root/
 ├── x-ipe-docs/
 │   ├── planning/
-│   │   ├── task-board.md          # Task tracking (via x-ipe+all+task-board-management)
+│   │   ├── tasks/              # Task tracking (JSON, via x-ipe-tool-task-board-manager)
 │   │   ├── feature-*.md           # Feature specifications
 │   │   └── technical-design-*.md  # Design documents
 │   ├── reference/
@@ -50,16 +50,16 @@ When creating `x-ipe-docs/reference/lessons_learned.md`, use this template:
    .gitignore
 
 4. Init task board:
-   -> Load skill: x-ipe+all+task-board-management
+   -> Load skill: x-ipe-tool-task-board-manager
    -> Execute: Operation 1 - Init Task Board
-   -> Created: x-ipe-docs/planning/task-board.md
+   -> Created: x-ipe-docs/planning/tasks/ (JSON task board)
 
 5. Return Task Completion Output:
    category: standalone
    next_task_based_skill: Development Environment Setup
    require_human_review: no
    task_output_links:
-     - x-ipe-docs/planning/task-board.md
+     - x-ipe-docs/planning/tasks/
 
 6. Resume Task Flow from x-ipe-workflow-task-execution skill
 ```
@@ -82,16 +82,16 @@ When creating `x-ipe-docs/reference/lessons_learned.md`, use this template:
    -> Preserved existing README.md, .gitignore
 
 4. Init task board:
-   -> Load skill: x-ipe+all+task-board-management
+   -> Load skill: x-ipe-tool-task-board-manager
    -> Execute: Operation 1 - Init Task Board
-   -> Created: x-ipe-docs/planning/task-board.md
+   -> Created: x-ipe-docs/planning/tasks/ (JSON task board)
 
 5. Return Task Completion Output:
    category: standalone
    next_task_based_skill: Development Environment Setup
    require_human_review: no
    task_output_links:
-     - x-ipe-docs/planning/task-board.md
+     - x-ipe-docs/planning/tasks/
 
 6. Resume Task Flow from x-ipe-workflow-task-execution skill
 ```
