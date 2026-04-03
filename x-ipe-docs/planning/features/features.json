@@ -1,0 +1,29 @@
+{
+  "_version": "1.0",
+  "features": [
+    {
+      "feature_id": "FEATURE-001-A",
+      "epic_id": "EPIC-001",
+      "title": "X",
+      "version": "v1.0",
+      "status": "Completed",
+      "description": "A test feature",
+      "dependencies": [],
+      "specification_link": "",
+      "created_at": "2026-04-03T07:11:16.196505+00:00",
+      "last_updated": "2026-04-03T07:11:16.241441+00:00"
+    },
+    {
+      "feature_id": "FEATURE-001-B",
+      "epic_id": "EPIC-001",
+      "title": "Second",
+      "version": "v1.0",
+      "status": "Planned",
+      "description": "A test feature",
+      "dependencies": [],
+      "specification_link": "",
+      "created_at": "2026-04-03T07:11:16.218670+00:00",
+      "last_updated": "2026-04-03T07:11:16.218670+00:00"
+    }
+  ]
+}

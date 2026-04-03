@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Task Board{% endblock %}
+
+{% block extra_css %}
+<link href="/static/css/task-board.css" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+<div class="tb-page">
+    <div class="tb-header">
+        <h1 class="tb-title">Task Board</h1>
+        <p class="tb-subtitle">Track all development tasks across the engineering workflow</p>
+    </div>
+
+    <!-- Stat Cards -->
+    <div class="tb-stats" id="tb-stats"></div>
+
+    <!-- Filter Bar -->
+    <div class="tb-filters">
+        <div class="tb-search-wrap">
+            <i class="bi bi-search tb-search-icon"></i>
+            <input id="tb-search" class="tb-search-input" type="text" placeholder="Search by task ID, description, or role…">
+        </div>
+        <div class="tb-filter-divider"></div>
+        <select id="tb-status-filter" class="tb-select">
+            <option value="">All Statuses</option>
+            <option value="in_progress">In Progress</option>
+            <option value="done">Done</option>
+            <option value="completed">Completed</option>
+            <option value="pending">Pending</option>
+            <option value="blocked">Blocked</option>
+            <option value="deferred">Deferred</option>
+        </select>
+        <div class="tb-filter-divider"></div>
+        <div class="tb-range-group" id="tb-range-group">
+            <button class="tb-range-btn active" data-range="1w">1W</button>
+            <button class="tb-range-btn" data-range="1m">1M</button>
+            <button class="tb-range-btn" data-range="all">All</button>
+        </div>
+    </div>
+
+    <!-- Error Banner -->
+    <div id="tb-error" class="tb-error" style="display:none;">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <span id="tb-error-msg"></span>
+    </div>
+
+    <!-- Table -->
+    <div class="tb-table-wrap">
+        <table class="tb-table" id="tb-table">
+            <thead>
+                <tr>
+                    <th>Task ID</th>
+                    <th>Type</th>
+                    <th>Description</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Updated</th>
+                    <th>Output</th>
+                    <th>Next</th>
+                </tr>
+            </thead>
+            <tbody id="tb-body"></tbody>
+        </table>
+    </div>
+
+    <!-- Empty State -->
+    <div id="tb-empty" class="tb-empty" style="display:none;">
+        <i class="bi bi-inbox"></i>
+        <p>No tasks found</p>
+        <span>Try expanding the time range or adjusting filters</span>
+    </div>
+
+    <!-- Pagination -->
+    <div class="tb-pagination" id="tb-pagination"></div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/js/features/task-board.js"></script>
+{% endblock %}

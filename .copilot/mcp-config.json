@@ -11,18 +11,6 @@
         "chrome-devtools-mcp@latest",
         "--isolated"
       ]
-    },
-    "x-ipe-app-and-agent-interaction": {
-      "type": "local",
-      "command": "uvx",
-      "tools": [
-        "*"
-      ],
-      "args": [
-        "--from",
-        "x-ipe",
-        "x-ipe-mcp"
-      ]
     }
   }
 }
