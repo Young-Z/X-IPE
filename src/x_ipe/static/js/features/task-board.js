@@ -16,6 +16,8 @@
         tasks: [],
         pagination: null,
         expandedTaskId: null,
+        sortField: 'task_id',
+        sortDir: 'desc',
     };
 
     // ── Constants ────────────────────────────────────────────────────
@@ -89,9 +91,49 @@
         }
     }
 
+    // ── Sorting ───────────────────────────────────────────────────────
+    function extractTaskNum(id) {
+        var m = (id || '').match(/(\d+)$/);
+        return m ? parseInt(m[1], 10) : 0;
+    }
+
+    function sortTasks(tasks) {
+        var field = state.sortField;
+        var dir = state.sortDir === 'asc' ? 1 : -1;
+        return tasks.slice().sort(function (a, b) {
+            var va, vb;
+            if (field === 'task_id') {
+                va = extractTaskNum(a.task_id);
+                vb = extractTaskNum(b.task_id);
+            } else {
+                va = (a[field] || '').toLowerCase();
+                vb = (b[field] || '').toLowerCase();
+            }
+            if (va < vb) return -1 * dir;
+            if (va > vb) return 1 * dir;
+            return 0;
+        });
+    }
+
+    function sortArrow(field) {
+        if (state.sortField !== field) return ' <span class="tb-sort-arrow inactive">⇅</span>';
+        return state.sortDir === 'asc'
+            ? ' <span class="tb-sort-arrow">↑</span>'
+            : ' <span class="tb-sort-arrow">↓</span>';
+    }
+
+    function updateSortHeaders() {
+        document.querySelectorAll('.tb-table thead th[data-sort]').forEach(function (th) {
+            var field = th.dataset.sort;
+            var label = th.dataset.label;
+            th.innerHTML = escapeHtml(label) + sortArrow(field);
+        });
+    }
+
     // ── Render ───────────────────────────────────────────────────────
     function renderAll() {
         renderStats();
+        updateSortHeaders();
         renderTable();
         renderPagination();
     }
@@ -127,7 +169,8 @@
         elTable.style.display = '';
         elEmpty.style.display = 'none';
 
-        elBody.innerHTML = state.tasks.map(function (task) {
+        var sorted = sortTasks(state.tasks);
+        elBody.innerHTML = sorted.map(function (task) {
             var statusCls = (task.status || '').toLowerCase().replace(/\s+/g, '_');
             var statusInfo = STATUS_COLORS[statusCls] || { label: task.status || '—' };
             var typeInfo = TYPE_COLORS[task.task_type] || { bg: '#f1f5f9', color: '#334155' };
@@ -275,7 +318,9 @@
         '<div id="tb-error" class="tb-error" style="display:none;">' +
         '<i class="bi bi-exclamation-triangle-fill"></i><span id="tb-error-msg"></span></div>' +
         '<div class="tb-table-wrap"><table class="tb-table" id="tb-table"><thead><tr>' +
-        '<th>Task ID</th><th>Type</th><th>Description</th><th>Role</th>' +
+        '<th class="tb-sortable" data-sort="task_id" data-label="Task ID">Task ID ↓</th>' +
+        '<th class="tb-sortable" data-sort="task_type" data-label="Type">Type ⇅</th>' +
+        '<th>Description</th><th>Role</th>' +
         '<th>Status</th><th>Updated</th><th>Output</th><th>Next</th>' +
         '</tr></thead><tbody id="tb-body"></tbody></table></div>' +
         '<div id="tb-empty" class="tb-empty" style="display:none;">' +
@@ -293,6 +338,8 @@
         state.tasks = [];
         state.pagination = null;
         state.expandedTaskId = null;
+        state.sortField = 'task_id';
+        state.sortDir = 'desc';
 
         elStats = document.getElementById('tb-stats');
         elBody = document.getElementById('tb-body');
@@ -312,6 +359,21 @@
                 state.range = btn.dataset.range;
                 state.page = 1;
                 fetchTasks();
+            });
+        });
+
+        // Sortable column headers
+        document.querySelectorAll('.tb-sortable').forEach(function (th) {
+            th.addEventListener('click', function () {
+                var field = th.dataset.sort;
+                if (state.sortField === field) {
+                    state.sortDir = state.sortDir === 'asc' ? 'desc' : 'asc';
+                } else {
+                    state.sortField = field;
+                    state.sortDir = field === 'task_id' ? 'desc' : 'asc';
+                }
+                updateSortHeaders();
+                renderTable();
             });
         });
 

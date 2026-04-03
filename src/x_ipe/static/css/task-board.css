@@ -286,9 +286,30 @@
     white-space: nowrap;
 }
 
+.tb-table thead th.tb-sortable {
+    cursor: pointer;
+    user-select: none;
+    transition: color 0.15s;
+}
+
+.tb-table thead th.tb-sortable:hover {
+    color: var(--text-primary);
+}
+
+.tb-sort-arrow {
+    font-size: 12px;
+    color: var(--accent-dark);
+}
+
+.tb-sort-arrow.inactive {
+    color: var(--text-muted);
+    opacity: 0.5;
+}
+
 .tb-table tbody tr {
     cursor: pointer;
     transition: background 0.15s;
+    height: 48px;
 }
 
 .tb-table tbody tr:hover {
@@ -296,9 +317,11 @@
 }
 
 .tb-table tbody td {
-    padding: 12px 16px;
+    padding: 8px 16px;
     border-bottom: 1px solid #f1f5f9;
     vertical-align: middle;
+    height: 48px;
+    line-height: 1.4;
 }
 
 .tb-task-id {
@@ -310,11 +333,13 @@
 }
 
 .tb-description {
+    display: inline-block;
     max-width: 340px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     color: var(--text-primary);
+    vertical-align: middle;
 }
 
 .tb-date {
