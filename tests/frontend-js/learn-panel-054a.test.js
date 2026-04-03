@@ -124,6 +124,62 @@ describe('LearnPanelManager', () => {
             const btn = container.querySelector('#learn-track-btn');
             expect(btn.disabled).toBe(true);
         });
+
+        it('should render purpose as textarea (not input)', async () => {
+            const mgr = new globalThis.LearnPanelManager();
+            global.fetch = vi.fn().mockResolvedValue({
+                json: () => Promise.resolve({ success: true, sessions: [] })
+            });
+            const container = document.getElementById('content-body');
+            await mgr.render(container);
+
+            const textarea = container.querySelector('#learn-purpose-input');
+            expect(textarea).not.toBeNull();
+            expect(textarea.tagName).toBe('TEXTAREA');
+        });
+
+        it('should mark purpose as required (not optional)', async () => {
+            const mgr = new globalThis.LearnPanelManager();
+            global.fetch = vi.fn().mockResolvedValue({
+                json: () => Promise.resolve({ success: true, sessions: [] })
+            });
+            const container = document.getElementById('content-body');
+            await mgr.render(container);
+
+            const label = container.innerHTML;
+            expect(label).not.toContain('(optional)');
+        });
+
+        it('should disable track button when purpose is empty', async () => {
+            const mgr = new globalThis.LearnPanelManager();
+            global.fetch = vi.fn().mockResolvedValue({
+                json: () => Promise.resolve({ success: true, sessions: [] })
+            });
+            const container = document.getElementById('content-body');
+            await mgr.render(container);
+
+            // Set valid URL but leave purpose empty
+            const urlInput = container.querySelector('#learn-url-input');
+            urlInput.value = 'https://example.com';
+            urlInput.dispatchEvent(new Event('input'));
+
+            const btn = container.querySelector('#learn-track-btn');
+            expect(btn.disabled).toBe(true);
+        });
+
+        it('should show word count and enforce 200-word limit', async () => {
+            const mgr = new globalThis.LearnPanelManager();
+            global.fetch = vi.fn().mockResolvedValue({
+                json: () => Promise.resolve({ success: true, sessions: [] })
+            });
+            const container = document.getElementById('content-body');
+            await mgr.render(container);
+
+            const wordCounter = container.querySelector('#learn-purpose-word-count');
+            expect(wordCounter).not.toBeNull();
+            expect(wordCounter.textContent).toContain('0');
+            expect(wordCounter.textContent).toContain('200');
+        });
     });
 
     describe('Session Card Rendering', () => {

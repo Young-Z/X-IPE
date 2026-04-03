@@ -45,9 +45,13 @@ class LearnPanelManager {
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label small fw-semibold">Tracking Purpose <span class="text-muted">(optional)</span></label>
-                            <input type="text" class="form-control form-control-sm" id="learn-purpose-input"
-                                placeholder="e.g., Checkout flow for AI agent training">
+                            <label class="form-label small fw-semibold">Tracking Purpose</label>
+                            <textarea class="form-control form-control-sm" id="learn-purpose-input"
+                                placeholder="e.g., Checkout flow for AI agent training" rows="3" maxlength="2000"></textarea>
+                            <div class="d-flex justify-content-between mt-1">
+                                <div class="invalid-feedback d-block" id="learn-purpose-error" style="display:none !important"></div>
+                                <small class="text-muted ms-auto" id="learn-purpose-word-count">0 / 200 words</small>
+                            </div>
                         </div>
 
                         <button class="btn btn-sm btn-success w-100" id="learn-track-btn" disabled>
@@ -79,8 +83,19 @@ class LearnPanelManager {
 
     _bindEvents() {
         const urlInput = document.getElementById('learn-url-input');
+        const purposeInput = document.getElementById('learn-purpose-input');
         const trackBtn = document.getElementById('learn-track-btn');
         const divider = document.getElementById('learn-divider');
+        const wordCountEl = document.getElementById('learn-purpose-word-count');
+        const purposeErrorEl = document.getElementById('learn-purpose-error');
+
+        const updateTrackButton = () => {
+            const urlValid = this._validateURL(urlInput?.value);
+            const purposeText = purposeInput?.value?.trim() || '';
+            const wordCount = purposeText ? purposeText.split(/\s+/).length : 0;
+            const purposeValid = purposeText.length > 0 && wordCount <= 200;
+            trackBtn.disabled = !(urlValid && purposeValid);
+        };
 
         // URL validation on input
         if (urlInput) {
@@ -88,7 +103,30 @@ class LearnPanelManager {
                 const valid = this._validateURL(urlInput.value);
                 urlInput.classList.toggle('is-invalid', urlInput.value.length > 0 && !valid);
                 urlInput.classList.toggle('is-valid', valid);
-                trackBtn.disabled = !valid;
+                updateTrackButton();
+            });
+        }
+
+        // Purpose validation + word count
+        if (purposeInput) {
+            purposeInput.addEventListener('input', () => {
+                const text = purposeInput.value.trim();
+                const wordCount = text ? text.split(/\s+/).length : 0;
+                if (wordCountEl) {
+                    wordCountEl.textContent = `${wordCount} / 200 words`;
+                    wordCountEl.classList.toggle('text-danger', wordCount > 200);
+                    wordCountEl.classList.toggle('text-muted', wordCount <= 200);
+                }
+                if (purposeErrorEl) {
+                    if (wordCount > 200) {
+                        purposeErrorEl.textContent = 'Purpose must be 200 words or fewer';
+                        purposeErrorEl.style.cssText = 'display:block !important';
+                    } else {
+                        purposeErrorEl.style.cssText = 'display:none !important';
+                    }
+                }
+                purposeInput.classList.toggle('is-invalid', wordCount > 200);
+                updateTrackButton();
             });
         }
 
@@ -117,9 +155,10 @@ class LearnPanelManager {
         const url = document.getElementById('learn-url-input')?.value?.trim();
         const purpose = document.getElementById('learn-purpose-input')?.value?.trim() || '';
         if (!this._validateURL(url)) return;
+        if (!purpose) return;
 
         // Build skill invocation command
-        const purposeArg = purpose ? ` --purpose "${purpose.replace(/"/g, '\\"')}"` : '';
+        const purposeArg = ` --purpose "${purpose.replace(/"/g, '\\"')}"`;
         const command = `Track behavior on ${url}${purposeArg}`;
 
         // Invoke via terminal if available
