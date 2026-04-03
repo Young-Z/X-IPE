@@ -5,7 +5,12 @@
 ## Active Tasks
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
-| TASK-1063 | Feature Closing | Close FEATURE-055-A (Board Shared Library): Final verification, code-to-docs review, refactoring analysis, commit + push to main. DAO mode. | Drift 🌊 | 🔄 in_progress | 04-03-2026 | — | x-ipe-task-based-feature-refinement |
+| TASK-1068 | Feature Closing | Close FEATURE-055-B (Task CRUD Scripts). Code-to-docs review, refactoring analysis, push to main. DAO mode. | Drift 🌊 | 🔄 in_progress | 04-03-2026 | — | x-ipe-task-based-feature-refinement |
+| TASK-1067 | Feature Acceptance Test | Acceptance tests for FEATURE-055-B (Task CRUD Scripts). 42 ACs, CLI/unit type. DAO mode. | Drift 🌊 | ✅ done | 04-03-2026 | 04-03-2026 | x-ipe-task-based-feature-closing |
+| TASK-1066 | Code Implementation | Implement FEATURE-055-B (Task CRUD Scripts): task_create.py, task_update.py, task_query.py, task_archive.py + test_task_crud.py. CLI Python. DAO mode. | Drift 🌊 | ✅ done | 04-03-2026 | 04-03-2026 | x-ipe-task-based-feature-acceptance-test |
+| TASK-1065 | Technical Design | Design FEATURE-055-B (Task CRUD Scripts): Two-part design for task_create.py, task_update.py, task_query.py, task_archive.py. CLI type. DAO mode. | Drift 🌊 | ✅ done | 04-03-2026 | 04-03-2026 | x-ipe-task-based-code-implementation |
+| TASK-1064 | Feature Refinement | Refine FEATURE-055-B (Task CRUD Scripts): 42 ACs in GWT format across 8 groups (create, update, query-list, query-id, archive, index, CLI, atomicity). DAO mode. | Drift 🌊 | ✅ done | 04-03-2026 | [specification.md](x-ipe-docs/requirements/EPIC-055/FEATURE-055-B/specification.md) | x-ipe-task-based-technical-design |
+| TASK-1063 | Feature Closing | Close FEATURE-055-A (Board Shared Library): ACs verified (32/32), code-to-docs review (8 fixes), refactoring analysis (8/10), committed + pushed to main (70190da). DAO mode. | Drift 🌊 | ✅ done | 04-03-2026 | Pushed to main (70190da) | x-ipe-task-based-feature-refinement |
 | TASK-1062 | Acceptance Testing | Execute acceptance tests for FEATURE-055-A (Board Shared Library): 32 TCs (30 unit + 2 integration), all PASS, 100% pass rate. 47 pytest tests, 93% coverage. | Drift 🌊 | ✅ done | 04-03-2026 | [acceptance-test-cases.md](x-ipe-docs/requirements/EPIC-055/FEATURE-055-A/acceptance-test-cases.md) | x-ipe-task-based-feature-closing |
 | TASK-1061 | Code Implementation | Implement FEATURE-055-A (Board Shared Library): _board_lib.py with atomic JSON I/O, file locking, schema validation, path resolution. Python stdlib only. program_type=library. 47 tests, 93% coverage. | Drift 🌊 | ✅ done | 04-03-2026 | [_board_lib.py](.github/skills/x-ipe-tool-task-board-manager/scripts/_board_lib.py), [test_board_lib.py](tests/test_board_lib.py) | x-ipe-task-based-feature-acceptance-test |
 | TASK-1060 | Technical Design | Design FEATURE-055-A (Board Shared Library): Two-part design for _board_lib.py — atomic JSON I/O, file locking, schema validation, path resolution. Library type. | Drift 🌊 | ✅ done | 04-03-2026 | [technical-design.md](x-ipe-docs/requirements/EPIC-055/FEATURE-055-A/technical-design.md) | x-ipe-task-based-code-implementation |
@@ -318,10 +323,10 @@
 
 ## Quick Stats
 
-- **Total Active:** 36
+- **Total Active:** 41
 - **In Progress:** 1
 - **Pending:** 0
-- **Completed (archived):** 905
+- **Completed (archived):** 906
 - **Deferred:** 0
 - **Reverted:** 8
 - **Pending Review:** 0
