@@ -120,6 +120,8 @@ class TaskBoardService:
             data = self._read_json(fp)
             if isinstance(data, list):
                 all_tasks.extend(data)
+            elif isinstance(data, dict) and isinstance(data.get("tasks"), list):
+                all_tasks.extend(data["tasks"])
             else:
                 logger.warning("Skipping malformed task file: %s", fp.name)
         return all_tasks
