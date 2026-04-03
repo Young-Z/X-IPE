@@ -169,6 +169,22 @@ BLOCKING: Step 5.1 halts if no tools available AND human declines manual mode.
   <execute_dor_checks_before_starting/>
   <schedule_dod_checks_with_sub_agent_before_starting/>
 
+  <phase_0 name="Board — Register Task">
+    <step_0_1>
+      <name>Create Task on Board</name>
+      <action>
+        Call `x-ipe-tool-task-board-manager` → `task_create.py`:
+        - task_type: "Idea Mockup"
+        - description: summarize work from input context
+        - status: "in_progress"
+        - role: from input context
+        - assignee: from input context
+        Store returned task_id for later update.
+      </action>
+      <output>Task created on board with status in_progress</output>
+    </step_0_1>
+  </phase_0>
+
   <phase_1 name="博学之 — Study Broadly">
 
     <step_1_1>
@@ -349,6 +365,17 @@ BLOCKING: Step 5.1 halts if no tools available AND human declines manual mode.
       </action>
       <output>workflow_action_updated</output>
     </step_5_4>
+
+    <step_5_5>
+      <name>Update Task on Board</name>
+      <action>
+        Call `x-ipe-tool-task-board-manager` → `task_update.py`:
+        - task_id: from Phase 0
+        - status: "done"
+        - output_links: list of deliverables produced in this skill execution
+      </action>
+      <output>Task marked done on board</output>
+    </step_5_5>
 
   </phase_5>
 

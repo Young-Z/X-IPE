@@ -144,6 +144,20 @@ BLOCKING: If fix changes key interfaces, update technical design FIRST.
   <execute_dor_checks_before_starting/>
   <schedule_dod_checks_with_sub_agent_before_starting/>
 
+  <step_0>
+    <name>Create Task on Board</name>
+    <action>
+      Call `x-ipe-tool-task-board-manager` → `task_create.py`:
+      - task_type: "Bug Fix"
+      - description: summarize work from input context
+      - status: "in_progress"
+      - role: from input context
+      - assignee: from input context
+      Store returned task_id for later update.
+    </action>
+    <output>Task created on board with status in_progress</output>
+  </step_0>
+
   <step_1>
     <name>Understand the Bug</name>
     <action>
@@ -312,6 +326,17 @@ BLOCKING: If fix changes key interfaces, update technical design FIRST.
     </success_criteria>
     <output>Verified fix with documentation</output>
   </step_8>
+
+  <step_8b>
+    <name>Update Task on Board</name>
+    <action>
+      Call `x-ipe-tool-task-board-manager` → `task_update.py`:
+      - task_id: from Step 0
+      - status: "done"
+      - output_links: list of deliverables produced
+    </action>
+    <output>Task marked done on board</output>
+  </step_8b>
 
   <phase_9 name="继续执行（Continue Execute）">
     <step_9_1>
