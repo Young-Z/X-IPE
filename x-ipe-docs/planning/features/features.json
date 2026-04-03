@@ -30,48 +30,48 @@
       "epic_id": "EPIC-001",
       "title": "Project Navigation",
       "version": "v1.0",
-      "status": "Tested",
+      "status": "Completed",
       "description": "",
       "dependencies": [],
       "specification_link": "x-ipe-docs/requirements/EPIC-001/FEATURE-001-A/specification.md",
       "created_at": "2026-01-18T00:00:00+00:00",
-      "last_updated": "2026-01-30T08:15:00+00:00"
+      "last_updated": "2026-04-03T16:18:08.223898+00:00"
     },
     {
       "feature_id": "FEATURE-002",
       "epic_id": "EPIC-002",
       "title": "Content Viewer",
       "version": "v1.0",
-      "status": "Implemented",
+      "status": "Completed",
       "description": "",
       "dependencies": [],
       "specification_link": "x-ipe-docs/requirements/EPIC-002/FEATURE-002-A/specification.md",
       "created_at": "2026-01-18T00:00:00+00:00",
-      "last_updated": "2026-01-18T00:55:00+00:00"
+      "last_updated": "2026-04-03T16:18:08.286301+00:00"
     },
     {
       "feature_id": "FEATURE-003",
       "epic_id": "EPIC-003",
       "title": "Content Editor",
       "version": "v1.0",
-      "status": "Implemented",
+      "status": "Completed",
       "description": "",
       "dependencies": [],
       "specification_link": "x-ipe-docs/requirements/EPIC-003/FEATURE-003-A/specification.md",
       "created_at": "2026-01-18T00:00:00+00:00",
-      "last_updated": "2026-01-20T09:30:00+00:00"
+      "last_updated": "2026-04-03T16:18:08.348044+00:00"
     },
     {
       "feature_id": "FEATURE-004",
       "epic_id": "EPIC-004",
       "title": "Live Refresh",
       "version": "v1.0",
-      "status": "Implemented",
+      "status": "Completed",
       "description": "",
       "dependencies": [],
       "specification_link": "x-ipe-docs/requirements/EPIC-004/FEATURE-004-A/specification.md",
       "created_at": "2026-01-18T00:00:00+00:00",
-      "last_updated": "2026-01-19T00:45:00+00:00"
+      "last_updated": "2026-04-03T16:18:08.408621+00:00"
     },
     {
       "feature_id": "FEATURE-005",
@@ -90,12 +90,12 @@
       "epic_id": "EPIC-006",
       "title": "Settings & Configuration",
       "version": "v1.0",
-      "status": "Implemented",
+      "status": "Completed",
       "description": "",
       "dependencies": [],
       "specification_link": "x-ipe-docs/requirements/EPIC-006/FEATURE-006-A/specification.md",
       "created_at": "2026-01-18T00:00:00+00:00",
-      "last_updated": "2026-01-19T14:30:00+00:00"
+      "last_updated": "2026-04-03T16:18:08.470696+00:00"
     },
     {
       "feature_id": "FEATURE-007",
@@ -114,12 +114,12 @@
       "epic_id": "EPIC-008",
       "title": "Workplace (Idea Management)",
       "version": "v1.4",
-      "status": "Implemented",
+      "status": "Completed",
       "description": "",
       "dependencies": [],
       "specification_link": "x-ipe-docs/requirements/EPIC-008/FEATURE-008-A/specification.md",
       "created_at": "2026-01-22T00:00:00+00:00",
-      "last_updated": "2026-01-28T14:45:00+00:00"
+      "last_updated": "2026-04-03T16:18:08.535305+00:00"
     },
     {
       "feature_id": "FEATURE-009",
@@ -270,60 +270,60 @@
       "epic_id": "EPIC-021",
       "title": "Console Voice Input",
       "version": "v1.0",
-      "status": "Implemented",
+      "status": "Completed",
       "description": "",
       "dependencies": [],
       "specification_link": "x-ipe-docs/requirements/EPIC-021/FEATURE-021-A/specification.md",
       "created_at": "2026-01-25T00:00:00+00:00",
-      "last_updated": "2026-01-25T13:30:00+00:00"
+      "last_updated": "2026-04-03T16:18:08.598357+00:00"
     },
     {
       "feature_id": "FEATURE-022-A",
       "epic_id": "EPIC-022",
       "title": "Browser Simulator & Proxy",
       "version": "v1.0",
-      "status": "Implemented",
+      "status": "Completed",
       "description": "",
       "dependencies": [],
       "specification_link": "x-ipe-docs/requirements/EPIC-022/FEATURE-022-A/specification.md",
       "created_at": "2026-01-28T00:00:00+00:00",
-      "last_updated": "2026-01-28T15:45:00+00:00"
+      "last_updated": "2026-04-03T16:19:12.044485+00:00"
     },
     {
       "feature_id": "FEATURE-022-B",
       "epic_id": "EPIC-022",
       "title": "Element Inspector",
       "version": "v1.0",
-      "status": "Implemented",
+      "status": "Completed",
       "description": "",
       "dependencies": [],
       "specification_link": "x-ipe-docs/requirements/EPIC-022/FEATURE-022-B/specification.md",
       "created_at": "2026-01-28T00:00:00+00:00",
-      "last_updated": "2026-01-28T16:30:00+00:00"
+      "last_updated": "2026-04-03T16:19:12.106239+00:00"
     },
     {
       "feature_id": "FEATURE-022-C",
       "epic_id": "EPIC-022",
       "title": "Feedback Capture & Panel",
       "version": "v1.0",
-      "status": "Implemented",
+      "status": "Completed",
       "description": "",
       "dependencies": [],
       "specification_link": "x-ipe-docs/requirements/EPIC-022/FEATURE-022-C/specification.md",
       "created_at": "2026-01-28T00:00:00+00:00",
-      "last_updated": "2026-01-28T17:00:00+00:00"
+      "last_updated": "2026-04-03T16:19:12.167627+00:00"
     },
     {
       "feature_id": "FEATURE-022-D",
       "epic_id": "EPIC-022",
       "title": "Feedback Storage & Submission",
       "version": "v1.0",
-      "status": "Implemented",
+      "status": "Completed",
       "description": "",
       "dependencies": [],
       "specification_link": "x-ipe-docs/requirements/EPIC-022/FEATURE-022-D/specification.md",
       "created_at": "2026-01-28T00:00:00+00:00",
-      "last_updated": "2026-01-28T17:30:00+00:00"
+      "last_updated": "2026-04-03T16:19:12.226732+00:00"
     },
     {
       "feature_id": "FEATURE-023-A",
@@ -474,96 +474,96 @@
       "epic_id": "EPIC-027",
       "title": "CLI Adapter Registry & Service",
       "version": "v1.0",
-      "status": "Implemented",
+      "status": "Completed",
       "description": "",
       "dependencies": [],
       "specification_link": "x-ipe-docs/requirements/EPIC-027/FEATURE-027-A/specification.md",
       "created_at": "2026-02-07T00:00:00+00:00",
-      "last_updated": "2026-02-07T14:12:00+00:00"
+      "last_updated": "2026-04-03T16:19:12.286251+00:00"
     },
     {
       "feature_id": "FEATURE-027-B",
       "epic_id": "EPIC-027",
       "title": "CLI Init & Selection",
       "version": "v1.0",
-      "status": "Implemented",
+      "status": "Completed",
       "description": "",
       "dependencies": [],
       "specification_link": "x-ipe-docs/requirements/EPIC-027/FEATURE-027-B/specification.md",
       "created_at": "2026-02-07T00:00:00+00:00",
-      "last_updated": "2026-02-07T15:10:00+00:00"
+      "last_updated": "2026-04-03T16:19:12.347696+00:00"
     },
     {
       "feature_id": "FEATURE-027-C",
       "epic_id": "EPIC-027",
       "title": "Skill & Instruction Translation",
       "version": "v1.0",
-      "status": "Implemented",
+      "status": "Completed",
       "description": "",
       "dependencies": [],
       "specification_link": "x-ipe-docs/requirements/EPIC-027/FEATURE-027-C/specification.md",
       "created_at": "2026-02-07T00:00:00+00:00",
-      "last_updated": "2026-02-07T16:05:00+00:00"
+      "last_updated": "2026-04-03T16:19:12.409675+00:00"
     },
     {
       "feature_id": "FEATURE-027-D",
       "epic_id": "EPIC-027",
       "title": "MCP Configuration Deployment",
       "version": "v1.0",
-      "status": "Implemented",
+      "status": "Completed",
       "description": "",
       "dependencies": [],
       "specification_link": "x-ipe-docs/requirements/EPIC-027/FEATURE-027-D/specification.md",
       "created_at": "2026-02-07T00:00:00+00:00",
-      "last_updated": "2026-02-07T15:25:00+00:00"
+      "last_updated": "2026-04-03T16:19:12.469256+00:00"
     },
     {
       "feature_id": "FEATURE-027-E",
       "epic_id": "EPIC-027",
       "title": "CLI Migration & Upgrade",
       "version": "v1.0",
-      "status": "Implemented",
+      "status": "Completed",
       "description": "",
       "dependencies": [],
       "specification_link": "x-ipe-docs/requirements/EPIC-027/FEATURE-027-E/specification.md",
       "created_at": "2026-02-07T00:00:00+00:00",
-      "last_updated": "2026-02-07T15:40:00+00:00"
+      "last_updated": "2026-04-03T16:19:12.530044+00:00"
     },
     {
       "feature_id": "FEATURE-028-A",
       "epic_id": "EPIC-028",
       "title": "Bilingual Prompt Schema & Migration",
       "version": "v1.0",
-      "status": "Implemented",
+      "status": "Completed",
       "description": "",
       "dependencies": [],
       "specification_link": "x-ipe-docs/requirements/EPIC-028/FEATURE-028-A/specification.md",
       "created_at": "2026-02-11T00:00:00+00:00",
-      "last_updated": "2026-02-11T03:00:00+00:00"
+      "last_updated": "2026-04-03T16:19:12.588930+00:00"
     },
     {
       "feature_id": "FEATURE-028-B",
       "epic_id": "EPIC-028",
       "title": "CLI Language Selection & Instructions",
       "version": "v1.0",
-      "status": "Implemented",
+      "status": "Completed",
       "description": "",
       "dependencies": [],
       "specification_link": "x-ipe-docs/requirements/EPIC-028/FEATURE-028-B/specification.md",
       "created_at": "2026-02-11T00:00:00+00:00",
-      "last_updated": "2026-02-11T03:00:00+00:00"
+      "last_updated": "2026-04-03T16:19:12.647746+00:00"
     },
     {
       "feature_id": "FEATURE-028-C",
       "epic_id": "EPIC-028",
       "title": "Frontend Prompt Language Filtering",
       "version": "v1.0",
-      "status": "Implemented",
+      "status": "Completed",
       "description": "",
       "dependencies": [],
       "specification_link": "x-ipe-docs/requirements/EPIC-028/FEATURE-028-C/specification.md",
       "created_at": "2026-02-11T00:00:00+00:00",
-      "last_updated": "2026-02-11T03:00:00+00:00"
+      "last_updated": "2026-04-03T16:19:12.708486+00:00"
     },
     {
       "feature_id": "FEATURE-028-D",
@@ -582,24 +582,24 @@
       "epic_id": "EPIC-029",
       "title": "Session Explorer Core",
       "version": "v1.0",
-      "status": "Tested",
+      "status": "Completed",
       "description": "",
       "dependencies": [],
       "specification_link": "x-ipe-docs/requirements/EPIC-029/FEATURE-029-A/specification.md",
       "created_at": "2026-02-11T00:00:00+00:00",
-      "last_updated": "2026-04-03T16:16:59.366919+00:00"
+      "last_updated": "2026-04-03T16:19:12.769055+00:00"
     },
     {
       "feature_id": "FEATURE-029-B",
       "epic_id": "EPIC-029",
       "title": "Session Actions",
       "version": "v1.0",
-      "status": "Implemented",
+      "status": "Completed",
       "description": "",
       "dependencies": [],
       "specification_link": "",
       "created_at": "2026-02-11T00:00:00+00:00",
-      "last_updated": "2026-02-12T08:30:00+00:00"
+      "last_updated": "2026-04-03T16:19:12.827722+00:00"
     },
     {
       "feature_id": "FEATURE-029-C",
@@ -642,24 +642,24 @@
       "epic_id": "EPIC-030",
       "title": "UIUX Reference Agent Skill & Toolbar",
       "version": "v2.0",
-      "status": "Tested",
+      "status": "Completed",
       "description": "",
       "dependencies": [],
       "specification_link": "x-ipe-docs/requirements/EPIC-030/FEATURE-030-B/specification.md",
       "created_at": "2026-02-14T00:00:00+00:00",
-      "last_updated": "2026-04-03T16:16:59.427109+00:00"
+      "last_updated": "2026-04-03T16:19:27.150223+00:00"
     },
     {
       "feature_id": "FEATURE-030-B-THEME",
       "epic_id": "EPIC-030",
       "title": "Catch Design Theme Mode",
       "version": "v2.0",
-      "status": "Tested",
+      "status": "Completed",
       "description": "",
       "dependencies": [],
       "specification_link": "x-ipe-docs/requirements/EPIC-030/FEATURE-030-B-THEME/specification.md",
       "created_at": "2026-02-14T00:00:00+00:00",
-      "last_updated": "2026-02-14T13:15:00+00:00"
+      "last_updated": "2026-04-03T16:19:27.209102+00:00"
     },
     {
       "feature_id": "FEATURE-030-B-MOCKUP",
@@ -1302,12 +1302,12 @@
       "epic_id": "EPIC-046",
       "title": "Skill-Creator Template + Guidelines Update",
       "version": "v1.0",
-      "status": "Implemented",
+      "status": "Completed",
       "description": "",
       "dependencies": [],
       "specification_link": "",
       "created_at": "2026-03-05T00:00:00+00:00",
-      "last_updated": "2026-03-05T17:05:00+00:00"
+      "last_updated": "2026-04-03T16:19:27.270355+00:00"
     },
     {
       "feature_id": "FEATURE-046-B",
@@ -1374,132 +1374,132 @@
       "epic_id": "EPIC-048",
       "title": "Tool Skill Contract Extension",
       "version": "v1.0",
-      "status": "Implemented",
+      "status": "Completed",
       "description": "",
       "dependencies": [],
       "specification_link": "",
       "created_at": "2026-03-06T00:00:00+00:00",
-      "last_updated": "2026-03-10T04:30:00+00:00"
+      "last_updated": "2026-04-03T16:19:27.329542+00:00"
     },
     {
       "feature_id": "FEATURE-048-B",
       "epic_id": "EPIC-048",
       "title": "Consultation Integration (Technical Design + Refactoring Analysis)",
       "version": "v1.0",
-      "status": "Implemented",
+      "status": "Completed",
       "description": "",
       "dependencies": [],
       "specification_link": "",
       "created_at": "2026-03-06T00:00:00+00:00",
-      "last_updated": "2026-03-10T05:00:00+00:00"
+      "last_updated": "2026-04-03T16:19:27.387606+00:00"
     },
     {
       "feature_id": "FEATURE-048-C",
       "epic_id": "EPIC-048",
       "title": "Bug Fix Delegation",
       "version": "v1.0",
-      "status": "Implemented",
+      "status": "Completed",
       "description": "",
       "dependencies": [],
       "specification_link": "FEATURE-048-A",
       "created_at": "2026-03-06T00:00:00+00:00",
-      "last_updated": "2026-03-10T05:20:00+00:00"
+      "last_updated": "2026-04-03T16:19:27.446969+00:00"
     },
     {
       "feature_id": "FEATURE-048-D",
       "epic_id": "EPIC-048",
       "title": "Code Refactor Delegation",
       "version": "v1.0",
-      "status": "Implemented",
+      "status": "Completed",
       "description": "",
       "dependencies": [],
       "specification_link": "FEATURE-048-A",
       "created_at": "2026-03-06T00:00:00+00:00",
-      "last_updated": "2026-03-10T05:25:00+00:00"
+      "last_updated": "2026-04-03T16:19:27.505780+00:00"
     },
     {
       "feature_id": "FEATURE-048-E",
       "epic_id": "EPIC-048",
       "title": "Acceptance Test Tool Selection",
       "version": "v1.0",
-      "status": "Implemented",
+      "status": "Completed",
       "description": "",
       "dependencies": [],
       "specification_link": "",
       "created_at": "2026-03-10T00:00:00+00:00",
-      "last_updated": "2026-03-10T05:10:00+00:00"
+      "last_updated": "2026-04-03T16:19:27.564074+00:00"
     },
     {
       "feature_id": "FEATURE-048-F",
       "epic_id": "EPIC-048",
       "title": "Human Playground Tool Selection",
       "version": "v1.0",
-      "status": "Implemented",
+      "status": "Completed",
       "description": "",
       "dependencies": [],
       "specification_link": "",
       "created_at": "2026-03-10T00:00:00+00:00",
-      "last_updated": "2026-03-10T05:15:00+00:00"
+      "last_updated": "2026-04-03T16:19:27.623082+00:00"
     },
     {
       "feature_id": "FEATURE-049-A",
       "epic_id": "EPIC-049",
       "title": "KB Backend & Storage Foundation",
       "version": "v1.0",
-      "status": "Tested",
+      "status": "Completed",
       "description": "",
       "dependencies": [],
       "specification_link": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-A/specification.md",
       "created_at": "2026-03-11T00:00:00+00:00",
-      "last_updated": "2026-04-03T16:16:59.549043+00:00"
+      "last_updated": "2026-04-03T16:19:27.680749+00:00"
     },
     {
       "feature_id": "FEATURE-049-B",
       "epic_id": "EPIC-049",
       "title": "KB Sidebar & Navigation",
       "version": "v1.0",
-      "status": "Tested",
+      "status": "Completed",
       "description": "",
       "dependencies": [],
       "specification_link": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-B/specification.md",
       "created_at": "2026-03-11T00:00:00+00:00",
-      "last_updated": "2026-04-03T16:16:59.610174+00:00"
+      "last_updated": "2026-04-03T16:19:27.738834+00:00"
     },
     {
       "feature_id": "FEATURE-049-C",
       "epic_id": "EPIC-049",
       "title": "KB Browse & Search",
       "version": "v1.0",
-      "status": "Tested",
+      "status": "Completed",
       "description": "",
       "dependencies": [],
       "specification_link": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-C/specification.md",
       "created_at": "2026-03-11T00:00:00+00:00",
-      "last_updated": "2026-04-03T16:16:59.671736+00:00"
+      "last_updated": "2026-04-03T16:19:27.796990+00:00"
     },
     {
       "feature_id": "FEATURE-049-D",
       "epic_id": "EPIC-049",
       "title": "KB Article Editor",
       "version": "v1.0",
-      "status": "Tested",
+      "status": "Completed",
       "description": "",
       "dependencies": [],
       "specification_link": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-D/specification.md",
       "created_at": "2026-03-11T00:00:00+00:00",
-      "last_updated": "2026-04-03T16:16:59.731065+00:00"
+      "last_updated": "2026-04-03T16:19:27.855124+00:00"
     },
     {
       "feature_id": "FEATURE-049-E",
       "epic_id": "EPIC-049",
       "title": "KB File Upload",
       "version": "v1.0",
-      "status": "Tested",
+      "status": "Completed",
       "description": "",
       "dependencies": [],
       "specification_link": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-E/specification.md",
       "created_at": "2026-03-11T00:00:00+00:00",
-      "last_updated": "2026-04-03T16:16:59.791157+00:00"
+      "last_updated": "2026-04-03T16:19:27.913584+00:00"
     },
     {
       "feature_id": "FEATURE-049-F",
@@ -1518,12 +1518,12 @@
       "epic_id": "EPIC-049",
       "title": "KB Reference Picker",
       "version": "v1.0",
-      "status": "Tested",
+      "status": "Completed",
       "description": "",
       "dependencies": [],
       "specification_link": "x-ipe-docs/requirements/EPIC-049/FEATURE-049-G/specification.md",
       "created_at": "2026-03-11T00:00:00+00:00",
-      "last_updated": "2026-04-03T16:16:59.913035+00:00"
+      "last_updated": "2026-04-03T16:19:27.972175+00:00"
     },
     {
       "feature_id": "FEATURE-050-A",
