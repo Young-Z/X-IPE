@@ -47,9 +47,9 @@ if (!window.__xipeBehaviorTrackerInjected) {
     class EventSerializer {
         constructor() { this._t0 = Date.now(); }
         serialize(e, type) {
-            const el = e.target || e.srcElement;
+            const el = e.target;
             const r = {
-                type, timestamp: Date.now(), relativeTime: Date.now() - this._t0,
+                type, timestamp: Date.now(),
                 target: this._ser(el),
                 metadata: { pageUrl: location.href, pageTitle: document.title },
                 details: {}
@@ -57,20 +57,20 @@ if (!window.__xipeBehaviorTrackerInjected) {
             if (type === 'click' || type === 'double_click' || type === 'right_click')
                 r.details = { x: e.clientX, y: e.clientY };
             else if (type === 'input')
-                r.details = { inputType: e.inputType || 'unknown' };
+                r.details = { inputType: e.inputType || '' };
             else if (type === 'scroll')
-                r.details = { scrollX: scrollX, scrollY: scrollY };
+                r.details = { scrollX, scrollY };
             else if (type === 'navigation')
                 r.details = { toUrl: location.href };
             return r;
         }
         _ser(el) {
-            if (!el || !el.tagName) return { tagName: 'unknown', cssSelector: '' };
-            let sel = el.tagName.toLowerCase();
-            if (el.id) sel += '#' + el.id;
-            else if (el.classList && el.classList.length) sel += '.' + [...el.classList].join('.');
+            if (!el || !el.tagName) return { tagName: '', cssSelector: '' };
+            let s = el.tagName.toLowerCase();
+            if (el.id) s += '#' + el.id;
+            else if (el.classList && el.classList.length) s += '.' + [...el.classList].join('.');
             return {
-                tagName: el.tagName, id: el.id || '', cssSelector: sel,
+                tagName: el.tagName, cssSelector: s,
                 textContent: (el.textContent || '').slice(0, 100),
                 value: el.value || '', type: el.type || '',
                 autocomplete: el.autocomplete || ''
@@ -168,12 +168,17 @@ if (!window.__xipeBehaviorTrackerInjected) {
         bar.querySelector('#__xb-stop').style.color = '#f87171';
         bar.querySelector('#__xb-start').style.color = '';
     };
-    bar.querySelector('#__xb-analysis').onclick = () => { window.__xipe_analysis_requested = true; };
+    bar.querySelector('#__xb-analysis').onclick = () => {
+        window.__xipe_analysis_requested = true;
+        const btn = bar.querySelector('#__xb-analysis');
+        btn.textContent = '⏳ Analyzing...'; btn.disabled = true;
+    };
 
-    // Update counter periodically
+    // Periodic: update counter + flush to localStorage (survives page redirect)
     setInterval(() => {
         const el = document.getElementById('__xipe-tracker-bar');
         if (el) { const c = el.querySelector('#__xb-count'); if (c) c.textContent = buf.size() + ' events'; }
+        if (window.__xipe_status === 'recording') lsFlush(buf);
     }, 1000);
 
     // Expose API for polling by track_behavior.py
@@ -187,7 +192,11 @@ if (!window.__xipeBehaviorTrackerInjected) {
         },
         clear: () => buf.clear(),
         getStatus: () => window.__xipe_status || 'idle',
-        getAnalysisFlag: () => { const f = !!window.__xipe_analysis_requested; window.__xipe_analysis_requested = false; return f; }
+        getAnalysisFlag: () => { const f = !!window.__xipe_analysis_requested; window.__xipe_analysis_requested = false; return f; },
+        resetAnalysisUI: () => {
+            const b = document.getElementById('__xipe-tracker-bar');
+            if (b) { const a = b.querySelector('#__xb-analysis'); if (a) { a.textContent = '📊 Analysis'; a.disabled = false; } }
+        }
     };
 
     window.__xipe_status = 'idle';

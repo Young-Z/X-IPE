@@ -188,16 +188,21 @@ input:
     4. IF url_changed:
        a. evaluate_script(build_clear_guard_script()) to clear guard
        b. Re-inject: evaluate_script(build_injection_script())
-       c. IIFE auto-restores events from localStorage
+       c. IIFE auto-restores events from localStorage (flushed every 1s during recording)
     5. IF analysis_requested:
        a. Call skill.run_analysis() → triggers PostProcessor
        b. Writes analysis.json alongside track-list.json
+       c. evaluate_script(build_reset_analysis_ui_script()) to reset button
     6. Wait 5 seconds, repeat from step 1
   </action>
   <constraints>
     - BLOCKING: Polling interval is 5 seconds (not configurable)
+    - BLOCKING: During tracking, the skill ONLY calls evaluate_script to collect data.
+      Do NOT use chrome-devtools for navigation, clicking, or any other action.
+      The only permitted MCP calls are: evaluate_script (collect/reinject) and take_screenshot.
     - Screenshot only on event count change (not every poll)
     - Analysis triggered ONLY when user clicks Analysis button in toolbar
+    - IIFE flushes events to localStorage every 1s during recording — survives page redirects
   </constraints>
   <output>poll_result per iteration</output>
 </operation>

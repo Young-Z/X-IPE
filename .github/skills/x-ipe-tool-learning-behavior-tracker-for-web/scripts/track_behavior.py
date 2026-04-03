@@ -73,6 +73,12 @@ class InjectionManager:
         """Clear the injection guard so tracker can be reinjected after URL change."""
         return "window.__xipeBehaviorTrackerInjected = false;"
 
+    def build_reset_analysis_ui_script(self):
+        """Reset the Analysis button UI after analysis completes."""
+        return """(() => {
+            if (window.__xipeBehaviorTracker) window.__xipeBehaviorTracker.resetAnalysisUI();
+        })();"""
+
 
 class BehaviorTrackerSkill:
     """Main skill orchestrator for web behavior tracking.
