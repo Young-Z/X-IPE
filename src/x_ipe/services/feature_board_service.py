@@ -56,16 +56,20 @@ class FeatureBoardService:
             "message": f"Feature '{feature_id}' not found",
         }
 
-    def epic_summary(self, epic_id: str | None = None) -> dict[str, Any]:
-        """Return per-epic status count summaries."""
+    def epic_summary(
+        self,
+        epic_id: str | None = None,
+        status: str | None = None,
+        search: str | None = None,
+    ) -> dict[str, Any]:
+        """Return per-epic status count summaries, optionally filtered."""
         features = self._read_features()
+        # Apply status/search filters so summaries reflect the active filter
+        filtered = [f for f in features if self._matches_filters(f, epic_id, status, search)]
 
         groups: dict[str, list[dict]] = defaultdict(list)
-        for f in features:
+        for f in filtered:
             groups[f.get("epic_id", "UNKNOWN")].append(f)
-
-        if epic_id:
-            groups = {k: v for k, v in groups.items() if k == epic_id}
 
         summaries = []
         for eid, feats in sorted(groups.items()):

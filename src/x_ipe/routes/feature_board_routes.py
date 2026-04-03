@@ -111,5 +111,7 @@ def get_feature(feature_id: str):
 def epic_summary():
     """Return per-epic status count summary."""
     epic_id = request.args.get("epic_id")
-    result = _get_service().epic_summary(epic_id)
+    status = request.args.get("status")
+    search = request.args.get("search")
+    result = _get_service().epic_summary(epic_id, status, search)
     return jsonify(result), 200

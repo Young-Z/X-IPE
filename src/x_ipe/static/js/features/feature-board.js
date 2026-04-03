@@ -37,7 +37,12 @@
     async function fetchSummary() {
         try {
             hideError();
-            var resp = await fetch('/api/features/epic-summary');
+            var params = new URLSearchParams();
+            if (state.status) params.set('status', state.status);
+            if (state.search) params.set('search', state.search);
+            var qs = params.toString();
+            var url = '/api/features/epic-summary' + (qs ? '?' + qs : '');
+            var resp = await fetch(url);
             if (!resp.ok) throw new Error('HTTP ' + resp.status);
             var json = await resp.json();
             if (!json.success) throw new Error(json.message || 'API error');
@@ -314,27 +319,17 @@
             }
         });
 
-        // Status filter
+        // Status filter — re-fetch epic summary with filter applied
         document.getElementById('fb-status-filter').addEventListener('change', function (e) {
             state.status = e.target.value;
-            state.epicLoaded = {};
-            state.epicFeatures = {};
-            state.expandedFeature = null;
-            if (state.expandedEpic) {
-                fetchEpicFeatures(state.expandedEpic);
-            }
+            fetchSummary();
         });
 
-        // Search with debounce
+        // Search with debounce — re-fetch epic summary with filter applied
         var searchInput = document.getElementById('fb-search');
         searchInput.addEventListener('input', debounce(function () {
             state.search = searchInput.value.trim();
-            state.epicLoaded = {};
-            state.epicFeatures = {};
-            state.expandedFeature = null;
-            if (state.expandedEpic) {
-                fetchEpicFeatures(state.expandedEpic);
-            }
+            fetchSummary();
         }, 300));
 
         fetchSummary();
