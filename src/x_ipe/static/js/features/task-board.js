@@ -318,6 +318,9 @@
         '<div id="tb-error" class="tb-error" style="display:none;">' +
         '<i class="bi bi-exclamation-triangle-fill"></i><span id="tb-error-msg"></span></div>' +
         '<div class="tb-table-wrap"><table class="tb-table" id="tb-table">' +
+        '<colgroup><col class="tb-col-id"><col class="tb-col-type"><col class="tb-col-desc">' +
+        '<col class="tb-col-role"><col class="tb-col-status"><col class="tb-col-date">' +
+        '<col class="tb-col-output"><col class="tb-col-next"></colgroup>' +
         '<thead><tr>' +
         '<th class="tb-sortable" data-sort="task_id" data-label="Task ID">Task ID ↓</th>' +
         '<th class="tb-sortable" data-sort="task_type" data-label="Type">Type ⇅</th>' +
