@@ -9,7 +9,7 @@ The skill script controls everything via Chrome DevTools MCP:
 - Takes screenshots when new events are detected
 - Detects URL changes and reinjects tracker
 - Manages x-ipe-docs/learning/{name}/ folder structure
-- Triggers LLM post-processing only when user clicks Analysis button
+- When user clicks Analysis, the AI agent delegates to knowledge extractor skill
 """
 import json
 import uuid
@@ -74,7 +74,7 @@ class InjectionManager:
         return "window.__xipeBehaviorTrackerInjected = false;"
 
     def build_reset_analysis_ui_script(self):
-        """Reset the Analysis button UI after analysis completes."""
+        """Reset the Analysis button UI after knowledge extraction completes."""
         return """(() => {
             if (window.__xipeBehaviorTracker) window.__xipeBehaviorTracker.resetAnalysisUI();
         })();"""
@@ -83,8 +83,9 @@ class InjectionManager:
 class BehaviorTrackerSkill:
     """Main skill orchestrator for web behavior tracking.
 
-    New architecture (CR-001): Script-centric with 5s polling.
-    The skill script controls Chrome DevTools MCP. The IIFE is a passive event buffer.
+    Architecture (CR-001): Script-centric with 5s polling.
+    The IIFE is a passive event buffer. Python provides helper methods.
+    The AI agent orchestrates via Chrome DevTools MCP.
 
     Usage by AI agent:
         1. skill.setup_output_folder(project_root, folder_name)
@@ -94,7 +95,7 @@ class BehaviorTrackerSkill:
            a. evaluate_script(injection_manager.build_collect_script())
            b. if new events → take_screenshot → save to imgs/
            c. if url changed → clear guard → reinject → restore from localStorage
-           d. if analysis_requested → run post_processor → write corrected events
+           d. if analysis_requested → delegate to knowledge extractor skill
            e. write track-list.json
         5. On stop: evaluate_script(injection_manager.build_stop_script())
     """
@@ -199,52 +200,6 @@ class BehaviorTrackerSkill:
         path.write_text(json.dumps(output, indent=2, ensure_ascii=False), encoding='utf-8')
         return str(path)
 
-    def run_analysis(self, events=None):
-        """Run post-processing analysis (triggered by Analysis button)."""
-        if events is None:
-            events = self._all_events
-
-        try:
-            from .post_processor import PostProcessor
-        except ImportError:
-            from post_processor import PostProcessor
-
-        processor = PostProcessor()
-        session_meta = self.get_session_metadata()
-
-        try:
-            result = processor.process(events, session_meta)
-            status = 'completed'
-        except Exception:
-            try:
-                result = processor.process(events, session_meta)
-                status = 'completed'
-            except Exception:
-                result = {
-                    'statistics': processor.compute_statistics(events),
-                    'analysis': {
-                        'flow_narrative': 'Post-processing failed.',
-                        'key_paths': [], 'pain_points': [],
-                        'ai_annotations': []
-                    }
-                }
-                status = 'failed'
-
-        # Write analysis output alongside track-list
-        if self._output_folder:
-            analysis_output = {
-                'schema_version': '2.0',
-                'session': session_meta,
-                'statistics': result['statistics'],
-                'events': events,
-                'analysis': result['analysis'],
-                'post_processing_status': status
-            }
-            path = self._output_folder / 'track' / 'analysis.json'
-            path.write_text(json.dumps(analysis_output, indent=2, ensure_ascii=False), encoding='utf-8')
-
-        return result
-
     def get_session_metadata(self):
         """Return session metadata."""
         from urllib.parse import urlparse
@@ -273,6 +228,5 @@ class BehaviorTrackerSkill:
         self.mark_stopped()
         self._all_events = events
         self.write_track_list(events)
-        result = self.run_analysis(events)
         return self.get_track_list_path()
 

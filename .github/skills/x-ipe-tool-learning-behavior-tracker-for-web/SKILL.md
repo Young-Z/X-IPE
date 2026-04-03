@@ -190,8 +190,9 @@ input:
        b. Re-inject: evaluate_script(build_injection_script())
        c. IIFE auto-restores events from localStorage (flushed every 1s during recording)
     5. IF analysis_requested:
-       a. Call skill.run_analysis() → triggers PostProcessor
-       b. Writes analysis.json alongside track-list.json
+       a. Write final track-list.json with all events
+       b. Delegate to x-ipe-task-based-application-knowledge-extractor skill
+          with track-list.json + screenshots as input
        c. evaluate_script(build_reset_analysis_ui_script()) to reset button
     6. Wait 5 seconds, repeat from step 1
   </action>
@@ -235,16 +236,10 @@ operation_output:
     session_id: "{uuid}"
     output_folder: "x-ipe-docs/learning/{folder_name}/"
     track_list: "x-ipe-docs/learning/{folder_name}/track/track-list.json"
-    analysis: "x-ipe-docs/learning/{folder_name}/track/analysis.json"
     screenshots: "x-ipe-docs/learning/{folder_name}/imgs/"
     statistics:
       totalEvents: 0
       pageCount: 0
-    analysis_result:
-      flow_narrative: ""
-      key_paths: []
-      pain_points: []
-      ai_annotations: []
   errors: []
 ```
 
@@ -300,10 +295,9 @@ operation_output:
 
 | File | Purpose |
 |------|---------|
-| `references/tracker-toolbar.js` | Readable source — <5KB IIFE with RecordingEngine, PIIMasker, CircularBuffer, EventSerializer, minimal UI bar |
-| `references/tracker-toolbar.mini.js` | Minified version for injection (<5KB) |
+| `references/tracker-toolbar.js` | Readable source — IIFE with RecordingEngine, PIIMasker, CircularBuffer, EventSerializer, minimal UI bar |
+| `references/tracker-toolbar.mini.js` | Minified version for injection |
 | `scripts/track_behavior.py` | BehaviorTrackerSkill (session orchestrator with polling model) + InjectionManager (script builder) |
-| `scripts/post_processor.py` | PostProcessor — flow narrative, key paths, pain points, AI annotations |
 | `scripts/__init__.py` | Package init |
 
 ---
@@ -319,7 +313,8 @@ Agent:
   3. poll loop (every 5s):
      - Events detected → screenshot saved to imgs/
      - track-list.json updated
-  4. User clicks Analysis button → PostProcessor runs → analysis.json written
+  4. User clicks Analysis → delegates to knowledge extractor skill
+     → generates user manual from tracked behavior
   5. stop → final track-list.json with 847 events, 15 screenshots
 ```
 

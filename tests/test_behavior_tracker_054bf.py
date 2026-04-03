@@ -1,8 +1,7 @@
 """
 EPIC-054 / CR-001: Behavior Tracker Tests
-- PostProcessor tests (FEATURE-054-F)
-- BehaviorTrackerSkill tests (CR-001: polling model, folder management)
-- InjectionManager tests (CR-001: new scripts)
+- BehaviorTrackerSkill tests (polling model, folder management)
+- InjectionManager tests (new scripts)
 """
 import json
 import os
@@ -14,75 +13,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).parent.parent / '.github' / 'skills' / 'x-ipe-tool-learning-behavior-tracker-for-web' / 'scripts'))
 
-from post_processor import PostProcessor
 from track_behavior import BehaviorTrackerSkill, InjectionManager
-
-
-class TestPostProcessor:
-    """FEATURE-054-F: Post-processing tests."""
-
-    def setup_method(self):
-        self.processor = PostProcessor()
-
-    def test_compute_statistics_empty(self):
-        stats = self.processor.compute_statistics([])
-        assert stats['totalEvents'] == 0
-        assert stats['pageCount'] == 0
-
-    def test_compute_statistics_with_events(self):
-        events = [
-            {'type': 'click', 'metadata': {'pageUrl': 'https://example.com/'}},
-            {'type': 'click', 'metadata': {'pageUrl': 'https://example.com/'}},
-            {'type': 'input', 'metadata': {'pageUrl': 'https://example.com/cart'}},
-            {'type': 'scroll', 'metadata': {'pageUrl': 'https://example.com/cart'}},
-        ]
-        stats = self.processor.compute_statistics(events)
-        assert stats['totalEvents'] == 4
-        assert stats['byType']['click'] == 2
-        assert stats['pageCount'] == 2
-
-    def test_process_returns_all_sections(self):
-        events = [
-            {'type': 'click', 'timestamp': 1000, 'metadata': {'pageUrl': 'https://example.com/'},
-             'target': {'cssSelector': 'button.buy'}},
-        ]
-        session_meta = {'id': 'test-1', 'domain': 'example.com', 'purpose': 'Test'}
-        result = self.processor.process(events, session_meta)
-        assert 'statistics' in result
-        assert 'analysis' in result
-        assert 'flow_narrative' in result['analysis']
-        assert 'key_paths' in result['analysis']
-        assert 'pain_points' in result['analysis']
-        assert 'ai_annotations' in result['analysis']
-
-    def test_flow_narrative_includes_domain(self):
-        events = [{'type': 'click', 'metadata': {'pageUrl': 'https://example.com/'}}]
-        result = self.processor.process(events, {'domain': 'example.com', 'purpose': ''})
-        assert 'example.com' in result['analysis']['flow_narrative']
-
-    def test_pain_points_long_pause(self):
-        events = [
-            {'type': 'click', 'timestamp': 1000},
-            {'type': 'click', 'timestamp': 50000},
-        ]
-        result = self.processor.process(events, {'domain': 'test.com', 'purpose': ''})
-        pauses = [pp for pp in result['analysis']['pain_points'] if pp['type'] == 'long_pause']
-        assert len(pauses) >= 1
-
-    def test_pain_points_repeated_action(self):
-        events = [
-            {'type': 'click', 'timestamp': 1000, 'target': {'cssSelector': 'button.buy'}},
-            {'type': 'click', 'timestamp': 2000, 'target': {'cssSelector': 'button.buy'}},
-            {'type': 'click', 'timestamp': 3000, 'target': {'cssSelector': 'button.buy'}},
-        ]
-        result = self.processor.process(events, {'domain': 'test.com', 'purpose': ''})
-        repeated = [pp for pp in result['analysis']['pain_points'] if pp['type'] == 'repeated_action']
-        assert len(repeated) >= 1
-
-    def test_empty_events(self):
-        result = self.processor.process([], {'domain': 'test.com', 'purpose': ''})
-        assert result['analysis']['flow_narrative'] == 'No events recorded.'
-        assert result['analysis']['key_paths'] == []
 
 
 class TestBehaviorTrackerSkill:
