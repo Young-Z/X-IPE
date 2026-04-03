@@ -963,19 +963,53 @@ class ProjectSidebar {
             });
         }
 
-        // FEATURE-057: Task Board sidebar link → navigates to /task-board page
+        // FEATURE-057: Task Board sidebar link → renders inline SPA panel
         const taskBoardHeader = this.container.querySelector('.nav-task-board');
         if (taskBoardHeader) {
             taskBoardHeader.addEventListener('click', () => {
-                window.location.href = '/task-board';
+                fileItems.forEach(f => f.classList.remove('active'));
+                this.selectedFile = null;
+                const sidebarChildren = this.container.querySelectorAll('.sidebar-child');
+                sidebarChildren.forEach(child => child.classList.remove('active'));
+                taskBoardHeader.classList.add('active');
+                if (window.contentRenderer) {
+                    window.contentRenderer.currentPath = null;
+                }
+                const createIdeaBtn = document.getElementById('btn-create-idea');
+                if (createIdeaBtn) {
+                    createIdeaBtn.classList.add('d-none');
+                }
+                const breadcrumb = document.getElementById('breadcrumb');
+                breadcrumb.innerHTML = '<li class="breadcrumb-item active">Task Board</li>';
+                const container = document.getElementById('content-body');
+                if (window.TaskBoardPanel) {
+                    window.TaskBoardPanel.render(container);
+                }
             });
         }
 
-        // FEATURE-057: Feature Board sidebar link → navigates to /feature-board page
+        // FEATURE-057: Feature Board sidebar link → renders inline SPA panel
         const featureBoardHeader = this.container.querySelector('.nav-feature-board');
         if (featureBoardHeader) {
             featureBoardHeader.addEventListener('click', () => {
-                window.location.href = '/feature-board';
+                fileItems.forEach(f => f.classList.remove('active'));
+                this.selectedFile = null;
+                const sidebarChildren = this.container.querySelectorAll('.sidebar-child');
+                sidebarChildren.forEach(child => child.classList.remove('active'));
+                featureBoardHeader.classList.add('active');
+                if (window.contentRenderer) {
+                    window.contentRenderer.currentPath = null;
+                }
+                const createIdeaBtn = document.getElementById('btn-create-idea');
+                if (createIdeaBtn) {
+                    createIdeaBtn.classList.add('d-none');
+                }
+                const breadcrumb = document.getElementById('breadcrumb');
+                breadcrumb.innerHTML = '<li class="breadcrumb-item active">Feature Board</li>';
+                const container = document.getElementById('content-body');
+                if (window.FeatureBoardPanel) {
+                    window.FeatureBoardPanel.render(container);
+                }
             });
         }
 

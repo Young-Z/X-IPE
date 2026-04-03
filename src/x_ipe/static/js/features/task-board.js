@@ -253,8 +253,47 @@
         elErrorMsg.textContent = '';
     }
 
-    // ── Init ─────────────────────────────────────────────────────────
-    document.addEventListener('DOMContentLoaded', function () {
+    // ── Template HTML (for SPA rendering) ─────────────────────────
+    var TEMPLATE = '<div class="tb-page">' +
+        '<div class="tb-header"><h1 class="tb-title">Task Board</h1>' +
+        '<p class="tb-subtitle">Track all development tasks across the engineering workflow</p></div>' +
+        '<div class="tb-stats" id="tb-stats"></div>' +
+        '<div class="tb-filters">' +
+        '<div class="tb-search-wrap"><i class="bi bi-search tb-search-icon"></i>' +
+        '<input id="tb-search" class="tb-search-input" type="text" placeholder="Search by task ID, description, or role…"></div>' +
+        '<div class="tb-filter-divider"></div>' +
+        '<select id="tb-status-filter" class="tb-select">' +
+        '<option value="">All Statuses</option><option value="in_progress">In Progress</option>' +
+        '<option value="done">Done</option><option value="completed">Completed</option>' +
+        '<option value="pending">Pending</option><option value="blocked">Blocked</option>' +
+        '<option value="deferred">Deferred</option></select>' +
+        '<div class="tb-filter-divider"></div>' +
+        '<div class="tb-range-group" id="tb-range-group">' +
+        '<button class="tb-range-btn active" data-range="1w">1W</button>' +
+        '<button class="tb-range-btn" data-range="1m">1M</button>' +
+        '<button class="tb-range-btn" data-range="all">All</button></div></div>' +
+        '<div id="tb-error" class="tb-error" style="display:none;">' +
+        '<i class="bi bi-exclamation-triangle-fill"></i><span id="tb-error-msg"></span></div>' +
+        '<div class="tb-table-wrap"><table class="tb-table" id="tb-table"><thead><tr>' +
+        '<th>Task ID</th><th>Type</th><th>Description</th><th>Role</th>' +
+        '<th>Status</th><th>Updated</th><th>Output</th><th>Next</th>' +
+        '</tr></thead><tbody id="tb-body"></tbody></table></div>' +
+        '<div id="tb-empty" class="tb-empty" style="display:none;">' +
+        '<i class="bi bi-inbox"></i><p>No tasks found</p>' +
+        '<span>Try expanding the time range or adjusting filters</span></div>' +
+        '<div class="tb-pagination" id="tb-pagination"></div></div>';
+
+    // ── Bind & Init ─────────────────────────────────────────────────
+    function init() {
+        // Reset state for fresh render
+        state.range = '1w';
+        state.status = '';
+        state.search = '';
+        state.page = 1;
+        state.tasks = [];
+        state.pagination = null;
+        state.expandedTaskId = null;
+
         elStats = document.getElementById('tb-stats');
         elBody = document.getElementById('tb-body');
         elPagination = document.getElementById('tb-pagination');
@@ -263,7 +302,7 @@
         elEmpty = document.getElementById('tb-empty');
         elTable = document.getElementById('tb-table');
 
-        if (!elStats || !elBody) return; // not on task-board page
+        if (!elStats || !elBody) return;
 
         // Range buttons
         document.querySelectorAll('.tb-range-btn').forEach(function (btn) {
@@ -303,14 +342,34 @@
         elBody.addEventListener('click', function (e) {
             var row = e.target.closest('tr[data-task-id]');
             if (!row) return;
-            // Don't toggle if clicking a link
             if (e.target.closest('a')) return;
             var taskId = row.getAttribute('data-task-id');
             state.expandedTaskId = (state.expandedTaskId === taskId) ? null : taskId;
             renderTable();
         });
 
-        // Initial fetch
         fetchTasks();
+    }
+
+    // ── SPA entry point ─────────────────────────────────────────────
+    window.TaskBoardPanel = {
+        render: function (container) {
+            if (!document.getElementById('task-board-css')) {
+                var link = document.createElement('link');
+                link.id = 'task-board-css';
+                link.rel = 'stylesheet';
+                link.href = '/static/css/task-board.css';
+                document.head.appendChild(link);
+            }
+            container.innerHTML = TEMPLATE;
+            init();
+        }
+    };
+
+    // ── Full-page route entry point ─────────────────────────────────
+    document.addEventListener('DOMContentLoaded', function () {
+        if (document.getElementById('tb-stats')) {
+            init();
+        }
     });
 })();

@@ -237,8 +237,37 @@
         elErrorMsg.textContent = '';
     }
 
-    // ── Init ─────────────────────────────────────────────────────────
-    document.addEventListener('DOMContentLoaded', function () {
+    // ── Template HTML (for SPA rendering) ─────────────────────────
+    var TEMPLATE = '<div class="fb-page">' +
+        '<div class="fb-header"><h1 class="fb-title">Feature Board</h1>' +
+        '<p class="fb-subtitle">Track features across epics in the engineering workflow</p></div>' +
+        '<div class="fb-filters">' +
+        '<div class="fb-search-wrap"><i class="bi bi-search fb-search-icon"></i>' +
+        '<input id="fb-search" class="fb-search-input" type="text" placeholder="Search by feature ID, title, or Epic…"></div>' +
+        '<div class="fb-filter-divider"></div>' +
+        '<select id="fb-status-filter" class="fb-select">' +
+        '<option value="">All Statuses</option><option value="Planned">Planned</option>' +
+        '<option value="Refined">Refined</option><option value="Designed">Designed</option>' +
+        '<option value="Implemented">Implemented</option><option value="Tested">Tested</option>' +
+        '<option value="Completed">Completed</option><option value="Retired">Retired</option></select></div>' +
+        '<div id="fb-error" class="fb-error" style="display:none;">' +
+        '<i class="bi bi-exclamation-triangle-fill"></i><span id="fb-error-msg"></span></div>' +
+        '<div id="fb-epics" class="fb-epics"></div>' +
+        '<div id="fb-empty" class="fb-empty" style="display:none;">' +
+        '<i class="bi bi-inbox"></i><p>No features found</p>' +
+        '<span>Try adjusting your search or status filter</span></div></div>';
+
+    // ── Bind & Init ─────────────────────────────────────────────────
+    function init() {
+        // Reset state for fresh render
+        state.status = '';
+        state.search = '';
+        state.summaries = [];
+        state.epicFeatures = {};
+        state.epicLoaded = {};
+        state.expandedEpic = null;
+        state.expandedFeature = null;
+
         elEpics = document.getElementById('fb-epics');
         elError = document.getElementById('fb-error');
         elErrorMsg = document.getElementById('fb-error-msg');
@@ -248,13 +277,11 @@
 
         // Epic header click (delegated)
         elEpics.addEventListener('click', function (e) {
-            // Feature row click
             var featureRow = e.target.closest('tr[data-feature-id]');
             if (featureRow) {
-                if (e.target.closest('a')) return; // don't toggle on link click
+                if (e.target.closest('a')) return;
                 var fid = featureRow.getAttribute('data-feature-id');
                 state.expandedFeature = (state.expandedFeature === fid) ? null : fid;
-                // Re-render the epic body that contains this feature
                 var epicGroup = featureRow.closest('.fb-epic-group');
                 if (epicGroup) {
                     var epicId = epicGroup.querySelector('.fb-epic-header').getAttribute('data-epic');
@@ -263,7 +290,6 @@
                 return;
             }
 
-            // Epic header click
             var header = e.target.closest('.fb-epic-header');
             if (!header) return;
             var epicId = header.getAttribute('data-epic');
@@ -274,7 +300,6 @@
                 state.expandedEpic = null;
                 group.classList.remove('open');
             } else {
-                // Collapse previous
                 if (state.expandedEpic) {
                     var prev = document.getElementById('fb-epic-' + state.expandedEpic);
                     if (prev) prev.classList.remove('open');
@@ -312,7 +337,28 @@
             }
         }, 300));
 
-        // Initial fetch
         fetchSummary();
+    }
+
+    // ── SPA entry point ─────────────────────────────────────────────
+    window.FeatureBoardPanel = {
+        render: function (container) {
+            if (!document.getElementById('feature-board-css')) {
+                var link = document.createElement('link');
+                link.id = 'feature-board-css';
+                link.rel = 'stylesheet';
+                link.href = '/static/css/feature-board.css';
+                document.head.appendChild(link);
+            }
+            container.innerHTML = TEMPLATE;
+            init();
+        }
+    };
+
+    // ── Full-page route entry point ─────────────────────────────────
+    document.addEventListener('DOMContentLoaded', function () {
+        if (document.getElementById('fb-epics')) {
+            init();
+        }
     });
 })();
