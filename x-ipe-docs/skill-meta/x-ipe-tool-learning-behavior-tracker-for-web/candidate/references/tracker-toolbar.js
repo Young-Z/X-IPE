@@ -152,14 +152,22 @@ if (!window.__xipeBehaviorTrackerInjected) {
         + '<button id="__xb-analysis">📊 Analysis</button><span id="__xb-count">0</span>';
     bar.style.cssText = 'position:fixed;bottom:0;left:0;right:0;height:32px;background:#1e293b;color:#e2e8f0;'
         + 'display:flex;align-items:center;gap:8px;padding:0 12px;z-index:2147483640;font:12px sans-serif;';
-    const btnStyle = 'background:none;border:1px solid #475569;color:#e2e8f0;padding:2px 10px;'
-        + 'border-radius:4px;cursor:pointer;font:12px sans-serif;';
+    const btnStyle = 'background:none;border:1px solid #475569;color:inherit;padding:2px 10px;'
+        + 'border-radius:4px;cursor:pointer;font:inherit;';
     document.body.appendChild(bar);
     bar.querySelectorAll('button').forEach(b => b.style.cssText = btnStyle);
     bar.querySelector('#__xb-count').style.cssText = 'margin-left:auto;color:#94a3b8;';
 
-    bar.querySelector('#__xb-start').onclick = () => { eng.start(); window.__xipe_status = 'recording'; };
-    bar.querySelector('#__xb-stop').onclick = () => { eng.stop(); lsFlush(buf); window.__xipe_status = 'stopped'; };
+    bar.querySelector('#__xb-start').onclick = () => {
+        eng.start(); window.__xipe_status = 'recording';
+        bar.querySelector('#__xb-start').style.color = '#4ade80';
+        bar.querySelector('#__xb-stop').style.color = '';
+    };
+    bar.querySelector('#__xb-stop').onclick = () => {
+        eng.stop(); lsFlush(buf); window.__xipe_status = 'stopped';
+        bar.querySelector('#__xb-stop').style.color = '#f87171';
+        bar.querySelector('#__xb-start').style.color = '';
+    };
     bar.querySelector('#__xb-analysis').onclick = () => { window.__xipe_analysis_requested = true; };
 
     // Update counter periodically
@@ -172,7 +180,11 @@ if (!window.__xipeBehaviorTrackerInjected) {
     window.__xipeBehaviorTracker = {
         collect: () => ({ events: buf.toArray(), eventCount: buf.size(), url: location.href }),
         stop: () => { eng.stop(); lsFlush(buf); },
-        start: () => { eng.start(); window.__xipe_status = 'recording'; },
+        start: () => {
+            eng.start(); window.__xipe_status = 'recording';
+            const b = document.getElementById('__xipe-tracker-bar');
+            if (b) { b.querySelector('#__xb-start').style.color = '#4ade80'; b.querySelector('#__xb-stop').style.color = ''; }
+        },
         clear: () => buf.clear(),
         getStatus: () => window.__xipe_status || 'idle',
         getAnalysisFlag: () => { const f = !!window.__xipe_analysis_requested; window.__xipe_analysis_requested = false; return f; }
