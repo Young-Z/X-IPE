@@ -164,6 +164,7 @@ input:
   <constraints>
     - BLOCKING: Must use tracker-toolbar.mini.js for injection
     - BLOCKING: IIFE guard prevents double injection
+    - BLOCKING: After injection, start polling IMMEDIATELY — do NOT ask user if they are ready
   </constraints>
   <output>injection_status</output>
 </operation>
@@ -197,6 +198,7 @@ input:
     6. Wait 5 seconds, repeat from step 1
   </action>
   <constraints>
+    - BLOCKING: Start polling IMMEDIATELY after inject — do NOT prompt, ask, or wait for user confirmation
     - BLOCKING: Polling interval is 5 seconds (not configurable)
     - BLOCKING: During tracking, the skill ONLY calls evaluate_script to collect data.
       Do NOT use chrome-devtools for navigation, clicking, or any other action.
@@ -220,10 +222,27 @@ input:
     2. Parse returned final events
     3. Mark session as stopped
     4. Write final track-list.json
+    5. Update x-ipe-docs/learning/README.md content listing (see Content Listing below)
   </action>
   <output>events[], session_metadata</output>
 </operation>
 ```
+
+### Content Listing
+
+**x-ipe-docs/learning/README.md** is a markdown index of all learning sessions.
+The agent MUST update this file after each stop or analysis operation.
+
+Format:
+```markdown
+# Learning Sessions
+
+| Session | Purpose | URL | Events | Screenshots | Date |
+|---------|---------|-----|--------|-------------|------|
+| [session-name](./session-name/) | purpose text | url | N | N | YYYY-MM-DD |
+```
+
+Each row links to the session folder. Data is read from `track/track-list.json`.
 
 ---
 
