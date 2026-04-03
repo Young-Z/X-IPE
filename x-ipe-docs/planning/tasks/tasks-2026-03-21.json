@@ -1,0 +1,49 @@
+{
+  "_version": "1.0",
+  "tasks": [
+    {
+      "task_id": "TASK-982",
+      "task_type": "Bug Fix",
+      "description": "Chinese filenames display as Unicode escape sequences (e.g., `\\u6D4B\\u8BD5\\u6587\\u6863.doc` instead of `测试文档.doc`). Discovered during TASK-981 verification. DAO mode.",
+      "role": "Echo 📡",
+      "status": "done",
+      "created_at": "2026-03-21T00:00:00+00:00",
+      "last_updated": "2026-03-21T00:00:00+00:00",
+      "output_links": [
+        "src/x_ipe/services/ideas_service.py",
+        "src/x_ipe/services/workflow_manager_service.py",
+        "src/x_ipe/app.py"
+      ],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-981",
+      "task_type": "Bug Fix",
+      "description": "UIUX Feedback Feedback-20260321-090349: Creating an idea with a knowledge base reference fails and the compose action remains in progress. DAO mode.",
+      "role": "Echo",
+      "status": "completed",
+      "created_at": "2026-03-21T09:25:00+00:00",
+      "last_updated": "2026-03-21T09:25:00+00:00",
+      "output_links": [
+        "x-ipe-docs/config/workflow-template.json",
+        "tests/test_workflow_manager.py"
+      ],
+      "next_task": "Restored `compose_idea` support for optional `kb-references` deliverables in the live workflow template, added a regression test, and verified the focused backend/frontend suites. Unrelated pre-existing failures remain in `tests/test_workflow_manager.py::TestWorkflowTracing::test_service_methods_have_tracing` and full `npm test` unhandled errors from KB sidebar/intake tests."
+    },
+    {
+      "task_id": "TASK-982",
+      "task_type": "Bug Fix",
+      "description": "Chinese filenames display as Unicode escape sequences (`\\u6D4B...` instead of `测试文档.doc`). Two root causes: (1) `yaml.dump()` in `_write_kb_references` missing `allow_unicode=True`, (2) manual YAML parser in `_maybe_expand_kb_reference` not decoding `\\uXXXX` escapes. Also added `ensure_ascii=False` to Flask JSON and 4 other `json.dump` calls as defense-in-depth. DAO mode.",
+      "role": "Echo 📡",
+      "status": "completed",
+      "created_at": "2026-03-21T00:00:00+00:00",
+      "last_updated": "2026-03-21T00:00:00+00:00",
+      "output_links": [
+        "src/x_ipe/services/ideas_service.py",
+        "src/x_ipe/services/workflow_manager_service.py",
+        "src/x_ipe/app.py"
+      ],
+      "next_task": "Fixed YAML + YAML parser + Flask JSON + 4 json.dump calls. Repaired 6 corrupted YAML files. 2 regression tests added. 87/88 Python tests pass (1 pre-existing). 125/125 JS tests pass."
+    }
+  ]
+}

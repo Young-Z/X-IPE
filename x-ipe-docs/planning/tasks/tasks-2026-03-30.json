@@ -1,0 +1,204 @@
+{
+  "_version": "1.0",
+  "tasks": [
+    {
+      "task_id": "TASK-1021",
+      "task_type": "Feature Refinement",
+      "description": "Refine FEATURE-052-C (UIUX Reference Script): Specification with 45 GWT ACs for uiux_save_reference.py — input validation, screenshot decoding, element merge, HTML/CSS/MD generation.",
+      "role": "Sage 🌿",
+      "status": "done",
+      "created_at": "2026-03-30T00:00:00+00:00",
+      "last_updated": "2026-03-30T00:00:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-052/FEATURE-052-C/specification.md"
+      ],
+      "next_task": "x-ipe-task-based-technical-design"
+    },
+    {
+      "task_id": "TASK-1022",
+      "task_type": "Technical Design",
+      "description": "Design FEATURE-052-C (UIUX Reference Script): Two-part design for uiux_save_reference.py — CLI interface, 7-stage pipeline, file generation.",
+      "role": "Sage 🌿",
+      "status": "done",
+      "created_at": "2026-03-30T00:00:00+00:00",
+      "last_updated": "2026-03-30T00:00:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-052/FEATURE-052-C/technical-design.md"
+      ],
+      "next_task": "x-ipe-task-based-code-implementation"
+    },
+    {
+      "task_id": "TASK-1024",
+      "task_type": "Feature Refinement + Design",
+      "description": "Refine & design FEATURE-052-D (Skill Migration & MCP Removal): Spec (14 ACs) + design for batch text replacement across 17 files, SKILL.md creation, MCP deprecation.",
+      "role": "Sage 🌿",
+      "status": "done",
+      "created_at": "2026-03-30T00:00:00+00:00",
+      "last_updated": "2026-03-30T00:00:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-052/FEATURE-052-D/specification.md"
+      ],
+      "next_task": "x-ipe-task-based-code-implementation"
+    },
+    {
+      "task_id": "TASK-1025",
+      "task_type": "Code Implementation",
+      "description": "Implement FEATURE-052-D: Update 15 skills, create SKILL.md, deprecate MCP server.",
+      "role": "Sage 🌿",
+      "status": "done",
+      "created_at": "2026-03-30T00:00:00+00:00",
+      "last_updated": "2026-03-30T00:00:00+00:00",
+      "output_links": [
+        "03-30-2026"
+      ],
+      "next_task": "x-ipe-task-based-feature-closing"
+    },
+    {
+      "task_id": "TASK-1023",
+      "task_type": "Code Implementation",
+      "description": "Implement FEATURE-052-C (UIUX Reference Script): uiux_save_reference.py (400 LOC) — full pipeline: validation, screenshot decoding, element merge, HTML/CSS/MD generation. 47 tests, 100% pass.",
+      "role": "Sage 🌿",
+      "status": "done",
+      "created_at": "2026-03-30T00:00:00+00:00",
+      "last_updated": "2026-03-30T00:00:00+00:00",
+      "output_links": [
+        ".github/skills/x-ipe-tool-x-ipe-app-interactor/scripts/uiux_save_reference.py",
+        "tests/test_feature_052c.py"
+      ],
+      "next_task": "x-ipe-task-based-feature-closing"
+    },
+    {
+      "task_id": "TASK-1020",
+      "task_type": "Code Implementation",
+      "description": "Implement FEATURE-052-B (KB Index Scripts): _kb_lib.py + kb_get_index.py + kb_set_entry.py + kb_remove_entry.py — 4 scripts, 38 tests, 100% pass.",
+      "role": "Sage 🌿",
+      "status": "done",
+      "created_at": "2026-03-30T00:00:00+00:00",
+      "last_updated": "2026-03-30T00:00:00+00:00",
+      "output_links": [
+        ".github/skills/x-ipe-tool-x-ipe-app-interactor/scripts/",
+        "tests/test_feature_052b.py"
+      ],
+      "next_task": "x-ipe-task-based-feature-closing"
+    },
+    {
+      "task_id": "TASK-1019",
+      "task_type": "Technical Design",
+      "description": "Design FEATURE-052-B (KB Index Scripts): Two-part design for 3 KB scripts + _kb_lib.py helper, CLI specs, flowcharts.",
+      "role": "Sage 🌿",
+      "status": "done",
+      "created_at": "2026-03-30T00:00:00+00:00",
+      "last_updated": "2026-03-30T00:00:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-052/FEATURE-052-B/technical-design.md"
+      ],
+      "next_task": "x-ipe-task-based-code-implementation"
+    },
+    {
+      "task_id": "TASK-1018",
+      "task_type": "Feature Refinement",
+      "description": "Refine FEATURE-052-B (KB Index Scripts): Specification with 34 GWT ACs for kb_get_index.py, kb_set_entry.py, kb_remove_entry.py.",
+      "role": "Sage 🌿",
+      "status": "done",
+      "created_at": "2026-03-30T00:00:00+00:00",
+      "last_updated": "2026-03-30T00:00:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-052/FEATURE-052-B/specification.md"
+      ],
+      "next_task": "x-ipe-task-based-technical-design"
+    },
+    {
+      "task_id": "TASK-1017",
+      "task_type": "Feature Closing",
+      "description": "Close FEATURE-052-A (Shared Utility & Workflow Scripts): AC verification (49 ACs, 94% tested), code-to-docs review (8 spec + 6 design fixes), refactoring analysis (7.5/10), committed to main.",
+      "role": "Sage 🌿",
+      "status": "done",
+      "created_at": "2026-03-30T00:00:00+00:00",
+      "last_updated": "2026-03-30T00:00:00+00:00",
+      "output_links": [
+        "main"
+      ],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-1016",
+      "task_type": "Code Implementation",
+      "description": "Implement FEATURE-052-A (Shared Utility & Workflow Scripts): _lib.py shared module, workflow_update_action.py, workflow_get_state.py — 3 scripts replacing MCP tools with zero deps. 54 tests, 100% pass.",
+      "role": "Sage 🌿",
+      "status": "done",
+      "created_at": "2026-03-30T00:00:00+00:00",
+      "last_updated": "2026-03-30T00:00:00+00:00",
+      "output_links": [
+        ".github/skills/x-ipe-tool-x-ipe-app-interactor/scripts/",
+        "tests/test_feature_052a.py"
+      ],
+      "next_task": "x-ipe-task-based-feature-acceptance-test"
+    },
+    {
+      "task_id": "TASK-1015",
+      "task_type": "Technical Design",
+      "description": "Design FEATURE-052-A (Shared Utility & Workflow Scripts): Two-part design for _lib.py module structure, workflow script data flows, CLI interface, file locking strategy.",
+      "role": "Sage 🌿",
+      "status": "done",
+      "created_at": "2026-03-30T00:00:00+00:00",
+      "last_updated": "2026-03-30T00:00:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-052/FEATURE-052-A/technical-design.md"
+      ],
+      "next_task": "x-ipe-task-based-code-implementation"
+    },
+    {
+      "task_id": "TASK-1014",
+      "task_type": "Feature Refinement",
+      "description": "Refine FEATURE-052-A (Shared Utility & Workflow Scripts): Create specification with GWT acceptance criteria for _lib.py shared module + workflow_update_action.py + workflow_get_state.py.",
+      "role": "Sage 🌿",
+      "status": "done",
+      "created_at": "2026-03-30T00:00:00+00:00",
+      "last_updated": "2026-03-30T00:00:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-052/FEATURE-052-A/specification.md"
+      ],
+      "next_task": "x-ipe-task-based-technical-design"
+    },
+    {
+      "task_id": "TASK-1013",
+      "task_type": "Feature Breakdown",
+      "description": "Break EPIC-052 (Replace MCP Server with Skill-Level Scripts) into features. 4 features: A (shared util + workflow scripts), B (KB index scripts), C (UIUX reference script), D (skill migration + MCP removal).",
+      "role": "Sage 🌿",
+      "status": "done",
+      "created_at": "2026-03-30T00:00:00+00:00",
+      "last_updated": "2026-03-30T00:00:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/requirement-details-part-21.md",
+        "x-ipe-docs/planning/features.md"
+      ],
+      "next_task": "x-ipe-task-based-feature-refinement"
+    },
+    {
+      "task_id": "TASK-1012",
+      "task_type": "Requirement Gathering",
+      "description": "Gather requirements for IDEA-036: Replace x-ipe-app-and-agent-interaction MCP with skill-level scripts. CRs on EPIC-033, EPIC-036, EPIC-027.",
+      "role": "Sage 🌿",
+      "status": "done",
+      "created_at": "2026-03-30T00:00:00+00:00",
+      "last_updated": "2026-03-30T00:00:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/requirement-details-part-21.md"
+      ],
+      "next_task": "x-ipe-task-based-feature-breakdown"
+    },
+    {
+      "task_id": "TASK-1011",
+      "task_type": "Ideation",
+      "description": "Refine idea 036: Evaluate replacing x-ipe-app-and-agent-interaction MCP functions with skill-level scripts for lighter-weight workflow action updates.",
+      "role": "Sage 🌿",
+      "status": "done",
+      "created_at": "2026-03-30T00:00:00+00:00",
+      "last_updated": "2026-03-30T00:00:00+00:00",
+      "output_links": [
+        "x-ipe-docs/ideas/036.%20CR-Replace%20existing%20mcp%20function/idea-summary-v1.md"
+      ],
+      "next_task": "x-ipe-task-based-requirement-gathering"
+    }
+  ]
+}

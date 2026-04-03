@@ -1,0 +1,106 @@
+{
+  "_version": "1.0",
+  "tasks": [
+    {
+      "task_id": "TASK-849",
+      "task_type": "Frontend-UI Browser AC Testing",
+      "description": "Execute frontend-ui classified ACs via chrome-devtools-mcp for features B,C,D,E,G. 34/34 UI ACs pass. Fixed 2 bugs: kb-browse.js string-to-array coercion, kb_service.py search API string concatenation.",
+      "role": "Echo 📡",
+      "status": "done",
+      "created_at": "2026-03-12T07:05:00+00:00",
+      "last_updated": "2026-03-12T07:05:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-049/FEATURE-049-B/acceptance-test-cases.md",
+        "x-ipe-docs/requirements/EPIC-049/FEATURE-049-C/acceptance-test-cases.md",
+        "x-ipe-docs/requirements/EPIC-049/FEATURE-049-D/acceptance-test-cases.md",
+        "x-ipe-docs/requirements/EPIC-049/FEATURE-049-E/acceptance-test-cases.md",
+        "x-ipe-docs/requirements/EPIC-049/FEATURE-049-G/acceptance-test-cases.md"
+      ],
+      "next_task": "DAO-053"
+    },
+    {
+      "task_id": "TASK-850",
+      "task_type": "Change Request",
+      "description": "CR-001: Replace all native browser dialogs (alert/confirm/prompt) with Bootstrap 5 modals. Created shared utility + replaced 14 call sites across 6 JS files. All 621 tests pass.",
+      "role": "Echo 📡",
+      "status": "done",
+      "created_at": "2026-03-12T07:30:00+00:00",
+      "last_updated": "2026-03-12T07:30:00+00:00",
+      "output_links": [
+        "src/x_ipe/static/js/utils/bootstrap-dialogs.js",
+        "x-ipe-docs/requirements/EPIC-049/FEATURE-049-D/CR-001.md"
+      ],
+      "next_task": "DAO-055"
+    },
+    {
+      "task_id": "TASK-851",
+      "task_type": "Bug Fix + CR-002",
+      "description": "KB browse discoverability: added top-bar KB button → modal with folder tree + article viewer (CR-002). Sidebar unchanged. Recursive API added.",
+      "role": "Echo 📡",
+      "status": "done",
+      "created_at": "2026-03-12T07:35:00+00:00",
+      "last_updated": "2026-03-12T07:35:00+00:00",
+      "output_links": [
+        "03-12-2026",
+        "13:45:00"
+      ],
+      "next_task": "DAO-058, DAO-059"
+    },
+    {
+      "task_id": "TASK-852",
+      "task_type": "Skill Creation",
+      "description": "Create `x-ipe-tool-ui-testing-via-chrome-mcp` tool skill — define UI testing capabilities using Chrome DevTools MCP based on best practices (navigation, snapshot, screenshot, form interaction, assertions)",
+      "role": "Sage 🌿",
+      "status": "done",
+      "created_at": "2026-03-12T05:48:00+00:00",
+      "last_updated": "2026-03-12T05:48:00+00:00",
+      "output_links": [
+        ".github/skills/x-ipe-tool-ui-testing-via-chrome-mcp/SKILL.md",
+        "x-ipe-docs/skill-meta/x-ipe-tool-ui-testing-via-chrome-mcp/skill-meta.md"
+      ],
+      "next_task": "DAO-060"
+    },
+    {
+      "task_id": "TASK-853",
+      "task_type": "Skill Update",
+      "description": "Update `x-ipe-task-based-feature-acceptance-test` + tools.json: (1) store ACs by test type after scope definition, (2) add x-ipe-tool-ui-testing-via-chrome-mcp to tools.json, (3) route UI test sets through the new tool",
+      "role": "Sage 🌿",
+      "status": "done",
+      "created_at": "2026-03-12T05:50:00+00:00",
+      "last_updated": "2026-03-12T05:50:00+00:00",
+      "output_links": [
+        ".github/skills/x-ipe-task-based-feature-acceptance-test/SKILL.md",
+        "x-ipe-docs/config/tools.json"
+      ],
+      "next_task": "DAO-060"
+    },
+    {
+      "task_id": "TASK-855",
+      "task_type": "Skill Update",
+      "description": "Add mockup support: (1) AC skill gets mockup_path input with auto-detect + freshness check, (2) UI testing tool gets mockup_path input + compare_with_mockup operation for visual gap analysis",
+      "role": "Sage 🌿",
+      "status": "done",
+      "created_at": "2026-03-12T10:58:00+00:00",
+      "last_updated": "2026-03-12T10:58:00+00:00",
+      "output_links": [
+        ".github/skills/x-ipe-task-based-feature-acceptance-test/SKILL.md",
+        ".github/skills/x-ipe-tool-ui-testing-via-chrome-mcp/SKILL.md"
+      ],
+      "next_task": "DAO-061"
+    },
+    {
+      "task_id": "TASK-854",
+      "task_type": "Skill Update",
+      "description": "Simplify DAO 格物 (Phase 1) and 致知 (Phase 2) — merged 6 substeps into 3: Step 1.1 (Parse+Decompose), Step 1.2 (Quick Perspectives), Step 2.1 (Match+Decide+Commit). 401→356 lines.",
+      "role": "Zephyr 🌬️",
+      "status": "done",
+      "created_at": "2026-03-12T10:55:00+00:00",
+      "last_updated": "2026-03-12T10:55:00+00:00",
+      "output_links": [
+        ".github/skills/x-ipe-dao-end-user-representative/SKILL.md",
+        ".github/skills/x-ipe-dao-end-user-representative/references/dao-phases-and-output-format.md"
+      ],
+      "next_task": "DAO-060"
+    }
+  ]
+}

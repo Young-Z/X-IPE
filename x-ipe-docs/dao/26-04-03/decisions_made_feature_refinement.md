@@ -121,3 +121,27 @@ All 8 decisions align with KISS/YAGNI/DRY principles and existing project patter
 | 9 | Shared CSS | Extract board-common.css for shared styles | DRY |
 | 10 | Nav label | "Features" with bi-kanban icon | Short, matches "Tasks" |
 
+
+---
+
+## FEATURE-057-C: Data Migration — Decisions
+
+**Task:** TASK-1075  
+**Feature:** FEATURE-057-C  
+**Timestamp:** 2026-04-03T08:35:00Z  
+**Disposition:** instruction  
+**Confidence:** 0.95
+
+### Decisions
+
+| # | Question | Decision | Rationale |
+|---|----------|----------|-----------|
+| 1 | Migration approach | Python script, reusable/testable | Deterministic, rerunnable |
+| 2 | Import strategy | Use _board_lib directly (not CRUD scripts) | CRUD scripts call sys.exit, not importable |
+| 3 | Markdown parsing | str.split('|') | Well-structured tables, KISS |
+| 4 | Dry-run | Yes, --dry-run flag | Low effort, high safety |
+| 5 | Script location | .github/skills/.../scripts/migrate.py | Colocate with CRUD scripts |
+| 6 | Active vs Completed | Parse both identically, plus Cancelled | Same parser, different column counts |
+| 7 | Emoji status | Strip emoji, normalize | ✅ done → done, 🔄 in_progress → in_progress |
+| 8 | Post-migration | Keep originals as .bak | Cleanup in 057-E |
+

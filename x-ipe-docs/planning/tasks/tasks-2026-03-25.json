@@ -1,0 +1,165 @@
+{
+  "_version": "1.0",
+  "tasks": [
+    {
+      "task_id": "TASK-1001",
+      "task_type": "Skill Update",
+      "description": "Update knowledge extraction + user manual skills based on hands-on testing feedback: (1) Add functional validation phase (walkthrough testing), (2) Update acceptance criteria to be task-oriented not just structural, (3) Add interaction pattern detection, (4) Add \"Followability\" quality dimension, (5) Require action-level screenshots, (6) Add test_walkthrough operation. Covers both x-ipe-task-based-application-knowledge-extractor and x-ipe-tool-knowledge-extraction-user-manual.",
+      "role": "Nova ✨",
+      "status": "done",
+      "created_at": "2026-03-25T00:00:00+00:00",
+      "last_updated": "2026-03-25T00:00:00+00:00",
+      "output_links": [
+        "../../.github/skills/x-ipe-task-based-application-knowledge-extractor/SKILL.md",
+        "../../.github/skills/x-ipe-tool-knowledge-extraction-user-manual/SKILL.md"
+      ],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-1000",
+      "task_type": "Skill Validation",
+      "description": "Phase 1+2: Validate and fix feature-stage skills (feature-refinement, technical-design, code-implementation, feature-acceptance-test, code-refactor, feature-closing). Inner issues + inter-skill I/O chain.",
+      "role": "Cipher 🔑",
+      "status": "done",
+      "created_at": "2026-03-25T00:00:00+00:00",
+      "last_updated": "2026-03-25T00:00:00+00:00",
+      "output_links": [
+        "../../.github/skills/x-ipe-task-based-feature-refinement/SKILL.md",
+        "../../.github/skills/x-ipe-task-based-technical-design/SKILL.md",
+        "../../.github/skills/x-ipe-task-based-code-implementation/SKILL.md",
+        "../../.github/skills/x-ipe-task-based-feature-acceptance-test/SKILL.md",
+        "../../.github/skills/x-ipe-task-based-code-refactor/SKILL.md",
+        "../../.github/skills/x-ipe-task-based-feature-closing/SKILL.md"
+      ],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-999",
+      "task_type": "Knowledge Extraction",
+      "description": "Extract user manual knowledge from X-IPE workflow mode (running web app at http://127.0.0.1:5858/). Study how to use workflow mode to create applications and generate user manual.",
+      "role": "Zephyr 🌬️",
+      "status": "done",
+      "created_at": "2026-03-25T00:00:00+00:00",
+      "last_updated": "2026-03-25T00:00:00+00:00",
+      "output_links": [
+        "../../x-ipe-docs/knowledge-base/.intake/EXTRACT-999/user-manual.md"
+      ],
+      "next_task": "x-ipe-tool-kb-librarian"
+    },
+    {
+      "task_id": "TASK-998",
+      "task_type": "Skill Validation",
+      "description": "Phase 2: Fix inter-skill I/O chain issues across requirement-stage (req-gathering → feature-breakdown → feature-refinement). Fix mockup_path→mockup_link, step numbering, feature_ids reference, mockup source chain.",
+      "role": "Cipher 🔑",
+      "status": "done",
+      "created_at": "2026-03-25T00:00:00+00:00",
+      "last_updated": "2026-03-25T00:00:00+00:00",
+      "output_links": [
+        "../../.github/skills/x-ipe-task-based-feature-breakdown/SKILL.md",
+        "../../.github/skills/x-ipe-task-based-feature-refinement/SKILL.md"
+      ],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-997",
+      "task_type": "Skill Validation",
+      "description": "Phase 1: Validate and fix inner issues in requirement-stage skills (requirement-gathering + feature-breakdown). Structural/content quality fixes.",
+      "role": "Cipher 🔑",
+      "status": "done",
+      "created_at": "2026-03-25T00:00:00+00:00",
+      "last_updated": "2026-03-25T00:00:00+00:00",
+      "output_links": [
+        "../../.github/skills/x-ipe-task-based-requirement-gathering/SKILL.md",
+        "../../.github/skills/x-ipe-task-based-feature-breakdown/SKILL.md"
+      ],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-996",
+      "task_type": "Skill Update",
+      "description": "Enhance x-ipe-tool-brand-theme-creator to extract basic UI component patterns (buttons, cards, inputs, links, badges, nav) from reference materials, not just colors/fonts. Update SKILL.md, input-sources.md, design-system-template.md, template-placeholders.md, and examples.md.",
+      "role": "Ember 🔥",
+      "status": "done",
+      "created_at": "2026-03-25T00:00:00+00:00",
+      "last_updated": "2026-03-25T00:00:00+00:00",
+      "output_links": [
+        ".github/skills/x-ipe-tool-brand-theme-creator/SKILL.md",
+        ".github/skills/x-ipe-tool-brand-theme-creator/references/component-extraction.md"
+      ],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-995",
+      "task_type": "Skill Update",
+      "description": "Fix I/O chain compatibility across ideation-stage skills: ideation output field name/format, mockup/arch input_init broken reference, share-idea missing predecessor ref, mockup_list format mismatch with requirement-gathering.",
+      "role": "Cipher 🔑",
+      "status": "done",
+      "created_at": "2026-03-25T00:00:00+00:00",
+      "last_updated": "2026-03-25T00:00:00+00:00",
+      "output_links": [
+        "../../.github/skills/x-ipe-task-based-ideation/SKILL.md",
+        "../../.github/skills/x-ipe-task-based-idea-mockup/SKILL.md",
+        "../../.github/skills/x-ipe-task-based-idea-to-architecture/SKILL.md",
+        "../../.github/skills/x-ipe-task-based-share-idea/SKILL.md",
+        "../../.github/skills/x-ipe-task-based-requirement-gathering/SKILL.md"
+      ],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-994",
+      "task_type": "Skill Update",
+      "description": "Add docx tool skill as DOCX conversion method in x-ipe-task-based-share-idea. Route DOCX format to docx skill instead of pandoc-only fallback.",
+      "role": "Zephyr 🌬️",
+      "status": "done",
+      "created_at": "2026-03-25T00:00:00+00:00",
+      "last_updated": "2026-03-25T00:00:00+00:00",
+      "output_links": [
+        ".github/skills/x-ipe-task-based-share-idea/SKILL.md"
+      ],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-993",
+      "task_type": "Skill Validation",
+      "description": "Validate all ideation-stage skills (4 task-based + 2 tool) against x-ipe-meta-skill-creator guidelines. Fix structural/content issues.",
+      "role": "Cipher 🔑",
+      "status": "done",
+      "created_at": "2026-03-25T00:00:00+00:00",
+      "last_updated": "2026-03-25T00:00:00+00:00",
+      "output_links": [
+        ".github/skills/x-ipe-task-based-ideation/SKILL.md",
+        ".github/skills/x-ipe-task-based-idea-mockup/SKILL.md",
+        ".github/skills/x-ipe-task-based-idea-to-architecture/SKILL.md"
+      ],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-992",
+      "task_type": "Skill Update",
+      "description": "Add production-patterns reference + lesson-learned consultation + reflection checklist to x-ipe-meta-skill-creator. Addresses 5 high-impact gaps from content audit.",
+      "role": "Cipher 🔑",
+      "status": "done",
+      "created_at": "2026-03-25T00:00:00+00:00",
+      "last_updated": "2026-03-25T00:00:00+00:00",
+      "output_links": [
+        ".github/skills/x-ipe-meta-skill-creator/references/12.%20reference-production-patterns.md",
+        ".github/skills/x-ipe-meta-skill-creator/SKILL.md"
+      ],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-991",
+      "task_type": "Skill Update",
+      "description": "Add Python lint script (scripts/lint_dsl.py) to x-ipe-tool-architecture-dsl skill for validating generated DSL code. Implements grammar validation rules E001-E009, W001. Update SKILL.md DoD to call linter. Pattern from ontology-1.0.4/scripts/ontology.py. DAO mode.",
+      "role": "Ember 🔥",
+      "status": "done",
+      "created_at": "2026-03-25T00:00:00+00:00",
+      "last_updated": "2026-03-25T00:00:00+00:00",
+      "output_links": [
+        ".github/skills/x-ipe-tool-architecture-dsl/scripts/lint_dsl.py",
+        ".github/skills/x-ipe-tool-architecture-dsl/SKILL.md"
+      ],
+      "next_task": ""
+    }
+  ]
+}

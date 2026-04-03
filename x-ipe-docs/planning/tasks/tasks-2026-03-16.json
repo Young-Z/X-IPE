@@ -1,0 +1,438 @@
+{
+  "_version": "1.0",
+  "tasks": [
+    {
+      "task_id": "TASK-912",
+      "task_type": "KB Librarian",
+      "description": "Run AI Librarian on 2 pending intake files (Clienteling meeting summary + transcript) — analyze content, assign tags, generate frontmatter, move to destination",
+      "role": "Sage 🌿",
+      "status": "done",
+      "created_at": "2026-03-16T16:03:00+00:00",
+      "last_updated": "2026-03-16T16:03:00+00:00",
+      "output_links": [
+        "x-ipe-docs/knowledge-base/clienteling-ai-tool/"
+      ],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-911",
+      "task_type": "Bug Fix",
+      "description": "Fix 2 KB intake UI regressions: (1) librarian panel not showing intake file list, only badge count (2) action icons in intake table stacking vertically instead of horizontal",
+      "role": "Zephyr 🌬️",
+      "status": "done",
+      "created_at": "2026-03-16T23:38:00+00:00",
+      "last_updated": "2026-03-16T23:38:00+00:00",
+      "output_links": [
+        "[965d2dc]"
+      ],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-910",
+      "task_type": "Code Implementation",
+      "description": "Create x-ipe-tool-kb-librarian skill via x-ipe-meta-skill-creator: skill-meta.md, candidate/SKILL.md, candidate/references/examples.md, validation, merge",
+      "role": "Zephyr 🌬️",
+      "status": "done",
+      "created_at": "2026-03-16T23:10:00+00:00",
+      "last_updated": "2026-03-16T23:10:00+00:00",
+      "output_links": [
+        ".github/skills/x-ipe-tool-kb-librarian/SKILL.md"
+      ],
+      "next_task": "x-ipe-task-based-feature-acceptance-test"
+    },
+    {
+      "task_id": "TASK-909",
+      "task_type": "Technical Design",
+      "description": "Design x-ipe-tool-kb-librarian skill for FEATURE-049-F CR-001: skill structure, operations, data flow, KB service integration",
+      "role": "Zephyr 🌬️",
+      "status": "done",
+      "created_at": "2026-03-16T23:05:00+00:00",
+      "last_updated": "2026-03-16T23:05:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/technical-design.md"
+      ],
+      "next_task": "x-ipe-task-based-code-implementation"
+    },
+    {
+      "task_id": "TASK-908",
+      "task_type": "Feature Refinement",
+      "description": "Refine FEATURE-049-F v1.1 (CR-001): Add ACs for x-ipe-tool-kb-librarian skill — file analysis, tag assignment, frontmatter generation, file movement, status updates",
+      "role": "Zephyr 🌬️",
+      "status": "done",
+      "created_at": "2026-03-16T22:52:00+00:00",
+      "last_updated": "2026-03-16T22:52:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/specification.md"
+      ],
+      "next_task": "x-ipe-task-based-technical-design"
+    },
+    {
+      "task_id": "TASK-907",
+      "task_type": "Change Request",
+      "description": "CR-001 for FEATURE-049-F: Add x-ipe-tool-kb-librarian skill creation to scope — skill handles file organization, tag assignment, frontmatter generation for intake files",
+      "role": "Zephyr 🌬️",
+      "status": "done",
+      "created_at": "2026-03-16T22:34:00+00:00",
+      "last_updated": "2026-03-16T22:34:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/CR-001.md"
+      ],
+      "next_task": "x-ipe-task-based-feature-refinement"
+    },
+    {
+      "task_id": "TASK-906",
+      "task_type": "Acceptance Test",
+      "description": "Execute acceptance tests for FEATURE-049-F (KB AI Librarian & Intake): classify 43 ACs by test type, run backend pytest + frontend vitest, document results",
+      "role": "Zephyr 🌬️",
+      "status": "done",
+      "created_at": "2026-03-16T22:26:00+00:00",
+      "last_updated": "2026-03-16T22:26:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/acceptance-test-cases.md"
+      ],
+      "next_task": "x-ipe-task-based-code-refactor"
+    },
+    {
+      "task_id": "TASK-905",
+      "task_type": "Code Implementation",
+      "description": "Implement FEATURE-049-F (KB AI Librarian & Intake): backend intake service methods + 2 routes in kb_service.py/kb_routes.py, fix _runAILibrarian() command, enhanced intake scene UI, per-file actions, sidebar badge, backend+frontend tests",
+      "role": "Zephyr 🌬️",
+      "status": "done",
+      "created_at": "2026-03-16T14:30:00+00:00",
+      "last_updated": "2026-03-16T14:30:00+00:00",
+      "output_links": [
+        "03-16-2026",
+        "22:25:00"
+      ],
+      "next_task": "x-ipe-task-based-feature-acceptance-test"
+    },
+    {
+      "task_id": "TASK-904",
+      "task_type": "Technical Design",
+      "description": "Design FEATURE-049-F (KB AI Librarian & Intake) — intake status service, .intake-status.json schema, frontend intake view, config extension",
+      "role": "Zephyr 🌬️",
+      "status": "done",
+      "created_at": "2026-03-16T14:00:00+00:00",
+      "last_updated": "2026-03-16T14:00:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/technical-design.md"
+      ],
+      "next_task": "x-ipe-task-based-code-implementation"
+    },
+    {
+      "task_id": "TASK-903",
+      "task_type": "Feature Refinement",
+      "description": "Refine FEATURE-049-F (KB AI Librarian & Intake) — create specification.md with 40 ACs, 8 FRs, mockup-linked, GWT format",
+      "role": "Zephyr 🌬️",
+      "status": "done",
+      "created_at": "2026-03-16T13:48:00+00:00",
+      "last_updated": "2026-03-16T13:48:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/specification.md"
+      ],
+      "next_task": "x-ipe-task-based-technical-design"
+    },
+    {
+      "task_id": "TASK-898",
+      "task_type": "Technical Design",
+      "description": "Design FEATURE-037-B CR-002: ~15 lines in compose-idea-modal.js _selectFile() to add X-Converted header check + sandboxed iframe rendering. Same pattern as FEATURE-038-C CR-001 deliverable-viewer.js",
+      "role": "Cipher 🔐",
+      "status": "done",
+      "created_at": "2026-03-16T07:17:00+00:00",
+      "last_updated": "2026-03-16T07:17:00+00:00",
+      "output_links": [
+        "03-16-2026",
+        "07:19:00"
+      ],
+      "next_task": "x-ipe-task-based-code-implementation"
+    },
+    {
+      "task_id": "TASK-901",
+      "task_type": "Code Refactor",
+      "description": "Assess and refactor FEATURE-038-C CR-001 code: _convert_docx/_convert_msg/_sanitize_converted_html in ideas_routes.py + X-Converted handling in deliverable-viewer.js. Result: No refactoring needed — code already clean (SRP, DRY, KISS, YAGNI).",
+      "role": "Cipher 🔐",
+      "status": "done",
+      "created_at": "2026-03-16T07:28:00+00:00",
+      "last_updated": "2026-03-16T07:28:00+00:00",
+      "output_links": [
+        "03-16-2026",
+        "07:31:00"
+      ],
+      "next_task": "x-ipe-task-based-feature-closing"
+    },
+    {
+      "task_id": "TASK-902",
+      "task_type": "Feature Closing",
+      "description": "Close FEATURE-038-C CR-001: All ACs verified, code committed in v1.1.17, 755 tests pass, no refactoring needed",
+      "role": "Cipher 🔐",
+      "status": "done",
+      "created_at": "2026-03-16T07:31:00+00:00",
+      "last_updated": "2026-03-16T07:31:00+00:00",
+      "output_links": [
+        "03-16-2026",
+        "07:35:00"
+      ],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-900",
+      "task_type": "Acceptance Test",
+      "description": "Verify FEATURE-037-B CR-002 acceptance criteria AC-031 through AC-035: all 5 unit tests pass, code matches spec",
+      "role": "Cipher 🔐",
+      "status": "done",
+      "created_at": "2026-03-16T07:23:00+00:00",
+      "last_updated": "2026-03-16T07:23:00+00:00",
+      "output_links": [
+        "03-16-2026",
+        "07:25:00"
+      ],
+      "next_task": "x-ipe-task-based-feature-closing"
+    },
+    {
+      "task_id": "TASK-899",
+      "task_type": "Code Implementation",
+      "description": "Implement FEATURE-037-B CR-002: Update _selectFile() in compose-idea-modal.js + add frontend tests for AC-031 to AC-035",
+      "role": "Cipher 🔐",
+      "status": "done",
+      "created_at": "2026-03-16T07:19:00+00:00",
+      "last_updated": "2026-03-16T07:19:00+00:00",
+      "output_links": [
+        "03-16-2026",
+        "07:23:00"
+      ],
+      "next_task": "x-ipe-task-based-feature-acceptance-test"
+    },
+    {
+      "task_id": "TASK-897",
+      "task_type": "Feature Refinement",
+      "description": "Refine FEATURE-037-B v1.2 for CR-002: Update AC-004/AC-005 for converted binary exception, add CR-002 AC group for .docx/.msg preview in Link Existing, update FR-037-B.3 with X-Converted detection",
+      "role": "Cipher 🔐",
+      "status": "done",
+      "created_at": "2026-03-16T07:13:00+00:00",
+      "last_updated": "2026-03-16T07:13:00+00:00",
+      "output_links": [
+        "03-16-2026",
+        "07:16:00"
+      ],
+      "next_task": "x-ipe-task-based-technical-design"
+    },
+    {
+      "task_id": "TASK-896",
+      "task_type": "Change Request",
+      "description": "CR-002 on FEATURE-037-B: Add .docx/.msg converted preview to ideation (compose-idea-modal.js _selectFile). Backend already done via shared endpoint. Frontend-only: detect X-Converted header, render in sandboxed iframe",
+      "role": "Cipher 🔐",
+      "status": "done",
+      "created_at": "2026-03-16T07:12:00+00:00",
+      "last_updated": "2026-03-16T07:12:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-037/FEATURE-037-B/CR-002.md",
+        "x-ipe-docs/requirements/EPIC-037/FEATURE-037-B/specification.md"
+      ],
+      "next_task": "x-ipe-task-based-feature-refinement"
+    },
+    {
+      "task_id": "TASK-895",
+      "task_type": "Skill Update",
+      "description": "Update x-ipe-task-based-human-playground to be human-initiated only: update description, add gate in Important Notes, update engineering-workflow.md cross-refs, update feature-closing description",
+      "role": "Cipher 🔐",
+      "status": "done",
+      "created_at": "2026-03-16T06:00:00+00:00",
+      "last_updated": "2026-03-16T06:00:00+00:00",
+      "output_links": [
+        ".github/skills/x-ipe-task-based-human-playground/SKILL.md",
+        ".github/skills/x-ipe-dao-end-user-representative/references/engineering-workflow.md"
+      ],
+      "next_task": "x-ipe-task-based-code-refactor"
+    },
+    {
+      "task_id": "TASK-894",
+      "task_type": "Acceptance Test",
+      "description": "Execute acceptance tests for FEATURE-038-C CR-001: Validate .docx/.msg preview conversion via backend unit tests (pytest) and frontend unit tests (vitest), verify sanitization, 413/415 handling, X-Converted header",
+      "role": "Cipher 🔐",
+      "status": "done",
+      "created_at": "2026-03-16T05:40:00+00:00",
+      "last_updated": "2026-03-16T05:40:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-038/FEATURE-038-C/acceptance-test-cases.md"
+      ],
+      "next_task": "x-ipe-task-based-human-playground"
+    },
+    {
+      "task_id": "TASK-893",
+      "task_type": "Code Implementation",
+      "description": "Implement FEATURE-038-C CR-001: Add mammoth/extract-msg deps, _convert_docx/_convert_msg/_sanitize helpers in ideas_routes.py, modify get_idea_file() route, add X-Converted detection in deliverable-viewer.js, write backend+frontend tests",
+      "role": "Cipher 🔐",
+      "status": "done",
+      "created_at": "2026-03-16T04:45:00+00:00",
+      "last_updated": "2026-03-16T04:45:00+00:00",
+      "output_links": [
+        "src/x_ipe/routes/ideas_routes.py",
+        "src/x_ipe/static/js/features/deliverable-viewer.js",
+        "tests/test_cr001_docx_msg_preview.py"
+      ],
+      "next_task": "x-ipe-task-based-feature-acceptance-test"
+    },
+    {
+      "task_id": "TASK-892",
+      "task_type": "Technical Design",
+      "description": "Design FEATURE-038-C CR-001: .docx/.msg file conversion pipeline — backend conversion layer in ideas_routes.py, HTML sanitization, frontend rendering via existing HTML preview path",
+      "role": "Cipher 🔐",
+      "status": "done",
+      "created_at": "2026-03-16T04:15:00+00:00",
+      "last_updated": "2026-03-16T04:15:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-038/FEATURE-038-C/technical-design.md"
+      ],
+      "next_task": "x-ipe-task-based-code-implementation"
+    },
+    {
+      "task_id": "TASK-891",
+      "task_type": "Feature Refinement",
+      "description": "Refine FEATURE-038-C v1.1 for CR-001: Update AC-038-C.15, BR-038-C.3, add .docx/.msg preview ACs, update Out-of-Scope, add conversion-related FRs/NFRs",
+      "role": "Cipher 🔐",
+      "status": "done",
+      "created_at": "2026-03-16T04:05:00+00:00",
+      "last_updated": "2026-03-16T04:05:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-038/FEATURE-038-C/specification.md"
+      ],
+      "next_task": "x-ipe-task-based-technical-design"
+    },
+    {
+      "task_id": "TASK-890",
+      "task_type": "Change Request",
+      "description": "UIUX Feedback-20260316-113736: Add .docx and .msg file content preview to deliverable preview modal and folder view (currently shows \"Binary file — cannot preview\")",
+      "role": "Cipher 🔐",
+      "status": "done",
+      "created_at": "2026-03-16T03:52:00+00:00",
+      "last_updated": "2026-03-16T03:52:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-038/FEATURE-038-C/CR-001.md",
+        "x-ipe-docs/requirements/EPIC-038/FEATURE-038-C/specification.md"
+      ],
+      "next_task": "x-ipe-task-based-feature-refinement"
+    },
+    {
+      "task_id": "TASK-889",
+      "task_type": "Code Refactor",
+      "description": "Phase 2: Remove legacy auto_proceed migration layer — LEGACY_KEY/MAP constants, _migrate_interaction_mode(), update_settings() migration, frontend fallbacks, legacyModeMap, migration tests",
+      "role": "Nova ⭐",
+      "status": "done",
+      "created_at": "2026-03-16T03:33:00+00:00",
+      "last_updated": "2026-03-16T03:33:00+00:00",
+      "output_links": [
+        "src/x_ipe/services/workflow_manager_service.py",
+        "src/x_ipe/static/js/features/workflow.js",
+        "src/x_ipe/static/js/features/action-execution-modal.js"
+      ],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-888",
+      "task_type": "Code Refactor",
+      "description": "Phase 1: Replace legacy auto_proceed with interaction_mode in backend init, list_workflows(), task board templates, skill-creator templates",
+      "role": "Nova ⭐",
+      "status": "done",
+      "created_at": "2026-03-16T03:20:00+00:00",
+      "last_updated": "2026-03-16T03:20:00+00:00",
+      "output_links": [
+        "src/x_ipe/services/workflow_manager_service.py",
+        "/.github/skills/"
+      ],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-887",
+      "task_type": "Feature Closing",
+      "description": "Close FEATURE-029-D CR-001: Verify ACs, code-to-docs review, refactoring analysis, commit and push",
+      "role": "Ember 🔥",
+      "status": "done",
+      "created_at": "2026-03-16T04:30:00+00:00",
+      "last_updated": "2026-03-16T04:30:00+00:00",
+      "output_links": [
+        "src/x_ipe/static/js/terminal.js"
+      ],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-886",
+      "task_type": "Human Playground",
+      "description": "Create interactive playground for FEATURE-029-D CR-001 border toggle — SKIPPED by human directive",
+      "role": "Ember 🔥",
+      "status": "skipped",
+      "created_at": "2026-03-16T04:20:00+00:00",
+      "last_updated": "2026-03-16T04:20:00+00:00",
+      "output_links": [],
+      "next_task": "x-ipe-task-based-feature-closing"
+    },
+    {
+      "task_id": "TASK-885",
+      "task_type": "Acceptance Test",
+      "description": "Execute acceptance tests for FEATURE-029-D CR-001: Validate border toggle in browser via Chrome DevTools MCP — click-vs-drag, chevron, handle visibility, persistence, animation guard, touch",
+      "role": "Ember 🔥",
+      "status": "done",
+      "created_at": "2026-03-16T04:10:00+00:00",
+      "last_updated": "2026-03-16T04:10:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-029/FEATURE-029-D/acceptance-test-cases.md"
+      ],
+      "next_task": "x-ipe-task-based-human-playground"
+    },
+    {
+      "task_id": "TASK-884",
+      "task_type": "Code Implementation",
+      "description": "Implement FEATURE-029-D CR-001: Border toggle — modify _initExplorerResize() for click-vs-drag (3px), add chevron CSS ::before, visible handle when collapsed, animation guard, touch support",
+      "role": "Ember 🔥",
+      "status": "done",
+      "created_at": "2026-03-16T03:50:00+00:00",
+      "last_updated": "2026-03-16T03:50:00+00:00",
+      "output_links": [
+        "src/x_ipe/static/js/terminal.js",
+        "src/x_ipe/static/css/terminal.css",
+        "tests/frontend-js/explorer-resize-toggle.test.js"
+      ],
+      "next_task": "x-ipe-task-based-feature-acceptance-test"
+    },
+    {
+      "task_id": "TASK-883",
+      "task_type": "Technical Design",
+      "description": "Design FEATURE-029-D CR-001: Border toggle interaction — click-vs-drag 3px threshold, chevron DOM/state, CSS handle visibility when collapsed, cursor switching, toggleExplorer() integration",
+      "role": "Ember 🔥",
+      "status": "done",
+      "created_at": "2026-03-16T03:10:00+00:00",
+      "last_updated": "2026-03-16T03:10:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-029/FEATURE-029-D/technical-design.md"
+      ],
+      "next_task": "x-ipe-task-based-code-implementation"
+    },
+    {
+      "task_id": "TASK-882",
+      "task_type": "Feature Refinement",
+      "description": "Refine FEATURE-029-D spec for CR-001: Detail border toggle ACs (AC-19–AC-25), update AC-9 edge cases, create mockup v2",
+      "role": "Ember 🔥",
+      "status": "done",
+      "created_at": "2026-03-16T02:30:00+00:00",
+      "last_updated": "2026-03-16T02:30:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-029/FEATURE-029-D/specification.md",
+        "x-ipe-docs/requirements/EPIC-029/FEATURE-029-D/mockups/console-explorer-v2.html"
+      ],
+      "next_task": "x-ipe-task-based-technical-design"
+    },
+    {
+      "task_id": "TASK-881",
+      "task_type": "Change Request",
+      "description": "UIUX Feedback: Add expand/collapse toggle on session explorer border — currently only supports resize bigger/smaller",
+      "role": "Ember 🔥",
+      "status": "done",
+      "created_at": "2026-03-16T02:15:00+00:00",
+      "last_updated": "2026-03-16T02:15:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-029/FEATURE-029-D/CR-001.md",
+        "x-ipe-docs/requirements/EPIC-029/FEATURE-029-D/specification.md"
+      ],
+      "next_task": "x-ipe-task-based-feature-refinement"
+    }
+  ]
+}

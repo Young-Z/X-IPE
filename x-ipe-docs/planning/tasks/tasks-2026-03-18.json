@@ -1,0 +1,405 @@
+{
+  "_version": "1.0",
+  "tasks": [
+    {
+      "task_id": "TASK-980",
+      "task_type": "Bug Fix",
+      "description": "CR-008 follow-up: Unify 4 remaining preview locations (workplace.js, folder-browser-modal.js, compose-idea-modal.js, link-preview-manager.js) to use shared FilePreviewRenderer. Added /api/file/raw endpoint with DOCX/MSG conversion. All 6 preview locations now unified. DAO mode.",
+      "role": "Pulse 💫",
+      "status": "done",
+      "created_at": "2026-03-18T00:00:00+00:00",
+      "last_updated": "2026-03-18T00:00:00+00:00",
+      "output_links": [
+        "main"
+      ],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-973",
+      "task_type": "Change Request",
+      "description": "CR-008 for FEATURE-049-F: Unify file preview across KB browse, workflow deliverables, and all other preview locations — shared preview component for consistency. Source: UIUX Feedback Feedback-20260318-213942. DAO mode.",
+      "role": "Pulse 💫",
+      "status": "done",
+      "created_at": "2026-03-18T00:00:00+00:00",
+      "last_updated": "2026-03-18T00:00:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/CR-008.md",
+        "x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/specification.md"
+      ],
+      "next_task": "x-ipe-task-based-feature-refinement"
+    },
+    {
+      "task_id": "TASK-974",
+      "task_type": "Feature Refinement",
+      "description": "Refine FEATURE-049-F specification for CR-008: Detail FilePreviewRenderer shared component ACs, UI/UX requirements, edge cases, technical considerations. DAO mode.",
+      "role": "Pulse 💫",
+      "status": "done",
+      "created_at": "2026-03-18T00:00:00+00:00",
+      "last_updated": "2026-03-18T00:00:00+00:00",
+      "output_links": [
+        "03-18-2026"
+      ],
+      "next_task": "x-ipe-task-based-technical-design"
+    },
+    {
+      "task_id": "TASK-975",
+      "task_type": "Technical Design",
+      "description": "Design CR-008 for FEATURE-049-F: FilePreviewRenderer shared component in core/file-preview-renderer.js. Configurable endpoint, blob lifecycle, KB browse + deliverable viewer integration. DAO mode.",
+      "role": "Pulse 💫",
+      "status": "done",
+      "created_at": "2026-03-18T00:00:00+00:00",
+      "last_updated": "2026-03-18T00:00:00+00:00",
+      "output_links": [
+        "03-18-2026"
+      ],
+      "next_task": "x-ipe-task-based-code-implementation"
+    },
+    {
+      "task_id": "TASK-976",
+      "task_type": "Code Implementation",
+      "description": "Implement CR-008 for FEATURE-049-F: FilePreviewRenderer in core/file-preview-renderer.js (~180 LOC), refactor KB browse modal + deliverable viewer to delegate. 16 ACs. DAO mode.",
+      "role": "Pulse 💫",
+      "status": "done",
+      "created_at": "2026-03-18T00:00:00+00:00",
+      "last_updated": "2026-03-18T00:00:00+00:00",
+      "output_links": [
+        "src/x_ipe/static/js/core/file-preview-renderer.js",
+        "tests/frontend-js/file-preview-renderer-cr008.test.js"
+      ],
+      "next_task": "x-ipe-task-based-feature-acceptance-test"
+    },
+    {
+      "task_id": "TASK-977",
+      "task_type": "Acceptance Testing",
+      "description": "Execute acceptance tests for CR-008 FEATURE-049-F: Validate 16 ACs (18a–18p) for FilePreviewRenderer. Unit tests via Vitest, UI tests via Chrome DevTools MCP. DAO mode.",
+      "role": "Pulse 💫",
+      "status": "done",
+      "created_at": "2026-03-18T00:00:00+00:00",
+      "last_updated": "2026-03-18T00:00:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/acceptance-test-cases-cr008.md"
+      ],
+      "next_task": "x-ipe-task-based-feature-closing"
+    },
+    {
+      "task_id": "TASK-978",
+      "task_type": "Feature Closing",
+      "description": "Close CR-008 FEATURE-049-F: Verify ACs, code-to-docs review, commit changes to main. Git strategy: main-branch-only. DAO mode.",
+      "role": "Pulse 💫",
+      "status": "done",
+      "created_at": "2026-03-18T00:00:00+00:00",
+      "last_updated": "2026-03-18T00:00:00+00:00",
+      "output_links": [
+        "main"
+      ],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-972",
+      "task_type": "Bug Fix",
+      "description": "Fix stale `kb-config.json` references in docstrings, docs, specs, and skill files — should be `knowledgebase-config.json`. 82 replacements across 17 files. DAO mode.",
+      "role": "Bolt ⚡",
+      "status": "done",
+      "created_at": "2026-03-18T00:00:00+00:00",
+      "last_updated": "2026-03-18T00:00:00+00:00",
+      "output_links": [],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-968",
+      "task_type": "Change Request",
+      "description": "CR-007 for FEATURE-049-F: Normal Upload zone — add click-to-browse native file selection and upload success indication. Source: UIUX Feedback Feedback-20260318-205614. DAO mode.",
+      "role": "Nova ✨",
+      "status": "done",
+      "created_at": "2026-03-18T00:00:00+00:00",
+      "last_updated": "2026-03-18T00:00:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/CR-007.md",
+        "x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/specification.md"
+      ],
+      "next_task": "x-ipe-task-based-feature-refinement"
+    },
+    {
+      "task_id": "TASK-969",
+      "task_type": "Feature Refinement",
+      "description": "Refine FEATURE-049-F specification for CR-007: Add FRs (FR-049-F.21, FR-049-F.22), UI/UX requirements, edge cases, and technical considerations for Normal Upload click-to-browse and success indication. DAO mode.",
+      "role": "Nova ✨",
+      "status": "done",
+      "created_at": "2026-03-18T00:00:00+00:00",
+      "last_updated": "2026-03-18T00:00:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/specification.md"
+      ],
+      "next_task": "x-ipe-task-based-technical-design"
+    },
+    {
+      "task_id": "TASK-970",
+      "task_type": "Technical Design",
+      "description": "Design CR-007 changes for FEATURE-049-F: _triggerNormalFileInput(), _uploadFilesWithFeedback(), _showUploadFeedback() in kb-browse-modal.js. Added Step 12 to TD v1.4. DAO mode.",
+      "role": "Nova ✨",
+      "status": "done",
+      "created_at": "2026-03-18T00:00:00+00:00",
+      "last_updated": "2026-03-18T00:00:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/technical-design.md"
+      ],
+      "next_task": "x-ipe-task-based-code-implementation"
+    },
+    {
+      "task_id": "TASK-971",
+      "task_type": "Code Implementation",
+      "description": "Implement CR-007 for FEATURE-049-F in kb-browse-modal.js: replaced trigger-upload handler with _triggerNormalFileInput(), added _uploadFilesWithFeedback() and _showUploadFeedback(), updated _handleNormalDrop(). All 808 tests pass. DAO mode.",
+      "role": "Nova ✨",
+      "status": "done",
+      "created_at": "2026-03-18T00:00:00+00:00",
+      "last_updated": "2026-03-18T00:00:00+00:00",
+      "output_links": [
+        "src/x_ipe/static/js/features/kb-browse-modal.js"
+      ],
+      "next_task": "x-ipe-task-based-feature-acceptance-test"
+    },
+    {
+      "task_id": "TASK-967",
+      "task_type": "Config Change",
+      "description": "Make refine_idea optional in workflow; compose_idea can suggest requirement_gathering directly. Source: user request. DAO mode.",
+      "role": "Sage 🌿",
+      "status": "done",
+      "created_at": "2026-03-18T00:00:00+00:00",
+      "last_updated": "2026-03-18T00:00:00+00:00",
+      "output_links": [
+        "x-ipe-docs/config/workflow-template.json",
+        "src/x_ipe/services/workflow_manager_service.py"
+      ],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-966",
+      "task_type": "Bug Fix",
+      "description": "Workflow mode instructions hardcode 'en' language — should respect project language config (zh etc). Source: Feedback-20260318-173426 #1. DAO mode.",
+      "role": "Sage 🌿",
+      "status": "done",
+      "created_at": "2026-03-18T00:00:00+00:00",
+      "last_updated": "2026-03-18T00:00:00+00:00",
+      "output_links": [
+        "src/x_ipe/static/js/features/action-execution-modal.js"
+      ],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-965",
+      "task_type": "Bug Fix",
+      "description": "Claude Code CLI adapter uses wrong `-p` flag in command. Should be `claude \"prompt\"` not `claude -p \"prompt\"`. Source: Feedback-20260318-173426 #2. DAO mode.",
+      "role": "Sage 🌿",
+      "status": "done",
+      "created_at": "2026-03-18T00:00:00+00:00",
+      "last_updated": "2026-03-18T00:00:00+00:00",
+      "output_links": [
+        "x-ipe-docs/config/cli-adapters.yaml"
+      ],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-964",
+      "task_type": "Feature Closing",
+      "description": "Close CR-006 full-width layout for FEATURE-049-F: verify ACs, commit changes. DAO mode.",
+      "role": "Flux ⚡",
+      "status": "done",
+      "created_at": "2026-03-18T00:00:00+00:00",
+      "last_updated": "2026-03-18T00:00:00+00:00",
+      "output_links": [
+        "src/x_ipe/static/css/kb-browse-modal.css"
+      ],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-963",
+      "task_type": "Acceptance Test",
+      "description": "Validate CR-006 full-width layout ACs for FEATURE-049-F: 6/6 CSS assertion tests pass, live browser verification confirms no max-width on .kb-article-main. DAO mode.",
+      "role": "Flux ⚡",
+      "status": "done",
+      "created_at": "2026-03-18T00:00:00+00:00",
+      "last_updated": "2026-03-18T00:00:00+00:00",
+      "output_links": [
+        "tests/frontend-js/kb-article-fullwidth-cr006.test.js"
+      ],
+      "next_task": "x-ipe-task-based-feature-closing"
+    },
+    {
+      "task_id": "TASK-962",
+      "task_type": "Code Implementation",
+      "description": "Implement CR-006 for FEATURE-049-F: Remove max-width: 780px from .kb-article-main in kb-browse-modal.css + 6 frontend tests. DAO mode.",
+      "role": "Flux ⚡",
+      "status": "done",
+      "created_at": "2026-03-18T00:00:00+00:00",
+      "last_updated": "2026-03-18T00:00:00+00:00",
+      "output_links": [
+        "src/x_ipe/static/css/kb-browse-modal.css",
+        "tests/frontend-js/kb-article-fullwidth-cr006.test.js"
+      ],
+      "next_task": "x-ipe-task-based-feature-acceptance-test"
+    },
+    {
+      "task_id": "TASK-961",
+      "task_type": "Technical Design",
+      "description": "Design CR-006 full-width article layout delta for FEATURE-049-F: remove max-width constraint, add padding, verify sidebar compatibility. DAO mode.",
+      "role": "Flux ⚡",
+      "status": "done",
+      "created_at": "2026-03-18T00:00:00+00:00",
+      "last_updated": "2026-03-18T00:00:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/technical-design.md"
+      ],
+      "next_task": "x-ipe-task-based-code-implementation"
+    },
+    {
+      "task_id": "TASK-960",
+      "task_type": "Feature Refinement",
+      "description": "Refine FEATURE-049-F specification for CR-006: Add ACs for full-width article content area, clarify AC-049-F-16b image scaling wording. DAO mode.",
+      "role": "Flux ⚡",
+      "status": "done",
+      "created_at": "2026-03-18T00:00:00+00:00",
+      "last_updated": "2026-03-18T00:00:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/specification.md"
+      ],
+      "next_task": "x-ipe-task-based-technical-design"
+    },
+    {
+      "task_id": "TASK-959",
+      "task_type": "Change Request",
+      "description": "CR-006 for FEATURE-049-F: Widen article content/image rendering area to span full available width with margins, eliminating wasted white space. Source: UIUX Feedback Feedback-20260318-102218. DAO mode.",
+      "role": "Flux ⚡",
+      "status": "done",
+      "created_at": "2026-03-18T00:00:00+00:00",
+      "last_updated": "2026-03-18T00:00:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/CR-006.md",
+        "x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/specification.md"
+      ],
+      "next_task": "x-ipe-task-based-feature-refinement"
+    },
+    {
+      "task_id": "TASK-958",
+      "task_type": "Feature Closing",
+      "description": "Close CR-005 folder support for FEATURE-049-F: verify ACs, code-to-docs review, refactoring analysis, push to main. DAO mode.",
+      "role": "Ember 🔥",
+      "status": "done",
+      "created_at": "2026-03-18T00:00:00+00:00",
+      "last_updated": "2026-03-18T00:00:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/"
+      ],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-956",
+      "task_type": "Acceptance Test",
+      "description": "Validate CR-005 folder support ACs for FEATURE-049-F: backend tree/status/cascade tests, frontend tree rendering/toggle/filter/action tests, structured review of API response schema. DAO mode.",
+      "role": "Ember 🔥",
+      "status": "done",
+      "created_at": "2026-03-18T00:00:00+00:00",
+      "last_updated": "2026-03-18T00:00:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/acceptance-test-report-cr005.md",
+        "src/"
+      ],
+      "next_task": "x-ipe-task-based-feature-closing"
+    },
+    {
+      "task_id": "TASK-955",
+      "task_type": "Code Implementation",
+      "description": "Implement CR-005 folder support for FEATURE-049-F: backend tree builder, derived status, deep pending count, folder cascade; frontend tree rendering with expand/collapse, filter, folder actions. Fullstack (Python/Flask + JS). DAO mode.",
+      "role": "Ember 🔥",
+      "status": "done",
+      "created_at": "2026-03-18T00:00:00+00:00",
+      "last_updated": "2026-03-18T00:00:00+00:00",
+      "output_links": [
+        "tests/",
+        "src/"
+      ],
+      "next_task": "x-ipe-task-based-feature-acceptance-test"
+    },
+    {
+      "task_id": "TASK-954",
+      "task_type": "Technical Design",
+      "description": "Design CR-005 folder support delta for FEATURE-049-F: tree data model, derived status algorithm, folder actions, pre-loaded API response, folder tree UI rendering. DAO mode.",
+      "role": "Ember 🔥",
+      "status": "done",
+      "created_at": "2026-03-18T00:00:00+00:00",
+      "last_updated": "2026-03-18T00:00:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/technical-design.md"
+      ],
+      "next_task": "x-ipe-task-based-code-implementation"
+    },
+    {
+      "task_id": "TASK-953",
+      "task_type": "Feature Refinement",
+      "description": "Refine FEATURE-049-F specification for CR-005 (folder support in intake). Update ACs, UI/UX requirements, functional requirements for folder tree display and count logic. DAO mode.",
+      "role": "Ember 🔥",
+      "status": "done",
+      "created_at": "2026-03-18T00:00:00+00:00",
+      "last_updated": "2026-03-18T00:00:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/specification.md"
+      ],
+      "next_task": "x-ipe-task-based-technical-design"
+    },
+    {
+      "task_id": "TASK-952",
+      "task_type": "Change Request",
+      "description": "CR for KB intake: fix file count logic for uploaded folders (shows 0) and add folder tree display with expand/collapse in intake file list view. Source: UIUX Feedback Feedback-20260318-083710",
+      "role": "Ember 🔥",
+      "status": "done",
+      "created_at": "2026-03-18T00:00:00+00:00",
+      "last_updated": "2026-03-18T00:00:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/CR-005.md",
+        "x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/specification.md"
+      ],
+      "next_task": "x-ipe-task-based-feature-refinement"
+    },
+    {
+      "task_id": "TASK-957",
+      "task_type": "Bug Fix",
+      "description": "KB article preview renders image files (.jpg, .png, etc.) inline. Added /api/kb/files/{path}/raw route + frontend image type detection + CSS. 4 Python + 6 JS tests.",
+      "role": "Spark ✨",
+      "status": "completed",
+      "created_at": "2026-03-18T00:00:00+00:00",
+      "last_updated": "2026-03-18T00:00:00+00:00",
+      "output_links": [
+        "[9928d31]"
+      ],
+      "next_task": "Source: UIUX Feedback Feedback-20260318-095642"
+    },
+    {
+      "task_id": "TASK-966",
+      "task_type": "Code Refactor",
+      "description": "Replace `watchdog` with `watchfiles` in backend file watching while preserving `FileWatcher` behavior and public lifecycle methods. DAO mode.",
+      "role": "Sage 🌿",
+      "status": "completed",
+      "created_at": "2026-03-18T07:46:02+00:00",
+      "last_updated": "2026-03-18T07:46:02+00:00",
+      "output_links": [
+        "src/x_ipe/services/file_service.py",
+        "x-ipe-docs/refactoring/analysis-TASK-966.md",
+        "x-ipe-docs/refactoring/validation-TASK-966.md"
+      ],
+      "next_task": "Replaced watcher engine with `watchfiles`, preserved event semantics via normalization, updated dependency metadata/docs, and validated with watcher-focused pytest. Unrelated failures remain in `test_navigation.py::test_get_structure_returns_five_sections` and broader `npm test`."
+    },
+    {
+      "task_id": "TASK-965",
+      "task_type": "KB Librarian",
+      "description": "Organize pending `ideation-user-manual` intake files: analyze content, assign metadata, generate index entries, and move files into a dedicated KB folder. DAO mode.",
+      "role": "Nova ☄️",
+      "status": "completed",
+      "created_at": "2026-03-18T00:00:00+00:00",
+      "last_updated": "2026-03-18T00:00:00+00:00",
+      "output_links": [
+        "x-ipe-docs/knowledge-base/ideation-user-manual/",
+        "x-ipe-docs/knowledge-base/ideation-user-manual/.kb-index.json"
+      ],
+      "next_task": "Filed all 25 intake files into `ideation-user-manual/`, wrote per-file metadata plus a root folder entry, and cleared `.intake/` pending items."
+    }
+  ]
+}

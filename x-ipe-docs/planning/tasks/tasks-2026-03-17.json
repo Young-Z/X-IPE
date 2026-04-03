@@ -1,0 +1,668 @@
+{
+  "_version": "1.0",
+  "tasks": [
+    {
+      "task_id": "TASK-950",
+      "task_type": "Skill Update",
+      "description": "Apply LL-001 to extractor: session-scoped screenshots + post-gen session cleanup. Workflow: Knowledge-Extraction",
+      "role": "Nova ☄️",
+      "status": "done",
+      "created_at": "2026-03-17T00:00:00+00:00",
+      "last_updated": "2026-03-17T00:00:00+00:00",
+      "output_links": [
+        "[482a9eb]"
+      ],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-951",
+      "task_type": "Skill Update",
+      "description": "Apply LL-001 to tool-user-manual: screenshots in references/ subfolder. Workflow: Knowledge-Extraction",
+      "role": "Nova ☄️",
+      "status": "done",
+      "created_at": "2026-03-17T00:00:00+00:00",
+      "last_updated": "2026-03-17T00:00:00+00:00",
+      "output_links": [
+        "[482a9eb]"
+      ],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-947",
+      "task_type": "Change Request",
+      "description": "CR on EPIC-050 extractor skill: refocus phases on knowledge extraction, add chrome devtools option, delegate quality scoring to tool skills. Also update EPIC-051 tool skill with quality scoring capability. Workflow: Knowledge-Extraction",
+      "role": "Nova ☄️",
+      "status": "done",
+      "created_at": "2026-03-17T00:00:00+00:00",
+      "last_updated": "2026-03-17T00:00:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-050/CR-002.md"
+      ],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-946",
+      "task_type": "Change Request",
+      "description": "CR-001 on FEATURE-051-A: Optimize user manual templates with ToC, content splitting (>800 lines), cross-file linking, scenario instructions with images, naming conventions. Workflow: Knowledge-Extraction",
+      "role": "Nova ☄️",
+      "status": "done",
+      "created_at": "2026-03-17T00:00:00+00:00",
+      "last_updated": "2026-03-17T00:00:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-051/FEATURE-051-A/CR-001.md",
+        "x-ipe-docs/requirements/EPIC-051/FEATURE-051-A/specification.md"
+      ],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-945",
+      "task_type": "Feature Refinement",
+      "description": "Create specification and technical design for FEATURE-051-A (User Manual Tool Skill). 25 ACs across 6 groups. Workflow: Knowledge-Extraction",
+      "role": "Nova ☄️",
+      "status": "done",
+      "created_at": "2026-03-17T00:00:00+00:00",
+      "last_updated": "2026-03-17T00:00:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-051/FEATURE-051-A/specification.md",
+        "x-ipe-docs/requirements/EPIC-051/FEATURE-051-A/technical-design.md"
+      ],
+      "next_task": "x-ipe-task-based-technical-design"
+    },
+    {
+      "task_id": "TASK-944",
+      "task_type": "Requirement Gathering",
+      "description": "Gather requirements for x-ipe-tool-knowledge-extraction-user-manual tool skill. EPIC-051, single feature (FEATURE-051-A). Workflow: Knowledge-Extraction",
+      "role": "Nova ☄️",
+      "status": "done",
+      "created_at": "2026-03-17T00:00:00+00:00",
+      "last_updated": "2026-03-17T00:00:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/requirement-details-part-21.md"
+      ],
+      "next_task": "x-ipe-task-based-feature-breakdown"
+    },
+    {
+      "task_id": "TASK-943",
+      "task_type": "Skill Refactor",
+      "description": "Restructure x-ipe-task-based-application-knowledge-extractor SKILL.md via skill-creator: (1) XML procedure/phase/step structure, (2) XML DoR/DoD, (3) extract inline procedures to references/, (4) remove FEATURE-050-* dev tracking artifacts. Workflow: Knowledge-Extraction",
+      "role": "Nova ☄️",
+      "status": "done",
+      "created_at": "2026-03-17T00:00:00+00:00",
+      "last_updated": "2026-03-17T00:00:00+00:00",
+      "output_links": [
+        "1e5ac39"
+      ],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-942",
+      "task_type": "Code Implementation",
+      "description": "Implement FEATURE-050-E: KB Intake Output & Quality Scoring. Update SKILL.md Phase 5/6, create output-quality-heuristics.md. program_type=skills. Workflow: Knowledge-Extraction",
+      "role": "Nova ☄️",
+      "status": "done",
+      "created_at": "2026-03-17T10:00:12+00:00",
+      "last_updated": "2026-03-17T10:00:12+00:00",
+      "output_links": [
+        "03-17-2026"
+      ],
+      "next_task": "x-ipe-task-based-feature-closing"
+    },
+    {
+      "task_id": "TASK-940",
+      "task_type": "Technical Design",
+      "description": "Design FEATURE-050-E: KB Intake Output & Quality Scoring (Phase 5 + Phase 6). program_type=skills. Workflow: Knowledge-Extraction",
+      "role": "Nova ☄️",
+      "status": "done",
+      "created_at": "2026-03-17T10:00:12+00:00",
+      "last_updated": "2026-03-17T10:00:12+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-050/FEATURE-050-E/technical-design.md"
+      ],
+      "next_task": "x-ipe-task-based-code-implementation"
+    },
+    {
+      "task_id": "TASK-939",
+      "task_type": "Feature Refinement",
+      "description": "Refine specification for FEATURE-050-E: KB Intake Output & Quality Scoring. 24 ACs, 5 groups. program_type=skills. Workflow: Knowledge-Extraction",
+      "role": "Nova ☄️",
+      "status": "done",
+      "created_at": "2026-03-17T10:10:00+00:00",
+      "last_updated": "2026-03-17T10:10:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-050/FEATURE-050-E/specification.md"
+      ],
+      "next_task": "x-ipe-task-based-technical-design"
+    },
+    {
+      "task_id": "TASK-938",
+      "task_type": "Code Implementation",
+      "description": "Implement FEATURE-050-D: Checkpoint, Resume & Error Handling. Update SKILL.md Phase 4, create checkpoint-error-heuristics.md. program_type=skills. Workflow: Knowledge-Extraction",
+      "role": "Nova ☄️",
+      "status": "done",
+      "created_at": "2026-03-17T10:00:00+00:00",
+      "last_updated": "2026-03-17T10:00:00+00:00",
+      "output_links": [
+        "[SKILL.md",
+        "checkpoint-error-heuristics.md]"
+      ],
+      "next_task": "x-ipe-task-based-feature-acceptance-test"
+    },
+    {
+      "task_id": "TASK-937",
+      "task_type": "Technical Design",
+      "description": "Design FEATURE-050-D: Checkpoint, Resume & Error Handling (Phase 4). program_type=skills. Workflow: Knowledge-Extraction",
+      "role": "Nova ☄️",
+      "status": "done",
+      "created_at": "2026-03-17T09:45:00+00:00",
+      "last_updated": "2026-03-17T09:45:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-050/FEATURE-050-D/technical-design.md"
+      ],
+      "next_task": "x-ipe-task-based-code-implementation"
+    },
+    {
+      "task_id": "TASK-936",
+      "task_type": "Process Improvement",
+      "description": "Enforce AC testing for program_type=skills: add Structured Review test type to acceptance-test skill, remove skip-AAA exception from code-implementation skill",
+      "role": "Nova ☄️",
+      "status": "done",
+      "created_at": "2026-03-17T09:55:00+00:00",
+      "last_updated": "2026-03-17T09:55:00+00:00",
+      "output_links": [
+        "[4342279]"
+      ],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-935",
+      "task_type": "Feature Refinement",
+      "description": "Refine specification for FEATURE-050-D: Checkpoint, Resume & Error Handling (Phase 4). 21 ACs, 6 groups. program_type=skills. Workflow: Knowledge-Extraction",
+      "role": "Nova ☄️",
+      "status": "done",
+      "created_at": "2026-03-17T09:35:00+00:00",
+      "last_updated": "2026-03-17T09:35:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-050/FEATURE-050-D/specification.md"
+      ],
+      "next_task": "x-ipe-task-based-technical-design"
+    },
+    {
+      "task_id": "TASK-929",
+      "task_type": "Bug Fix",
+      "description": "Fix workflow action naming inconsistencies: align `code_implementation`→`implementation`, `acceptance_test`→`acceptance_testing`, `idea_mockup`→`design_mockup` across MCP, skills, frontend, tools config",
+      "role": "Drift 🌊",
+      "status": "done",
+      "created_at": "2026-03-17T07:28:00+00:00",
+      "last_updated": "2026-03-17T07:28:00+00:00",
+      "output_links": [
+        "[f620cf0]"
+      ],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-933",
+      "task_type": "Code Implementation",
+      "description": "Implement FEATURE-050-C: Extract-Validate Loop. Update SKILL.md Phase 3, create validation-loop-heuristics.md. program_type=skills. Workflow: Knowledge-Extraction",
+      "role": "Nova ☄️",
+      "status": "done",
+      "created_at": "2026-03-17T09:25:00+00:00",
+      "last_updated": "2026-03-17T09:25:00+00:00",
+      "output_links": [
+        "[SKILL.md",
+        "validation-loop-heuristics.md]"
+      ],
+      "next_task": "x-ipe-task-based-feature-closing"
+    },
+    {
+      "task_id": "TASK-932",
+      "task_type": "Technical Design",
+      "description": "Design FEATURE-050-C: Extract-Validate Loop. program_type=skills. Workflow: Knowledge-Extraction",
+      "role": "Nova ☄️",
+      "status": "done",
+      "created_at": "2026-03-17T09:10:00+00:00",
+      "last_updated": "2026-03-17T09:10:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-050/FEATURE-050-C/technical-design.md"
+      ],
+      "next_task": "x-ipe-task-based-code-implementation"
+    },
+    {
+      "task_id": "TASK-931",
+      "task_type": "Feature Refinement",
+      "description": "Refine specification for FEATURE-050-C: Extract-Validate Loop & Coverage Control. 25 ACs, 6 groups. Workflow: Knowledge-Extraction",
+      "role": "Nova ☄️",
+      "status": "done",
+      "created_at": "2026-03-17T09:00:00+00:00",
+      "last_updated": "2026-03-17T09:00:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-050/FEATURE-050-C/specification.md"
+      ],
+      "next_task": "x-ipe-task-based-technical-design"
+    },
+    {
+      "task_id": "TASK-930",
+      "task_type": "Code Implementation",
+      "description": "Implement FEATURE-050-B: Source Extraction Engine. Update SKILL.md Phase 2 stub, create extraction-engine-heuristics.md reference. program_type=skills. Workflow: Knowledge-Extraction",
+      "role": "Nova ☄️",
+      "status": "done",
+      "created_at": "2026-03-17T08:50:00+00:00",
+      "last_updated": "2026-03-17T08:50:00+00:00",
+      "output_links": [
+        "[0a22a7f]"
+      ],
+      "next_task": "x-ipe-task-based-feature-closing"
+    },
+    {
+      "task_id": "TASK-929",
+      "task_type": "Technical Design",
+      "description": "Design FEATURE-050-B: Source Extraction Engine. program_type=skills. Workflow: Knowledge-Extraction",
+      "role": "Nova ☄️",
+      "status": "done",
+      "created_at": "2026-03-17T08:40:00+00:00",
+      "last_updated": "2026-03-17T08:40:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-050/FEATURE-050-B/technical-design.md"
+      ],
+      "next_task": "x-ipe-task-based-code-implementation"
+    },
+    {
+      "task_id": "TASK-928",
+      "task_type": "Feature Refinement",
+      "description": "Refine specification for FEATURE-050-B: Source Extraction Engine. 29 ACs, 7 groups, 7 FRs, 3 NFRs. Workflow: Knowledge-Extraction",
+      "role": "Nova ☄️",
+      "status": "done",
+      "created_at": "2026-03-17T08:30:00+00:00",
+      "last_updated": "2026-03-17T08:30:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-050/FEATURE-050-B/specification.md"
+      ],
+      "next_task": "x-ipe-task-based-technical-design"
+    },
+    {
+      "task_id": "TASK-927",
+      "task_type": "Feature Closing",
+      "description": "Close FEATURE-050-A: Extractor Skill Foundation & Input Detection. Verify ACs, code-to-docs review, commit, output summary. Workflow: Knowledge-Extraction",
+      "role": "Nova ☄️",
+      "status": "done",
+      "created_at": "2026-03-17T08:10:00+00:00",
+      "last_updated": "2026-03-17T08:10:00+00:00",
+      "output_links": [
+        "[05a8a14]"
+      ],
+      "next_task": "x-ipe-task-based-feature-refinement"
+    },
+    {
+      "task_id": "TASK-925",
+      "task_type": "CR + Implementation",
+      "description": "CR-004 for FEATURE-049-F: Add rich file preview to KB browse — markdown+DSL via ContentRenderer, docx/msg conversion, image/PDF/HTML preview, syntax highlighting",
+      "role": "Zephyr 🌬️",
+      "status": "done",
+      "created_at": "2026-03-17T06:25:00+00:00",
+      "last_updated": "2026-03-17T06:25:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/CR-004.md"
+      ],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-926",
+      "task_type": "Skill Update",
+      "description": "Update x-ipe-task-based-bug-fix: add webapp-testing (Chrome DevTools) as optional_tool for browser-based UI bug validation",
+      "role": "Zephyr 🌬️",
+      "status": "done",
+      "created_at": "2026-03-17T06:40:00+00:00",
+      "last_updated": "2026-03-17T06:40:00+00:00",
+      "output_links": [
+        ".github/skills/x-ipe-task-based-bug-fix/SKILL.md"
+      ],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-922",
+      "task_type": "KB Librarian",
+      "description": "Run AI Librarian on 2 pending .docx intake files (teams会议-文字记录模板.docx, teams会议摘要模块模版.docx) — analyze content, assign tags, generate index entries, move to destination",
+      "role": "Spark ⚡",
+      "status": "done",
+      "created_at": "2026-03-17T05:33:00+00:00",
+      "last_updated": "2026-03-17T05:33:00+00:00",
+      "output_links": [
+        "x-ipe-docs/knowledge-base/jd-store-operations/"
+      ],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-921",
+      "task_type": "CR + Implementation",
+      "description": "CR-003 for FEATURE-049-F: Add MCP tools (get_kb_index, set_kb_index_entry, remove_kb_index_entry) + Flask routes + 11 tests",
+      "role": "Zephyr 🌬️",
+      "status": "done",
+      "created_at": "2026-03-17T05:25:00+00:00",
+      "last_updated": "2026-03-17T05:25:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/CR-003.md"
+      ],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-921",
+      "task_type": "Requirement Gathering",
+      "description": "Gather requirements for EPIC-050: Application Knowledge Extraction skill system. Workflow: Knowledge-Extraction",
+      "role": "Nova ☄️",
+      "status": "done",
+      "created_at": "2026-03-17T05:44:00+00:00",
+      "last_updated": "2026-03-17T05:44:00+00:00",
+      "output_links": [
+        "03-17-2026",
+        "05:53:00"
+      ],
+      "next_task": "x-ipe-task-based-feature-breakdown"
+    },
+    {
+      "task_id": "TASK-922",
+      "task_type": "Feature Breakdown",
+      "description": "Break EPIC-050 into 5 features (FEATURE-050-A to FEATURE-050-E). Workflow: Knowledge-Extraction",
+      "role": "Nova ☄️",
+      "status": "done",
+      "created_at": "2026-03-17T06:19:00+00:00",
+      "last_updated": "2026-03-17T06:19:00+00:00",
+      "output_links": [
+        "03-17-2026",
+        "06:25:00"
+      ],
+      "next_task": "x-ipe-task-based-feature-refinement"
+    },
+    {
+      "task_id": "TASK-923",
+      "task_type": "Feature Refinement",
+      "description": "Refine specification for FEATURE-050-A: Extractor Skill Foundation & Input Detection. Workflow: Knowledge-Extraction",
+      "role": "Nova ☄️",
+      "status": "done",
+      "created_at": "2026-03-17T06:25:00+00:00",
+      "last_updated": "2026-03-17T06:25:00+00:00",
+      "output_links": [
+        "03-17-2026",
+        "06:30:00"
+      ],
+      "next_task": "x-ipe-task-based-technical-design"
+    },
+    {
+      "task_id": "TASK-924",
+      "task_type": "Technical Design",
+      "description": "Design FEATURE-050-A: Extractor Skill Foundation & Input Detection. Workflow: Knowledge-Extraction",
+      "role": "Nova ☄️",
+      "status": "done",
+      "created_at": "2026-03-17T06:30:00+00:00",
+      "last_updated": "2026-03-17T06:30:00+00:00",
+      "output_links": [
+        "03-17-2026",
+        "07:15:00"
+      ],
+      "next_task": "x-ipe-task-based-code-implementation"
+    },
+    {
+      "task_id": "TASK-925",
+      "task_type": "Code Implementation",
+      "description": "Implement FEATURE-050-A: Extractor Skill Foundation & Input Detection. program_type=skills, delegate to x-ipe-meta-skill-creator. Workflow: Knowledge-Extraction",
+      "role": "Nova ☄️",
+      "status": "done",
+      "created_at": "2026-03-17T07:20:00+00:00",
+      "last_updated": "2026-03-17T07:20:00+00:00",
+      "output_links": [
+        "03-17-2026",
+        "07:45:00"
+      ],
+      "next_task": "x-ipe-task-based-feature-acceptance-test"
+    },
+    {
+      "task_id": "TASK-920",
+      "task_type": "Ideation",
+      "description": "Refine idea for knowledge-extraction skill (x-ipe-task-based-application-knowledge-extractor) and auto-detect UIUX references. Workflow: Knowledge-Extraction",
+      "role": "Nova ☄️",
+      "status": "done",
+      "created_at": "2026-03-17T05:05:00+00:00",
+      "last_updated": "2026-03-17T05:05:00+00:00",
+      "output_links": [
+        "x-ipe-docs/ideas/wf-008-knowledge-extraction/refined-idea/idea-summary-v1.md"
+      ],
+      "next_task": "x-ipe-task-based-requirement-gathering"
+    },
+    {
+      "task_id": "TASK-919",
+      "task_type": "Skill Update",
+      "description": "Restructure workflow stages: 5-stage pipeline (IDEATION→REQUIREMENT→IMPLEMENT→VALIDATION→FEEDBACK), update engineering-workflow.md + toolbox modal UI + Python migrations v3.2 + skill config paths",
+      "role": "Zephyr 🌬️",
+      "status": "done",
+      "created_at": "2026-03-17T03:25:00+00:00",
+      "last_updated": "2026-03-17T03:25:00+00:00",
+      "output_links": [
+        "[490741a]"
+      ],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-918",
+      "task_type": "Skill Update",
+      "description": "Convert x-ipe-task-based-user-manual to x-ipe-tool-readme-updator (tool skill), update feature-closing with optional_tools.readme_updator toggle",
+      "role": "Zephyr 🌬️",
+      "status": "done",
+      "created_at": "2026-03-17T03:11:00+00:00",
+      "last_updated": "2026-03-17T03:11:00+00:00",
+      "output_links": [
+        ".github/skills/x-ipe-tool-readme-updator/SKILL.md"
+      ],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-917",
+      "task_type": "Skill Update",
+      "description": "Update x-ipe-task-based-change-request: make specification update unconditional (both modification and new_feature), add human confirmation gate for large-scope changes before executing Phase 5",
+      "role": "Ember 🔥",
+      "status": "done",
+      "created_at": "2026-03-17T02:55:00+00:00",
+      "last_updated": "2026-03-17T02:55:00+00:00",
+      "output_links": [],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-916",
+      "task_type": "Code Implementation",
+      "description": "Implement FEATURE-049-F CR-002: .kb-index.json registry in kb_service.py — 9 new index methods, refactored CRUD, 26 new tests, updated librarian skill",
+      "role": "Zephyr 🌬️",
+      "status": "done",
+      "created_at": "2026-03-17T04:00:00+00:00",
+      "last_updated": "2026-03-17T04:00:00+00:00",
+      "output_links": [
+        "[64b9f10]"
+      ],
+      "next_task": "x-ipe-task-based-feature-acceptance-test"
+    },
+    {
+      "task_id": "TASK-915",
+      "task_type": "Technical Design",
+      "description": "Design FEATURE-049-F CR-002: .kb-index.json registry architecture — read/write methods, migration from frontmatter, folder metadata, description field, API compatibility",
+      "role": "Zephyr 🌬️",
+      "status": "done",
+      "created_at": "2026-03-17T03:00:00+00:00",
+      "last_updated": "2026-03-17T03:00:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/technical-design.md"
+      ],
+      "next_task": "x-ipe-task-based-code-implementation"
+    },
+    {
+      "task_id": "TASK-914",
+      "task_type": "Feature Refinement",
+      "description": "Refine FEATURE-049-F v1.2 (CR-002): Update ACs for .kb-index.json registry, add folder metadata + description ACs, update frontmatter→index terminology",
+      "role": "Zephyr 🌬️",
+      "status": "done",
+      "created_at": "2026-03-17T02:50:00+00:00",
+      "last_updated": "2026-03-17T02:50:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/specification.md"
+      ],
+      "next_task": "x-ipe-task-based-technical-design"
+    },
+    {
+      "task_id": "TASK-913",
+      "task_type": "Change Request",
+      "description": "CR-002 for FEATURE-049-F: Replace frontmatter-embedded metadata with `.kb-index.json` registry — hidden file, locally-scoped, folder metadata support, description attribute",
+      "role": "Zephyr 🌬️",
+      "status": "done",
+      "created_at": "2026-03-17T02:43:00+00:00",
+      "last_updated": "2026-03-17T02:43:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-049/FEATURE-049-F/CR-002.md"
+      ],
+      "next_task": "x-ipe-task-based-feature-refinement"
+    },
+    {
+      "task_id": "TASK-948",
+      "task_type": "Skill Cleanup",
+      "description": "Remove deprecated x-ipe-task-based-user-manual skill folder and update ~24 stale references across production skills, candidate files, and docs. Follow-up to TASK-918 (conversion to x-ipe-tool-readme-updator).",
+      "role": "Flux ⚡",
+      "status": "done",
+      "created_at": "2026-03-17T00:00:00+00:00",
+      "last_updated": "2026-03-17T00:00:00+00:00",
+      "output_links": [],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-947",
+      "task_type": "Skill Update",
+      "description": "Rename the x-ipe-task-based-application-knowledge-extractor checkpoint folder from `.checkpoint/` to `.x-ipe-checkpoint/` across candidate, production, skill-meta, tests, and validation artifacts.",
+      "role": "Echo 📡",
+      "status": "done",
+      "created_at": "2026-03-17T20:38:16+00:00",
+      "last_updated": "2026-03-17T20:38:16+00:00",
+      "output_links": [
+        ".github/skills/x-ipe-task-based-application-knowledge-extractor/SKILL.md",
+        "x-ipe-docs/skill-meta/x-ipe-task-based-application-knowledge-extractor/skill-meta.md",
+        "x-ipe-docs/skill-meta/x-ipe-task-based-application-knowledge-extractor/sandbox/evaluation-report.yaml",
+        ".github/skills/x-ipe-tool-knowledge-extraction-user-manual/SKILL.md"
+      ],
+      "next_task": "Renamed the extractor handoff root to `.x-ipe-checkpoint/`, updated candidate and production docs/templates/tests, aligned the downstream user-manual tool-skill contract, fixed the production handoff template reference, and verified `npm test` with 34/34 files and 779/779 tests passing."
+    },
+    {
+      "task_id": "TASK-946",
+      "task_type": "Skill Update",
+      "description": "Update x-ipe-task-based-application-knowledge-extractor to make format/app-type handling generic: remove hardcoded enumerations from candidate SKILL.md and bundled references/templates, validate, then merge.",
+      "role": "Echo 📡",
+      "status": "done",
+      "created_at": "2026-03-17T20:17:37+00:00",
+      "last_updated": "2026-03-17T20:17:37+00:00",
+      "output_links": [
+        ".github/skills/x-ipe-task-based-application-knowledge-extractor/SKILL.md",
+        "x-ipe-docs/skill-meta/x-ipe-task-based-application-knowledge-extractor/skill-meta.md",
+        "x-ipe-docs/skill-meta/x-ipe-task-based-application-knowledge-extractor/sandbox/evaluation-report.yaml"
+      ],
+      "next_task": "Generalized format/app-type language to open-ended summary labels, added `detected_formats`/`detected_app_types`, documented mixin lookup fallback, merged candidate to production, and verified `npm test` plus 8/8 sandbox validation checks."
+    },
+    {
+      "task_id": "TASK-941",
+      "task_type": "Bug Fix",
+      "description": "Use the shared folder display-name logic for ideation edit modal folders so idea folders like `wf-008-knowledge-extraction` render consistently with deliverable folder labels",
+      "role": "Echo 📡",
+      "status": "done",
+      "created_at": "2026-03-17T17:48:30+00:00",
+      "last_updated": "2026-03-17T17:48:30+00:00",
+      "output_links": [
+        "src/x_ipe/static/js/features/workflow-stage.js",
+        "tests/frontend-js/workflow-stage-running.test.js"
+      ],
+      "next_task": "Ideation edit modal folder names now reuse the shared folder display-name logic with a safe fallback, including trailing-slash idea folders, and were validated with targeted Vitest plus full `npm test`."
+    },
+    {
+      "task_id": "TASK-940",
+      "task_type": "Bug Fix",
+      "description": "Use real folder names for deliverables folder chips instead of tag names when folder paths end with `/` (e.g. show `FEATURE-050-A/`)",
+      "role": "Echo 📡",
+      "status": "done",
+      "created_at": "2026-03-17T17:35:00+00:00",
+      "last_updated": "2026-03-17T17:35:00+00:00",
+      "output_links": [
+        "src/x_ipe/static/js/features/deliverable-viewer.js",
+        "tests/frontend-js/deliverable-viewer.test.js",
+        "tests/frontend-js/deliverable-grouping.test.js"
+      ],
+      "next_task": "Folder chips and folder deliverable labels now use the real folder basename, preserve trailing `/` for explicit folders, keep empty-path fallback behavior, and were validated with targeted Vitest plus full `npm test`."
+    },
+    {
+      "task_id": "TASK-939",
+      "task_type": "Bug Fix",
+      "description": "Process UIUX feedback Feedback-20260317-170937: sort feedback entries in A-Z, 0-9 ascending order in the feedback panel",
+      "role": "Quill ✒️",
+      "status": "done",
+      "created_at": "2026-03-17T17:29:51+00:00",
+      "last_updated": "2026-03-17T17:29:51+00:00",
+      "output_links": [
+        "src/x_ipe/services/uiux_feedback_service.py",
+        "src/x_ipe/routes/uiux_feedback_routes.py",
+        "tests/test_uiux_feedback_storage.py"
+      ],
+      "next_task": "Changed feedback listing to ascending name order, added regression coverage, verified targeted pytest (37 passed), `npm test` passed, and confirmed recent feedback folders render in ascending order."
+    },
+    {
+      "task_id": "TASK-934",
+      "task_type": "Change Request",
+      "description": "CR for FEATURE-049-B: Add description field to KB article sidebar DETAILS section (UIUX Feedback-20260317-160429)",
+      "role": "Ember 🔥",
+      "status": "done",
+      "created_at": "2026-03-17T16:56:00+00:00",
+      "last_updated": "2026-03-17T16:56:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-049/FEATURE-049-B/CR-003.md",
+        "x-ipe-docs/requirements/EPIC-049/FEATURE-049-B/specification.md",
+        "x-ipe-docs/requirements/EPIC-049/FEATURE-049-B/acceptance-test-cases.md",
+        "x-ipe-docs/requirements/EPIC-049/mockups/kb-interface-v2.html",
+        "src/x_ipe/static/js/features/kb-browse-modal.js",
+        "tests/frontend-js/kb-browse-modal-article-detail.test.js"
+      ],
+      "next_task": "Processed UIUX feedback into CR-003, added wrapped description field to KB article Details section, versioned mockup/spec docs, updated acceptance cases, and validated with targeted Vitest plus full `npm test`."
+    },
+    {
+      "task_id": "TASK-938",
+      "task_type": "Bug Fix",
+      "description": "Remove `feature_closing` deliverables from workflow template and clean existing Knowledge-Extraction workflow data so commit metadata does not appear as deliverables",
+      "role": "Echo 📡",
+      "status": "done",
+      "created_at": "2026-03-17T17:13:17+00:00",
+      "last_updated": "2026-03-17T17:13:17+00:00",
+      "output_links": [
+        "src/x_ipe/services/workflow_manager_service.py",
+        "x-ipe-docs/config/workflow-template.json",
+        "x-ipe-docs/engineering-workflow/workflow-Knowledge-Extraction.json",
+        "tests/test_workflow_manager.py"
+      ],
+      "next_task": "Removed `feature_closing` deliverable tags, pruned stale closing metadata on workflow read, cleaned existing Knowledge-Extraction workflow data, and added regression coverage."
+    },
+    {
+      "task_id": "TASK-937",
+      "task_type": "Feature Acceptance Test",
+      "description": "Independently validate TASK-934 / CR-003 for FEATURE-049-B: verify CR docs, spec/mockup updates, implementation intent, and tests",
+      "role": "Echo 📡",
+      "status": "done",
+      "created_at": "2026-03-17T17:15:00+00:00",
+      "last_updated": "2026-03-17T17:15:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-049/FEATURE-049-B/CR-003.md",
+        "tests/frontend-js/kb-browse-modal-article-detail.test.js"
+      ],
+      "next_task": "Validated CR-003 docs/JS/CSS/mockup/tests; gap found: FEATURE-049-B acceptance-test-cases.md lacks AC-049-B-11 coverage entries. Targeted Vitest + npm test passed."
+    },
+    {
+      "task_id": "TASK-936",
+      "task_type": "Bug Fix",
+      "description": "Fix deliverables panel UIUX feedback (Feedback-20260317-161023): remove duplicate `feature-docs-folder` chip rendering and improve sub-header separator/alignment",
+      "role": "Echo 📡",
+      "status": "done",
+      "created_at": "2026-03-17T16:37:35+00:00",
+      "last_updated": "2026-03-17T16:37:35+00:00",
+      "output_links": [
+        "src/x_ipe/static/js/features/workflow-stage.js",
+        "src/x_ipe/static/css/workflow.css",
+        "tests/frontend-js/deliverable-grouping.test.js"
+      ],
+      "next_task": "Deduped repeated folder chips, added a right-aligned chip rail with full-width separator, validated via targeted Vitest and `npm test`"
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "_version": "1.0",
+  "tasks": [
+    {
+      "task_id": "TASK-042",
+      "task_type": "Human Playground",
+      "description": "Interactive testing for FEATURE-003: Content Editor",
+      "role": "No longer needed",
+      "status": "cancelled",
+      "created_at": "2026-01-23T04:52:00+00:00",
+      "last_updated": "2026-01-23T04:52:00+00:00",
+      "output_links": [],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-032",
+      "task_type": "Human Playground",
+      "description": "Create interactive playground for FEATURE-005: Interactive Console",
+      "role": "No longer needed",
+      "status": "cancelled",
+      "created_at": "2026-01-23T04:52:00+00:00",
+      "last_updated": "2026-01-23T04:52:00+00:00",
+      "output_links": [],
+      "next_task": ""
+    }
+  ]
+}

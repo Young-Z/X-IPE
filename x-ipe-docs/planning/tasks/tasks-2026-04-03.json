@@ -1,0 +1,429 @@
+{
+  "_version": "1.0",
+  "tasks": [
+    {
+      "task_id": "TASK-1075",
+      "task_type": "Feature Pipeline",
+      "description": "Full pipeline for FEATURE-057-A (Task Board Web Page): refine → design → implement → test → close. DAO mode.",
+      "role": "Drift 🌊",
+      "status": "in_progress",
+      "created_at": "2026-04-03T00:00:00+00:00",
+      "last_updated": "2026-04-03T00:00:00+00:00",
+      "output_links": [],
+      "next_task": "x-ipe-task-based-feature-refinement"
+    },
+    {
+      "task_id": "TASK-1074",
+      "task_type": "Feature Pipeline",
+      "description": "Full pipeline for FEATURE-056-B (Feature Board API): refine → design → implement → test → close. DAO mode.",
+      "role": "Drift 🌊",
+      "status": "done",
+      "created_at": "2026-04-03T00:00:00+00:00",
+      "last_updated": "2026-04-03T00:00:00+00:00",
+      "output_links": [
+        "04-03-2026"
+      ],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-1073",
+      "task_type": "Feature Pipeline",
+      "description": "Full pipeline for FEATURE-056-A (Feature CRUD Scripts): refine → design → implement → test → close. DAO mode.",
+      "role": "Drift 🌊",
+      "status": "done",
+      "created_at": "2026-04-03T00:00:00+00:00",
+      "last_updated": "2026-04-03T00:00:00+00:00",
+      "output_links": [
+        "04-03-2026"
+      ],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-1072",
+      "task_type": "Acceptance Test + Closing",
+      "description": "Acceptance test and close FEATURE-055-C (Task Board API). 29 ACs. DAO mode.",
+      "role": "Drift 🌊",
+      "status": "done",
+      "created_at": "2026-04-03T00:00:00+00:00",
+      "last_updated": "2026-04-03T00:00:00+00:00",
+      "output_links": [
+        "04-03-2026"
+      ],
+      "next_task": "x-ipe-task-based-feature-refinement"
+    },
+    {
+      "task_id": "TASK-1071",
+      "task_type": "Code Implementation",
+      "description": "Implement FEATURE-055-C (Task Board API). Routes + service + tests. DAO mode.",
+      "role": "Drift 🌊",
+      "status": "done",
+      "created_at": "2026-04-03T00:00:00+00:00",
+      "last_updated": "2026-04-03T00:00:00+00:00",
+      "output_links": [
+        "04-03-2026"
+      ],
+      "next_task": "x-ipe-task-based-feature-acceptance-test"
+    },
+    {
+      "task_id": "TASK-1070",
+      "task_type": "Technical Design",
+      "description": "Design FEATURE-055-C (Task Board API). Flask blueprint + service layer. DAO mode.",
+      "role": "Drift 🌊",
+      "status": "done",
+      "created_at": "2026-04-03T00:00:00+00:00",
+      "last_updated": "2026-04-03T00:00:00+00:00",
+      "output_links": [
+        "04-03-2026"
+      ],
+      "next_task": "x-ipe-task-based-code-implementation"
+    },
+    {
+      "task_id": "TASK-1069",
+      "task_type": "Feature Refinement",
+      "description": "Refine FEATURE-055-C (Task Board API). Flask read-only endpoints. DAO mode.",
+      "role": "Drift 🌊",
+      "status": "done",
+      "created_at": "2026-04-03T00:00:00+00:00",
+      "last_updated": "2026-04-03T00:00:00+00:00",
+      "output_links": [
+        "04-03-2026"
+      ],
+      "next_task": "x-ipe-task-based-technical-design"
+    },
+    {
+      "task_id": "TASK-1068",
+      "task_type": "Feature Closing",
+      "description": "Close FEATURE-055-B (Task CRUD Scripts). Code-to-docs review, refactoring analysis, push to main. DAO mode.",
+      "role": "Drift 🌊",
+      "status": "done",
+      "created_at": "2026-04-03T00:00:00+00:00",
+      "last_updated": "2026-04-03T00:00:00+00:00",
+      "output_links": [
+        "04-03-2026"
+      ],
+      "next_task": "x-ipe-task-based-feature-refinement"
+    },
+    {
+      "task_id": "TASK-1067",
+      "task_type": "Feature Acceptance Test",
+      "description": "Acceptance tests for FEATURE-055-B (Task CRUD Scripts). 42 ACs, CLI/unit type. DAO mode.",
+      "role": "Drift 🌊",
+      "status": "done",
+      "created_at": "2026-04-03T00:00:00+00:00",
+      "last_updated": "2026-04-03T00:00:00+00:00",
+      "output_links": [
+        "04-03-2026"
+      ],
+      "next_task": "x-ipe-task-based-feature-closing"
+    },
+    {
+      "task_id": "TASK-1066",
+      "task_type": "Code Implementation",
+      "description": "Implement FEATURE-055-B (Task CRUD Scripts): task_create.py, task_update.py, task_query.py, task_archive.py + test_task_crud.py. CLI Python. DAO mode.",
+      "role": "Drift 🌊",
+      "status": "done",
+      "created_at": "2026-04-03T00:00:00+00:00",
+      "last_updated": "2026-04-03T00:00:00+00:00",
+      "output_links": [
+        "04-03-2026"
+      ],
+      "next_task": "x-ipe-task-based-feature-acceptance-test"
+    },
+    {
+      "task_id": "TASK-1065",
+      "task_type": "Technical Design",
+      "description": "Design FEATURE-055-B (Task CRUD Scripts): Two-part design for task_create.py, task_update.py, task_query.py, task_archive.py. CLI type. DAO mode.",
+      "role": "Drift 🌊",
+      "status": "done",
+      "created_at": "2026-04-03T00:00:00+00:00",
+      "last_updated": "2026-04-03T00:00:00+00:00",
+      "output_links": [
+        "04-03-2026"
+      ],
+      "next_task": "x-ipe-task-based-code-implementation"
+    },
+    {
+      "task_id": "TASK-1064",
+      "task_type": "Feature Refinement",
+      "description": "Refine FEATURE-055-B (Task CRUD Scripts): 42 ACs in GWT format across 8 groups (create, update, query-list, query-id, archive, index, CLI, atomicity). DAO mode.",
+      "role": "Drift 🌊",
+      "status": "done",
+      "created_at": "2026-04-03T00:00:00+00:00",
+      "last_updated": "2026-04-03T00:00:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-055/FEATURE-055-B/specification.md"
+      ],
+      "next_task": "x-ipe-task-based-technical-design"
+    },
+    {
+      "task_id": "TASK-1063",
+      "task_type": "Feature Closing",
+      "description": "Close FEATURE-055-A (Board Shared Library): ACs verified (32/32), code-to-docs review (8 fixes), refactoring analysis (8/10), committed + pushed to main (70190da). DAO mode.",
+      "role": "Drift 🌊",
+      "status": "done",
+      "created_at": "2026-04-03T00:00:00+00:00",
+      "last_updated": "2026-04-03T00:00:00+00:00",
+      "output_links": [
+        "Pushed",
+        "to",
+        "main",
+        "(70190da)"
+      ],
+      "next_task": "x-ipe-task-based-feature-refinement"
+    },
+    {
+      "task_id": "TASK-1062",
+      "task_type": "Acceptance Testing",
+      "description": "Execute acceptance tests for FEATURE-055-A (Board Shared Library): 32 TCs (30 unit + 2 integration), all PASS, 100% pass rate. 47 pytest tests, 93% coverage.",
+      "role": "Drift 🌊",
+      "status": "done",
+      "created_at": "2026-04-03T00:00:00+00:00",
+      "last_updated": "2026-04-03T00:00:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-055/FEATURE-055-A/acceptance-test-cases.md"
+      ],
+      "next_task": "x-ipe-task-based-feature-closing"
+    },
+    {
+      "task_id": "TASK-1061",
+      "task_type": "Code Implementation",
+      "description": "Implement FEATURE-055-A (Board Shared Library): _board_lib.py with atomic JSON I/O, file locking, schema validation, path resolution. Python stdlib only. program_type=library. 47 tests, 93% coverage.",
+      "role": "Drift 🌊",
+      "status": "done",
+      "created_at": "2026-04-03T00:00:00+00:00",
+      "last_updated": "2026-04-03T00:00:00+00:00",
+      "output_links": [
+        ".github/skills/x-ipe-tool-task-board-manager/scripts/_board_lib.py",
+        "tests/test_board_lib.py"
+      ],
+      "next_task": "x-ipe-task-based-feature-acceptance-test"
+    },
+    {
+      "task_id": "TASK-1060",
+      "task_type": "Technical Design",
+      "description": "Design FEATURE-055-A (Board Shared Library): Two-part design for _board_lib.py — atomic JSON I/O, file locking, schema validation, path resolution. Library type.",
+      "role": "Drift 🌊",
+      "status": "done",
+      "created_at": "2026-04-03T00:00:00+00:00",
+      "last_updated": "2026-04-03T00:00:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-055/FEATURE-055-A/technical-design.md"
+      ],
+      "next_task": "x-ipe-task-based-code-implementation"
+    },
+    {
+      "task_id": "TASK-1059",
+      "task_type": "Feature Refinement",
+      "description": "Refine FEATURE-055-A (Board Shared Library): Create specification.md with GWT acceptance criteria for atomic JSON I/O, file locking, schema validation, path resolution utilities.",
+      "role": "Drift 🌊",
+      "status": "done",
+      "created_at": "2026-04-03T00:00:00+00:00",
+      "last_updated": "2026-04-03T00:00:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-055/FEATURE-055-A/specification.md"
+      ],
+      "next_task": "x-ipe-task-based-technical-design"
+    },
+    {
+      "task_id": "TASK-1058",
+      "task_type": "Feature Breakdown",
+      "description": "Break EPIC-055 (3 features), EPIC-056 (2 features), EPIC-057 (5 features) into 10 total features with MVP-first criteria.",
+      "role": "Drift 🌊",
+      "status": "done",
+      "created_at": "2026-04-03T00:00:00+00:00",
+      "last_updated": "2026-04-03T00:00:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/requirement-details-part-23.md",
+        "x-ipe-docs/planning/features.md"
+      ],
+      "next_task": "x-ipe-task-based-feature-refinement"
+    },
+    {
+      "task_id": "TASK-1057",
+      "task_type": "Requirement Gathering",
+      "description": "Gather requirements for IDEA-039: CR-Feature and Task Board (EPIC-055, EPIC-056, EPIC-057) — JSON data layer, CRUD skill scripts, Flask API, view-only web UI, migration strategy.",
+      "role": "Drift 🌊",
+      "status": "done",
+      "created_at": "2026-04-03T00:00:00+00:00",
+      "last_updated": "2026-04-03T00:00:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/requirement-details-part-23.md",
+        "x-ipe-docs/requirements/EPIC-055/",
+        "x-ipe-docs/requirements/EPIC-056/",
+        "x-ipe-docs/requirements/EPIC-057/"
+      ],
+      "next_task": "x-ipe-task-based-feature-breakdown"
+    },
+    {
+      "task_id": "TASK-1056",
+      "task_type": "Code Implementation",
+      "description": "CR-001 Implementation: Rewrite tracker-toolbar.js (<5KB), update track_behavior.py (polling, screenshots, folder mgmt), update SKILL.md, update tests.",
+      "role": "Spark ✨",
+      "status": "done",
+      "created_at": "2026-04-03T00:00:00+00:00",
+      "last_updated": "2026-04-03T00:00:00+00:00",
+      "output_links": [
+        "04-03-2026"
+      ],
+      "next_task": "5da9c6d"
+    },
+    {
+      "task_id": "TASK-1055",
+      "task_type": "Change Request",
+      "description": "CR-001: EPIC-054 Behavior Tracker overhaul — simplify IIFE to <5KB, 5s polling model, screenshot on change, localStorage persistence, URL-change reinjection, new x-ipe-docs/learning/ folder structure. Classification: MODIFICATION.",
+      "role": "Spark ✨",
+      "status": "done",
+      "created_at": "2026-04-03T00:00:00+00:00",
+      "last_updated": "2026-04-03T00:00:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-054/FEATURE-054-B/CR-001.md"
+      ],
+      "next_task": "x-ipe-task-based-feature-refinement"
+    },
+    {
+      "task_id": "TASK-1054",
+      "task_type": "Idea Mockup",
+      "description": "Create web UI mockups for IDEA-039: Task Board Page (filters, search, table) + Feature Board Page (Epic grouping, accordion).",
+      "role": "Drift 🌊",
+      "status": "done",
+      "created_at": "2026-04-03T00:00:00+00:00",
+      "last_updated": "2026-04-03T00:00:00+00:00",
+      "output_links": [
+        "x-ipe-docs/ideas/039.%20CR-Feature%20and%20Task%20Board/mockups/task-board-v1.html",
+        "x-ipe-docs/ideas/039.%20CR-Feature%20and%20Task%20Board/mockups/feature-board-v1.html"
+      ],
+      "next_task": "x-ipe-task-based-requirement-gathering"
+    },
+    {
+      "task_id": "TASK-1053",
+      "task_type": "Skill Creation",
+      "description": "Rename x-ipe-learning-behavior-tracker-for-web → x-ipe-tool-learning-behavior-tracker-for-web. Recreate SKILL.md following x-ipe-tool template. Create tracker-toolbar.mini.js minified version.",
+      "role": "Spark ✨",
+      "status": "done",
+      "created_at": "2026-04-03T00:00:00+00:00",
+      "last_updated": "2026-04-03T00:00:00+00:00",
+      "output_links": [
+        ".github/skills/x-ipe-tool-learning-behavior-tracker-for-web/"
+      ],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-1052",
+      "task_type": "Ideation",
+      "description": "Refine idea 039: CR-Feature and Task Board — separate data/UI for task board and features (JSON + web page), new manager skills, filtering/pagination. DAO mode.",
+      "role": "Drift 🌊",
+      "status": "done",
+      "created_at": "2026-04-03T00:00:00+00:00",
+      "last_updated": "2026-04-03T00:00:00+00:00",
+      "output_links": [
+        "x-ipe-docs/ideas/039.%20CR-Feature%20and%20Task%20Board/refined-idea/idea-summary-v1.md"
+      ],
+      "next_task": "x-ipe-task-based-requirement-gathering"
+    },
+    {
+      "task_id": "TASK-1051",
+      "task_type": "Bug Fix",
+      "description": "FEATURE-054-A: (1) Tracking Purpose required textarea with 200-word limit. (2) Track Behavior button sends command to terminal via terminalManager API.",
+      "role": "Spark ✨",
+      "status": "done",
+      "created_at": "2026-04-03T00:00:00+00:00",
+      "last_updated": "2026-04-03T00:00:00+00:00",
+      "output_links": [
+        "a9fcacc"
+      ],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-1050",
+      "task_type": "Feature Closing",
+      "description": "Close EPIC-054 all 6 features (FEATURE-054-A through F). Final verification, code-to-docs review, refactoring analysis, commit + push to main. DAO mode.",
+      "role": "Spark ✨",
+      "status": "done",
+      "created_at": "2026-04-03T00:00:00+00:00",
+      "last_updated": "2026-04-03T00:00:00+00:00",
+      "output_links": [
+        "04-03-2026"
+      ],
+      "next_task": "06c89c3"
+    },
+    {
+      "task_id": "TASK-1049",
+      "task_type": "Acceptance Testing",
+      "description": "Execute acceptance tests for EPIC-054 all 6 features (103 ACs). 45 automated tests (32 JS + 13 Python) all PASS. 58 code-review TCs all PASS. 103/103 = 100% pass rate. Zero defects.",
+      "role": "Spark ✨",
+      "status": "done",
+      "created_at": "2026-04-03T00:00:00+00:00",
+      "last_updated": "2026-04-03T00:00:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-054/acceptance-test-cases.md"
+      ],
+      "next_task": "x-ipe-task-based-feature-closing"
+    },
+    {
+      "task_id": "TASK-1047",
+      "task_type": "Technical Design",
+      "description": "Technical Design — EPIC-054 (all 6 features). Design FEATURE-054-A through F in MVP order: A→B→C→E→F→D",
+      "role": "Spark ✨",
+      "status": "done",
+      "created_at": "2026-04-03T08:36:00.218910+00:00",
+      "last_updated": "2026-04-03T08:36:00.218910+00:00",
+      "output_links": [
+        "(pending)"
+      ],
+      "next_task": "(pending)"
+    },
+    {
+      "task_id": "TASK-1046",
+      "task_type": "Feature Refinement",
+      "description": "Feature Refinement — EPIC-054 (all 6 features). Refine FEATURE-054-A through F in MVP order: A→B→C→E→F→D",
+      "role": "Spark ✨",
+      "status": "done",
+      "created_at": "2026-04-03T08:36:00.219059+00:00",
+      "last_updated": "2026-04-03T08:36:00.219059+00:00",
+      "output_links": [
+        "(pending)"
+      ],
+      "next_task": "x-ipe-task-based-technical-design"
+    },
+    {
+      "task_id": "TASK-1045",
+      "task_type": "Feature Breakdown",
+      "description": "Feature Breakdown for EPIC-054 Learn Module — Break down into features with MVP-first criteria.",
+      "role": "x-ipe-task-based-feature-breakdown",
+      "status": "done",
+      "created_at": "2026-04-03T08:36:00.219069+00:00",
+      "last_updated": "2026-04-03T08:36:00.219069+00:00",
+      "output_links": [
+        "(pending)"
+      ],
+      "next_task": "x-ipe-task-based-feature-refinement"
+    },
+    {
+      "task_id": "TASK-856",
+      "task_type": "Skill Update",
+      "description": "Add mockup_link to code-implementation + html5 tool skill",
+      "role": "Sage 🌿",
+      "status": "cancelled",
+      "created_at": "2026-04-03T08:36:00.220360+00:00",
+      "last_updated": "2026-04-03T08:36:00.220360+00:00",
+      "output_links": [
+        "03-12-2026",
+        "12:24:00"
+      ],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-033",
+      "task_type": "Implement CR-002: Refocus Extractor on Knowledge Learning",
+      "description": "Execute CR-002 that adds Chrome DevTools extraction support, tool skill feedback during extraction, and delegates quality scoring to tool skills. Affects extractor SKILL.md (4 changes), execution-procedures.md (4 changes), and adds score_quality operation to user manual tool skill.",
+      "role": "EPIC-050, EPIC-051",
+      "status": "completed",
+      "created_at": "2026-04-03T08:36:00.220387+00:00",
+      "last_updated": "2026-04-03T08:36:00.220387+00:00",
+      "output_links": [
+        "03-17-2026"
+      ],
+      "next_task": "03-17-2026"
+    }
+  ]
+}

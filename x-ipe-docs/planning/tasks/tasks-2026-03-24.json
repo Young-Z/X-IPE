@@ -1,0 +1,144 @@
+{
+  "_version": "1.0",
+  "tasks": [
+    {
+      "task_id": "TASK-988",
+      "task_type": "Skill Update",
+      "description": "Migrate auto_proceed → interaction_mode in bug-fix production SKILL.md + sync 8 candidate SKILL.md from production. DAO mode.",
+      "role": "Drift 🌊",
+      "status": "done",
+      "created_at": "2026-03-24T00:00:00+00:00",
+      "last_updated": "2026-03-24T00:00:00+00:00",
+      "output_links": [],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-989",
+      "task_type": "Bug Fix",
+      "description": "KB preview rendering defects: (1) preview window height not fully utilizing available space, (2) docx icons (ww, lz, mj) not rendering correctly vs original format. Source: Feedback-20260324-154826. FEATURE-049-F. DAO mode.",
+      "role": "Spark ⚡",
+      "status": "done",
+      "created_at": "2026-03-24T00:00:00+00:00",
+      "last_updated": "2026-03-24T00:00:00+00:00",
+      "output_links": [
+        "src/x_ipe/static/css/kb-browse-modal.css",
+        "src/x_ipe/static/js/core/file-preview-renderer.js",
+        "tests/frontend-js/kb-preview-rendering-fix.test.js"
+      ],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-990",
+      "task_type": "Bug Fix",
+      "description": "Compose idea bugs: (1) new idea file not shown in deliverable panel after submit, (2) typed idea text and uploaded file not restored when reopening compose idea, (3) need cross icon to remove uploaded files. Source: Feedback-20260324-161921. DAO mode.",
+      "role": "Pixel 🎨",
+      "status": "done",
+      "created_at": "2026-03-24T00:00:00+00:00",
+      "last_updated": "2026-03-24T00:00:00+00:00",
+      "output_links": [
+        "src/x_ipe/static/js/features/compose-idea-modal.js",
+        "tests/frontend-js/compose-idea-modal.test.js"
+      ],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-987",
+      "task_type": "Skill Update",
+      "description": "Bug-fix skill: (1) simplify UI detection from program_type to context check, (2) add x-ipe-tool-ui-testing-via-chrome-mcp to tools.json. DAO mode.",
+      "role": "Drift 🌊",
+      "status": "done",
+      "created_at": "2026-03-24T00:00:00+00:00",
+      "last_updated": "2026-03-24T00:00:00+00:00",
+      "output_links": [],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-988",
+      "task_type": "Bug Fix",
+      "description": "Language switch fails with FileNotFoundError when config_file_path is \"package-defaults\" (regression from TASK-986 layered config). Settings should write to package-bundled default .x-ipe.yaml when no project config exists. Source: Feedback-20260324-150712. DAO mode.",
+      "role": "Ember 🔥",
+      "status": "done",
+      "created_at": "2026-03-24T00:00:00+00:00",
+      "last_updated": "2026-03-24T00:00:00+00:00",
+      "output_links": [
+        "src/x_ipe/routes/settings_routes.py",
+        "tests/test_settings_language.py"
+      ],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-986",
+      "task_type": "Code Implementation",
+      "description": "Add layered .x-ipe.yaml config: bundle default config in package (src/x_ipe/defaults/), load as fallback in both entry points (uv run python -m x_ipe.app + x-ipe serve), deep-merge project-level .x-ipe.yaml over defaults. DAO mode.",
+      "role": "Ember 🔥",
+      "status": "done",
+      "created_at": "2026-03-24T00:00:00+00:00",
+      "last_updated": "2026-03-24T00:00:00+00:00",
+      "output_links": [
+        "src/x_ipe/core/config_utils.py",
+        "src/x_ipe/defaults/.x-ipe.yaml",
+        "tests/test_config_layered.py"
+      ],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-985",
+      "task_type": "Bug Fix",
+      "description": "UIUX feedback simulator browser shows blank viewport when previewing KB content — \"cannot preview\" in simulator but works in direct KB access. Root cause: proxy JSON-wraps HTML responses, hiding X-Converted header. Source: Feedback-20260324-141037. DAO mode.",
+      "role": "Ember 🔥",
+      "status": "done",
+      "created_at": "2026-03-24T00:00:00+00:00",
+      "last_updated": "2026-03-24T00:00:00+00:00",
+      "output_links": [
+        "src/x_ipe/static/js/core/file-preview-renderer.js",
+        "src/x_ipe/routes/kb_routes.py",
+        "src/x_ipe/static/js/uiux-feedback.js"
+      ],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-988",
+      "task_type": "Skill Update",
+      "description": "Migrate auto_proceed → interaction_mode in bug-fix production SKILL.md + sync 8 candidate SKILL.md from production. DAO mode.",
+      "role": "Drift 🌊",
+      "status": "done",
+      "created_at": "2026-03-24T00:00:00+00:00",
+      "last_updated": "2026-03-24T00:00:00+00:00",
+      "output_links": [],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-987",
+      "task_type": "Skill Update",
+      "description": "Bug-fix skill: (1) simplify UI detection from program_type to context check, (2) add x-ipe-tool-ui-testing-via-chrome-mcp to tools.json. DAO mode.",
+      "role": "Drift 🌊",
+      "status": "done",
+      "created_at": "2026-03-24T00:00:00+00:00",
+      "last_updated": "2026-03-24T00:00:00+00:00",
+      "output_links": [],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-988",
+      "task_type": "Skill Update",
+      "description": "Migrate auto_proceed → interaction_mode in bug-fix production SKILL.md + sync 8 candidate SKILL.md from production. DAO mode.",
+      "role": "Drift 🌊",
+      "status": "done",
+      "created_at": "2026-03-24T00:00:00+00:00",
+      "last_updated": "2026-03-24T00:00:00+00:00",
+      "output_links": [],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-987",
+      "task_type": "Skill Update",
+      "description": "Bug-fix skill: (1) simplify UI detection from program_type to context check, (2) add x-ipe-tool-ui-testing-via-chrome-mcp to tools.json. DAO mode.",
+      "role": "Drift 🌊",
+      "status": "done",
+      "created_at": "2026-03-24T00:00:00+00:00",
+      "last_updated": "2026-03-24T00:00:00+00:00",
+      "output_links": [],
+      "next_task": ""
+    }
+  ]
+}

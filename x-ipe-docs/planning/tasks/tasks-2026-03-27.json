@@ -1,0 +1,55 @@
+{
+  "_version": "1.0",
+  "tasks": [
+    {
+      "task_id": "TASK-1010",
+      "task_type": "Code Implementation",
+      "description": "Implement CR-003 for FEATURE-038-C: Update FolderBrowserModal._makePreviewHeader() with toggle + download=true, pass renderMode to FilePreviewRenderer, add tests.",
+      "role": "Quill ✒️",
+      "status": "done",
+      "created_at": "2026-03-27T00:00:00+00:00",
+      "last_updated": "2026-03-27T00:00:00+00:00",
+      "output_links": [],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-1009",
+      "task_type": "Change Request",
+      "description": "CR-003 for FEATURE-038-C: Extend CR-002 toolbar (download + toggle) to folder browser modal's inline file preview (_makePreviewHeader).",
+      "role": "Quill ✒️",
+      "status": "done",
+      "created_at": "2026-03-27T00:00:00+00:00",
+      "last_updated": "2026-03-27T00:00:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-038/FEATURE-038-C/CR-003.md"
+      ],
+      "next_task": "x-ipe-task-based-feature-refinement"
+    },
+    {
+      "task_id": "TASK-1008",
+      "task_type": "Feature Closing",
+      "description": "Close CR-002 for FEATURE-038-C: Verify ACs, code-to-docs review, refactoring analysis, commit and push to main.",
+      "role": "Quill ✒️",
+      "status": "done",
+      "created_at": "2026-03-27T00:00:00+00:00",
+      "last_updated": "2026-03-27T00:00:00+00:00",
+      "output_links": [
+        "https://github.com/Young-Z/X-IPE/commit/cd006ed"
+      ],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-1007",
+      "task_type": "Acceptance Test",
+      "description": "Execute acceptance tests for CR-002 FEATURE-038-C: Validate 10 ACs (06a-06j) covering toolbar header, download, toggle, smart defaults, state reset.",
+      "role": "Quill ✒️",
+      "status": "done",
+      "created_at": "2026-03-27T00:00:00+00:00",
+      "last_updated": "2026-03-27T00:00:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-038/FEATURE-038-C/acceptance-test-cases.md"
+      ],
+      "next_task": "x-ipe-task-based-feature-closing"
+    }
+  ]
+}

@@ -1,0 +1,156 @@
+{
+  "_version": "1.0",
+  "tasks": [
+    {
+      "task_id": "TASK-1039",
+      "task_type": "Acceptance Testing",
+      "description": "Execute acceptance tests for FEATURE-053-A: Structured review of 74 ACs across 16 groups. 1 defect found+fixed (INVALID_SECTION_ID error). Final: 74/74 PASS (100%).",
+      "role": "Cipher 🔐",
+      "status": "done",
+      "created_at": "2026-03-31T00:00:00+00:00",
+      "last_updated": "2026-03-31T00:00:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-053/FEATURE-053-A/acceptance-test-cases.md"
+      ],
+      "next_task": "x-ipe-task-based-feature-closing"
+    },
+    {
+      "task_id": "TASK-1038",
+      "task_type": "Code Implementation",
+      "description": "Implement FEATURE-053-A (Application Reverse Engineering Tool Skill): Created 15 skill files via x-ipe-meta-skill-creator delegation (SKILL.md, 3 core templates, 9 mixin files, references, test-cases). Updated extractor category registration. program_type=skills.",
+      "role": "Cipher 🔐",
+      "status": "done",
+      "created_at": "2026-03-31T00:00:00+00:00",
+      "last_updated": "2026-03-31T00:00:00+00:00",
+      "output_links": [
+        ".github/skills/x-ipe-tool-knowledge-extraction-application-reverse-engineering/SKILL.md"
+      ],
+      "next_task": "x-ipe-task-based-feature-acceptance-test"
+    },
+    {
+      "task_id": "TASK-1037",
+      "task_type": "Technical Design",
+      "description": "Design FEATURE-053-A (Application Reverse Engineering Tool Skill): Two-part design for skill file structure, 8-section phased playbook, collection template, acceptance criteria, 9 mixin files (4 repo-type + 5 language-type), quality scoring weight profiles, verification walkthrough.",
+      "role": "Cipher 🔐",
+      "status": "done",
+      "created_at": "2026-03-31T00:00:00+00:00",
+      "last_updated": "2026-03-31T00:00:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-053/FEATURE-053-A/technical-design.md"
+      ],
+      "next_task": "x-ipe-task-based-code-implementation"
+    },
+    {
+      "task_id": "TASK-1036",
+      "task_type": "Feature Refinement",
+      "description": "Refine FEATURE-053-A (Application Reverse Engineering Tool Skill): Create detailed specification with GWT acceptance criteria for 7-operation contract, 8-section playbook, mixin system, quality scoring, verification walkthrough, tests pipeline, extractor registration.",
+      "role": "Cipher 🔐",
+      "status": "done",
+      "created_at": "2026-03-31T00:00:00+00:00",
+      "last_updated": "2026-03-31T00:00:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-053/FEATURE-053-A/specification.md"
+      ],
+      "next_task": "x-ipe-task-based-technical-design"
+    },
+    {
+      "task_id": "TASK-1035",
+      "task_type": "Feature Breakdown",
+      "description": "Break down IDEA-037 (Application Reverse Engineering) into EPIC-053 with single feature FEATURE-053-A. Full scope: 8-section phased playbook, mixin system, quality scoring, tests pipeline, extractor registration.",
+      "role": "Cipher 🔐",
+      "status": "done",
+      "created_at": "2026-03-31T00:00:00+00:00",
+      "last_updated": "2026-03-31T00:00:00+00:00",
+      "output_links": [
+        "x-ipe-docs/requirements/requirement-details-part-22.md"
+      ],
+      "next_task": "x-ipe-task-based-feature-breakdown"
+    },
+    {
+      "task_id": "TASK-1034",
+      "task_type": "Bug Fix",
+      "description": "KB article preview does not render markdown images — `![alt](path)` syntax not converted to `<img>` tags despite image files existing. Fix the KB preview rendering function.",
+      "role": "Bolt ⚡",
+      "status": "done",
+      "created_at": "2026-03-31T00:00:00+00:00",
+      "last_updated": "2026-03-31T00:00:00+00:00",
+      "output_links": [],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-1033",
+      "task_type": "Ideation",
+      "description": "Refine idea 037: Application Reverse Engineering knowledge extraction skill — brainstorm scope, structure, and integration with knowledge extractor. Updated to v1.1: phased extraction order, AAA tests as early knowledge source.",
+      "role": "Ember 🔥 / Spark ✨",
+      "status": "done",
+      "created_at": "2026-03-31T00:00:00+00:00",
+      "last_updated": "2026-03-31T00:00:00+00:00",
+      "output_links": [
+        "x-ipe-docs/ideas/037.%20Feature-Application%20Reverse%20Engineering/refined-idea/idea-summary-v1.md"
+      ],
+      "next_task": "x-ipe-task-based-requirement-gathering"
+    },
+    {
+      "task_id": "TASK-1032",
+      "task_type": "Knowledge Extraction",
+      "description": "Deep research (2 additional rounds) on X-IPE workflow mode user manual — expanded from 65% to 97% coverage. Round 2: +10 feature files, +8 workflow files. Round 3: CLI vendors, DAO interception, stage gate formula. 53 files total.",
+      "role": "Nova ✨",
+      "status": "done",
+      "created_at": "2026-03-31T00:00:00+00:00",
+      "last_updated": "2026-03-31T00:00:00+00:00",
+      "output_links": [
+        "x-ipe-docs/knowledge-base/.intake/x-ipe-workflow-mode-user-manual/"
+      ],
+      "next_task": "x-ipe-tool-kb-librarian"
+    },
+    {
+      "task_id": "TASK-1031",
+      "task_type": "Skill Update",
+      "description": "Add deep research mode to knowledge extractor (rounds 1-10 or 'smart' auto-exit), new Phase 5.3 iteration step. Update user-manual tool skill for subfolder output (core features + common workflows get per-item files).",
+      "role": "Nova ✨",
+      "status": "done",
+      "created_at": "2026-03-31T00:00:00+00:00",
+      "last_updated": "2026-03-31T00:00:00+00:00",
+      "output_links": [
+        ".github/skills/x-ipe-task-based-application-knowledge-extractor/SKILL.md",
+        ".github/skills/x-ipe-tool-knowledge-extraction-user-manual/SKILL.md"
+      ],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-1030",
+      "task_type": "Bug Fix",
+      "description": "Fix workflow .lock files not cleaned up — add cleanup in delete_workflow() and with_file_lock(cleanup=True) in scripts, .gitignore lock files",
+      "role": "Bolt ⚡",
+      "status": "done",
+      "created_at": "2026-03-31T00:00:00+00:00",
+      "last_updated": "2026-03-31T00:00:00+00:00",
+      "output_links": [],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-1029",
+      "task_type": "Skill Update",
+      "description": "Update x-ipe-task-based-application-knowledge-extractor: extraction folder naming from opaque IDs (EXTRACT-1028) to meaningful names ({app_name}-{category}, e.g., x-ipe-workflow-mode-user-manual). Updated candidate + production SKILL.md, 3 reference files, 5 new test cases.",
+      "role": "Nova ✨",
+      "status": "done",
+      "created_at": "2026-03-31T00:00:00+00:00",
+      "last_updated": "2026-03-31T00:00:00+00:00",
+      "output_links": [
+        ".github/skills/x-ipe-task-based-application-knowledge-extractor/SKILL.md"
+      ],
+      "next_task": ""
+    },
+    {
+      "task_id": "TASK-1026",
+      "task_type": "Ideation",
+      "description": "Refine idea wf-009-test-greedy-snake: Greedy Snake game — brainstorm, research game design principles, produce structured idea summary. Workflow mode.",
+      "role": "Flux ⚡",
+      "status": "done",
+      "created_at": "2026-03-31T00:00:00+00:00",
+      "last_updated": "2026-03-31T00:00:00+00:00",
+      "output_links": [],
+      "next_task": ""
+    }
+  ]
+}
