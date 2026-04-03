@@ -5,7 +5,7 @@
 ## Active Tasks
 
 | Task ID | Task | Description | Role | Status | Last Updated | Output Links | Next Task |
-| TASK-1068 | Feature Closing | Close FEATURE-055-B (Task CRUD Scripts). Code-to-docs review, refactoring analysis, push to main. DAO mode. | Drift 🌊 | 🔄 in_progress | 04-03-2026 | — | x-ipe-task-based-feature-refinement |
+| TASK-1068 | Feature Closing | Close FEATURE-055-B (Task CRUD Scripts). Code-to-docs review, refactoring analysis, push to main. DAO mode. | Drift 🌊 | ✅ done | 04-03-2026 | 04-03-2026 | x-ipe-task-based-feature-refinement |
 | TASK-1067 | Feature Acceptance Test | Acceptance tests for FEATURE-055-B (Task CRUD Scripts). 42 ACs, CLI/unit type. DAO mode. | Drift 🌊 | ✅ done | 04-03-2026 | 04-03-2026 | x-ipe-task-based-feature-closing |
 | TASK-1066 | Code Implementation | Implement FEATURE-055-B (Task CRUD Scripts): task_create.py, task_update.py, task_query.py, task_archive.py + test_task_crud.py. CLI Python. DAO mode. | Drift 🌊 | ✅ done | 04-03-2026 | 04-03-2026 | x-ipe-task-based-feature-acceptance-test |
 | TASK-1065 | Technical Design | Design FEATURE-055-B (Task CRUD Scripts): Two-part design for task_create.py, task_update.py, task_query.py, task_archive.py. CLI type. DAO mode. | Drift 🌊 | ✅ done | 04-03-2026 | 04-03-2026 | x-ipe-task-based-code-implementation |
