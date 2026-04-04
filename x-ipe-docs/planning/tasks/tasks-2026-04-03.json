@@ -491,11 +491,11 @@
       "task_type": "enhancement",
       "description": "Add dynamic auto-refresh to feature board and task board",
       "role": "Drift",
-      "status": "in_progress",
+      "status": "done",
       "output_links": [],
       "next_task": "",
       "created_at": "2026-04-03T16:21:25.593361+00:00",
-      "last_updated": "2026-04-03T16:21:25.593361+00:00"
+      "last_updated": "2026-04-03T16:28:47.273407+00:00"
     }
   ]
 }
