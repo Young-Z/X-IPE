@@ -1,4 +1,4 @@
-# Copilot Instructions
+# AI Agent Instructions
 
 > **⚠️ CRITICAL RULE FOR AI AGENTS EXECUTING SUGGESTED SKILLS:**
 > Follow the steps EXACTLY in the skill to execute! Do NOT skip, reorder, or improvise.

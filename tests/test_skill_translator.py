@@ -398,14 +398,14 @@ class TestClaudeCodeTranslation:
         assert (target / "complex-skill" / "references" / "example.md").exists()
 
     def test_generates_claude_md(self, tmp_project):
-        """Claude Code generate_instructions() creates CLAUDE.md at project root."""
+        """Claude Code generate_instructions() creates .claude/CLAUDE.md."""
         from x_ipe.services.skill_translator import SkillTranslator
         translator = SkillTranslator()
-        adapter = make_adapter(name='claude-code', instructions_file='CLAUDE.md')
+        adapter = make_adapter(name='claude-code', instructions_file='.claude/CLAUDE.md')
         tpl = tmp_project / "resources" / "templates" / "instructions-template.md"
         result = translator.generate_instructions(adapter, tmp_project, template_path=tpl)
         assert result is not None
-        assert (tmp_project / "CLAUDE.md").exists()
+        assert (tmp_project / ".claude" / "CLAUDE.md").exists()
 
 
 # ============================================================================

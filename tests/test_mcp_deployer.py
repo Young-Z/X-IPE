@@ -77,7 +77,7 @@ def claude_adapter():
         run_args="",
         inline_prompt_flag="--prompt",
         prompt_format='{command} {inline_prompt_flag} "{escaped_prompt}"',
-        instructions_file="CLAUDE.md",
+        instructions_file=".claude/CLAUDE.md",
         skills_folder=".claude/skills/",
         mcp_config_path=".mcp.json",
         mcp_config_format="project",
