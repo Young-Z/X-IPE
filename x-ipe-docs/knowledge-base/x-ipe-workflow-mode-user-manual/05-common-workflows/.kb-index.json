@@ -1,0 +1,149 @@
+{
+  "version": "1.0",
+  "entries": {
+    "_index.md": {
+      "title": "Common Workflows",
+      "description": "MARKDOWN file: _index.md",
+      "tags": {
+        "lifecycle": [
+          "active"
+        ],
+        "domain": [
+          "frontend"
+        ]
+      },
+      "author": "AI Librarian",
+      "created": "2026-04-07",
+      "type": "markdown",
+      "auto_generated": true
+    },
+    "workflow01-create-new-workflow.md": {
+      "title": "Create New Workflow",
+      "description": "- X-IPE web app running at `http://127.0.0.1:5858/`",
+      "tags": {
+        "lifecycle": [
+          "active"
+        ],
+        "domain": [
+          "frontend"
+        ]
+      },
+      "author": "AI Librarian",
+      "created": "2026-04-07",
+      "type": "markdown",
+      "auto_generated": true
+    },
+    "workflow02-run-ideation-stage.md": {
+      "title": "Run Ideation Stage",
+      "description": "The Ideation stage is the first stage in every workflow. It involves composing your initial idea, optionally adding UIUX references, and refining the idea with AI assistance.",
+      "tags": {
+        "lifecycle": [
+          "active"
+        ],
+        "domain": [
+          "frontend"
+        ]
+      },
+      "author": "AI Librarian",
+      "created": "2026-04-07",
+      "type": "markdown",
+      "auto_generated": true
+    },
+    "workflow03-run-requirement-stage.md": {
+      "title": "Run Requirement Stage",
+      "description": "The Requirement stage transforms your refined idea into structured requirements and breaks them into implementable features.",
+      "tags": {
+        "lifecycle": [
+          "active"
+        ],
+        "domain": [
+          "frontend"
+        ]
+      },
+      "author": "AI Librarian",
+      "created": "2026-04-07",
+      "type": "markdown",
+      "auto_generated": true
+    },
+    "workflow04-feature-implementation.md": {
+      "title": "Feature Implementation Lifecycle",
+      "description": "After Feature Breakdown, each feature has its own lane with 8 steps that progress through the implementation lifecycle.",
+      "tags": {
+        "lifecycle": [
+          "active"
+        ],
+        "domain": [
+          "frontend"
+        ]
+      },
+      "author": "AI Librarian",
+      "created": "2026-04-07",
+      "type": "markdown",
+      "auto_generated": true
+    },
+    "workflow05-change-interaction-mode.md": {
+      "title": "Change Interaction Mode",
+      "description": "Each workflow can be set to one of three interaction modes that control how the AI agent interacts with you during task execution.",
+      "tags": {
+        "lifecycle": [
+          "active"
+        ],
+        "domain": [
+          "frontend"
+        ]
+      },
+      "author": "AI Librarian",
+      "created": "2026-04-07",
+      "type": "markdown",
+      "auto_generated": true
+    },
+    "workflow06-manage-dependencies.md": {
+      "title": "Manage Feature Dependencies",
+      "description": "Features created during Feature Breakdown can have dependencies on each other. Dependencies control the execution order of feature lane steps.",
+      "tags": {
+        "lifecycle": [
+          "active"
+        ],
+        "domain": [
+          "frontend"
+        ]
+      },
+      "author": "AI Librarian",
+      "created": "2026-04-07",
+      "type": "markdown",
+      "auto_generated": true
+    },
+    "workflow07-browse-deliverables.md": {
+      "title": "Browse Deliverables",
+      "description": "Every workflow action produces deliverables — files and folders that are tracked and viewable from the workflow card.",
+      "tags": {
+        "lifecycle": [
+          "active"
+        ],
+        "domain": [
+          "frontend"
+        ]
+      },
+      "author": "AI Librarian",
+      "created": "2026-04-07",
+      "type": "markdown",
+      "auto_generated": true
+    },
+    "workflow08-delete-workflow.md": {
+      "title": "Delete Workflow",
+      "description": "You can permanently delete a workflow and its state file through the Actions menu.",
+      "tags": {
+        "lifecycle": [
+          "active"
+        ],
+        "domain": [
+          "frontend"
+        ]
+      },
+      "author": "AI Librarian",
+      "created": "2026-04-07",
+      "type": "markdown",
+      "auto_generated": true
+    }
+  }
+}
