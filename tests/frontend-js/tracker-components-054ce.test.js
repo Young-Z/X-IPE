@@ -152,18 +152,18 @@ describe('CircularBuffer (FEATURE-054-C)', () => {
 });
 
 describe('PIIMasker (FEATURE-054-E)', () => {
-    it('should mask text by default', () => {
+    it('should preserve text content by default', () => {
         const pii = new PIIMasker({ piiWhitelist: [] });
         const event = {
             type: 'click',
             target: { tagName: 'BUTTON', textContent: 'Buy Now', value: '', cssSelector: 'button.buy' }
         };
         const result = pii.mask(event);
-        expect(result.target.textContent).toBe('[MASKED]');
+        expect(result.target.textContent).toBe('Buy Now');
     });
 
-    it('should reveal whitelisted selectors', () => {
-        const pii = new PIIMasker({ piiWhitelist: ['.product-title'] });
+    it('should preserve text for all selectors', () => {
+        const pii = new PIIMasker({ piiWhitelist: [] });
         const event = {
             type: 'click',
             target: { tagName: 'H2', textContent: 'iPhone 15', value: '', cssSelector: 'h2.product-title' }
@@ -211,6 +211,26 @@ describe('PIIMasker (FEATURE-054-E)', () => {
             target: { tagName: 'DIV', textContent: '', value: '', cssSelector: 'div.empty' }
         };
         expect(pii.mask(event).target.textContent).toBe('');
+    });
+
+    it('should preserve original textContent (no default masking)', () => {
+        const pii = new PIIMasker({ piiWhitelist: [] });
+        const event = {
+            type: 'click',
+            target: { tagName: 'BUTTON', textContent: 'Buy Now', value: '', cssSelector: 'button.buy' }
+        };
+        const result = pii.mask(event);
+        expect(result.target.textContent).toBe('Buy Now');
+    });
+
+    it('should preserve original input value (no default masking)', () => {
+        const pii = new PIIMasker({ piiWhitelist: [] });
+        const event = {
+            type: 'input',
+            target: { tagName: 'INPUT', type: 'text', textContent: '', value: 'search query', cssSelector: 'input.search', autocomplete: '' }
+        };
+        const result = pii.mask(event);
+        expect(result.target.value).toBe('search query');
     });
 });
 

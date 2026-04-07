@@ -12,8 +12,6 @@ if (!window.__xipeBehaviorTrackerInjected) {
 
     class PIIMasker {
         constructor(cfg) {
-            this._wl = new Set(cfg.piiWhitelist || []);
-            this._m = '[MASKED]';
             this._p = '[PASSWORD_FIELD]';
         }
         mask(r) {
@@ -23,9 +21,6 @@ if (!window.__xipeBehaviorTrackerInjected) {
                 (t.autocomplete || '').includes('password'))) {
                 t.textContent = this._p; t.value = this._p; return r;
             }
-            if (t.cssSelector && [...this._wl].some(s => t.cssSelector.includes(s))) return r;
-            if (t.textContent) t.textContent = this._m;
-            if (t.value) t.value = this._m;
             return r;
         }
     }
