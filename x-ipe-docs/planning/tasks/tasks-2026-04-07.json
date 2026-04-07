@@ -70,6 +70,20 @@
       "next_task": "",
       "created_at": "2026-04-07T06:40:36.968462+00:00",
       "last_updated": "2026-04-07T06:42:33.602285+00:00"
+    },
+    {
+      "task_id": "TASK-ENCODING",
+      "task_type": "Bug Fix",
+      "description": "Fix garbled Chinese characters in track-list.json caused by UTF-8 double-encoding during Chrome DevTools MCP transport. Added _fix_double_encoded_utf8 utility in track_behavior.py.",
+      "role": "Bolt",
+      "status": "done",
+      "output_links": [
+        ".github/skills/x-ipe-tool-learning-behavior-tracker-for-web/scripts/track_behavior.py",
+        "tests/test_behavior_tracker_054bf.py"
+      ],
+      "next_task": "",
+      "created_at": "2026-04-07T07:04:42.232279+00:00",
+      "last_updated": "2026-04-07T07:04:42.232279+00:00"
     }
   ]
 }

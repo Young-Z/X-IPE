@@ -18,6 +18,20 @@ from pathlib import Path
 from datetime import datetime, timezone
 
 
+def _fix_double_encoded_utf8(obj):
+    """Fix UTF-8 text that was double-encoded (UTF-8 → Latin-1 → UTF-8) during transport."""
+    if isinstance(obj, str):
+        try:
+            return obj.encode('latin-1').decode('utf-8')
+        except (UnicodeDecodeError, UnicodeEncodeError):
+            return obj
+    elif isinstance(obj, dict):
+        return {k: _fix_double_encoded_utf8(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [_fix_double_encoded_utf8(item) for item in obj]
+    return obj
+
+
 class InjectionManager:
     """Manages script injection into target pages via Chrome DevTools MCP."""
 
@@ -158,6 +172,7 @@ class BehaviorTrackerSkill:
                 current_url: str — current page URL
         """
         events = poll_data.get('events', [])
+        events = _fix_double_encoded_utf8(events)
         event_count = poll_data.get('eventCount', len(events))
         current_url = poll_data.get('url', '')
         analysis_requested = poll_data.get('analysisRequested', False)
