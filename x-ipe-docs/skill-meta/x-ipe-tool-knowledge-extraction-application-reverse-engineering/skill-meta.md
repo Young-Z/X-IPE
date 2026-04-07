@@ -7,10 +7,10 @@
 # ─────────────────────────────────────────────────────────────
 skill_name: x-ipe-tool-knowledge-extraction-application-reverse-engineering
 skill_type: x-ipe-tool
-version: "1.0.0"
+version: "2.0.0"
 status: candidate
 created: 2026-03-31
-updated: 2026-03-31
+updated: 2026-04-07
 
 # ─────────────────────────────────────────────────────────────
 # PURPOSE

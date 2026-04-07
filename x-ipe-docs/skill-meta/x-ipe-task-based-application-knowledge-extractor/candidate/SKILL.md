@@ -28,7 +28,7 @@ triggers:
 
 ### ⚠️ BLOCKING Rules
 
-1. **v1 Scope:** Only "user-manual" extraction category is supported. Requests for other categories (API-reference, architecture, runbook, configuration) will halt with error listing v1-supported categories.
+1. **v1 Scope:** Only "user-manual" and "application-reverse-engineering" extraction categories are supported. Requests for other categories (API-reference, runbook, configuration) will halt with error listing supported categories.
 2. **Tool Skill Required:** Extraction cannot proceed without a matching tool skill (e.g., `x-ipe-tool-knowledge-extraction-user-manual`). If no tool skill is found, the skill halts with error.
 3. **File-Based Handoff:** All knowledge exchange between extractor and tool skills MUST use `.x-ipe-checkpoint/` folder. Inline text exchange is prohibited.
 4. **Checkpoint Location:** `.x-ipe-checkpoint/` is created in CWD (project root), NEVER inside target directory. For URL-only targets, CWD is used.
@@ -54,13 +54,20 @@ input:
   
   # Required inputs
   target: "{path or URL to application/documentation}"
-  purpose: "user-manual"  # v1: only user-manual supported
+  purpose: "user-manual | application-reverse-engineering"  # supported categories
   
   # Optional
   config_overrides:
     max_retries: 3
     web_search_enabled: true
     timeout_seconds: 15
+
+  # Behavior Context (optional — provided by x-ipe-tool-learning-behavior-tracker-for-web)
+  behavior_context:
+    learning_folder: ""  # path to learning folder with track/track-list.json and imgs/
+                         # When provided, use tracked behavior data as SUPPLEMENTARY guidance
+                         # to prioritize features and understand user workflows.
+                         # The extractor MUST still explore the target independently via Chrome DevTools.
 
   # Deep Research Mode (optional)
   deep_research:
@@ -75,14 +82,15 @@ input:
   <field name="task_id" source="auto-generated" />
   <field name="execution_mode" source="workflow or free-mode" />
   <field name="target" source="user-provided (path or URL)" />
-  <field name="purpose" source="user-provided, v1: 'user-manual' only" />
+  <field name="purpose" source="user-provided: 'user-manual' or 'application-reverse-engineering'" />
   <field name="config_overrides" source="optional, defaults: max_retries=3, web_search_enabled=true, timeout_seconds=15, max_files_per_section=50, max_validation_iterations=3, coverage_target=0.8" />
+  <field name="behavior_context.learning_folder" source="optional, from behavior tracker skill. Path to learning folder containing tracked events and screenshots." />
   <field name="deep_research.rounds" source="ask-user, default: 1, values: 1-10 or 'smart'" />
 </input_init>
 ```
 
 **Validation Gates:**
-- IF `target` missing → halt; IF `purpose` not "user-manual" → halt
+- IF `target` missing → halt; IF `purpose` not in ["user-manual", "application-reverse-engineering"] → halt
 - IF target path missing or URL unreachable → halt
 - IF CWD not writable → halt
 - Set defaults for unspecified config_overrides
@@ -101,7 +109,7 @@ input:
   </checkpoint>
   <checkpoint required="true">
     <name>Input Validated</name>
-    <verification>Target exists/reachable, purpose is v1-supported category</verification>
+    <verification>Target exists/reachable, purpose is a supported category</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>Working Directory Writable</name>
@@ -171,24 +179,30 @@ input:
          - public_url / running_web_app → Chrome DevTools (navigate, take_snapshot, take_screenshot for UI knowledge)
          - IF visual content would aid knowledge explanation → plan screenshot capture points
       5. NOTE: Chrome DevTools MCP is available for URL/web app targets — use take_screenshot to capture UI states that help explain features
+      6. IF behavior_context.learning_folder is provided:
+         - Read track/track-list.json from the learning folder to understand tracked user workflows
+         - Use tracked events as SUPPLEMENTARY guidance to prioritize features and understand navigation paths
+         - Review imgs/ screenshots from tracking for additional context
+         - CRITICAL: Do NOT rely solely on tracked behavior — independently explore the target app
+           to discover and document features the user did not interact with during tracking
     </action>
     <constraints>
       - BLOCKING: Empty directory or unreachable URL → halt with error
     </constraints>
-    <output>InputAnalysis {input_type, format, app_type, app_name, source_metadata}</output>
+    <output>InputAnalysis {input_type, format, app_type, app_name, source_metadata, has_behavior_context}</output>
   </step_1_1>
 
   <step_1_2>
     <name>Select Category</name>
     <action>
       1. Read purpose parameter from input
-      2. Validate against v1-supported categories (user-manual only)
+      2. Validate against supported categories: "user-manual", "application-reverse-engineering"
       3. Halt with error if unsupported or unknown category
     </action>
     <constraints>
-      - BLOCKING: purpose not "user-manual" → halt listing v1-supported categories
+      - BLOCKING: purpose not in ["user-manual", "application-reverse-engineering"] → halt listing supported categories
     </constraints>
-    <output>selected_category = "user-manual"</output>
+    <output>selected_category = "{purpose}"</output>
   </step_1_2>
 
   <step_1_3>
@@ -224,22 +238,28 @@ input:
     <name>Extract Source Content</name>
     <action>
       1. Read collection template from Phase 1 artifacts, parse H2 sections with extraction prompts
-      2. For each section: identify relevant sources, apply skip rules, extract/browse content
-      3. Synthesize knowledge into coherent content (never raw-dump files)
-      4. FOR running_web_app / public_url targets: Detect interaction patterns per element:
+      2. IF behavior_context.learning_folder is available from input:
+         a. Read track/track-list.json to extract user workflow patterns and navigation sequences
+         b. Use tracked events to prioritize which features/sections to explore first
+         c. Reference behavior screenshots (imgs/) for understanding UI states observed during tracking
+         d. CRITICAL: This is SUPPLEMENTARY guidance only — the extractor MUST still independently
+            explore the target app via Chrome DevTools to discover features beyond what was tracked
+      3. For each section: identify relevant sources, apply skip rules, extract/browse content
+      4. Synthesize knowledge into coherent content (never raw-dump files)
+      5. FOR running_web_app / public_url targets: Detect interaction patterns per element:
          - FORM, MODAL, CLI_DISPATCH, NAVIGATION, TOGGLE
          - For CLI_DISPATCH: MUST document terminal target, Enter-to-execute requirement, expected output, and completion signal
          - Record patterns in content file alongside feature descriptions
-      5. Screenshot strategy for running_web_app / public_url:
+      6. Screenshot strategy for running_web_app / public_url:
          a. Section 4 (Core Features): screenshot of each feature's primary UI state
          b. Section 5 (Workflows): screenshot at EACH STEP (before-action + after-action)
          c. Section 3 (Getting Started): screenshot at key quick start steps
          d. Name: screenshots/{section_nn}-{step_nn}-{description}.png
          e. Reference in content: ![Step N: Description](screenshots/{filename})
-      6. Write to checkpoint/content/section-{NN}-{slug}.md, update manifest per-section
-      7. Call tool skill validate_section operation on extracted content for early feedback
-      8. IF validation result contains criteria with status `incomplete` AND `missing_info[]` is non-empty → use `missing_info` entries to form targeted re-extraction prompts for the specific content gaps
-      9. IF tool skill feedback indicates gaps → adjust extraction prompts and re-extract before moving to next section
+      7. Write to checkpoint/content/section-{NN}-{slug}.md, update manifest per-section
+      8. Call tool skill validate_section operation on extracted content for early feedback
+      9. IF validation result contains criteria with status `incomplete` AND `missing_info[]` is non-empty → use `missing_info` entries to form targeted re-extraction prompts for the specific content gaps
+      10. IF tool skill feedback indicates gaps → adjust extraction prompts and re-extract before moving to next section
     </action>
     <constraints>
       - BLOCKING: All content must go through file paths in checkpoint — no inline content

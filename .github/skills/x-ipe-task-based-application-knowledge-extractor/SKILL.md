@@ -62,6 +62,13 @@ input:
     web_search_enabled: true
     timeout_seconds: 15
 
+  # Behavior Context (optional — provided by x-ipe-tool-learning-behavior-tracker-for-web)
+  behavior_context:
+    learning_folder: ""  # path to learning folder with track/track-list.json and imgs/
+                         # When provided, use tracked behavior data as SUPPLEMENTARY guidance
+                         # to prioritize features and understand user workflows.
+                         # The extractor MUST still explore the target independently via Chrome DevTools.
+
   # Deep Research Mode (optional)
   deep_research:
     rounds: 1           # default: 1 (single pass), max: 10, or "smart"
@@ -77,6 +84,7 @@ input:
   <field name="target" source="user-provided (path or URL)" />
   <field name="purpose" source="user-provided: 'user-manual' or 'application-reverse-engineering'" />
   <field name="config_overrides" source="optional, defaults: max_retries=3, web_search_enabled=true, timeout_seconds=15, max_files_per_section=50, max_validation_iterations=3, coverage_target=0.8" />
+  <field name="behavior_context.learning_folder" source="optional, from behavior tracker skill. Path to learning folder containing tracked events and screenshots." />
   <field name="deep_research.rounds" source="ask-user, default: 1, values: 1-10 or 'smart'" />
 </input_init>
 ```
@@ -97,7 +105,7 @@ input:
 <definition_of_ready>
   <checkpoint required="true">
     <name>Task Exists</name>
-    <verification>Task exists in task board (via x-ipe-tool-task-board-manager query) with status pending or in_progress</verification>
+    <verification>Task exists on task-board.md with status pending or in_progress</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>Input Validated</name>
@@ -152,23 +160,6 @@ input:
 ## Execution Procedure
 
 <procedure>
-
-<phase_0 name="Board — Register Task">
-  <step_0_1>
-    <name>Create Task on Board</name>
-    <action>
-      Call `x-ipe-tool-task-board-manager` → `task_create.py`:
-      - task_type: "Knowledge Extraction"
-      - description: summarize work from input context
-      - status: "in_progress"
-      - role: from input context
-      - assignee: from input context
-      Store returned task_id for later update.
-    </action>
-    <output>Task created on board with status in_progress</output>
-  </step_0_1>
-</phase_0>
-
 <phase_1 name="博学之 — Study Broadly">
   <step_1_1>
     <name>Analyze Input</name>
@@ -188,11 +179,17 @@ input:
          - public_url / running_web_app → Chrome DevTools (navigate, take_snapshot, take_screenshot for UI knowledge)
          - IF visual content would aid knowledge explanation → plan screenshot capture points
       5. NOTE: Chrome DevTools MCP is available for URL/web app targets — use take_screenshot to capture UI states that help explain features
+      6. IF behavior_context.learning_folder is provided:
+         - Read track/track-list.json from the learning folder to understand tracked user workflows
+         - Use tracked events as SUPPLEMENTARY guidance to prioritize features and understand navigation paths
+         - Review imgs/ screenshots from tracking for additional context
+         - CRITICAL: Do NOT rely solely on tracked behavior — independently explore the target app
+           to discover and document features the user did not interact with during tracking
     </action>
     <constraints>
       - BLOCKING: Empty directory or unreachable URL → halt with error
     </constraints>
-    <output>InputAnalysis {input_type, format, app_type, app_name, source_metadata}</output>
+    <output>InputAnalysis {input_type, format, app_type, app_name, source_metadata, has_behavior_context}</output>
   </step_1_1>
 
   <step_1_2>
@@ -241,22 +238,28 @@ input:
     <name>Extract Source Content</name>
     <action>
       1. Read collection template from Phase 1 artifacts, parse H2 sections with extraction prompts
-      2. For each section: identify relevant sources, apply skip rules, extract/browse content
-      3. Synthesize knowledge into coherent content (never raw-dump files)
-      4. FOR running_web_app / public_url targets: Detect interaction patterns per element:
+      2. IF behavior_context.learning_folder is available from input:
+         a. Read track/track-list.json to extract user workflow patterns and navigation sequences
+         b. Use tracked events to prioritize which features/sections to explore first
+         c. Reference behavior screenshots (imgs/) for understanding UI states observed during tracking
+         d. CRITICAL: This is SUPPLEMENTARY guidance only — the extractor MUST still independently
+            explore the target app via Chrome DevTools to discover features beyond what was tracked
+      3. For each section: identify relevant sources, apply skip rules, extract/browse content
+      4. Synthesize knowledge into coherent content (never raw-dump files)
+      5. FOR running_web_app / public_url targets: Detect interaction patterns per element:
          - FORM, MODAL, CLI_DISPATCH, NAVIGATION, TOGGLE
          - For CLI_DISPATCH: MUST document terminal target, Enter-to-execute requirement, expected output, and completion signal
          - Record patterns in content file alongside feature descriptions
-      5. Screenshot strategy for running_web_app / public_url:
+      6. Screenshot strategy for running_web_app / public_url:
          a. Section 4 (Core Features): screenshot of each feature's primary UI state
          b. Section 5 (Workflows): screenshot at EACH STEP (before-action + after-action)
          c. Section 3 (Getting Started): screenshot at key quick start steps
          d. Name: screenshots/{section_nn}-{step_nn}-{description}.png
          e. Reference in content: ![Step N: Description](screenshots/{filename})
-      6. Write to checkpoint/content/section-{NN}-{slug}.md, update manifest per-section
-      7. Call tool skill validate_section operation on extracted content for early feedback
-      8. IF validation result contains criteria with status `incomplete` AND `missing_info[]` is non-empty → use `missing_info` entries to form targeted re-extraction prompts for the specific content gaps
-      9. IF tool skill feedback indicates gaps → adjust extraction prompts and re-extract before moving to next section
+      7. Write to checkpoint/content/section-{NN}-{slug}.md, update manifest per-section
+      8. Call tool skill validate_section operation on extracted content for early feedback
+      9. IF validation result contains criteria with status `incomplete` AND `missing_info[]` is non-empty → use `missing_info` entries to form targeted re-extraction prompts for the specific content gaps
+      10. IF tool skill feedback indicates gaps → adjust extraction prompts and re-extract before moving to next section
     </action>
     <constraints>
       - BLOCKING: All content must go through file paths in checkpoint — no inline content
@@ -393,17 +396,6 @@ input:
     </constraints>
     <output>deep_research_summary { total_rounds_executed, final_coverage_pct, gap_analysis_per_round[] }</output>
   </step_5_3>
-
-  <step_5_4>
-    <name>Update Task on Board</name>
-    <action>
-      Call `x-ipe-tool-task-board-manager` → `task_update.py`:
-      - task_id: from Phase 0
-      - status: "done"
-      - output_links: list of deliverables produced in this skill execution
-    </action>
-    <output>Task marked done on board</output>
-  </step_5_4>
 </phase_5>
 
 <phase_6 name="继续执行 — Route and Execute">
@@ -413,7 +405,7 @@ input:
       1. Update manifest: status → "complete", completed_at → ISO 8601
       2. Populate Output Result with extraction_status, quality_score, quality_label, kb_output_path
       3. Clean up session: IF success/partial → remove entire session folder (all output already in .intake/); IF failed → preserve for debugging
-      4. Update task status → completed (via x-ipe-tool-task-board-manager)
+      4. Update task-board.md → completed
     </action>
     <constraints>
       - On success: remove entire .x-ipe-checkpoint/session-{timestamp}/ (output is in .intake/)

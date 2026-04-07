@@ -45,7 +45,7 @@ Add to Section 5 (Code Structure):
 - Trace the primary request flow through layers
 -->
 
-### For Section 2 (Design Patterns)
+### For Section 2 (Design Pattern Detection)
 <!-- ADDITIONAL PROMPTS:
 - Focus on patterns within a single codebase (no cross-module patterns)
 - Look for layering patterns: repository pattern, service pattern, middleware pattern

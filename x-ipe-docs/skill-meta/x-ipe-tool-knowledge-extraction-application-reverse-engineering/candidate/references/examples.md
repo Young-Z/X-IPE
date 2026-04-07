@@ -1,164 +1,233 @@
-# Usage Examples — Application Reverse Engineering
+# Usage Examples — Application Reverse Engineering Orchestrator (v2.0)
 
-> Examples showing how the Knowledge Extractor interacts with this tool skill.
+> Examples showing how the orchestrator dispatches to sub-skills and coordinates phased extraction.
 
 ---
 
-## Example 1: Full Extraction Flow
+## Example 1: Full Orchestration Flow (TypeScript Monorepo)
 
 ```yaml
-# Step 1: Extractor loads this skill and gets artifact paths
-Extractor: get_artifacts()
+# Scenario: Reverse engineering a TypeScript monorepo (11K files, 86K LOC)
+
+# ── Step 1: Discover available sub-skills ──
+Orchestrator: discover_sub_skills()
 → {
-    artifact_paths: {
-      playbook_template: "templates/playbook-template.md",
-      collection_template: "templates/collection-template.md",
-      acceptance_criteria: "templates/acceptance-criteria.md",
-      repo_type_mixins: {
-        monorepo: "templates/mixin-monorepo.md",
-        multi_module: "templates/mixin-multi-module.md",
-        single_module: "templates/mixin-single-module.md",
-        microservices: "templates/mixin-microservices.md"
-      },
-      language_type_mixins: {
-        python: "templates/mixin-python.md",
-        java: "templates/mixin-java.md",
-        javascript: "templates/mixin-javascript.md",
-        typescript: "templates/mixin-typescript.md",
-        go: "templates/mixin-go.md"
-      },
-      config_defaults: {
-        max_files_per_section: 30,
-        complexity_gate: { min_files: 10, min_loc: 500, min_dirs: 3 }
-      }
-    }
-  }
-
-# Step 2: Extractor detects repo-type and language → applies mixins
-Extractor: get_mixin(mixin_key="monorepo")
-→ { overlay content: cross-package analysis prompts, additional sections }
-
-Extractor: get_mixin(mixin_key="typescript")
-→ { overlay content: TypeScript-specific detection prompts }
-
-Extractor: get_mixin(mixin_key="javascript")
-→ { overlay content: JavaScript-specific detection prompts }
-
-# Step 3: Per-section extraction cycle (Phase 1 first)
-Extractor: get_collection_template(section_id="5-code-structure-analysis")
-→ { extraction prompts for Code Structure section }
-
-# ... extractor analyzes codebase using prompts ...
-
-Extractor: validate_section(section_id="5-code-structure-analysis", content_path=".x-ipe-checkpoint/section-5.md")
-→ { passed: true, criteria: [
-    { id: "REQ-1", status: "pass", feedback: "Directory tree present" },
-    { id: "REQ-2", status: "pass", feedback: "Directory mapping table found" },
-    ...
-  ], missing_info: [] }
-
-Extractor: pack_section(section_id="5-code-structure-analysis", content_path=".x-ipe-checkpoint/section-5.md")
-→ { formatted inline Markdown content }
-
-Extractor: score_quality(section_id="5-code-structure-analysis", content_path=".x-ipe-checkpoint/section-5.md")
-→ { section_quality_score: 0.87, dimensions: {
-    completeness: 0.90, structure: 0.85, clarity: 0.80,
-    accuracy: 0.90, freshness: 1.0, coverage: 0.75
-  }, improvement_hints: [] }
-```
-
----
-
-## Example 2: Mixin Composition Order
-
-```yaml
-# Scenario: A Python monorepo (e.g., a data platform with multiple packages)
-
-# Step 1: Apply repo-type mixin FIRST (primary overlay)
-Extractor: get_mixin(mixin_key="monorepo")
-→ Adds: cross-package dependency prompts, per-package module view, workspace analysis
-
-# Step 2: Apply language-type mixin SECOND (additive overlay)
-Extractor: get_mixin(mixin_key="python")
-→ Adds: Python-specific pattern detection, pyproject.toml parsing, pytest fixtures
-
-# Result: Base templates + monorepo structural analysis + Python-specific prompts
-# The monorepo mixin defines HOW to analyze structure.
-# The Python mixin adds WHAT to look for in Python code.
-```
-
----
-
-## Example 3: Handling Validation with Incomplete Content
-
-```yaml
-# Section 8 (Source Code Tests) — coverage below 80%
-Extractor: validate_section(section_id="8-source-code-tests", content_path=".x-ipe-checkpoint/section-8.md")
-→ { passed: false, criteria: [
-    { id: "REQ-1", status: "pass", feedback: "AAA structure followed" },
-    { id: "REQ-2", status: "pass", feedback: "All tests pass" },
-    { id: "REQ-3", status: "incomplete", feedback: "Coverage at 62%, below 80% target" },
-    { id: "REQ-4", status: "pass", feedback: "Framework matches (pytest)" },
-    { id: "REQ-5", status: "pass", feedback: "Source code unmodified" },
-    { id: "REQ-6", status: "pass", feedback: "Knowledge mapping documented" }
-  ], missing_info: [
-    "Coverage gap in modules: auth_service (45%), payment_handler (38%). Generate additional tests for these modules."
-  ] }
-
-# Extractor uses missing_info to request more test generation
-# After iteration, re-validates until coverage ≥80% or max iterations reached
-```
-
----
-
-## Example 4: Test Walkthrough (Source-Code Verification)
-
-```yaml
-# After all 8 sections extracted, verify claims against actual code
-Extractor: test_walkthrough(content_path=".x-ipe-checkpoint/all-sections.md", repo_path="/path/to/repo")
-→ { 
-    claims_total: 47,
-    claims_verified: 43,
-    claims_failed: 4,
-    verification_score: 0.91,
-    unverified_claims: [
-      { claim_id: "arch-3", type: "module_exists", issue: "Module 'analytics_engine' not found at stated path", suggestion: "Check if module was renamed or moved" },
-      { claim_id: "pattern-7", type: "pattern_detected", issue: "Observer pattern at utils/events.py:42 — file exists but no EventEmitter class found", suggestion: "Verify line numbers against current code version" },
-      { claim_id: "dep-12", type: "dependency_link", issue: "Claimed auth → billing import not found", suggestion: "Check indirect dependency through shared module" },
-      { claim_id: "stack-2", type: "tech_stack_item", issue: "Redis version 7.2 claimed but redis==6.2.0 in requirements.txt", suggestion: "Update version reference" }
+    sub_skills: [
+      { name: "x-ipe-tool-rev-eng-code-structure-analysis", section_id: 5, phase: "1-Scan", has_extract: true },
+      { name: "x-ipe-tool-rev-eng-technology-stack",        section_id: 7, phase: "1-Scan", has_extract: true },
+      { name: "x-ipe-tool-rev-eng-test-analysis",           section_id: 8, phase: "2-Tests", has_extract: true },
+      { name: "x-ipe-tool-rev-eng-architecture-recovery",   section_id: 1, phase: "3-Deep", has_extract: true },
+      { name: "x-ipe-tool-rev-eng-design-pattern-detection",section_id: 2, phase: "3-Deep", has_extract: true },
+      { name: "x-ipe-tool-rev-eng-api-contract-extraction", section_id: 3, phase: "3-Deep", has_extract: true },
+      { name: "x-ipe-tool-rev-eng-dependency-analysis",     section_id: 4, phase: "3-Deep", has_extract: true },
+      { name: "x-ipe-tool-rev-eng-data-flow-analysis",      section_id: 6, phase: "3-Deep", has_extract: true }
     ]
   }
+
+# ── Step 2: Apply cross-cutting mixins ──
+Orchestrator: get_mixin(mixin_key="monorepo")
+→ { overlay: cross-package analysis prompts, per-package module view, workspace analysis }
+
+Orchestrator: get_mixin(mixin_key="typescript")
+→ { overlay: TypeScript-specific detection prompts, tsconfig analysis }
+
+# ── Step 3: Execute orchestrate_phases (full 3-phase run) ──
+Orchestrator: orchestrate_phases(
+    repo_path="/workspace/openclaw",
+    output_path=".intake/openclaw-rev-eng/"
+)
+
+# ── Phase 1: Scan (parallel dispatch) ──
+# Dispatches sections 5 and 7 simultaneously:
+
+  dispatch_section(section_id=5, repo_path="/workspace/openclaw",
+    output_path=".intake/openclaw-rev-eng/section-05-code-structure-analysis/")
+  → { section_path: ".intake/.../section-05-.../", quality_score: 0.89, success: true }
+
+  dispatch_section(section_id=7, repo_path="/workspace/openclaw",
+    output_path=".intake/openclaw-rev-eng/section-07-technology-stack/")
+  → { section_path: ".intake/.../section-07-.../", quality_score: 0.92, success: true }
+
+# phase1_results = {
+#   "5": { path: "section-05-.../", quality: 0.89, modules: [...], directories: [...] },
+#   "7": { path: "section-07-.../", quality: 0.92, technologies: [...], frameworks: [...] }
+# }
+
+# ── Phase 2: Tests (depends on Phase 1) ──
+# Phase 1 scan results passed as context so test analysis knows project structure:
+
+  dispatch_section(section_id=8, repo_path="/workspace/openclaw",
+    output_path=".intake/openclaw-rev-eng/section-08-source-code-tests/",
+    section_context={ phase1_results: { "5": ..., "7": ... } })
+  → { section_path: ".intake/.../section-08-.../", quality_score: 0.85, success: true,
+      metadata: { tests_collected: 3293, tests_executed: 421, coverage: 0.78 } }
+
+# phase2_results = {
+#   "8": { path: "section-08-.../", quality: 0.85, test_insights: {...}, coverage_map: {...} }
+# }
+
+# ── Phase 3: Deep Analysis (parallel, depends on Phase 1+2) ──
+# All Phase 1+2 results passed as context:
+
+  dispatch_section(section_id=1, ..., section_context={ phase1_results, phase2_results })
+  → { quality_score: 0.93, success: true }   # Architecture Recovery
+
+  dispatch_section(section_id=2, ..., section_context={ phase1_results, phase2_results })
+  → { quality_score: 0.91, success: true }   # Design Pattern Detection
+
+  dispatch_section(section_id=3, ..., section_context={ phase1_results, phase2_results })
+  → { quality_score: 0.88, success: true }   # API Contract Extraction
+
+  dispatch_section(section_id=4, ..., section_context={ phase1_results, phase2_results })
+  → { quality_score: 0.90, success: true }   # Dependency Analysis
+
+  dispatch_section(section_id=6, ..., section_context={ phase1_results, phase2_results })
+  → { quality_score: 0.87, success: true }   # Data Flow Analysis
+
+# ── Step 4: Post-extraction (orchestrator cross-section work) ──
+
+Orchestrator: generate_index(output_path=".intake/openclaw-rev-eng/")
+→ { index_path: ".intake/openclaw-rev-eng/index.md" }
+# Generated index.md:
+#   | # | Section                | Quality | Lines | Description                    |
+#   |---|------------------------|---------|-------|--------------------------------|
+#   | 1 | Architecture Recovery  | 0.93    | 1375  | 4-level architecture recovery  |
+#   | 2 | Design Patterns        | 0.91    | 1528  | 42 patterns with evidence      |
+#   | 5 | Code Structure         | 0.89    | 890   | Project layout + modules       |
+#   ...
+#   Reading Order: 5 → 7 → 1 → 6 → 2 → 3 → 4 → 8
+
+Orchestrator: aggregate_quality()
+→ {
+    overall_score: 0.896,
+    classification: "HIGH",
+    section_scores: {
+      "1": { score: 0.93, weight: 0.15, weighted: 0.1395 },
+      "2": { score: 0.91, weight: 0.15, weighted: 0.1365 },
+      "3": { score: 0.88, weight: 0.10, weighted: 0.0880 },
+      "4": { score: 0.90, weight: 0.10, weighted: 0.0900 },
+      "5": { score: 0.89, weight: 0.10, weighted: 0.0890 },
+      "6": { score: 0.87, weight: 0.15, weighted: 0.1305 },
+      "7": { score: 0.92, weight: 0.10, weighted: 0.0920 },
+      "8": { score: 0.85, weight: 0.15, weighted: 0.1275 }
+    },
+    weakest_sections: []  # all above 0.70
+  }
+
+Orchestrator: validate_cross_references()
+→ {
+    total_references: 127,
+    valid_references: 119,
+    invalid_references: 8,
+    consistency_score: 0.937,
+    issues: [
+      { source_section: 1, target_section: 5, claim: "analytics-engine module",
+        issue: "Referenced in architecture but not found in code structure scan",
+        severity: "warning" },
+      { source_section: 4, target_section: 7, claim: "Redis 7.2",
+        issue: "Dependency declares redis==6.2.0 but tech stack says 7.2",
+        severity: "error" }
+    ]
+  }
+
+# Final output:
+# .intake/openclaw-rev-eng/
+# ├── index.md                    ← Master TOC with quality scores
+# ├── section-01-.../             ← 8 section subfolders from sub-skills
+# ├── section-02-.../
+# ├── ...
+# ├── extraction_report.md        ← Timing, phases, quality summary
+# └── cross-reference-validation.md ← 8 issues flagged
 ```
 
 ---
 
-## Example 5: Quality Scoring with Section-Specific Weights
+## Example 2: Partial Extraction with Missing Sub-Skill
 
 ```yaml
-# Architecture section uses accuracy-heavy weights
-Extractor: score_quality(section_id="1-architecture-recovery", content_path="...")
-→ { section_quality_score: 0.78, dimensions: {
-    completeness: 0.85,  # weight 0.20
-    structure: 0.90,     # weight 0.10
-    clarity: 0.70,       # weight 0.15
-    accuracy: 0.72,      # weight 0.35  ← dominant weight
-    freshness: 0.95,     # weight 0.10
-    coverage: 0.65       # weight 0.10
-  }, improvement_hints: [
-    "accuracy: 2 architecture claims lack file:line evidence",
-    "coverage: Only 3 of 7 modules have detailed component breakdown"
-  ] }
+# Scenario: Python single-module API service.
+# The x-ipe-tool-rev-eng-data-flow-analysis sub-skill is not installed.
 
-# Tests section uses coverage-heavy weights
-Extractor: score_quality(section_id="8-source-code-tests", content_path="...")
-→ { section_quality_score: 0.71, dimensions: {
-    completeness: 0.80,  # weight 0.10
-    structure: 0.85,     # weight 0.05
-    clarity: 0.75,       # weight 0.10
-    accuracy: 0.90,      # weight 0.15
-    freshness: 1.00,     # weight 0.10
-    coverage: 0.62       # weight 0.50  ← dominant weight, dragging score down
-  }, improvement_hints: [
-    "coverage: Line coverage at 62%, target is 80%. Uncovered modules: payment_handler, notification_service"
-  ] }
+# ── Step 1: Discover — one sub-skill missing ──
+Orchestrator: discover_sub_skills()
+→ {
+    sub_skills: [
+      { name: "x-ipe-tool-rev-eng-code-structure-analysis", section_id: 5, phase: "1-Scan" },
+      { name: "x-ipe-tool-rev-eng-technology-stack",        section_id: 7, phase: "1-Scan" },
+      { name: "x-ipe-tool-rev-eng-test-analysis",           section_id: 8, phase: "2-Tests" },
+      { name: "x-ipe-tool-rev-eng-architecture-recovery",   section_id: 1, phase: "3-Deep" },
+      { name: "x-ipe-tool-rev-eng-design-pattern-detection",section_id: 2, phase: "3-Deep" },
+      { name: "x-ipe-tool-rev-eng-api-contract-extraction", section_id: 3, phase: "3-Deep" },
+      { name: "x-ipe-tool-rev-eng-dependency-analysis",     section_id: 4, phase: "3-Deep" }
+      # NOTE: section 6 (data-flow-analysis) NOT discovered
+    ]
+  }
+
+# ── Step 2: Mixins ──
+Orchestrator: get_mixin(mixin_key="single-module")
+→ { overlay: single-module structural analysis }
+
+Orchestrator: get_mixin(mixin_key="python")
+→ { overlay: Python-specific detection, pyproject.toml parsing, pytest fixtures }
+
+# ── Step 3: Orchestrate — partial run ──
+Orchestrator: orchestrate_phases(
+    repo_path="/workspace/my-api",
+    output_path=".intake/my-api-rev-eng/"
+)
+
+# Phase 1: sections 5, 7 → both succeed
+# Phase 2: section 8 → succeeds (with phase1 context)
+# Phase 3: sections 1, 2, 3, 4 → succeed; section 6 → SKIPPED (no sub-skill)
+
+# ── Step 4: Quality reflects missing section ──
+Orchestrator: aggregate_quality()
+→ {
+    overall_score: 0.761,
+    classification: "ACCEPTABLE",
+    section_scores: {
+      "1": { score: 0.88, weight: 0.15, weighted: 0.132 },
+      "2": { score: 0.85, weight: 0.15, weighted: 0.128 },
+      "3": { score: 0.82, weight: 0.10, weighted: 0.082 },
+      "4": { score: 0.84, weight: 0.10, weighted: 0.084 },
+      "5": { score: 0.90, weight: 0.10, weighted: 0.090 },
+      "6": { score: 0.00, weight: 0.15, weighted: 0.000 },  # ← missing, drags score
+      "7": { score: 0.91, weight: 0.10, weighted: 0.091 },
+      "8": { score: 0.79, weight: 0.15, weighted: 0.119 }
+    },
+    weakest_sections: [
+      { section_id: 6, score: 0.0,
+        hints: ["Sub-skill x-ipe-tool-rev-eng-data-flow-analysis not installed. Install to complete extraction."] }
+    ]
+  }
+
+# ── Cross-references still run on available sections ──
+Orchestrator: validate_cross_references()
+→ {
+    total_references: 89,
+    valid_references: 84,
+    invalid_references: 5,
+    consistency_score: 0.944,
+    issues: [
+      { source_section: 1, target_section: 6,
+        claim: "Data flow references in architecture",
+        issue: "Section 6 missing — cannot validate data flow claims",
+        severity: "info" }
+    ]
+  }
+
+# Final output (7 of 8 sections):
+# .intake/my-api-rev-eng/
+# ├── index.md                           ← Notes section 6 as missing
+# ├── section-01-architecture-recovery/
+# ├── section-02-design-patterns/
+# ├── section-03-api-contracts/
+# ├── section-04-dependency-analysis/
+# ├── section-05-code-structure-analysis/
+# ├── section-07-technology-stack/
+# ├── section-08-source-code-tests/
+# │   └── tests/                         ← Executable pytest files
+# ├── extraction_report.md
+# └── cross-reference-validation.md
+# (no section-06-data-flow/ — sub-skill not available)
 ```

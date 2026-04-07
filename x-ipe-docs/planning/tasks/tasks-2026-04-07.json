@@ -55,6 +55,17 @@
       "next_task": "",
       "created_at": "2026-04-07T06:04:40.140218+00:00",
       "last_updated": "2026-04-07T06:07:31.751480+00:00"
+    },
+    {
+      "task_id": "TASK-AUTO",
+      "task_type": "Bug Fix",
+      "description": "Learning skill tracker-toolbar.js PIIMasker masks ALL textContent and value fields as [MASKED] by default. User wants original text collected and shown in track-list.json instead of [MASKED].",
+      "role": "Bolt",
+      "status": "in_progress",
+      "output_links": [],
+      "next_task": "",
+      "created_at": "2026-04-07T06:40:36.968462+00:00",
+      "last_updated": "2026-04-07T06:40:36.968462+00:00"
     }
   ]
 }

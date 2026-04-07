@@ -34,8 +34,11 @@
 - IF input_type involves UI → plan screenshot capture points (login screens, dashboards, key workflows)
 - IF images can aid knowledge explanation → mark sections for screenshot capture in manifest
 - Store planned techniques in `source_metadata.extraction_techniques[]`
+- IF `behavior_context.learning_folder` is provided → read track/track-list.json for tracked user workflows,
+  use as supplementary guidance for feature prioritization and navigation path understanding.
+  Set `has_behavior_context = true` in InputAnalysis. CRITICAL: still explore target independently.
 
-**VERIFY:** ✅ InputAnalysis created with input_type, format, app_type, source_metadata
+**VERIFY:** ✅ InputAnalysis created with input_type, format, app_type, source_metadata, has_behavior_context
 
 **REFERENCE:** `references/input-detection-heuristics.md`, `templates/input-analysis-output.md`
 
@@ -346,7 +349,7 @@ For EACH section in collection template order:
 1. Update manifest: `status` → "complete", `completed_at` → ISO 8601
 2. Populate Output Result: `extraction_status`, `quality_score`, `quality_label`, `kb_output_path`
 3. Set `task_output_links[]`: extraction_report.md, manifest paths
-4. Update task status → completed (via x-ipe-tool-task-board-manager)
+4. Update task-board.md → completed
 5. IF extraction_status == "complete" or "partial":
    - Remove ENTIRE session folder `{checkpoint_path}` (manifest, content, feedback, screenshots, packed — all)
    - Rationale: all useful output is already in `.intake/{extraction_id}/`; checkpoint was temporary

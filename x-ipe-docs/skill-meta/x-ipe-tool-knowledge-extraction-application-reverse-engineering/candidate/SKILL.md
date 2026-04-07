@@ -1,44 +1,53 @@
 ---
 name: x-ipe-tool-knowledge-extraction-application-reverse-engineering
-version: "1.0"
-description: Provides playbook, collection template, acceptance criteria, and two-dimension mixins (repo-type × language-type) for application reverse engineering knowledge extraction. Loaded by x-ipe-task-based-application-knowledge-extractor during Phase 1. Triggers on category "application-reverse-engineering".
-categories:
-  - "application-reverse-engineering"
+version: "2.0"
+description: >
+  Orchestrator for application reverse engineering knowledge extraction.
+  Dynamically discovers section-specific sub-skills, coordinates 3-phase
+  execution (Scan → Tests → Deep), generates the master index, aggregates
+  quality scores, and validates cross-references. Retains cross-cutting
+  mixin templates (repo-type × language-type).
 ---
 
-# Knowledge Extraction — Application Reverse Engineering
+# Knowledge Extraction — Application Reverse Engineering (Orchestrator)
 
 ## Purpose
 
-AI Agents follow this skill to provide application reverse engineering extraction artifacts:
-1. Base playbook template defining 8-section phased extraction layout
-2. Collection template with per-section extraction prompts and source priority
-3. Acceptance criteria for validating extracted content
-4. Two-dimension mixins (repo-type × language-type) for codebase-specific overlays
+AI Agents follow this skill to orchestrate application reverse engineering extraction:
+1. **Discover** section-specific sub-skills dynamically (glob pattern)
+2. **Dispatch** extraction work to sub-skills in 3 phases with dependency passing
+3. **Collect** results and generate master index.md (LL-001)
+4. **Aggregate** quality scores across all sections
+5. **Validate** cross-section consistency
+6. Provide cross-cutting **mixin templates** (repo-type × language-type)
 
 ---
 
 ## Important Notes
 
-BLOCKING: This is a **tool skill** — it provides templates and validation only. The extraction process is driven by `x-ipe-task-based-application-knowledge-extractor`.
-CRITICAL: All template files MUST exist at the paths declared in `get_artifacts` output. The extractor verifies existence before proceeding.
-CRITICAL: **Mixin composition order matters.** Repo-type mixin is applied first (primary structural overlay). Language-type mixins are merged on top (additive). Only one repo-type, but multiple language-types may apply.
+BLOCKING: This is an **orchestrator skill** — it dispatches to sub-skills, not a monolithic template provider.
+CRITICAL: Sub-skills are discovered dynamically via glob. Do NOT hardcode sub-skill names or paths.
+CRITICAL: Phase dependencies are strict: Phase 2 receives Phase 1 output; Phase 3 receives Phase 1+2 output.
+CRITICAL: Mixin composition order: repo-type first (primary), language-type merged on top (additive, may be multiple).
 
 ---
 
 ## About
 
-This skill is a template provider for the Application Knowledge Extractor. When the extractor receives a `purpose: "application-reverse-engineering"` request, it discovers this skill by globbing `.github/skills/x-ipe-tool-knowledge-extraction-*/SKILL.md` and matching `categories: ["application-reverse-engineering"]` in the frontmatter.
+This skill orchestrates the full application reverse engineering extraction by discovering
+and dispatching to 8 section-specific sub-skills. The extractor (`x-ipe-task-based-application-knowledge-extractor`)
+invokes this orchestrator, which coordinates the 3-phase execution.
 
 **Key Concepts:**
-- **Playbook Template** — Defines 8 extraction sections in 3 phases: Scan (5, 7), Tests (8), Deep (1, 2, 3, 4, 6)
-- **Collection Template** — Per-section extraction prompts with HTML comments guiding source analysis
-- **Acceptance Criteria** — Validation rules per section with `[REQ]`/`[OPT]` markers
-- **Repo-Type Mixin** — Structural overlay for monorepo, multi-module, single-module, or microservices
-- **Language-Type Mixin** — Additive overlay for Python, Java, JavaScript, TypeScript, or Go
-- **Complexity Gate** — Minimum thresholds (≥10 files, ≥500 LOC, ≥3 dirs) before extraction proceeds
-- **Quality Scoring** — 6-dimension weighted scoring with 3 section-specific weight profiles
-- **Mixin Composition** — Repo-type applied first (primary, only one); language-type merged on top (additive, may be multiple)
+- **Sub-Skill Discovery** — Glob `.github/skills/x-ipe-tool-rev-eng-*/SKILL.md`, parse frontmatter
+- **3-Phase Execution** — Phase 1 (Scan: 5, 7) → Phase 2 (Tests: 8) → Phase 3 (Deep: 1, 2, 3, 4, 6)
+- **Context Passing** — Phase 1 feeds Phase 2; Phase 1+2 feed Phase 3
+- **Master Index** — TOC with quality scores, reading order (LL-001)
+- **Quality Aggregation** — Weighted scores rolled up into overall score
+- **Cross-Reference Validation** — Cross-section consistency checks
+- **Mixin Templates** — Cross-cutting repo-type and language-type overlays
+
+**Phases:** `P1 (∥ 5,7) → P2 (8, needs P1) → P3 (∥ 1,2,3,4,6, needs P1+P2)`
 
 ---
 
@@ -50,8 +59,10 @@ triggers:
   - "category: application-reverse-engineering"
   - "reverse engineer source code"
   - "extract architecture from codebase"
+  - "orchestrate reverse engineering"
 
 not_for:
+  - "Single section extraction" → invoke sub-skill directly
   - "User manual extraction" → use x-ipe-tool-knowledge-extraction-user-manual
   - "Direct README update" → use x-ipe-tool-readme-updator
 ```
@@ -62,64 +73,18 @@ not_for:
 
 ```yaml
 input:
-  operation: "get_artifacts | get_collection_template | validate_section | get_mixin | pack_section | score_quality | test_walkthrough"
+  operation: "discover_sub_skills | dispatch_section | orchestrate_phases | get_mixin | generate_index | aggregate_quality | validate_cross_references"
   category: "application-reverse-engineering"
-  section_id: "string | null"          # e.g., "1-architecture-recovery", "5-code-structure-analysis"
-  content_path: "string | null"        # Path to extracted content file
-  mixin_key: "string | null"           # e.g., "monorepo", "python" — used by get_mixin
-  repo_path: "string | null"           # Path to target repo — used by test_walkthrough
+  section_id: "integer | null"                # 1–8, for dispatch_section
+  repo_path: "string"                         # Target repository (required for orchestrate/dispatch)
+  output_path: "string"                       # .intake/{extraction_id}/ (required for orchestrate/generate/validate)
+  mixin_key: "string | null"                  # e.g., "monorepo", "python" (required for get_mixin)
+  section_context:                            # Built during phase execution
+    phase1_output: "map | null"              # Section 5 + 7 output paths
+    phase2_output: "map | null"              # Section 8 output path
   config:
     max_files_per_section: 30
-    complexity_gate:
-      min_files: 10
-      min_loc: 500
-      min_dirs: 3
-```
-
-### Input Initialization
-
-```xml
-<input_init>
-  <field name="operation" source="Caller specifies which operation to perform" />
-  <field name="category" source="Always 'application-reverse-engineering' for this skill" />
-
-  <field name="section_id" source="Caller provides section identifier">
-    <steps>
-      1. Required for validate_section, pack_section, and score_quality operations
-      2. Must match an H2 slug from playbook template (e.g., "1-architecture-recovery", "8-source-code-tests")
-    </steps>
-  </field>
-
-  <field name="content_path" source="Caller provides path to extracted content in .x-ipe-checkpoint/">
-    <steps>
-      1. Path must exist and be readable
-      2. Content must be UTF-8 markdown
-    </steps>
-  </field>
-
-  <field name="mixin_key" source="Caller specifies mixin identifier for get_mixin">
-    <steps>
-      1. Must be one of: monorepo, multi-module, single-module, microservices (repo-type)
-         OR: python, java, javascript, typescript, go (language-type)
-      2. IF null and operation is get_mixin → return error INVALID_MIXIN_KEY
-    </steps>
-  </field>
-
-  <field name="repo_path" source="Caller provides path to target repository">
-    <steps>
-      1. Optional — only used by test_walkthrough operation
-      2. IF provided → source-code verification mode (glob, grep, import tracing)
-      3. IF null → offline structural validation only
-    </steps>
-  </field>
-
-  <field name="config" source="Caller provides or uses defaults">
-    <steps>
-      1. max_files_per_section defaults to 30
-      2. complexity_gate defaults to { min_files: 10, min_loc: 500, min_dirs: 3 }
-    </steps>
-  </field>
-</input_init>
+    complexity_gate: { min_files: 10, min_loc: 500, min_dirs: 3 }
 ```
 
 ---
@@ -129,16 +94,20 @@ input:
 ```xml
 <definition_of_ready>
   <checkpoint required="true">
-    <name>Template files exist</name>
-    <verification>All files in templates/ directory are present and readable</verification>
+    <name>Valid operation requested</name>
+    <verification>operation matches one of the 7 defined operations</verification>
   </checkpoint>
   <checkpoint required="true">
-    <name>Valid operation requested</name>
-    <verification>operation parameter matches one of the 7 defined operations</verification>
+    <name>Sub-skills discoverable</name>
+    <verification>Glob .github/skills/x-ipe-tool-rev-eng-*/SKILL.md returns ≥1 result</verification>
+  </checkpoint>
+  <checkpoint required="true">
+    <name>Mixin templates exist</name>
+    <verification>All mixin files in templates/ are present and readable</verification>
   </checkpoint>
   <checkpoint required="false">
-    <name>Content file exists (for validate/pack/score)</name>
-    <verification>IF operation is validate_section, pack_section, or score_quality THEN content_path file exists</verification>
+    <name>Repo path valid (for extraction operations)</name>
+    <verification>IF orchestrate_phases or dispatch_section THEN repo_path is a directory</verification>
   </checkpoint>
 </definition_of_ready>
 ```
@@ -147,90 +116,111 @@ input:
 
 ## Operations
 
-### Operation: get_artifacts
+### Operation: discover_sub_skills
 
-**When:** Extractor Step 1.3 loads this skill and needs paths to all templates.
+**When:** First step — discover available sub-skills before dispatching.
 
 ```xml
-<operation name="get_artifacts">
+<operation name="discover_sub_skills">
   <action>
-    1. Return paths to all template files relative to skill root:
-       - playbook_template: templates/playbook-template.md
-       - collection_template: templates/collection-template.md
-       - acceptance_criteria: templates/acceptance-criteria.md
-    2. Return repo-type mixin paths:
-       - repo_type_mixins.monorepo: templates/mixin-monorepo.md
-       - repo_type_mixins.multi_module: templates/mixin-multi-module.md
-       - repo_type_mixins.single_module: templates/mixin-single-module.md
-       - repo_type_mixins.microservices: templates/mixin-microservices.md
-    3. Return language-type mixin paths:
-       - language_type_mixins.python: templates/mixin-python.md
-       - language_type_mixins.java: templates/mixin-java.md
-       - language_type_mixins.javascript: templates/mixin-javascript.md
-       - language_type_mixins.typescript: templates/mixin-typescript.md
-       - language_type_mixins.go: templates/mixin-go.md
-    4. Return config defaults:
-       - max_files_per_section: 30
-       - complexity_gate: { min_files: 10, min_loc: 500, min_dirs: 3 }
+    1. Glob: .github/skills/x-ipe-tool-rev-eng-*/SKILL.md
+    2. For each matched file:
+       a. Parse YAML frontmatter (name, description, section_id, phase)
+       b. Verify the skill has an `extract` operation defined
+       c. Record: { name, section_id, phase, path, description }
+    3. Sort by phase (1-Scan, 2-Tests, 3-Deep), then by section_id
+    4. Validate all 3 phases have at least one sub-skill
+    5. Return the discovered sub-skill registry
   </action>
+  <constraints>
+    - BLOCKING: Do NOT hardcode sub-skill names — always discover via glob
+    - CRITICAL: Missing sub-skills are warnings, not errors (partial extraction is valid)
+  </constraints>
   <output>
-    artifact_paths object with playbook_template, collection_template,
-    acceptance_criteria, repo_type_mixins map, language_type_mixins map, config_defaults
+    sub_skills: [{ name, section_id, phase, path, description, has_extract: bool }]
   </output>
 </operation>
 ```
 
-### Operation: get_collection_template
+### Operation: dispatch_section
 
-**When:** Extractor Step 2.1 reads section-specific extraction prompts.
+**When:** Orchestrator needs to invoke a specific sub-skill for one section.
 
 ```xml
-<operation name="get_collection_template">
+<operation name="dispatch_section">
   <action>
-    1. Read templates/collection-template.md
-    2. IF section_id provided → extract only that section's content
-    3. ELSE → return full template with all 8 sections
-    4. Each section contains HTML comments with EXTRACTION PROMPTS, SOURCE PRIORITY, and PHASE CONTEXT
+    1. Look up section_id in the discovered sub-skill registry
+    2. IF no sub-skill found for section_id → return SECTION_NOT_FOUND error
+    3. Build invocation context:
+       a. repo_path: path to target repository
+       b. output_path: {output_path}/section-{nn}-{slug}/
+       c. phase1_output: paths from Phase 1 results (if available)
+       d. phase2_output: paths from Phase 2 results (if available)
+       e. config: complexity_gate, max_files_per_section
+    4. Invoke the sub-skill's `extract` operation with the built context
+    5. Collect sub-skill output: { section_path, quality_score, metadata }
+    6. Return the dispatch result
   </action>
   <constraints>
-    - BLOCKING: Do NOT modify prompt content; return as-is from template
+    - BLOCKING: section_id is required
+    - CRITICAL: Phase context MUST be passed — Phase 2 sub-skill needs phase1_output,
+      Phase 3 sub-skills need phase1_output + phase2_output
+    - CRITICAL: Create output subfolder before invoking sub-skill
   </constraints>
-  <output>Markdown content with extraction prompts in HTML comments</output>
+  <output>
+    dispatch_result: { section_id, sub_skill_name, section_path, quality_score, success: bool, errors: [] }
+  </output>
 </operation>
 ```
 
-### Operation: validate_section
+### Operation: orchestrate_phases
 
-**When:** Extractor Step 3.1 validates extracted content against acceptance criteria.
+**When:** Full extraction requested — execute all 3 phases in order.
 
 ```xml
-<operation name="validate_section">
+<operation name="orchestrate_phases">
   <action>
-    1. Read templates/acceptance-criteria.md
-    2. Extract criteria for the given section_id
-    3. Read content at content_path
-    4. Evaluate each criterion against the content:
-       a. For each checklist item, check if content satisfies the rule
-       b. Mark as PASS, FAIL, or INCOMPLETE with brief feedback
-    5. IF any REQ criterion fails due to insufficient source material (not poor writing):
-       a. Mark criterion as INCOMPLETE (distinct from FAIL)
-       b. Add to missing_info[] with description of what content is needed
-    6. Return validation result with per-criterion status
+    1. Run discover_sub_skills to build the registry
+    2. Create output directory: {output_path}/
+    3. **Phase 1 — Scan (parallel):**
+       a. Dispatch sections 5 and 7 in parallel
+       b. Collect results: phase1_output = { "5": result_5, "7": result_7 }
+       c. IF any Phase 1 section fails → log warning, continue with available results
+    4. **Phase 2 — Tests (depends on Phase 1):**
+       a. Dispatch section 8 with phase1_output
+       b. Collect result: phase2_output = { "8": result_8 }
+       c. IF Phase 2 fails → log warning, continue (Phase 3 runs without test context)
+    5. **Phase 3 — Deep Analysis (parallel, depends on Phase 1+2):**
+       a. Dispatch sections 1, 2, 3, 4, 6 in parallel with phase1_output + phase2_output
+       c. Collect results: phase3_results = { "1": result_1, ... "6": result_6 }
+    6. Run generate_index with all section results
+    7. Run aggregate_quality across all sections
+    8. Run validate_cross_references across all sections
+    9. Generate extraction_report.md with timing, phase results, quality summary
+    10. Return orchestration result
   </action>
   <constraints>
-    - BLOCKING: section_id and content_path are required
-    - CRITICAL: ALL criteria must be evaluated — do not skip any
-    - CRITICAL: Distinguish FAIL (content exists but is wrong) from INCOMPLETE (content is missing/thin)
+    - BLOCKING: repo_path and output_path are required
+    - CRITICAL: Phase ordering is STRICT — Phase 2 MUST wait for Phase 1; Phase 3 MUST wait for Phase 1+2
+    - CRITICAL: Within a phase, sections run in parallel (no inter-section dependencies)
+    - Partial success is valid: failed sections are logged but don't block others
   </constraints>
   <output>
-    validation_result: { section_id, passed: bool, criteria: [{id, status, feedback}], missing_info: [] }
+    orchestration_result: {
+      phases: { phase1: { sections, status }, phase2: { sections, status }, phase3: { sections, status } },
+      overall_quality: float,
+      index_path: string,
+      report_path: string,
+      cross_ref_path: string,
+      errors: []
+    }
   </output>
 </operation>
 ```
 
 ### Operation: get_mixin
 
-**When:** Extractor needs codebase-specific extraction prompts (repo-type or language-type).
+**When:** Extractor needs codebase-specific overlays (repo-type or language-type).
 
 ```xml
 <operation name="get_mixin">
@@ -246,142 +236,118 @@ input:
                       typescript → templates/mixin-typescript.md
                       go → templates/mixin-go.md
     2. Read and return the mixin template content
-    3. Mixin contains detection signals, additional sections, and section overlay prompts
+    3. Mixin contains detection signals, additional prompts, and section overlays
   </action>
   <constraints>
     - BLOCKING: mixin_key is required and must be one of the 9 valid keys
+    - CRITICAL: Composition order — repo-type first (primary), language-type additive
   </constraints>
   <output>Mixin markdown content with detection signals and overlay prompts</output>
 </operation>
 ```
 
-### Operation: pack_section
+### Operation: generate_index
 
-**When:** Extractor packs validated content into final output format.
+**When:** After all phases complete — create the master index.md (LL-001).
 
 ```xml
-<operation name="pack_section">
+<operation name="generate_index">
   <action>
-    1. Read the playbook template to get section heading, phase, and output type
-    2. Read validated content at content_path
-    3. IF output type is "subfolder" (sections 1, 2, 3, 4, 6, 8):
-       a. Create subfolder: section-{nn}-{section-slug}/
-       b. Parse content to identify logical units (split on H3 headings)
-       c. Create individual files per logical unit
-       d. Create _index.md with summary table
-       e. Create screenshots/ subfolder for diagrams
-       f. Return list of created file paths
-    4. IF output type is "inline" (sections 5, 7):
-       a. Format content under proper H2 heading with Markdown tables
-       b. Apply section numbering from playbook
-       c. Normalize list and code block formatting
-    5. Return formatted section ready for assembly
+    1. Scan output_path for section-{nn}-{slug}/ subdirectories
+    2. For each section subfolder:
+       a. Read its index.md for description
+       b. Count total lines across all .md files
+       c. Retrieve quality score from sub-skill results
+    3. Build master index.md at {output_path}/index.md with:
+       - App name and overview
+       - Section table: number, name (linked), quality score, line count, description
+       - Reading order: 5 → 7 → 1 → 6 → 2 → 3 → 4 → 8
+       - Extraction metadata: overall quality, phases completed, source path
+    4. Return path to generated index
   </action>
   <constraints>
-    - BLOCKING: section_id and content_path are required
-    - CRITICAL: Do not alter factual content — only apply formatting
-    - CRITICAL: Sections with subfolder output MUST have _index.md and screenshots/
-    - CRITICAL: Section 8 additionally has tests/ subfolder for executable test files
+    - BLOCKING: output_path must contain at least one section subfolder
+    - CRITICAL: Quality scores must come from actual sub-skill results
   </constraints>
-  <output>Formatted markdown section (inline or subfolder path) ready for final assembly</output>
+  <output>index_path: string</output>
 </operation>
 ```
 
-### Operation: score_quality
+### Operation: aggregate_quality
 
-**When:** Extractor requests quality assessment for a section.
+**When:** After all phases complete — compute overall quality score.
 
 ```xml
-<operation name="score_quality">
+<operation name="aggregate_quality">
   <action>
-    1. Read content at content_path for the given section_id
-    2. Load acceptance criteria for the section from templates/acceptance-criteria.md
-    3. Evaluate content across 6 quality dimensions:
-       a. Completeness (0.0–1.0): ratio of [REQ] criteria satisfied
-       b. Structure (0.0–1.0): proper heading hierarchy, diagrams, tables
-       c. Clarity (0.0–1.0): clear explanations, concrete examples
-       d. Accuracy (0.0–1.0): evidence-backed claims, verified against code
-       e. Freshness (0.0–1.0): references current versions, no stale info
-       f. Coverage (0.0–1.0): breadth of code-evidence across modules
-    4. Apply section-aware weighting (see Weight Tables below)
-    5. Generate improvement_hints[] for any dimension below 0.6
+    1. Collect quality_score from each sub-skill's dispatch result
+    2. Apply section-group weighting:
+       - Architecture sections (1, 2, 6): weight 0.15 each = 0.45 total
+       - Tests section (8): weight 0.15
+       - Other sections (3, 4, 5, 7): weight 0.10 each = 0.40 total
+    3. Compute weighted_overall = Σ(section_score × section_weight)
+    4. Classify:
+       - ≥ 0.85 → HIGH
+       - ≥ 0.65 → ACCEPTABLE
+       - < 0.65 → LOW
+    5. Identify weakest sections (below 0.70) with improvement hints
+    6. Return aggregated result
   </action>
   <constraints>
-    - BLOCKING: section_id and content_path are required
-    - CRITICAL: This skill defines what "quality" means for reverse engineering output
+    - CRITICAL: Missing sections get score 0.0 (they drag the average down)
+    - CRITICAL: Use sub-skill-reported scores — do NOT re-evaluate content
   </constraints>
   <output>
-    quality_result: { section_id, section_quality_score, dimensions: {completeness, structure, clarity, accuracy, freshness, coverage}, improvement_hints[] }
+    aggregate_result: {
+      overall_score: float,
+      classification: "HIGH | ACCEPTABLE | LOW",
+      section_scores: { section_id: { score, weight, weighted } },
+      weakest_sections: [{ section_id, score, hints: [] }]
+    }
   </output>
 </operation>
 ```
 
-#### Quality Scoring Weight Tables
+### Operation: validate_cross_references
 
-**Architecture Sections** (1-Architecture Recovery, 2-Design Patterns, 6-Data Flow):
-
-| Dimension | Weight |
-|-----------|--------|
-| Completeness | 0.20 |
-| Structure | 0.10 |
-| Clarity | 0.15 |
-| **Accuracy** | **0.35** |
-| Freshness | 0.10 |
-| Coverage | 0.10 |
-
-**Tests Section** (8-Source Code Tests):
-
-| Dimension | Weight |
-|-----------|--------|
-| Completeness | 0.10 |
-| Structure | 0.05 |
-| Clarity | 0.10 |
-| Accuracy | 0.15 |
-| Freshness | 0.10 |
-| **Coverage** | **0.50** |
-
-**Other Sections** (3-API Contracts, 4-Dependencies, 5-Code Structure, 7-Tech Stack):
-
-| Dimension | Weight |
-|-----------|--------|
-| **Completeness** | **0.30** |
-| Structure | 0.20 |
-| Clarity | 0.20 |
-| Accuracy | 0.15 |
-| Freshness | 0.10 |
-| Coverage | 0.05 |
-
-### Operation: test_walkthrough
-
-**When:** After extraction complete, verify extracted claims against the actual codebase.
+**When:** After all phases complete — check cross-section consistency.
 
 ```xml
-<operation name="test_walkthrough">
+<operation name="validate_cross_references">
   <action>
-    1. Read extracted knowledge from content_path (all 8 sections)
-    2. Parse verifiable claims and classify each:
-       - module_exists: glob for module path, check import references
-       - pattern_detected: locate cited file:line, confirm structural match
-       - api_contract: find function/class, check signature matches
-       - dependency_link: trace import chain, confirm A imports/calls B
-       - tech_stack_item: check config files, confirm version matches
-    3. IF repo_path is provided (source-code verification mode):
-       a. For each claim: navigate to repo_path, perform verification method
-       b. Cross-check with Phase 2 test knowledge (test imports, mocks, assertions)
-       c. Record: {claim_id, type, expected, actual, verified: bool}
-    4. IF repo_path is NOT available (offline validation):
-       a. For each claim: verify it cites specific file paths or code references
-       b. Check evidence is concrete (file:line, not vague descriptions)
-       c. Record: {claim_id, has_evidence: bool, evidence_quality: high|medium|low}
-    5. Compute verification_score = claims_verified / claims_total
-    6. Generate unverified_claims[] for each failed claim
+    1. Read all section index.md files from output_path
+    2. Build reference maps:
+       a. modules_declared: from section 5 (Code Structure) — list of modules/directories
+       b. tech_declared: from section 7 (Tech Stack) — technologies and versions
+       c. tests_declared: from section 8 (Tests) — test files and coverage data
+       d. arch_claims: from section 1 (Architecture) — module references, layers
+       e. pattern_claims: from section 2 (Design Patterns) — file:line citations
+       f. api_claims: from section 3 (API Contracts) — endpoint/module references
+       g. dep_claims: from section 4 (Dependencies) — import/call graphs
+       h. flow_claims: from section 6 (Data Flow) — module path references
+    3. Cross-validate:
+       a. Architecture claims reference modules found in code structure (1 ↔ 5)
+       b. Design patterns cite files that exist in code structure (2 ↔ 5)
+       c. API contracts reference modules from code structure (3 ↔ 5)
+       d. Dependencies match imports found in code structure (4 ↔ 5)
+       e. Data flows reference modules from code structure (6 ↔ 5)
+       f. Deep sections cite test evidence where available (1,2,3,4,6 ↔ 8)
+       g. Tech stack versions match dependency declarations (7 ↔ 4)
+    4. Generate cross-reference-validation.md at {output_path}/
+    5. Return validation summary
   </action>
   <constraints>
-    - CRITICAL: Claims must be verified against actual code — do not trust descriptions alone
-    - BLOCKING: content_path is required
+    - Missing sections are skipped (validation runs on available sections)
+    - CRITICAL: Flag inconsistencies but do NOT auto-correct content
   </constraints>
   <output>
-    walkthrough_result: { claims_total, claims_verified, claims_failed, verification_score, unverified_claims: [{claim_id, type, issue, suggestion}] }
+    cross_ref_result: {
+      total_references: int,
+      valid_references: int,
+      invalid_references: int,
+      consistency_score: float,
+      issues: [{ source_section, target_section, claim, issue, severity }]
+    }
   </output>
 </operation>
 ```
@@ -395,12 +361,43 @@ operation_output:
   success: true | false
   operation: "{one of the 7 operations}"
   result:
-    artifact_paths:          # get_artifacts — includes playbook, collection, AC, repo_type_mixins (4), language_type_mixins (5), config_defaults
-    validation_result:       # validate_section — { section_id, passed, criteria: [{id, status, feedback}], missing_info[] }
-    formatted_content:       # pack_section — formatted markdown or subfolder path
-    quality_result:          # score_quality — { section_id, section_quality_score, dimensions: {6 dims}, improvement_hints[] }
-    walkthrough_result:      # test_walkthrough — { claims_total, claims_verified, verification_score, unverified_claims[] }
+    sub_skills:              # discover_sub_skills
+    dispatch_result:         # dispatch_section
+    orchestration_result:    # orchestrate_phases (includes index + quality + cross-refs)
+    mixin_content:           # get_mixin
+    index_path:              # generate_index
+    aggregate_result:        # aggregate_quality
+    cross_ref_result:        # validate_cross_references
   errors: []
+```
+
+---
+
+## Output Structure
+
+```
+.intake/{extraction_id}/
+├── index.md                           # Master TOC (LL-001) — generated by orchestrator
+├── section-01-architecture-recovery/  # From x-ipe-tool-rev-eng-architecture-recovery
+│   ├── index.md
+│   └── ...
+├── section-02-design-patterns/        # From x-ipe-tool-rev-eng-design-pattern-detection
+│   └── ...
+├── section-03-api-contracts/          # From x-ipe-tool-rev-eng-api-contract-extraction
+│   └── ...
+├── section-04-dependency-analysis/    # From x-ipe-tool-rev-eng-dependency-analysis
+│   └── ...
+├── section-05-code-structure-analysis/ # From x-ipe-tool-rev-eng-code-structure-analysis
+│   └── ...
+├── section-06-data-flow/              # From x-ipe-tool-rev-eng-data-flow-analysis
+│   └── ...
+├── section-07-technology-stack/       # From x-ipe-tool-rev-eng-technology-stack
+│   └── ...
+├── section-08-source-code-tests/      # From x-ipe-tool-rev-eng-test-analysis
+│   ├── tests/                         # Executable test files
+│   └── ...
+├── extraction_report.md               # Generated by orchestrator
+└── cross-reference-validation.md      # Generated by orchestrator
 ```
 
 ---
@@ -414,12 +411,24 @@ operation_output:
     <verification>operation_output.success is true</verification>
   </checkpoint>
   <checkpoint required="true">
-    <name>Result matches operation</name>
-    <verification>Returned result fields match the requested operation type</verification>
+    <name>Sub-skills discovered dynamically</name>
+    <verification>No hardcoded sub-skill list — glob pattern used</verification>
   </checkpoint>
   <checkpoint required="true">
-    <name>Template files intact</name>
-    <verification>No template files were modified during operation</verification>
+    <name>Phase dependencies enforced</name>
+    <verification>Phase 2 received Phase 1 output; Phase 3 received Phase 1+2 output</verification>
+  </checkpoint>
+  <checkpoint required="true">
+    <name>Master index generated (LL-001)</name>
+    <verification>index.md exists at output_path with TOC, quality scores, reading order</verification>
+  </checkpoint>
+  <checkpoint required="true">
+    <name>Quality aggregated across sections</name>
+    <verification>Overall score computed with section-group weighting</verification>
+  </checkpoint>
+  <checkpoint required="true">
+    <name>Cross-references validated</name>
+    <verification>cross-reference-validation.md exists with consistency results</verification>
   </checkpoint>
 </definition_of_done>
 ```
@@ -431,13 +440,14 @@ operation_output:
 | Error | Cause | Resolution |
 |-------|-------|------------|
 | `INVALID_OPERATION` | operation not one of the 7 defined | Check operation name matches exactly |
-| `MISSING_SECTION_ID` | section_id null for validate/pack/score | Provide section_id matching playbook template |
-| `MISSING_CONTENT_PATH` | content_path null for validate/pack/score/walkthrough | Provide path to extracted content file |
-| `CONTENT_NOT_FOUND` | content_path file does not exist | Verify file was written by extractor |
+| `NO_SUB_SKILLS_FOUND` | Glob returned zero results | Verify sub-skill folders exist under `.github/skills/x-ipe-tool-rev-eng-*/` |
+| `SECTION_NOT_FOUND` | section_id doesn't match any discovered sub-skill | Run discover_sub_skills first; check section_id is 1–8 |
+| `MISSING_REPO_PATH` | repo_path null for orchestrate/dispatch | Provide path to target repository |
+| `MISSING_OUTPUT_PATH` | output_path null for orchestrate/generate/validate | Provide .intake/{extraction_id}/ path |
 | `INVALID_MIXIN_KEY` | mixin_key not one of the 9 valid keys | Use one of: monorepo, multi-module, single-module, microservices, python, java, javascript, typescript, go |
-| `TEMPLATE_NOT_FOUND` | Template file missing from skill | Re-install skill or verify file paths |
+| `PHASE_DEPENDENCY_VIOLATED` | Phase 2/3 invoked without prior phase results | Run phases in order or supply section_context |
+| `SUB_SKILL_EXTRACT_FAILED` | Sub-skill returned error | Check sub-skill logs; partial extraction continues |
 | `BELOW_COMPLEXITY_GATE` | Codebase below min thresholds | Skip reverse engineering; document rationale |
-| `SCORING_FAILED` | Unable to evaluate content quality | Verify content exists and is readable |
 
 ---
 
@@ -445,9 +455,7 @@ operation_output:
 
 | File | Purpose |
 |------|---------|
-| `templates/playbook-template.md` | 8-section phased playbook (Scan → Tests → Deep) |
-| `templates/collection-template.md` | Per-section extraction prompts with source priority |
-| `templates/acceptance-criteria.md` | Per-section validation rules with [REQ]/[OPT] markers |
+| `templates/playbook-template.md` | Phase order reference (Scan → Tests → Deep) |
 | `templates/mixin-monorepo.md` | Repo-type: monorepo structural overlay |
 | `templates/mixin-multi-module.md` | Repo-type: multi-module structural overlay |
 | `templates/mixin-single-module.md` | Repo-type: single-module structural overlay |
@@ -462,4 +470,4 @@ operation_output:
 
 ## Examples
 
-See [references/examples.md](.github/skills/x-ipe-tool-knowledge-extraction-application-reverse-engineering/references/examples.md) for usage examples.
+See [references/examples.md](references/examples.md) for orchestration flow examples.

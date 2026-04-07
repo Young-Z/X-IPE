@@ -1,6 +1,6 @@
 # Skill Meta: x-ipe-task-based-application-knowledge-extractor
 
-> Version: v1.0 | Status: Candidate | Last Updated: 03-17-2026
+> Version: v2.0 | Status: Candidate | Last Updated: 04-07-2026
 
 ---
 
@@ -10,10 +10,10 @@
 skill_name: "x-ipe-task-based-application-knowledge-extractor"
 skill_type: "task-based"
 skill_category: "standalone"
-version: "1.0.0"
+version: "2.0.0"
 status: "candidate"
 created_date: "2026-03-17"
-last_modified: "2026-03-17"
+last_modified: "2026-04-07"
 ```
 
 ---
@@ -210,7 +210,8 @@ error: "No tool skill found for category 'user-manual'. Install x-ipe-tool-knowl
 - **X-IPE Config:** `x-ipe-docs/config/tools.json` for web search gating
 
 ### External Dependencies
-- **`x-ipe-tool-knowledge-extraction-user-manual`:** Required for v1 extraction (built in separate EPIC)
+- **`x-ipe-tool-knowledge-extraction-user-manual`:** Required for user-manual extraction
+- **`x-ipe-tool-knowledge-extraction-application-reverse-engineering`:** Required for application-reverse-engineering extraction
 - **EPIC-049 (KB infrastructure):** Required for downstream output via `.intake/` pipeline (FEATURE-050-E)
 
 ---
@@ -227,7 +228,7 @@ This skill is being built incrementally across 5 features:
 | FEATURE-050-D | Checkpoint & Resume | Retry logic, pause/resume, checkpoint management, error handling | 🔜 Future |
 | FEATURE-050-E | KB Intake Output | Quality scoring, `.intake/` pipeline, completion | 🔜 Future |
 
-**v1 Scope:** User-manual extraction category only, one purpose at a time.
+**v1 Scope:** User-manual and application-reverse-engineering extraction categories supported, one purpose at a time.
 
 ---
 
@@ -246,7 +247,7 @@ This skill is being built incrementally across 5 features:
 ## Design Principles Applied
 
 - **SOLID:** Single Responsibility (input detection, category selection, tool loading are separate concerns)
-- **YAGNI:** v1 only supports user-manual category; multi-category is deferred
+- **YAGNI:** v1 supports user-manual and application-reverse-engineering categories; other categories deferred
 - **KISS:** Hardcoded category filter in v1; AI-driven selection deferred to future
 
 ---

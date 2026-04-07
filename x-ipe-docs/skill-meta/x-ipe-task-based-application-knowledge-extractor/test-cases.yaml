@@ -507,9 +507,9 @@ test_cases:
     test_method: behavioral
     steps:
       - "Execute Step 1.2 with multiple applicable categories"
-      - "Verify only v1-supported category selected"
-      - "Verify non-v1 categories logged as deferred"
-    expected: "selected_category = 'user-manual', deferred_categories logged"
+      - "Verify only supported categories selected"
+      - "Verify non-supported categories logged as deferred"
+    expected: "selected_category = purpose value (user-manual or application-reverse-engineering), deferred_categories logged"
 
   - id: TC-038
     ac_ref: AC-050A-05c
@@ -613,7 +613,7 @@ test_cases:
       - "Set purpose to 'API-reference' (not v1-supported)"
       - "Execute Step 1.2 — Select Category"
       - "Verify error halt"
-    expected: "Error: 'Category API-reference is not supported in v1. Supported: user-manual'"
+    expected: "Error: 'Category API-reference is not supported. Supported: user-manual, application-reverse-engineering'"
 
   # ============================================================
   # BLOCKING SCENARIOS
@@ -634,13 +634,13 @@ test_cases:
   - id: TC-046
     ac_ref: AC-050A-01a
     category: blocking
-    name: "v1 scope enforced — only user-manual category"
+    name: "v1 scope enforced — only user-manual and application-reverse-engineering categories"
     type: must_pass
     test_method: behavioral
     steps:
       - "Attempt extraction with purpose = 'architecture'"
-      - "Verify v1 filter rejects non-supported categories"
-    expected: "Error listing v1-supported categories"
+      - "Verify filter rejects non-supported categories"
+    expected: "Error listing supported categories (user-manual, application-reverse-engineering)"
 
   # ============================================================
   # TECHNICAL DESIGN ALIGNMENT
@@ -666,8 +666,8 @@ test_cases:
     type: must_pass
     test_method: content_search
     steps:
-      - "Verify Step 1.2 implements category validation against v1-supported list"
-      - "Verify hardcoded filter for v1 (user-manual only)"
+      - "Verify Step 1.2 implements category validation against supported list"
+      - "Verify filter for supported categories (user-manual, application-reverse-engineering)"
       - "Verify error handling for unsupported categories"
     expected: "CategorySelector logic present in Step 1.2"
 

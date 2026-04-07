@@ -34,8 +34,11 @@
 - IF input_type involves UI → plan screenshot capture points (login screens, dashboards, key workflows)
 - IF images can aid knowledge explanation → mark sections for screenshot capture in manifest
 - Store planned techniques in `source_metadata.extraction_techniques[]`
+- IF `behavior_context.learning_folder` is provided → read track/track-list.json for tracked user workflows,
+  use as supplementary guidance for feature prioritization and navigation path understanding.
+  Set `has_behavior_context = true` in InputAnalysis. CRITICAL: still explore target independently.
 
-**VERIFY:** ✅ InputAnalysis created with input_type, format, app_type, source_metadata
+**VERIFY:** ✅ InputAnalysis created with input_type, format, app_type, source_metadata, has_behavior_context
 
 **REFERENCE:** `references/input-detection-heuristics.md`, `templates/input-analysis-output.md`
 
