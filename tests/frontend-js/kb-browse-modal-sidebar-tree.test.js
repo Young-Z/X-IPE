@@ -112,3 +112,69 @@ describe('KB Browse Modal — Sidebar Tree (TASK-1086)', () => {
     expect(html).toContain('visible.md');
   });
 });
+
+describe('KB Browse Modal — Polling for external changes', () => {
+  beforeEach(() => {
+    document.body.innerHTML = '';
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
+  it.skipIf(!ensureImpl())('starts polling on open and stops on close', () => {
+    const modal = createModal();
+    // Simulate open state
+    modal._startPolling();
+    expect(modal._pollTimer).not.toBeNull();
+
+    // Simulate close
+    modal._stopPolling();
+    expect(modal._pollTimer).toBeNull();
+  });
+
+  it.skipIf(!ensureImpl())('polls for tree changes and re-renders on change', async () => {
+    const modal = createModal();
+    modal._buildFolderColorMap();
+    modal._renderSidebarFolders();
+
+    const updatedTree = [
+      ...sampleTree(),
+      { name: 'new-folder', path: 'new-folder', type: 'folder', children: [] },
+    ];
+
+    // Mock fetch to return new tree
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ tree: updatedTree }),
+    });
+
+    // Set initial hash
+    modal._lastTreeHash = JSON.stringify(sampleTree());
+
+    await modal._pollForChanges();
+
+    // Tree should be updated (via _refreshData → _loadData which calls fetch)
+    expect(modal._lastTreeHash).toBe(JSON.stringify(updatedTree));
+  });
+
+  it.skipIf(!ensureImpl())('skips re-render when tree unchanged', async () => {
+    const modal = createModal();
+
+    const currentTree = sampleTree();
+    modal._lastTreeHash = JSON.stringify(currentTree);
+
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ tree: currentTree }),
+    });
+
+    const renderSpy = vi.spyOn(modal, '_renderSidebarFolders');
+    await modal._pollForChanges();
+
+    // Should not re-render since tree is unchanged
+    expect(renderSpy).not.toHaveBeenCalled();
+  });
+});

@@ -10,6 +10,7 @@ import json
 import os
 import shutil
 import tempfile
+import time
 from dataclasses import dataclass, field
 from datetime import date
 from pathlib import Path
@@ -163,6 +164,8 @@ class KBConfig:
 class KBService:
     """Service for managing the Knowledge Base file system and metadata."""
 
+    CACHE_TTL = 2.0  # seconds — detect external filesystem changes
+
     def __init__(self, project_root: str):
         self.project_root = Path(project_root).resolve()
         self.kb_root = self.project_root / KB_ROOT_DIR
@@ -170,6 +173,7 @@ class KBService:
         self._tree_cache: Optional[List[KBNode]] = None
         self._frontmatter_index: Dict[str, Optional[FrontmatterData]] = {}
         self._cache_valid = False
+        self._cache_built_at: float = 0.0
 
     # ------------------------------------------------------------------
     # Initialization
@@ -255,6 +259,7 @@ class KBService:
     def _invalidate_cache(self) -> None:
         self._cache_valid = False
         self._tree_cache = None
+        self._cache_built_at = 0.0
         self._frontmatter_index.clear()
         if hasattr(self, '_allowed_ext_cache'):
             del self._allowed_ext_cache
@@ -262,10 +267,13 @@ class KBService:
     def _ensure_file_index(self) -> None:
         """Rebuild the in-memory tree cache and metadata index if stale."""
         if self._cache_valid and self._tree_cache is not None:
-            return
+            if time.time() - self._cache_built_at <= self.CACHE_TTL:
+                return
+            self._invalidate_cache()
         self.ensure_kb_root()
         self._tree_cache = self._build_tree(self.kb_root, '')
         self._cache_valid = True
+        self._cache_built_at = time.time()
 
     # ------------------------------------------------------------------
     # Tree building

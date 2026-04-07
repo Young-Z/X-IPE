@@ -190,6 +190,78 @@ class TestTreeAPI:
         assert 'tree' in data
 
 
+class TestTreeCacheTTL:
+    """Cache TTL: external filesystem changes should be picked up automatically."""
+
+    def test_external_file_detected_after_cache_ttl(self, kb_service):
+        """Files added outside KBService must appear in get_tree() after TTL expires."""
+        # Build initial cache (empty tree)
+        tree = kb_service.get_tree()
+        assert tree == []
+
+        # Simulate external file addition (AI Librarian bypassing KBService)
+        _create_md_file(kb_service.kb_root, 'external-doc.md', body='Added externally')
+
+        # Force TTL expiration by backdating the cache timestamp
+        kb_service._cache_built_at = 0
+
+        # get_tree() should now detect the stale cache and rebuild
+        tree = kb_service.get_tree()
+        names = [n.name for n in tree]
+        assert 'external-doc.md' in names
+
+    def test_external_folder_detected_after_cache_ttl(self, kb_service):
+        """Folders added outside KBService must appear after TTL expires."""
+        tree = kb_service.get_tree()
+        assert tree == []
+
+        # Simulate external folder + file creation
+        (kb_service.kb_root / 'new-folder').mkdir()
+        _create_md_file(kb_service.kb_root, 'new-folder/readme.md', body='Hello')
+
+        # Force TTL expiration
+        kb_service._cache_built_at = 0
+
+        tree = kb_service.get_tree()
+        folder_names = [n.name for n in tree if n.type == 'folder']
+        assert 'new-folder' in folder_names
+
+    def test_cache_valid_within_ttl(self, kb_service):
+        """Cache should be served within TTL window (no unnecessary rebuilds)."""
+        import time
+        _create_md_file(kb_service.kb_root, 'first.md', body='First')
+        kb_service._invalidate_cache()
+        tree1 = kb_service.get_tree()
+        built_at = kb_service._cache_built_at
+
+        # Immediately request again — should use cache (no rebuild)
+        tree2 = kb_service.get_tree()
+        assert kb_service._cache_built_at == built_at  # Same timestamp = cache hit
+
+    def test_tree_api_returns_fresh_data_after_external_change(self, client, app):
+        """GET /api/kb/tree must return fresh data after external FS changes."""
+        svc = app.config['KB_SERVICE']
+        svc.ensure_kb_root()
+
+        # First request: empty tree
+        resp = client.get('/api/kb/tree')
+        assert resp.status_code == 200
+        tree1 = resp.get_json()['tree']
+
+        # Add file externally
+        _create_md_file(svc.kb_root, 'intake-result.md', body='From librarian')
+
+        # Force TTL expiration
+        svc._cache_built_at = 0
+
+        # Second request: should see the new file
+        resp = client.get('/api/kb/tree')
+        assert resp.status_code == 200
+        tree2 = resp.get_json()['tree']
+        names = [n['name'] for n in tree2]
+        assert 'intake-result.md' in names
+
+
 # ===========================================================================
 # AC-049-A-03: Folder CRUD Operations
 # ===========================================================================

@@ -41,6 +41,8 @@ class KBBrowseModal {
         this._intakeItems = [];
         this._intakeStats = {};
         this._intakePendingDeep = 0;
+        this._pollTimer = null;
+        this._lastTreeHash = null;
         this._onKbChanged = () => { if (this.overlay) this._refreshData(); };
         document.addEventListener('kb:changed', this._onKbChanged);
     }
@@ -49,6 +51,7 @@ class KBBrowseModal {
     async open() {
         if (this.overlay) return;
         await this._loadData();
+        this._lastTreeHash = JSON.stringify(this.tree);
         this._createModal();
         document.body.style.overflow = 'hidden';
         requestAnimationFrame(() => {
@@ -56,10 +59,12 @@ class KBBrowseModal {
         });
         // Load intake file count for badges
         this._refreshIntakeFiles();
+        this._startPolling();
     }
 
     close() {
         if (!this.overlay) return;
+        this._stopPolling();
         // CR-008: Cleanup FilePreviewRenderer
         if (this._filePreviewRenderer) {
             this._filePreviewRenderer.destroy();
@@ -78,6 +83,7 @@ class KBBrowseModal {
     }
 
     destroy() {
+        this._stopPolling();
         document.removeEventListener('kb:changed', this._onKbChanged);
         this.close();
     }
@@ -117,6 +123,32 @@ class KBBrowseModal {
         await this._loadData();
         if (this.currentScene === 'browse') this._renderBrowseContent();
         this._renderSidebarFolders();
+    }
+
+    _startPolling() {
+        this._stopPolling();
+        this._pollTimer = setInterval(() => this._pollForChanges(), 5000);
+    }
+
+    _stopPolling() {
+        if (this._pollTimer) {
+            clearInterval(this._pollTimer);
+            this._pollTimer = null;
+        }
+    }
+
+    async _pollForChanges() {
+        if (!this.overlay) return;
+        try {
+            const res = await fetch(KBBrowseModal.API.TREE);
+            if (!res.ok) return;
+            const d = await res.json();
+            const newHash = JSON.stringify(d.tree || []);
+            if (newHash !== this._lastTreeHash) {
+                this._lastTreeHash = newHash;
+                await this._refreshData();
+            }
+        } catch (_) { /* ignore transient network errors */ }
     }
 
     _buildFolderColorMap() {
