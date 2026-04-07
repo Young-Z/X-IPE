@@ -424,7 +424,11 @@ BLOCKING: Step 4 → Step 5: task board must be updated via x-ipe-tool-task-boar
             → Invoke x-ipe-dao-end-user-representative with same context
             → Present DAO's recommendation to human and wait for confirmation
           ELSE (interact-with-human):
-            → Present next task suggestion to human and wait for instruction
+            → Present next task suggestion to human using the skill-specific hint template
+              (each skill defines its own contextual hint in its routing phase)
+            → For feature-stage skills: always name the specific feature ID and the next pipeline step
+            → After feature-closing: suggest the next unstarted feature from backlog, or celebrate completion if all done
+            → Wait for human instruction
         ELSE:
           → STOP (no next task defined)
     </actions>

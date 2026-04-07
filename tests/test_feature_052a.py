@@ -514,6 +514,25 @@ class TestWorkflowUpdateAction:
         fb_action = state["shared"]["requirement"]["actions"]["feature_breakdown"]
         assert fb_action["next_actions_suggested"] == ["FEAT-A"]
 
+    def test_feature_breakdown_requires_features_arg(self):
+        """feature_breakdown action with status=done must require --features."""
+        state = json.loads(self.state_path.read_text())
+        state["shared"]["ideation"]["actions"]["compose_idea"]["status"] = "done"
+        state["shared"]["ideation"]["status"] = "completed"
+        state["shared"]["requirement"]["status"] = "in_progress"
+        state["shared"]["requirement"]["actions"]["requirement_gathering"]["status"] = "done"
+        state["current_stage"] = "requirement"
+        self.state_path.write_text(json.dumps(state, indent=2))
+
+        result, code = self._run([
+            "--workflow", "test-wf",
+            "--action", "feature_breakdown",
+            "--status", "done",
+            # --features intentionally omitted
+        ])
+        assert code == 1
+        assert result["error"] == "MISSING_FEATURES"
+
     def test_feature_action_update(self):
         """AC-052-A-06g: Per-feature action update."""
         state = json.loads(self.state_path.read_text())

@@ -389,7 +389,11 @@ BLOCKING: Step 3.1 special-case delegations run BEFORE semantic routing.
             context: "Skill completed. Study the context and full output to decide best next action."
           → DAO studies the complete context and decides the best next action
         ELSE (interact-with-human):
-          → Present next task suggestion to human and wait for instruction
+          → Present next pipeline step hint to human:
+            "✅ Code implementation complete for {feature_id}.
+             Next step: Acceptance Testing — run acceptance tests for {feature_id}.
+             Want me to proceed?"
+          → Wait for human instruction
       </action>
       <constraints>
         - BLOCKING (manual): Human MUST confirm or redirect before proceeding

@@ -404,7 +404,16 @@ BLOCKING: Step 4.1 - Tests for a given type are blocked if the required tool is 
             context: "Skill completed. Study the context and full output to decide best next action."
           → DAO studies the complete context and decides the best next action
         ELSE (interact-with-human):
-          → Present next task suggestion to human and wait for instruction
+          → Present next pipeline step hint to human:
+            IF refactoring was recommended in test results:
+              "✅ Acceptance tests complete for {feature_id}. Code quality improvements recommended.
+               Next step: Code Refactor — refactor {feature_id} for quality improvements before closing.
+               Want me to proceed?"
+            ELSE:
+              "✅ Acceptance tests passed for {feature_id}.
+               Next step: Feature Closing — close {feature_id} and create PR.
+               Want me to proceed?"
+          → Wait for human instruction
       </action>
       <constraints>
         - BLOCKING (manual): Human MUST confirm or redirect before proceeding

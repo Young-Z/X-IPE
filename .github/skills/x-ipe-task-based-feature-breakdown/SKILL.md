@@ -67,7 +67,7 @@ input:
   category: "requirement-stage"
   next_task_based_skill:
     - skill: "x-ipe-task-based-feature-refinement"
-      condition: "Refine individual features from breakdown"
+      condition: "Refine the first unstarted feature. Each feature goes through the complete pipeline (refinement → design → implementation → testing → closing) one at a time before starting the next."
   process_preference:
     interaction_mode: "{from input process_preference.interaction_mode}"
 
@@ -377,7 +377,13 @@ BLOCKING (auto): Proceed after DoD verification; resolve open questions via x-ip
             context: "Skill completed. Study the context and full output to decide best next action."
           → DAO studies the complete context and decides the best next action
         ELSE (interact-with-human):
-          → Present next task suggestion to human and wait for instruction
+          → Present feature-by-feature pipeline hint to human:
+            "✅ Feature breakdown complete — {N} features created ({list of feature IDs}).
+             📋 Each feature goes through the complete pipeline one at a time:
+                refinement → design → implementation → testing → closing
+             Next step: Feature Refinement — let's start with {first_feature_id} ({title})
+             and refine its specification. Want me to proceed?"
+          → Wait for human instruction
       </action>
       <constraints>
         - BLOCKING (manual): Human MUST confirm or redirect before proceeding
@@ -414,7 +420,7 @@ task_completion_output:
   status: completed | blocked
   next_task_based_skill:
     - skill: "x-ipe-task-based-feature-refinement"
-      condition: "Refine individual features from breakdown"
+      condition: "Refine the first unstarted feature. Each feature goes through the complete pipeline (refinement → design → implementation → testing → closing) one at a time before starting the next."
   process_preference:
     interaction_mode: "{from input process_preference.interaction_mode}"
   execution_mode: "{from input}"

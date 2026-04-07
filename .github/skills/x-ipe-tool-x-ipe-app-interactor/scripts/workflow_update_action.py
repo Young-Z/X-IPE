@@ -447,6 +447,14 @@ def main(argv: list[str] | None = None) -> None:
     context = json.loads(args.context) if args.context else None
     features = json.loads(args.features) if args.features else None
 
+    # feature_breakdown done requires --features
+    if args.action == "feature_breakdown" and args.status == "done" and not features:
+        exit_with_error(
+            EXIT_VALIDATION_ERROR,
+            "MISSING_FEATURES",
+            "The feature_breakdown action requires a --features argument when status is 'done'.",
+        )
+
     # Convert legacy list deliverables to keyed dict
     if isinstance(deliverables, list):
         deliverables = convert_list_to_keyed(template, args.action, deliverables)

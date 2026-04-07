@@ -49,7 +49,7 @@ input:
   category: "feature-stage"
   next_task_based_skill:
     - skill: "x-ipe-task-based-feature-refinement"
-      condition: "Start next feature from backlog"
+      condition: "Start the next unstarted feature from backlog. Continue the feature-by-feature pipeline (refinement → design → implementation → testing → closing)."
   process_preference:
     interaction_mode: "{from input process_preference.interaction_mode}"
   feature_phase: "Feature Closing"
@@ -394,7 +394,18 @@ BLOCKING: Phase 1 to Phase 2 is BLOCKED if any acceptance criterion is not met. 
             context: "Skill completed. Study the context and full output to decide best next action."
           → DAO studies the complete context and decides the best next action
         ELSE (interact-with-human):
-          → Present next task suggestion to human and wait for instruction
+          → Check feature board for remaining features:
+            IF more features remain unstarted in the backlog:
+              Present next feature pipeline hint to human:
+                "✅ {feature_id} closed! ({completed_count} of {total_count} features done)
+                 Next step: Feature Refinement — let's continue with {next_feature_id} ({title}),
+                 the next feature in the backlog, and take it through the complete pipeline
+                 (refinement → design → implementation → testing → closing). Want me to proceed?"
+            ELSE:
+              Present completion hint to human:
+                "✅ {feature_id} closed! All {total_count} features complete! 🎉
+                 The feature development pipeline is finished."
+          → Wait for human instruction
       </action>
       <constraints>
         - BLOCKING (manual): Human MUST confirm or redirect before proceeding
@@ -431,7 +442,7 @@ task_completion_output:
   status: completed | blocked
   next_task_based_skill:
     - skill: "x-ipe-task-based-feature-refinement"
-      condition: "Start next feature from backlog"
+      condition: "Start the next unstarted feature from backlog. Continue the feature-by-feature pipeline (refinement → design → implementation → testing → closing)."
   process_preference:
     interaction_mode: "{from input process_preference.interaction_mode}"
   execution_mode: "{from input}"

@@ -9,6 +9,22 @@ IDEATION → REQUIREMENT → IMPLEMENT → VALIDATION → FEEDBACK
 (shared)    (shared)      (per-feat)  (per-feat)   (per-feat)
 ```
 
+### Feature-by-Feature Pipeline Principle
+
+After feature breakdown, work proceeds **one feature at a time** through the complete development pipeline before starting the next feature:
+
+```
+Feature Breakdown (all features created at once)
+  └─→ For each feature, sequentially:
+        Feature Refinement → Technical Design → Code Implementation
+          → Acceptance Testing → (optional Code Refactor) → Feature Closing
+        └─→ Then pick next unstarted feature from backlog
+```
+
+**Why one at a time?** This ensures each feature is fully refined, designed, implemented, tested, and shipped before context-switching. It reduces WIP, minimizes merge conflicts, and delivers incremental value.
+
+**Routing hint pattern:** Each skill's completion message explicitly names the current feature and suggests the next pipeline step for that same feature. Only after Feature Closing does the hint suggest moving to the next feature.
+
 ## Stage Actions & Skill Mapping
 
 ### Stage 1: IDEATION (shared)
@@ -27,7 +43,7 @@ IDEATION → REQUIREMENT → IMPLEMENT → VALIDATION → FEEDBACK
 | Action | Skill | Required | Next Actions |
 |--------|-------|----------|--------------|
 | requirement_gathering | x-ipe-task-based-requirement-gathering | yes | feature_breakdown |
-| feature_breakdown | x-ipe-task-based-feature-breakdown | yes | → enters IMPLEMENT per feature |
+| feature_breakdown | x-ipe-task-based-feature-breakdown | yes | → pick first unstarted feature, enter IMPLEMENT |
 
 ### Stage 3: IMPLEMENT (per feature)
 
@@ -43,7 +59,7 @@ IDEATION → REQUIREMENT → IMPLEMENT → VALIDATION → FEEDBACK
 |--------|-------|----------|--------------|
 | acceptance_test | x-ipe-task-based-feature-acceptance-test | yes | code_refactor |
 | code_refactor | x-ipe-task-based-code-refactor | no | feature_closing |
-| feature_closing | x-ipe-task-based-feature-closing | yes | → enters FEEDBACK |
+| feature_closing | x-ipe-task-based-feature-closing | yes | → next unstarted feature (back to IMPLEMENT) or done |
 
 ### Stage 5: FEEDBACK (per feature)
 
