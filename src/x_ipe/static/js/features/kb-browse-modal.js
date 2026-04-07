@@ -128,26 +128,88 @@ class KBBrowseModal {
 
     _getFolderNames() {
         const names = new Set();
-        // Extract from tree API data (complete folder list)
         const walk = (nodes) => {
             for (const n of nodes) {
                 if (n.type === 'folder') {
-                    names.add(n.name);
+                    names.add(n.path || n.name);
                     if (n.children) walk(n.children);
                 }
             }
         };
         walk(this.tree);
-        // Fallback: also extract from file paths (exclude .intake)
+        // Fallback: also extract from file paths (exclude .intake and hidden)
         this.files.forEach(f => {
             const parts = f.path.split('/');
-            if (parts.length > 1 && parts[0] !== '.intake') names.add(parts[0]);
+            if (parts.length > 1 && parts[0] !== '.intake' && !parts[0].startsWith('.')) names.add(parts[0]);
         });
         return [...names].sort();
     }
 
     _getFolderColor(name) {
         return this._folderColorMap[name] || KBBrowseModal.FOLDER_COLORS[5];
+    }
+
+    /**
+     * Filter files excluding .intake and hidden (dot-prefixed) entries.
+     */
+    _getBrowseFiles() {
+        return this.files.filter(f => {
+            if (f.path.startsWith('.intake/') || f.path.startsWith('.intake\\')) return false;
+            // Exclude hidden files (any path segment starting with '.')
+            const parts = f.path.split('/');
+            return !parts.some(p => p.startsWith('.'));
+        });
+    }
+
+    /**
+     * Count files recursively under a given folder path.
+     */
+    _countFilesInFolder(folderPath, browseFiles) {
+        const prefix = folderPath + '/';
+        return browseFiles.filter(f => f.path.startsWith(prefix)).length;
+    }
+
+    /**
+     * Recursively render a tree node (folder) for the sidebar.
+     */
+    _renderTreeNode(node, browseFiles, depth) {
+        if (node.type !== 'folder') return '';
+        const folderPath = node.path || node.name;
+        const count = this._countFilesInFolder(folderPath, browseFiles);
+        const color = this._getFolderColor(folderPath);
+        const isActive = this.activeSidebarFolder === folderPath;
+        const indent = 12 + depth * 16;
+
+        let html = `
+                    <div class="kb-sidebar-folder${isActive ? ' active' : ''}" data-folder="${this._escapeAttr(folderPath)}" style="padding-left:${indent}px;">
+                        <div class="folder-dot" style="background:${color.color};"></div>
+                        <span>\u{1F4C1} ${this._escapeHtml(node.name)}</span>
+                        <span class="folder-count">${count}</span>
+                    </div>`;
+
+        // Show files when this folder is active
+        if (isActive) {
+            const directFiles = browseFiles.filter(f => {
+                if (!f.path.startsWith(folderPath + '/')) return false;
+                const rest = f.path.slice(folderPath.length + 1);
+                return !rest.includes('/');
+            });
+            directFiles.forEach(f => {
+                const fName = f.path.split('/').pop();
+                html += `
+                    <div class="kb-sidebar-file" data-path="${this._escapeAttr(f.path)}" style="padding-left:${indent + 16}px;">
+                        <i class="bi bi-file-earmark-text"></i> ${this._escapeHtml(fName)}
+                    </div>`;
+            });
+        }
+
+        // Recurse into child folders
+        const childFolders = (node.children || []).filter(c => c.type === 'folder' && !c.name.startsWith('.'));
+        childFolders.forEach(child => {
+            html += this._renderTreeNode(child, browseFiles, depth + 1);
+        });
+
+        return html;
     }
 
     // ─── Modal Creation ────────────────────────────
@@ -199,8 +261,7 @@ class KBBrowseModal {
     _renderSidebarFolders() {
         const el = this.overlay?.querySelector('[data-role="sidebar-folders"]');
         if (!el) return;
-        const folders = this._getFolderNames();
-        const browseFiles = this.files.filter(f => !f.path.startsWith('.intake/') && !f.path.startsWith('.intake\\'));
+        const browseFiles = this._getBrowseFiles();
         const totalFiles = browseFiles.length;
 
         let html = `
@@ -217,28 +278,22 @@ class KBBrowseModal {
                         <span class="folder-count">${totalFiles}</span>
                     </div>`;
 
-        folders.forEach(name => {
-            const count = browseFiles.filter(f => f.path.startsWith(name + '/')).length;
-            const color = this._getFolderColor(name);
-            const isActive = this.activeSidebarFolder === name;
-            html += `
-                    <div class="kb-sidebar-folder${isActive ? ' active' : ''}" data-folder="${this._escapeAttr(name)}">
-                        <div class="folder-dot" style="background:${color.color};"></div>
-                        <span>\u{1F4C1} ${this._escapeHtml(name)}</span>
-                        <span class="folder-count">${count}</span>
-                    </div>`;
-
-            // Show files in expanded folder
-            if (isActive && isActive !== 'all') {
-                browseFiles.filter(f => f.path.startsWith(name + '/')).forEach(f => {
-                    const fName = f.path.split('/').pop();
-                    html += `
-                    <div class="kb-sidebar-file" data-path="${this._escapeAttr(f.path)}">
-                        <i class="bi bi-file-earmark-text"></i> ${this._escapeHtml(fName)}
-                    </div>`;
-                });
-            }
+        // Render tree recursively from tree data
+        const topFolders = (this.tree || []).filter(n => n.type === 'folder' && !n.name.startsWith('.'));
+        topFolders.forEach(node => {
+            html += this._renderTreeNode(node, browseFiles, 0);
         });
+
+        // Show root-level files when "all" is active
+        if (this.activeSidebarFolder === 'all') {
+            const rootFiles = browseFiles.filter(f => !f.path.includes('/'));
+            rootFiles.forEach(f => {
+                html += `
+                    <div class="kb-sidebar-file" data-path="${this._escapeAttr(f.path)}">
+                        <i class="bi bi-file-earmark-text"></i> ${this._escapeHtml(f.name)}
+                    </div>`;
+            });
+        }
 
         html += `
                     <div class="kb-sidebar-intake-link" data-action="show-intake">
@@ -828,8 +883,12 @@ class KBBrowseModal {
     _getFilteredFiles() {
         let files = [...this.files];
 
-        // Exclude .intake files from browse view
-        files = files.filter(f => !f.path.startsWith('.intake/') && !f.path.startsWith('.intake\\'));
+        // Exclude .intake and hidden files from browse view
+        files = files.filter(f => {
+            if (f.path.startsWith('.intake/') || f.path.startsWith('.intake\\')) return false;
+            const parts = f.path.split('/');
+            return !parts.some(p => p.startsWith('.'));
+        });
 
         // Sidebar folder filter
         if (this.activeSidebarFolder !== 'all') {
@@ -1329,7 +1388,15 @@ class KBBrowseModal {
                     if (!ok) return;
                 }
                 try {
-                    await fetch(`/api/kb/files/${encodeURIComponent('.intake/' + itemPath)}`, { method: 'DELETE' });
+                    if (isFolder) {
+                        await fetch('/api/kb/folders', {
+                            method: 'DELETE',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ path: '.intake/' + itemPath })
+                        });
+                    } else {
+                        await fetch(`/api/kb/files/${encodeURIComponent('.intake/' + itemPath)}`, { method: 'DELETE' });
+                    }
                     document.dispatchEvent(new CustomEvent('kb:changed'));
                     this._refreshIntakeFiles();
                 } catch { /* ignore */ }

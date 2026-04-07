@@ -285,7 +285,7 @@ class KBService:
 
         for entry in entries:
             name = entry.name
-            if name == INTAKE_FOLDER or name == KB_INDEX_FILE:
+            if name.startswith('.'):
                 continue
 
             rel_path = f"{rel_base}/{name}".lstrip('/')
@@ -599,7 +599,7 @@ class KBService:
         for entry in entries:
             if not entry.is_file():
                 continue
-            if entry.name == KB_INDEX_FILE:
+            if entry.name.startswith('.'):
                 continue
             rel = str(entry.relative_to(self.kb_root)).replace('\\', '/')
             stat = entry.stat()

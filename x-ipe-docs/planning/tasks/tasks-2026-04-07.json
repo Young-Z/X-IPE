@@ -1,0 +1,36 @@
+{
+  "_version": "1.0",
+  "tasks": [
+    {
+      "task_id": "TASK-1086",
+      "task_type": "Bug Fix",
+      "description": "Fix KB tree view bugs (Feedback-20260407-132358): 1) sidebar tree not scrollable, 2) sub-folders not shown, 3) hidden files shown, 4) lock file not released",
+      "role": "Ember",
+      "status": "done",
+      "output_links": [
+        "src/x_ipe/services/kb_service.py",
+        "src/x_ipe/static/js/features/kb-browse-modal.js",
+        "src/x_ipe/static/css/kb-browse-modal.css",
+        ".github/skills/x-ipe-tool-x-ipe-app-interactor/scripts/kb_set_entry.py",
+        "tests/test_kb_service.py",
+        "tests/frontend-js/kb-browse-modal-sidebar-tree.test.js"
+      ],
+      "next_task": "",
+      "created_at": "2026-04-07T05:32:31.634009+00:00",
+      "last_updated": "2026-04-07T05:47:48.110067+00:00"
+    },
+    {
+      "task_id": "TASK-1087",
+      "task_type": "Bug Fix",
+      "description": "workflow_update_action.py silently skips feature population when --features is omitted for feature_breakdown action with status=done. Should require --features argument.",
+      "role": "Bolt",
+      "status": "done",
+      "output_links": [
+        "src/x_ipe/static/js/features/kb-browse-modal.js"
+      ],
+      "next_task": "",
+      "created_at": "2026-04-07T05:43:20.377271+00:00",
+      "last_updated": "2026-04-07T05:51:10.380727+00:00"
+    }
+  ]
+}

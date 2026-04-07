@@ -54,7 +54,7 @@ def main(argv: list[str] | None = None) -> None:
 
     lock_path = folder_path / f"{KB_INDEX_FILE}.lock"
 
-    with with_file_lock(lock_path, timeout=args.lock_timeout):
+    with with_file_lock(lock_path, timeout=args.lock_timeout, cleanup=True):
         index = read_kb_index(folder_path)
         if args.name in index["entries"]:
             del index["entries"][args.name]

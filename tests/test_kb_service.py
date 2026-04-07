@@ -1704,3 +1704,132 @@ class TestFileRawServing:
         resp = client.get('/api/kb/files/domain/chart.png/raw')
         assert resp.status_code == 200
         assert resp.data == img_data
+
+
+# ===========================================================================
+# TASK-1086: Hidden files excluded from tree and list_files
+# ===========================================================================
+
+class TestHiddenFileFiltering:
+    """All dot-files should be excluded from _build_tree and list_files."""
+
+    def test_tree_excludes_lock_files(self, kb_service):
+        """Lock files (.kb-index.json.lock) must not appear in tree."""
+        _create_md_file(kb_service.kb_root, 'visible.md')
+        (kb_service.kb_root / '.kb-index.json.lock').write_text('')
+        kb_service._invalidate_cache()
+        tree = kb_service.get_tree()
+        names = [n.name for n in tree]
+        assert '.kb-index.json.lock' not in names
+        assert 'visible.md' in names
+
+    def test_tree_excludes_all_dotfiles(self, kb_service):
+        """Any file starting with '.' must not appear in tree."""
+        _create_md_file(kb_service.kb_root, 'visible.md')
+        (kb_service.kb_root / '.hidden-file').write_text('secret')
+        (kb_service.kb_root / '.another-hidden').write_text('secret')
+        kb_service._invalidate_cache()
+        tree = kb_service.get_tree()
+        names = [n.name for n in tree]
+        assert '.hidden-file' not in names
+        assert '.another-hidden' not in names
+        assert 'visible.md' in names
+
+    def test_tree_excludes_dotfolders(self, kb_service):
+        """Folders starting with '.' (other than .intake) must not appear."""
+        sub = kb_service.kb_root / '.hidden-folder'
+        sub.mkdir()
+        (sub / 'inside.md').write_text('# Inside')
+        _create_md_file(kb_service.kb_root, 'visible.md')
+        kb_service._invalidate_cache()
+        tree = kb_service.get_tree()
+        names = [n.name for n in tree]
+        assert '.hidden-folder' not in names
+        assert 'visible.md' in names
+
+    def test_tree_excludes_nested_lock_files(self, kb_service):
+        """Lock files inside subfolders must not appear in tree."""
+        sub = kb_service.kb_root / 'guides'
+        sub.mkdir()
+        _create_md_file(kb_service.kb_root, 'guides/doc.md')
+        (sub / '.kb-index.json.lock').write_text('')
+        kb_service._invalidate_cache()
+        tree = kb_service.get_tree()
+        folder = [n for n in tree if n.name == 'guides'][0]
+        child_names = [c.name for c in folder.children]
+        assert '.kb-index.json.lock' not in child_names
+        assert 'doc.md' in child_names
+
+    def test_list_files_excludes_lock_files(self, kb_service):
+        """list_files() must not return .kb-index.json.lock."""
+        _create_md_file(kb_service.kb_root, 'visible.md')
+        (kb_service.kb_root / '.kb-index.json.lock').write_text('')
+        kb_service._invalidate_cache()
+        files = kb_service.list_files()
+        names = [f.name for f in files]
+        assert '.kb-index.json.lock' not in names
+        assert 'visible.md' in names
+
+    def test_list_files_excludes_dotfiles(self, kb_service):
+        """list_files() must not return any dot-file."""
+        _create_md_file(kb_service.kb_root, 'visible.md')
+        (kb_service.kb_root / '.hidden-config').write_text('x')
+        kb_service._invalidate_cache()
+        files = kb_service.list_files()
+        names = [f.name for f in files]
+        assert '.hidden-config' not in names
+        assert 'visible.md' in names
+
+    def test_list_files_recursive_excludes_dotfiles(self, kb_service):
+        """list_files(recursive=True) must not return dot-files in subfolders."""
+        sub = kb_service.kb_root / 'guides'
+        sub.mkdir()
+        _create_md_file(kb_service.kb_root, 'guides/doc.md')
+        (sub / '.kb-index.json.lock').write_text('')
+        (sub / '.kb-index.json').write_text('{}')
+        kb_service._invalidate_cache()
+        files = kb_service.list_files(recursive=True)
+        names = [f.name for f in files]
+        assert '.kb-index.json.lock' not in names
+        assert '.kb-index.json' not in names
+        assert 'doc.md' in names
+
+
+# ===========================================================================
+# TASK-1087: Intake folder delete
+# ===========================================================================
+
+class TestIntakeFolderDelete:
+    """Folders in intake can be deleted via DELETE /api/kb/folders."""
+
+    def test_delete_intake_folder_via_api(self, client, app):
+        """DELETE /api/kb/folders with intake folder path removes the folder."""
+        svc = app.config['KB_SERVICE']
+        svc.ensure_kb_root()
+        intake = Path(svc.kb_root) / '.intake' / 'my-manual'
+        intake.mkdir(parents=True)
+        (intake / 'file1.md').write_text('# Hello')
+        sub = intake / 'sub'
+        sub.mkdir()
+        (sub / 'file2.md').write_text('# World')
+
+        resp = client.delete('/api/kb/folders',
+                             json={'path': '.intake/my-manual'},
+                             content_type='application/json')
+        assert resp.status_code == 200
+        data = resp.get_json()
+        assert data['success'] is True
+        assert not intake.exists()
+
+    def test_delete_intake_folder_service(self, kb_service):
+        """delete_folder() removes intake subfolder recursively."""
+        intake = kb_service.kb_root / '.intake' / 'test-folder'
+        intake.mkdir(parents=True)
+        (intake / 'a.md').write_text('A')
+        sub = intake / 'nested'
+        sub.mkdir()
+        (sub / 'b.md').write_text('B')
+
+        result = kb_service.delete_folder('.intake/test-folder')
+        assert result['deleted_count'] == 2
+        assert not intake.exists()

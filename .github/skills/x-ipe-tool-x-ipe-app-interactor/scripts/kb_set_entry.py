@@ -55,7 +55,7 @@ def main(argv: list[str] | None = None) -> None:
     index_path = folder_path / KB_INDEX_FILE
     lock_path = folder_path / f"{KB_INDEX_FILE}.lock"
 
-    with with_file_lock(lock_path, timeout=args.lock_timeout):
+    with with_file_lock(lock_path, timeout=args.lock_timeout, cleanup=True):
         index = read_kb_index(folder_path)
         index["entries"][args.name] = entry
         atomic_write_json(index_path, index)
