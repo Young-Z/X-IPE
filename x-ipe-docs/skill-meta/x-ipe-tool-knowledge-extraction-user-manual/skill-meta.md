@@ -7,10 +7,10 @@
 # ─────────────────────────────────────────────────────────────
 skill_name: x-ipe-tool-knowledge-extraction-user-manual
 skill_type: x-ipe-tool
-version: "1.0.0"
+version: "1.1.0"
 status: candidate
 created: 2026-03-17
-updated: 2026-03-17
+updated: 2026-07-25
 
 # ─────────────────────────────────────────────────────────────
 # PURPOSE
@@ -37,7 +37,7 @@ inputs:
     - name: operation
       type: string
       description: "The operation to perform"
-      validation: "Must be one of: get_artifacts, get_collection_template, validate_section, get_mixin, pack_section"
+      validation: "Must be one of: get_artifacts, get_collection_template, validate_section, get_mixin, pack_section, score_quality, test_walkthrough"
 
     - name: category
       type: string
@@ -65,6 +65,11 @@ inputs:
       default: "{ web_search_enabled: false, max_files_per_section: 20, max_iterations: 3 }"
       description: "Configuration overrides for extraction behavior"
 
+    - name: instruction_temperature
+      type: string
+      default: "balanced"
+      description: "Controls instructional content style: strict (verbatim, no drift), balanced (accuracy + flow), creative (exploratory, inventive examples)"
+
 outputs:
   state:
     - name: status
@@ -74,7 +79,7 @@ outputs:
     - name: playbook_template
       type: file
       path: "templates/playbook-template.md"
-      description: "Base user manual section layout (7 sections)"
+      description: "Base user manual section layout (8 sections)"
 
     - name: collection_template
       type: file
@@ -149,9 +154,9 @@ acceptance_criteria:
 
     - id: AC-C02
       category: content
-      criterion: 5 operations defined with XML structure
+      criterion: 7 operations defined with XML structure
       test: regex_match
-      expected: "5 instances of <operation name=.*>"
+      expected: "7 instances of <operation name=.*>"
 
     - id: AC-C03
       category: content
@@ -243,9 +248,14 @@ test_scenarios:
       then: "success=true, all 6 artifact paths returned, config defaults included"
 
     - name: "get_collection_template returns full template"
-      given: "No section_id specified"
+      given: "No section_id specified, instruction_temperature=balanced"
       when: "execute get_collection_template"
-      then: "success=true, all 7 sections with extraction prompts returned"
+      then: "success=true, all 8 sections with extraction prompts returned, balanced temperature guidance appended"
+
+    - name: "get_collection_template respects strict temperature"
+      given: "instruction_temperature=strict"
+      when: "execute get_collection_template"
+      then: "success=true, strict temperature guidance appended (verbatim labels, no paraphrasing)"
 
     - name: "validate_section passes valid content"
       given: "Section content satisfying all REQ criteria"
@@ -257,10 +267,10 @@ test_scenarios:
       when: "execute get_mixin"
       then: "success=true, web mixin content with additional sections returned"
 
-    - name: "pack_section formats content"
-      given: "Validated section content"
+    - name: "pack_section formats content with temperature"
+      given: "Validated section content, instruction_temperature=balanced"
       when: "execute pack_section with section_id and content_path"
-      then: "success=true, formatted_content with proper headings returned"
+      then: "success=true, formatted_content with proper headings returned, instructional tone matches balanced"
 
   error_cases:
     - name: "Invalid operation"
@@ -283,7 +293,7 @@ test_scenarios:
 # ─────────────────────────────────────────────────────────────
 evaluation:
   self_check:
-    - "All 5 operations produce structured output matching schema"
+    - "All 7 operations produce structured output matching schema"
     - "DoD checkpoints all verified"
     - "Error scenarios handled gracefully with descriptive messages"
     - "Template files unmodified after all operations"

@@ -62,6 +62,10 @@ input:
   content_path: "string | null"     # Path to extracted content file
   app_type: "web | cli | mobile | null"  # Required for get_mixin
   app_url: "string | null"          # Optional URL for live walkthrough testing
+  instruction_temperature: "strict | balanced | creative"  # Default: balanced
+    # strict: Exact template adherence, verbatim labels, [PLACEHOLDER] markers, uniform phrasing.
+    # balanced: Accuracy + natural flow. Representative examples. Moderate paraphrasing.
+    # creative: High variability. Inventive scenarios. Exploration encouraged.
   config:
     web_search_enabled: false
     max_files_per_section: 20
@@ -81,21 +85,18 @@ input:
       2. Must match an H2 slug from playbook template (e.g., "1-overview", "2-installation-setup")
     </steps>
   </field>
-
   <field name="content_path" source="Caller provides path to extracted content in .x-ipe-checkpoint/">
     <steps>
       1. Path must exist and be readable
       2. Content must be UTF-8 markdown
     </steps>
   </field>
-
   <field name="app_type" source="Caller specifies target platform for get_mixin">
     <steps>
       1. Must be one of: web, cli, mobile
       2. IF null and operation is get_mixin → return error INVALID_APP_TYPE
     </steps>
   </field>
-
   <field name="app_url" source="Caller provides URL for live walkthrough testing">
     <steps>
       1. Optional — only used by test_walkthrough operation
@@ -103,7 +104,13 @@ input:
       3. IF null → offline validation mode (structural checks only)
     </steps>
   </field>
-
+  <field name="instruction_temperature" source="Caller specifies or defaults to 'balanced'">
+    <steps>
+      1. Must be one of: strict, balanced, creative
+      2. IF null or omitted → default to "balanced"
+      3. Affects pack_section, score_quality, and get_collection_template operations
+    </steps>
+  </field>
   <field name="config" source="Caller provides or uses defaults">
     <steps>
       1. web_search_enabled defaults to false
@@ -168,7 +175,6 @@ input:
 ### Operation: get_collection_template
 
 **When:** Extractor Step 2.1 reads section-specific extraction prompts.
-
 ```xml
 <operation name="get_collection_template">
   <action>
@@ -176,11 +182,15 @@ input:
     2. IF section_id provided → extract only that section's content
     3. ELSE → return full template with all 8 sections
     4. Each section contains HTML comments with EXTRACTION PROMPTS
+    5. Append instruction_temperature guidance to the returned prompts:
+       - strict: "Write instructions exactly as found in source. Use verbatim labels and literal syntax. Mark placeholders with [PLACEHOLDER]. No paraphrasing."
+       - balanced: "Write clear, natural instructions grounded in source. Light paraphrasing OK. Examples realistic."
+       - creative: "Write engaging instructions. Inventive but plausible examples. Encourage exploration."
   </action>
   <constraints>
-    - BLOCKING: Do NOT modify prompt content; return as-is from template
+    - BLOCKING: Do NOT modify the base prompt content; append temperature guidance as a separate block
   </constraints>
-  <output>Markdown content with extraction prompts in HTML comments</output>
+  <output>Markdown content with extraction prompts in HTML comments plus temperature guidance</output>
 </operation>
 ```
 
@@ -213,7 +223,6 @@ input:
   </output>
 </operation>
 ```
-
 ### Operation: get_mixin
 
 **When:** Extractor needs platform-specific extraction prompts.
@@ -234,7 +243,6 @@ input:
   <output>Mixin markdown content with additional sections and prompts</output>
 </operation>
 ```
-
 ### Operation: pack_section
 
 **When:** Extractor packs validated content into final user manual format.
@@ -271,7 +279,11 @@ input:
        c. Ensure subsection headings use H3
        d. Wrap code examples in fenced code blocks
        e. Normalize list formatting
-    6. Return formatted section ready for assembly
+    6. Apply instruction_temperature to instructional content and examples:
+       - **strict:** Exact source phrasing. Mark `[placeholder]` values. Uniform "Step N: [Action] [Element] → [Expected]" pattern.
+       - **balanced:** Natural, grounded instructions. Realistic examples. Light paraphrasing OK.
+       - **creative:** Engaging, descriptive. Inventive scenarios. Add "why" explanations and exploration tips.
+    7. Return formatted section ready for assembly
   </action>
   <constraints>
     - BLOCKING: section_id and content_path are required
@@ -284,8 +296,6 @@ input:
   <output>Formatted markdown section (inline, sub-file path, or subfolder path) ready for final assembly</output>
 </operation>
 ```
-
----
 
 ### Operation: score_quality
 
@@ -315,8 +325,12 @@ input:
          (followability weighted highest — getting started MUST be literally followable)
        - **All other sections:**
          Weighted mean: completeness 0.35, structure 0.20, clarity 0.25, followability 0.10, freshness 0.10
-    5. Generate improvement_hints[] for any dimension below 0.6
-    6. **For sections 3, 4, and 5:** Apply critical-but-constructive feedback mode:
+    5. Adjust scoring thresholds per instruction_temperature:
+       - **strict:** Clarity/followability thresholds → 0.75. Penalize paraphrasing (-0.1 clarity) and missing placeholders (-0.1 structure).
+       - **balanced:** Standard thresholds (0.6 default).
+       - **creative:** Followability threshold -0.05. No penalty for stylistic variation. +0.05 clarity bonus for "why" explanations.
+    6. Generate improvement_hints[] for any dimension below threshold (adjusted per temperature)
+    7. **For sections 3, 4, and 5:** Apply critical-but-constructive feedback mode:
        a. Be MORE specific in improvement_hints (name exact missing subsections, features, or scenarios)
        b. Lower the "acceptable" threshold: score < 0.70 → generate hints (not just < 0.60)
        c. If instructions are vague or generic → explicitly call out "Instructions lack step-by-step detail"
@@ -329,7 +343,7 @@ input:
     - CRITICAL: Sections 3, 4, and 5 receive stricter evaluation — they are the core value of the manual
   </constraints>
   <output>
-    quality_result: { section_id, section_quality_score, dimensions: {completeness, structure, clarity, followability, freshness}, improvement_hints[], is_key_section: bool }
+    quality_result: { section_id, section_quality_score, dimensions: {completeness, structure, clarity, followability, freshness}, improvement_hints[], is_key_section: bool, instruction_temperature: string }
   </output>
 </operation>
 ```
