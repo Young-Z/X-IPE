@@ -192,9 +192,21 @@ input:
        c. IIFE auto-restores events from localStorage (flushed every 1s during recording)
     5. IF analysis_requested:
        a. Write final track-list.json with all events
-       b. Delegate to x-ipe-task-based-application-knowledge-extractor skill
-          with track-list.json + screenshots as input
-       c. evaluate_script(build_reset_analysis_ui_script()) to reset button
+       b. Stop the tracker IIFE (evaluate_script with build_stop_script()) so Chrome DevTools is free for the knowledge extractor
+       c. Delegate to x-ipe-task-based-application-knowledge-extractor skill with:
+          - target: the ORIGINAL session URL (e.g., "https://shop.example.com") — NOT the track-list.json file
+          - purpose: "user-manual"
+          - behavior_context: path to learning folder (e.g., "x-ipe-docs/learning/{folder_name}/")
+            containing track/track-list.json (tracked events) and imgs/ (behavior screenshots)
+          CRITICAL: The knowledge extractor MUST treat this as a running_web_app target and follow
+          its FULL extraction process — independently exploring the app via Chrome DevTools,
+          navigating pages, taking its own screenshots, and extracting content section-by-section.
+          The behavior_context (track-list.json + screenshots) serves as SUPPLEMENTARY guidance
+          to help the extractor understand user workflows and prioritize features, NOT as the
+          sole source of knowledge. The extractor must still discover and document features
+          the user did not interact with during tracking.
+       d. After knowledge extractor completes, evaluate_script(build_reset_analysis_ui_script()) to reset button
+       e. Re-inject tracker if user wants to continue recording
     6. Wait 5 seconds, repeat from step 1
   </action>
   <constraints>
@@ -206,6 +218,10 @@ input:
     - Screenshot only on event count change (not every poll)
     - Analysis triggered ONLY when user clicks Analysis button in toolbar
     - IIFE flushes events to localStorage every 1s during recording — survives page redirects
+    - BLOCKING: On analysis handoff, MUST stop tracker IIFE before delegating to knowledge extractor.
+      The knowledge extractor needs exclusive Chrome DevTools access to explore the app independently.
+    - BLOCKING: On analysis handoff, target MUST be the session URL (running web app), NOT the track-list.json file.
+      The tracked behavior data is supplementary context, not the extraction target.
   </constraints>
   <output>poll_result per iteration</output>
 </operation>
@@ -332,8 +348,13 @@ Agent:
   3. poll loop (every 5s):
      - Events detected → screenshot saved to imgs/
      - track-list.json updated
-  4. User clicks Analysis → delegates to knowledge extractor skill
-     → generates user manual from tracked behavior
+  4. User clicks Analysis → stops tracker, delegates to knowledge extractor:
+     - target: https://shop.example.com (the running app URL)
+     - behavior_context: x-ipe-docs/learning/checkout-flow-shopify/
+     → knowledge extractor explores app independently via Chrome DevTools
+     → takes its own screenshots of features and workflows
+     → uses tracked behavior data as guidance for prioritizing content
+     → generates user manual following full extraction process
   5. stop → final track-list.json with 847 events, 15 screenshots
 ```
 

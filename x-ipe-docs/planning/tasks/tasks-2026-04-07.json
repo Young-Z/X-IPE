@@ -31,6 +31,30 @@
       "next_task": "",
       "created_at": "2026-04-07T05:43:20.377271+00:00",
       "last_updated": "2026-04-07T05:51:10.380727+00:00"
+    },
+    {
+      "task_id": "TASK-1088",
+      "task_type": "maintenance",
+      "description": "AI Librarian: Process all pending intake files in .intake/x-ipe-workflow-mode-user-manual/ — analyze content, assign tags, generate metadata index entries, move to KB destination.",
+      "role": "Spark",
+      "status": "done",
+      "output_links": [],
+      "next_task": "",
+      "created_at": "2026-04-07T05:55:53.432783+00:00",
+      "last_updated": "2026-04-07T05:57:49.533257+00:00"
+    },
+    {
+      "task_id": "TASK-1076",
+      "task_type": "Skill Update",
+      "description": "Update x-ipe-tool-learning-behavior-tracker-for-web: After learning insights and delegating to knowledge extractor, ensure knowledge extractor still follows its full process to explore the running app and take screenshots independently",
+      "status": "done",
+      "role": "Ember 🔥",
+      "output_links": [
+        ".github/skills/x-ipe-tool-learning-behavior-tracker-for-web/SKILL.md"
+      ],
+      "next_task": "",
+      "created_at": "2026-04-07T06:04:40.140218+00:00",
+      "last_updated": "2026-04-07T06:07:31.751480+00:00"
     }
   ]
 }
