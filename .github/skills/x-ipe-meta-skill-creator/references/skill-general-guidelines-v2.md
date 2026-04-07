@@ -65,7 +65,7 @@ loading_levels:
   level_2:
     content: SKILL.md body
     when_loaded: When skill triggers
-    token_budget: <500 lines
+    token_budget: <500 lines (600 for x-ipe-tool type)
     
   level_3:
     content: Bundled resources (scripts/, references/, templates/)

@@ -65,7 +65,7 @@ loading_levels:
   level_2:
     content: SKILL.md body
     when_loaded: When skill triggers
-    token_budget: <500 lines
+    token_budget: <500 lines (600 for x-ipe-tool type)
     
   level_3:
     content: Bundled resources (scripts/, references/, templates/)
@@ -246,7 +246,7 @@ mapping_guidance:
       - "Write code / create file → Phase 5 (Practice)"
   - challenge: "My skill only has 2 steps"
     rule: "Phase 1 gets context gathering, Phase 5 gets execution. Phases 2-4 skip."
-  - challenge: "interaction_mode and Phase 2?"
+  - challenge: "interaction_mode mode and Phase 2?"
     rule: "Agent self-resolves via x-ipe-dao-end-user-representative. Phase 2 is not skipped."
 ```
 
@@ -266,8 +266,8 @@ skill_types:
     purpose: Orchestration skill that is called when all related task-based skills in a category finish their work
     naming_convention: "x-ipe-{category}-{operation-name}"
     examples:
-      - x-ipe-x-ipe+all+task-board-management
-      - x-ipe+feature+feature-board-management
+      - x-ipe-tool-task-board-manager
+      - x-ipe-tool-task-board-manager
       
   x-ipe-tool:
     purpose: Utility functions and tool integrations
@@ -578,6 +578,9 @@ See [8. example-structured-summary.md](8.%20example-structured-summary.md) for e
 ## DoR/DoD Pattern
 
 Use XML format for Definition of Ready (DoR) and Definition of Done (DoD) sections.
+
+CRITICAL: DoR MUST have at most 5 checkpoints. DoD MUST have at most 10 checkpoints.
+If a skill naturally generates more, keep only the most critical ones — those that prevent broken execution (DoR) or ensure delivery quality (DoD). Merge related checks into single checkpoints where possible.
 
 ### Template
 

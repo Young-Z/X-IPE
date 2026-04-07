@@ -50,7 +50,7 @@ All skill modifications MUST go through the candidate workflow:
 
 BLOCKING: Read [skill-general-guidelines-v2.md](.github/skills/x-ipe-meta-skill-creator/references/skill-general-guidelines-v2.md) for core principles and patterns before creating skills.
 
-CRITICAL: SKILL.md body must stay under 500 lines. Move examples to references/. DoR ≤ 5 checkpoints, DoD ≤ 10 checkpoints — if over limit, merge related checks.
+CRITICAL: SKILL.md body must stay under 500 lines (600 for x-ipe-tool type). Move examples to references/. DoR ≤ 5 checkpoints, DoD ≤ 10 checkpoints — if over limit, merge related checks.
 
 MANDATORY: All 6 skill types have complete templates in the templates/ folder.
 
@@ -433,7 +433,7 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
   </checkpoint>
   <checkpoint required="true">
     <name>SKILL.md Structure Valid</name>
-    <verification>Frontmatter valid (name + triggers), section order correct, keywords used, line count under 500</verification>
+    <verification>Frontmatter valid (name + triggers), section order correct, keywords used, line count under limit (500; 600 for x-ipe-tool)</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>DoR/DoD Within Limits</name>

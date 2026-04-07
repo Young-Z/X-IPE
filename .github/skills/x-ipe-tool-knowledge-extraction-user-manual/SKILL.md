@@ -104,7 +104,7 @@ input:
       3. IF null → offline validation mode (structural checks only)
     </steps>
   </field>
-  <field name="instruction_temperature" source="Caller specifies or defaults to 'balanced'">
+  <field name="instruction_temperature" source="Provided by caller (extractor asks human). Default: balanced">
     <steps>
       1. Must be one of: strict, balanced, creative
       2. IF null or omitted → default to "balanced"

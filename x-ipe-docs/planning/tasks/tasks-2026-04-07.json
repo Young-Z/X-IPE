@@ -105,12 +105,15 @@
       "task_id": "TASK-1077",
       "task_type": "Skill Update",
       "description": "Add instruction_temperature input parameter (strict/balanced/creative) to x-ipe-tool-knowledge-extraction-user-manual skill for controlling instructional content variability",
-      "status": "in_progress",
+      "status": "✅ done",
       "role": "Ember 🔥",
-      "output_links": [],
+      "output_links": [
+        ".github/skills/x-ipe-tool-knowledge-extraction-user-manual/SKILL.md",
+        "x-ipe-docs/skill-meta/x-ipe-tool-knowledge-extraction-user-manual/skill-meta.md"
+      ],
       "next_task": "",
       "created_at": "2026-04-07T08:31:31.216115+00:00",
-      "last_updated": "2026-04-07T08:31:31.216115+00:00"
+      "last_updated": "2026-04-07T08:40:44.483974+00:00"
     }
   ]
 }

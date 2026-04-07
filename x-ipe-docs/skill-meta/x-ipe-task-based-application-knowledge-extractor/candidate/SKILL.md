@@ -73,6 +73,11 @@ input:
   deep_research:
     rounds: 1           # default: 1 (single pass), max: 10, or "smart"
                          # "smart": auto-exit when 100% of functions/UI covered
+
+  # Instruction Temperature (optional — applies to user-manual category)
+  instruction_temperature: "balanced"  # strict | balanced | creative
+    # Controls instructional content tone in user manual extraction.
+    # Passed to tool skill operations (get_collection_template, pack_section, score_quality).
 ```
 
 ### Input Initialization
@@ -86,6 +91,7 @@ input:
   <field name="config_overrides" source="optional, defaults: max_retries=3, web_search_enabled=true, timeout_seconds=15, max_files_per_section=50, max_validation_iterations=3, coverage_target=0.8" />
   <field name="behavior_context.learning_folder" source="optional, from behavior tracker skill. Path to learning folder containing tracked events and screenshots." />
   <field name="deep_research.rounds" source="ask-user, default: 1, values: 1-10 or 'smart'" />
+  <field name="instruction_temperature" source="ask-user, default: balanced, values: strict|balanced|creative. Only for purpose=user-manual." />
 </input_init>
 ```
 
@@ -97,6 +103,9 @@ input:
 - IF `deep_research.rounds` not provided → prompt user:
   - "How many deep research rounds? (default: 1, max: 10, or 'smart' for auto-detect)"
   - IF numeric → clamp to 1–10; IF "smart" → set rounds = "smart"
+- IF `purpose` == "user-manual" AND `instruction_temperature` not provided → prompt user:
+  - "What instruction tone? Strict (exact/verbatim), Balanced (default, accuracy + flow), or Creative (exploratory)?"
+  - IF not in [strict, balanced, creative] → default to "balanced"
 
 ---
 

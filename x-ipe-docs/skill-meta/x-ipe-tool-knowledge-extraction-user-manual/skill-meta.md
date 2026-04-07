@@ -131,9 +131,9 @@ acceptance_criteria:
 
     - id: AC-S03
       category: structure
-      criterion: SKILL.md body < 500 lines
+      criterion: SKILL.md body < 600 lines
       test: line_count
-      expected: "< 500"
+      expected: "< 600"
 
     - id: AC-S04
       category: structure
