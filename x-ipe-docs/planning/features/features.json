@@ -1848,6 +1848,84 @@
       "specification_link": "FEATURE-057-D",
       "created_at": "2026-04-03T00:00:00+00:00",
       "last_updated": "2026-04-03T00:00:00+00:00"
+    },
+    {
+      "feature_id": "FEATURE-058-A",
+      "epic_id": "EPIC-058",
+      "title": "Ontology Tool Skill (x-ipe-tool-ontology)",
+      "version": "v1.0",
+      "description": "Complete x-ipe-tool-ontology skill with 3 operations: (A) Knowledge Tagging — AI-driven content analysis, dynamic dimension discovery, KnowledgeNode/KnowledgeDimension entity model, dimension registry normalization; (B) Graph Creation — collect entities, build graph, detect disconnected clusters, auto-split JSONL, stale reference pruning; (C) Knowledge Search — text matching + BFS traversal, multi-graph cross-search, configurable depth",
+      "dependencies": [],
+      "status": "Tested",
+      "created_at": "2026-04-08T09:29:08.079225+00:00",
+      "last_updated": "2026-04-08T10:27:36.984021+00:00"
+    },
+    {
+      "feature_id": "FEATURE-058-B",
+      "epic_id": "EPIC-058",
+      "title": "Ontology Tool — Graph Creation & Auto-Split",
+      "version": "v1.0",
+      "description": "MERGED into FEATURE-058-A",
+      "dependencies": [
+        "FEATURE-058-A"
+      ],
+      "status": "Retired",
+      "created_at": "2026-04-08T09:29:23.888267+00:00",
+      "last_updated": "2026-04-08T09:42:29.657036+00:00"
+    },
+    {
+      "feature_id": "FEATURE-058-C",
+      "epic_id": "EPIC-058",
+      "title": "Ontology Tool — Knowledge Search",
+      "version": "v1.0",
+      "description": "MERGED into FEATURE-058-A",
+      "dependencies": [
+        "FEATURE-058-A",
+        "FEATURE-058-B"
+      ],
+      "status": "Retired",
+      "created_at": "2026-04-08T09:29:23.915994+00:00",
+      "last_updated": "2026-04-08T09:42:29.681456+00:00"
+    },
+    {
+      "feature_id": "FEATURE-058-D",
+      "epic_id": "EPIC-058",
+      "title": "KB Librarian Ontology Integration",
+      "version": "v1.0",
+      "description": "Update x-ipe-tool-kb-librarian to call ontology tool during intake, skill contract declaration, graph recreation after tagging batch",
+      "dependencies": [
+        "FEATURE-058-A"
+      ],
+      "status": "Planned",
+      "created_at": "2026-04-08T09:29:23.941312+00:00",
+      "last_updated": "2026-04-08T09:29:23.941312+00:00"
+    },
+    {
+      "feature_id": "FEATURE-058-E",
+      "epic_id": "EPIC-058",
+      "title": "Ontology Graph Viewer UI",
+      "version": "v1.0",
+      "description": "Cytoscape.js graph viewer with 5 plugins, 3 layouts, context menus, minimap, tooltips, zoom controls, graph file sidebar with Select All",
+      "dependencies": [
+        "FEATURE-058-A"
+      ],
+      "status": "Planned",
+      "created_at": "2026-04-08T09:29:23.964279+00:00",
+      "last_updated": "2026-04-08T09:42:34.471172+00:00"
+    },
+    {
+      "feature_id": "FEATURE-058-F",
+      "epic_id": "EPIC-058",
+      "title": "Graph Search & AI Agent Integration",
+      "version": "v1.0",
+      "description": "Search bar with scope selector, wildcard text search, BFS graph search integration, AI Agent terminal overlay, multi-graph cross-search",
+      "dependencies": [
+        "FEATURE-058-A",
+        "FEATURE-058-E"
+      ],
+      "status": "Planned",
+      "created_at": "2026-04-08T09:29:23.986027+00:00",
+      "last_updated": "2026-04-08T09:42:34.501529+00:00"
     }
   ]
 }

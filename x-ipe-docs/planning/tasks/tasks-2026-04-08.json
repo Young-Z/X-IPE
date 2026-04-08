@@ -129,6 +129,62 @@
       "next_task": "",
       "created_at": "2026-04-08T09:48:55.834463+00:00",
       "last_updated": "2026-04-08T09:59:00.346507+00:00"
+    },
+    {
+      "task_id": "TASK-1097",
+      "task_type": "Technical Design",
+      "description": "Create technical design for FEATURE-058-A (Ontology Tool Skill x-ipe-tool-ontology). Design 4-module Python architecture: ontology.py (core engine), graph_ops.py (graph building/clusters), search.py (text+BFS search), dimension_registry.py (taxonomy management). Master entity store pattern with JSONL event sourcing.",
+      "status": "completed",
+      "role": "Ember 🔥",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-058/FEATURE-058-A/technical-design.md"
+      ],
+      "next_task": "x-ipe-task-based-code-implementation",
+      "created_at": "2026-04-08T10:04:41.917076+00:00",
+      "last_updated": "2026-04-08T10:10:31.444611+00:00"
+    },
+    {
+      "task_id": "TASK-1098",
+      "task_type": "Code Implementation",
+      "description": "Implement FEATURE-058-A: Ontology Tool Skill (x-ipe-tool-ontology). 4 Python modules (ontology.py, graph_ops.py, search.py, dimension_registry.py) + SKILL.md + tests. program_type=skills, tech_stack=[Python 3.10+].",
+      "status": "completed",
+      "role": "Ember 🔥",
+      "output_links": [
+        ".github/skills/x-ipe-tool-ontology/scripts/ontology.py",
+        ".github/skills/x-ipe-tool-ontology/scripts/dimension_registry.py",
+        ".github/skills/x-ipe-tool-ontology/scripts/graph_ops.py",
+        ".github/skills/x-ipe-tool-ontology/scripts/search.py",
+        ".github/skills/x-ipe-tool-ontology/SKILL.md",
+        ".github/skills/x-ipe-tool-ontology/references/dimension-guidelines.md",
+        "tests/test_ontology_tool.py"
+      ],
+      "next_task": "x-ipe-task-based-feature-acceptance-test",
+      "created_at": "2026-04-08T10:12:55.997085+00:00",
+      "last_updated": "2026-04-08T10:21:49.203922+00:00"
+    },
+    {
+      "task_id": "TASK-1099",
+      "task_type": "Feature Acceptance Test",
+      "description": "Execute acceptance tests for FEATURE-058-A: Ontology Tool Skill. Classify 59 ACs, structured-review for skills-type deliverables.",
+      "status": "completed",
+      "role": "Ember 🔥",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-058/FEATURE-058-A/acceptance-test-cases.md"
+      ],
+      "next_task": "x-ipe-task-based-feature-closing",
+      "created_at": "2026-04-08T10:22:35.738358+00:00",
+      "last_updated": "2026-04-08T10:27:37.081129+00:00"
+    },
+    {
+      "task_id": "TASK-1100",
+      "task_type": "Feature Closing",
+      "description": "Close FEATURE-058-A: Ontology Tool Skill. Verify ACs, review code-to-docs, refactoring analysis, commit & push.",
+      "status": "in_progress",
+      "role": "Ember 🔥",
+      "output_links": [],
+      "next_task": "x-ipe-task-based-feature-refinement",
+      "created_at": "2026-04-08T10:28:11.933785+00:00",
+      "last_updated": "2026-04-08T10:28:11.933785+00:00"
     }
   ]
 }
