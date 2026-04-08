@@ -32,6 +32,22 @@ EXIT_LOCK_TIMEOUT = 3
 # Schema definitions (versioned)
 # ---------------------------------------------------------------------------
 
+VALID_TASK_STATUSES = {
+    "pending", "in_progress", "completed", "blocked",
+    "cancelled", "skipped", "deferred",
+}
+
+TASK_STATUS_ALIASES: dict[str, str] = {
+    "done": "completed",
+    "complete": "completed",
+}
+
+
+def normalize_task_status(status: str) -> str:
+    """Map task status aliases to canonical form (e.g. 'done' → 'completed')."""
+    return TASK_STATUS_ALIASES.get(status, status)
+
+
 TASK_SCHEMA_V1: dict[str, Any] = {
     "_version": "1.0",
     "task_id":      {"type": str,  "required": True},

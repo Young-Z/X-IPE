@@ -6,7 +6,7 @@
       "task_type": "Bug Fix",
       "description": "handleUpdate() missing pendingFiles — uploaded files silently dropped when updating an existing idea in edit mode",
       "role": "Drift 🌊",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-14T16:30:00+00:00",
       "last_updated": "2026-03-14T16:30:00+00:00",
       "output_links": [
@@ -20,7 +20,7 @@
       "task_type": "Bug Fix",
       "description": "KB reference file (.knowledge-reference.yaml) not shown as deliverable in workflow stage UI — not registered in template or deliverables dict",
       "role": "Drift 🌊",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-14T16:30:00+00:00",
       "last_updated": "2026-03-14T16:30:00+00:00",
       "output_links": [
@@ -35,7 +35,7 @@
       "task_type": "Bug Fix",
       "description": "UIUX Feedback-20260314-234833: Reopen composed idea doesn't restore saved content, idea name, or KB references — editor shows empty, deliverable file not loaded",
       "role": "Drift 🌊",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-14T16:15:00+00:00",
       "last_updated": "2026-03-14T16:15:00+00:00",
       "output_links": [
@@ -51,7 +51,7 @@
       "task_type": "Bug Fix",
       "description": "UIUX feedback: Make deliverable file cards smaller to match action button height — reduce padding, icon size, gap",
       "role": "Flux ⚡",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-14T09:58:00+00:00",
       "last_updated": "2026-03-14T09:58:00+00:00",
       "output_links": [
@@ -64,7 +64,7 @@
       "task_type": "Bug Fix",
       "description": "UIUX Feedback-20260314-174241: In deliverables cards, move folder paths beside subtitle (inline) and reduce font size to distinguish folders from generated files",
       "role": "Flux ⚡",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-14T09:51:00+00:00",
       "last_updated": "2026-03-14T09:51:00+00:00",
       "output_links": [
@@ -80,7 +80,7 @@
       "task_type": "Bug Fix",
       "description": "Reopen composed idea broken (TASK-874 regression): (1) single file stuck, (2) 2+ files shows 'No file path'. Fix raw-idea→raw-ideas + handle array values in workflow-stage.js and action-execution-modal.js",
       "role": "Bolt ⚡",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-14T14:46:00+00:00",
       "last_updated": "2026-03-14T14:46:00+00:00",
       "output_links": [
@@ -95,7 +95,7 @@
       "task_type": "Bug Fix",
       "description": "Deliverable card labels show tag name (e.g. \"raw-ideas\") instead of file/folder name — change to show basename from path",
       "role": "Bolt ⚡",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-14T09:32:00+00:00",
       "last_updated": "2026-03-14T09:32:00+00:00",
       "output_links": [
@@ -110,7 +110,7 @@
       "task_type": "Bug Fix",
       "description": "Compose idea file upload shows only 1 file when 2 are uploaded — diagnose root cause, write failing test, fix, verify",
       "role": "Bolt ⚡",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-14T09:18:00+00:00",
       "last_updated": "2026-03-14T09:18:00+00:00",
       "output_links": [
@@ -124,7 +124,7 @@
       "task_type": "Acceptance Test",
       "description": "Execute acceptance tests for FEATURE-041-E CR-003: Verify array-valued deliverable tags — backend storage, schema bump, validation, expansion, template resolution, backward compat",
       "role": "Bolt ⚡",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-14T08:50:00+00:00",
       "last_updated": "2026-03-14T08:50:00+00:00",
       "output_links": [
@@ -137,7 +137,7 @@
       "task_type": "Code Implementation",
       "description": "Implement FEATURE-041-E CR-003: Array-valued deliverable tags — 11 implementation steps across config, backend, MCP tool, frontend. Rename raw-idea→raw-ideas, array storage/validation/expansion, schema 4.0, template resolution, candidate algorithm, static validation",
       "role": "Bolt ⚡",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-14T08:50:00+00:00",
       "last_updated": "2026-03-14T08:50:00+00:00",
       "output_links": [
@@ -152,7 +152,7 @@
       "task_type": "Technical Design",
       "description": "Design FEATURE-041-E CR-003: Array-valued deliverable tags — data model changes, resolve_deliverables expansion, template token resolution, validation updates, schema version bump, frontend rendering",
       "role": "Bolt ⚡",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-14T08:25:00+00:00",
       "last_updated": "2026-03-14T08:25:00+00:00",
       "output_links": [
@@ -165,7 +165,7 @@
       "task_type": "Feature Refinement",
       "description": "Refine FEATURE-041-E specification for CR-003: Add ACs for array-valued deliverable tags, update data model, backward compat, template resolution, frontend rendering",
       "role": "Bolt ⚡",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-14T08:10:00+00:00",
       "last_updated": "2026-03-14T08:10:00+00:00",
       "output_links": [
@@ -178,7 +178,7 @@
       "task_type": "Change Request",
       "description": "UIUX Feedback-20260314-152441: Update deliverable tags to support multiple outputs — change `$output:raw-idea` to `$output:raw-ideas` so compose_idea lists all produced files (idea .md + uploaded PNGs)",
       "role": "Bolt ⚡",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-14T07:35:00+00:00",
       "last_updated": "2026-03-14T07:35:00+00:00",
       "output_links": [
@@ -191,7 +191,7 @@
       "task_type": "Enhancement",
       "description": "FEATURE-049-G: Add KB Reference button to Compose Idea modal in workflow mode — button, picker integration, count label, popup, FormData kb_references",
       "role": "Ember 🔥",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-14T06:55:00+00:00",
       "last_updated": "2026-03-14T06:55:00+00:00",
       "output_links": [
@@ -206,7 +206,7 @@
       "task_type": "Bug Fix",
       "description": "FEATURE-049-G: +Create New Idea → KB Reference should auto-create draft folder before opening picker (reuse create-folder API)",
       "role": "Ember 🔥",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-14T06:45:00+00:00",
       "last_updated": "2026-03-14T06:45:00+00:00",
       "output_links": [

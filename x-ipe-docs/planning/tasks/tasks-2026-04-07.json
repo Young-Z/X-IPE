@@ -6,7 +6,7 @@
       "task_type": "Bug Fix",
       "description": "Fix KB tree view bugs (Feedback-20260407-132358): 1) sidebar tree not scrollable, 2) sub-folders not shown, 3) hidden files shown, 4) lock file not released",
       "role": "Ember",
-      "status": "done",
+      "status": "completed",
       "output_links": [
         "src/x_ipe/services/kb_service.py",
         "src/x_ipe/static/js/features/kb-browse-modal.js",
@@ -24,7 +24,7 @@
       "task_type": "Bug Fix",
       "description": "workflow_update_action.py silently skips feature population when --features is omitted for feature_breakdown action with status=done. Should require --features argument.",
       "role": "Bolt",
-      "status": "done",
+      "status": "completed",
       "output_links": [
         "src/x_ipe/static/js/features/kb-browse-modal.js"
       ],
@@ -37,7 +37,7 @@
       "task_type": "maintenance",
       "description": "AI Librarian: Process all pending intake files in .intake/x-ipe-workflow-mode-user-manual/ — analyze content, assign tags, generate metadata index entries, move to KB destination.",
       "role": "Spark",
-      "status": "done",
+      "status": "completed",
       "output_links": [],
       "next_task": "",
       "created_at": "2026-04-07T05:55:53.432783+00:00",
@@ -47,7 +47,7 @@
       "task_id": "TASK-1076",
       "task_type": "Skill Update",
       "description": "Update x-ipe-tool-learning-behavior-tracker-for-web: After learning insights and delegating to knowledge extractor, ensure knowledge extractor still follows its full process to explore the running app and take screenshots independently",
-      "status": "done",
+      "status": "completed",
       "role": "Ember 🔥",
       "output_links": [
         ".github/skills/x-ipe-tool-learning-behavior-tracker-for-web/SKILL.md"
@@ -61,7 +61,7 @@
       "task_type": "Bug Fix",
       "description": "Learning skill tracker-toolbar.js PIIMasker masks ALL textContent and value fields as [MASKED] by default. User wants original text collected and shown in track-list.json instead of [MASKED].",
       "role": "Bolt",
-      "status": "done",
+      "status": "completed",
       "output_links": [
         ".github/skills/x-ipe-tool-learning-behavior-tracker-for-web/references/tracker-toolbar.js",
         ".github/skills/x-ipe-tool-learning-behavior-tracker-for-web/references/tracker-toolbar.mini.js",
@@ -76,7 +76,7 @@
       "task_type": "Bug Fix",
       "description": "Fix garbled Chinese characters in track-list.json caused by UTF-8 double-encoding during Chrome DevTools MCP transport. Added _fix_double_encoded_utf8 utility in track_behavior.py.",
       "role": "Bolt",
-      "status": "done",
+      "status": "completed",
       "output_links": [
         ".github/skills/x-ipe-tool-learning-behavior-tracker-for-web/scripts/track_behavior.py",
         "tests/test_behavior_tracker_054bf.py"
@@ -90,7 +90,7 @@
       "task_type": "Bug Fix",
       "role": "Spark",
       "description": "KB tree view not updating after AI librarian intake. After intake moves files into KB, tree view does not refresh. Page reload fails too - only backend restart fixes it. Expected: auto-update without page reload.",
-      "status": "done",
+      "status": "completed",
       "output_links": [
         "src/x_ipe/services/kb_service.py",
         "src/x_ipe/static/js/features/kb-browse-modal.js",
@@ -105,7 +105,7 @@
       "task_id": "TASK-1077",
       "task_type": "Skill Update",
       "description": "Add instruction_temperature input parameter (strict/balanced/creative) to x-ipe-tool-knowledge-extraction-user-manual skill for controlling instructional content variability",
-      "status": "✅ done",
+      "status": "completed",
       "role": "Ember 🔥",
       "output_links": [
         ".github/skills/x-ipe-tool-knowledge-extraction-user-manual/SKILL.md",
@@ -120,7 +120,7 @@
       "task_type": "skill-creation",
       "description": "Create x-ipe-task-based-general-purpose-executor and x-ipe-tool-user-manual-referencer skills",
       "role": "Ember",
-      "status": "✅ done",
+      "status": "completed",
       "output_links": [
         ".github/skills/x-ipe-task-based-general-purpose-executor/SKILL.md",
         ".github/skills/x-ipe-tool-user-manual-referencer/SKILL.md"

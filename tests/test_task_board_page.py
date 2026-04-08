@@ -69,7 +69,7 @@ class TestTaskBoardPageRoute:
     def test_contains_status_filter_options(self, client):
         resp = client.get("/task-board")
         html = resp.data.decode()
-        for status in ["All Statuses", "In Progress", "Done", "Completed", "Pending", "Blocked", "Deferred"]:
+        for status in ["All Statuses", "In Progress", "Completed", "Pending", "Blocked", "Deferred"]:
             assert status in html
 
     def test_contains_pagination_container(self, client):

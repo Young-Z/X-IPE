@@ -39,8 +39,9 @@ EMOJI_RE = re.compile(
 )
 
 STATUS_NORMALIZE: dict[str, str] = {
-    "done": "done",
+    "done": "completed",
     "completed": "completed",
+    "complete": "completed",
     "in_progress": "in_progress",
     "in progress": "in_progress",
     "pending": "pending",

@@ -92,14 +92,14 @@ def task_env(tmp_path, monkeypatch):
 
 @pytest.fixture
 def seeded_env(task_env):
-    """Task env with two tasks pre-seeded (TASK-001 in_progress, TASK-002 done)."""
+    """Task env with two tasks pre-seeded (TASK-001 in_progress, TASK-002 completed)."""
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     t1 = _full_task("TASK-001", status="in_progress")
-    t2 = _full_task("TASK-002", status="done", last_updated="2026-04-03T07:00:00+00:00")
+    t2 = _full_task("TASK-002", status="completed", last_updated="2026-04-03T07:00:00+00:00")
     _setup_daily(task_env, today, [t1, t2])
     _setup_index(task_env, {
         "TASK-001": {"file": f"tasks-{today}.json", "status": "in_progress", "last_updated": t1["last_updated"]},
-        "TASK-002": {"file": f"tasks-{today}.json", "status": "done", "last_updated": t2["last_updated"]},
+        "TASK-002": {"file": f"tasks-{today}.json", "status": "completed", "last_updated": t2["last_updated"]},
     })
     return task_env
 
@@ -220,7 +220,7 @@ class TestTaskUpdate:
         today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
         daily = _read_daily(seeded_env, today)
         task = next(t for t in daily["tasks"] if t["task_id"] == "TASK-001")
-        assert task["status"] == "done"
+        assert task["status"] == "completed"  # "done" normalized to "completed"
         assert task["description"] == "Test task description"  # unchanged
         assert task["last_updated"] > "2026-04-03T06:00:00+00:00"
 
@@ -247,7 +247,7 @@ class TestTaskUpdate:
         capsys.readouterr()
 
         idx = _read_index(seeded_env)
-        assert idx["entries"]["TASK-001"]["status"] == "done"
+        assert idx["entries"]["TASK-001"]["status"] == "completed"  # "done" normalized
         assert idx["entries"]["TASK-001"]["last_updated"] > "2026-04-03T06:00:00+00:00"
 
     def test_not_found(self, task_env, capsys):
@@ -335,10 +335,10 @@ class TestTaskQueryList:
 
     def test_status_filter(self, seeded_env, capsys):
         """AC-03b: Filter by status."""
-        task_query.main(["--status", "done"])
+        task_query.main(["--status", "completed"])
         out = json.loads(capsys.readouterr().out)
         assert out["data"]["total"] == 1
-        assert out["data"]["tasks"][0]["status"] == "done"
+        assert out["data"]["tasks"][0]["status"] == "completed"
 
     def test_search_filter(self, seeded_env, capsys):
         """AC-03c: Text search across task fields."""
@@ -673,3 +673,79 @@ class TestAtomicity:
         assert len(lock_calls) == 2
         assert lock_calls[0] == f"tasks-{date}.json.lock"
         assert lock_calls[1] == "tasks-index.json.lock"
+
+
+# ---------------------------------------------------------------------------
+# TestStatusNormalization — "done" and "completed" merge to "completed"
+# ---------------------------------------------------------------------------
+
+class TestStatusNormalization:
+    """Verify that similar task statuses are normalized to canonical forms."""
+
+    def test_create_normalizes_done_to_completed(self, task_env, capsys):
+        """Creating a task with status 'done' stores it as 'completed'."""
+        task_create.main(["--task", json.dumps(_make_task(status="done"))])
+        out = json.loads(capsys.readouterr().out)
+        daily = _board_lib.atomic_read_json(task_env / out["data"]["file"])["data"]
+        assert daily["tasks"][0]["status"] == "completed"
+
+    def test_create_normalizes_complete_to_completed(self, task_env, capsys):
+        """Creating a task with status 'complete' stores it as 'completed'."""
+        task_create.main(["--task", json.dumps(_make_task(status="complete"))])
+        out = json.loads(capsys.readouterr().out)
+        daily = _board_lib.atomic_read_json(task_env / out["data"]["file"])["data"]
+        assert daily["tasks"][0]["status"] == "completed"
+
+    def test_update_normalizes_done_to_completed(self, seeded_env, capsys):
+        """Updating a task status to 'done' stores it as 'completed'."""
+        task_update.main(["--task-id", "TASK-001",
+                          "--updates", json.dumps({"status": "done"})])
+        capsys.readouterr()
+        today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        daily = _read_daily(seeded_env, today)
+        task = next(t for t in daily["tasks"] if t["task_id"] == "TASK-001")
+        assert task["status"] == "completed"
+
+    def test_update_index_normalizes_done(self, seeded_env, capsys):
+        """Index entry reflects normalized status after update."""
+        task_update.main(["--task-id", "TASK-001",
+                          "--updates", json.dumps({"status": "done"})])
+        capsys.readouterr()
+        idx = _read_index(seeded_env)
+        assert idx["entries"]["TASK-001"]["status"] == "completed"
+
+    def test_query_done_finds_completed(self, task_env, capsys):
+        """Querying --status done finds tasks with normalized 'completed' status."""
+        today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        t1 = _full_task("TASK-001", status="completed")
+        _setup_daily(task_env, today, [t1])
+        _setup_index(task_env, {
+            "TASK-001": {"file": f"tasks-{today}.json", "status": "completed",
+                         "last_updated": t1["last_updated"]},
+        })
+        task_query.main(["--status", "done"])
+        out = json.loads(capsys.readouterr().out)
+        assert out["data"]["total"] == 1
+        assert out["data"]["tasks"][0]["status"] == "completed"
+
+    def test_completed_stays_completed(self, task_env, capsys):
+        """Status 'completed' is already canonical and stays unchanged."""
+        task_create.main(["--task", json.dumps(_make_task(status="completed"))])
+        out = json.loads(capsys.readouterr().out)
+        daily = _board_lib.atomic_read_json(task_env / out["data"]["file"])["data"]
+        assert daily["tasks"][0]["status"] == "completed"
+
+    def test_in_progress_unchanged(self, task_env, capsys):
+        """Non-alias statuses like 'in_progress' are not changed."""
+        task_create.main(["--task", json.dumps(_make_task(status="in_progress"))])
+        out = json.loads(capsys.readouterr().out)
+        daily = _board_lib.atomic_read_json(task_env / out["data"]["file"])["data"]
+        assert daily["tasks"][0]["status"] == "in_progress"
+
+    def test_normalize_function_in_board_lib(self):
+        """_board_lib exposes normalize_task_status function."""
+        assert _board_lib.normalize_task_status("done") == "completed"
+        assert _board_lib.normalize_task_status("complete") == "completed"
+        assert _board_lib.normalize_task_status("completed") == "completed"
+        assert _board_lib.normalize_task_status("in_progress") == "in_progress"
+        assert _board_lib.normalize_task_status("pending") == "pending"

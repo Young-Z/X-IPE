@@ -22,6 +22,11 @@ _VALID_RANGES = {"1w", "1m", "all"}
 _SEARCH_FIELDS = ("task_id", "task_type", "description", "role")
 _DATE_PATTERN = re.compile(r"^tasks-(\d{4}-\d{2}-\d{2})\.json$")
 
+_TASK_STATUS_ALIASES: dict[str, str] = {
+    "done": "completed",
+    "complete": "completed",
+}
+
 
 class TaskBoardService:
     """Read-only service for querying task board data."""
@@ -131,8 +136,11 @@ class TaskBoardService:
         task: dict, status: str | None, search: str | None
     ) -> bool:
         """Return True if task passes status and search filters."""
-        if status and task.get("status") != status:
-            return False
+        if status:
+            norm_filter = _TASK_STATUS_ALIASES.get(status, status)
+            norm_task = _TASK_STATUS_ALIASES.get(task.get("status", ""), task.get("status", ""))
+            if norm_task != norm_filter:
+                return False
         if search:
             searchable = " ".join(
                 str(task.get(f, "")) for f in _SEARCH_FIELDS

@@ -6,7 +6,7 @@
       "task_type": "Knowledge Extraction",
       "description": "Extract and analyze knowledge from ontology-1.0.4 skill (x-ipe-docs/ideas/103. Research-Ontology/ontology-1.0.4). Purpose: application-reverse-engineering.",
       "role": "Zephyr",
-      "status": "done",
+      "status": "completed",
       "output_links": [
         "x-ipe-docs/knowledge-base/.intake/ontology-application-reverse-engineering/"
       ],
@@ -18,7 +18,7 @@
       "task_id": "TASK-1090",
       "task_type": "Ideation",
       "description": "Refine idea #40: Feature-Ontology For Knowledgebase - introduce ontology-based multi-dimensional knowledge tagging, knowledge graph creation, and graph-based search UI",
-      "status": "done",
+      "status": "completed",
       "role": "Ember 🔥",
       "output_links": [
         "x-ipe-docs/ideas/40. Feature-Ontology For Knowledgebase/refined-idea/idea-summary-v1.md",
@@ -33,7 +33,7 @@
       "task_type": "skill-update",
       "description": "Add execution_temperature param to general-purpose-executor and user-manual-referencer",
       "role": "Ember",
-      "status": "done",
+      "status": "completed",
       "output_links": [
         ".github/skills/x-ipe-task-based-general-purpose-executor/SKILL.md",
         ".github/skills/x-ipe-tool-user-manual-referencer/SKILL.md"
@@ -46,7 +46,7 @@
       "task_id": "TASK-1091",
       "task_type": "Ideation",
       "description": "Idea #40 v2: Combine Feature-Ontology design with ontology-1.0.4 data engine — updated idea-summary-v2.md with merged architecture",
-      "status": "done",
+      "status": "completed",
       "role": "Ember 🔥",
       "output_links": [
         "x-ipe-docs/ideas/40. Feature-Ontology For Knowledgebase/refined-idea/idea-summary-v2.md"
@@ -59,7 +59,7 @@
       "task_id": "TASK-1092",
       "task_type": "Idea Mockup",
       "description": "Create visual mockup for Idea #40 Feature-Ontology for Knowledgebase v2 — Ontology Graph Viewer UI",
-      "status": "done",
+      "status": "completed",
       "role": "Ember 🔥",
       "output_links": [
         "x-ipe-docs/ideas/40. Feature-Ontology For Knowledgebase/mockups/ontology-graph-viewer-v1.html",
@@ -68,6 +68,67 @@
       "next_task": "x-ipe-task-based-requirement-gathering",
       "created_at": "2026-04-08T03:33:30.678678+00:00",
       "last_updated": "2026-04-08T03:39:47.851555+00:00"
+    },
+    {
+      "task_id": "TASK-1093",
+      "task_type": "Requirement Gathering",
+      "description": "EPIC-058: Gather requirements for Feature-Ontology for Knowledgebase",
+      "status": "completed",
+      "role": "Ember 🔥",
+      "output_links": [
+        "x-ipe-docs/requirements/requirement-details-part-24.md",
+        "x-ipe-docs/requirements/EPIC-058/mockups/ontology-graph-viewer-v1.html",
+        "x-ipe-docs/requirements/requirement-details-index.md"
+      ],
+      "next_task": "x-ipe-task-based-feature-breakdown",
+      "created_at": "2026-04-08T06:09:19.809126+00:00",
+      "last_updated": "2026-04-08T09:15:43.355514+00:00"
+    },
+    {
+      "task_id": "TASK-1094",
+      "task_type": "Feature Breakdown",
+      "description": "Break EPIC-058 (Feature-Ontology for Knowledgebase) into features with MVP-first criteria. Source: requirement-details-part-24.md with 6 features (FEATURE-058-A through F).",
+      "status": "completed",
+      "role": "Ember 🔥",
+      "output_links": [
+        "x-ipe-docs/requirements/requirement-details-part-24.md",
+        "x-ipe-docs/requirements/requirement-details-index.md",
+        "x-ipe-docs/requirements/EPIC-058/mockups/ontology-graph-viewer-v1.html"
+      ],
+      "next_task": "x-ipe-task-based-feature-refinement",
+      "created_at": "2026-04-08T09:19:31.279218+00:00",
+      "last_updated": "2026-04-08T09:29:39.158559+00:00"
+    },
+    {
+      "task_id": "TASK-1095",
+      "task_type": "Feature Refinement",
+      "description": "Refine specification for FEATURE-058-A (Ontology Tool — Knowledge Tagging). Create detailed user stories, GWT acceptance criteria, and requirements.",
+      "status": "completed",
+      "role": "Ember 🔥",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-058/FEATURE-058-A/specification.md",
+        "x-ipe-docs/requirements/requirement-details-part-24.md"
+      ],
+      "next_task": "x-ipe-task-based-technical-design",
+      "created_at": "2026-04-08T09:32:20.241389+00:00",
+      "last_updated": "2026-04-08T09:46:58.021455+00:00"
+    },
+    {
+      "task_id": "TASK-1096",
+      "task_type": "Bug Fix",
+      "description": "Merge similar task statuses (done/completed/✅ done) into canonical completed status. Add status normalization to task CRUD scripts.",
+      "role": "Spark",
+      "status": "completed",
+      "output_links": [
+        ".github/skills/x-ipe-tool-task-board-manager/scripts/_board_lib.py",
+        ".github/skills/x-ipe-tool-task-board-manager/scripts/task_create.py",
+        ".github/skills/x-ipe-tool-task-board-manager/scripts/task_update.py",
+        ".github/skills/x-ipe-tool-task-board-manager/scripts/task_query.py",
+        "tests/test_task_crud.py"
+      ],
+      "next_task": "",
+      "created_at": "2026-04-08T09:48:55.834463+00:00",
+      "last_updated": "2026-04-08T09:59:00.346507+00:00"
     }
   ]
 }

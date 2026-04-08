@@ -6,7 +6,7 @@
       "task_type": "Code Implementation",
       "description": "Code Implementation — EPIC-054 all 6 features: learn-panel.js, learn_routes.py, tracker-toolbar.js IIFE (RecordingEngine, PIIMasker, TrackerToolbox, BackupManager), track_behavior.py, post_processor.py. 45 tests (32 JS + 13 Python) all pass.",
       "role": "Spark ✨",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-04-02T00:00:00+00:00",
       "last_updated": "2026-04-02T00:00:00+00:00",
       "output_links": [
@@ -20,7 +20,7 @@
       "task_type": "Requirement Gathering",
       "description": "Gather requirements for IDEA-038: Learn Module (EPIC-054) — Define feature scope, user workflows, integration points with behavior tracking and web event recording.",
       "role": "Spark ✨",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-04-02T00:00:00+00:00",
       "last_updated": "2026-04-02T00:00:00+00:00",
       "output_links": [
@@ -35,7 +35,7 @@
       "task_type": "Idea Mockup",
       "description": "Create visual mockups for IDEA-038: Learn Module — Workplace GUI entry point + injected tracker toolbox overlay.",
       "role": "Spark ✨",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-04-02T00:00:00+00:00",
       "last_updated": "2026-04-02T00:00:00+00:00",
       "output_links": [
@@ -49,7 +49,7 @@
       "task_type": "Ideation",
       "description": "Refine idea 038: Feature-Learn module — brainstorm learning function with behavior tracking, web event recording, AI-assisted annotation. DAO mode.",
       "role": "Spark ✨",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-04-02T00:00:00+00:00",
       "last_updated": "2026-04-02T00:00:00+00:00",
       "output_links": [
@@ -62,7 +62,7 @@
       "task_type": "Change Request",
       "description": "CR: Change Claude Code instructions_file from `.claude/instructions.md` to `CLAUDE.md` (project root). Modification to FEATURE-027-C — aligns config with existing spec AC-4.4. Updated 2 configs, 3 test files, README.",
       "role": "Pixel 🎨",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-04-02T00:00:00+00:00",
       "last_updated": "2026-04-02T00:00:00+00:00",
       "output_links": [],

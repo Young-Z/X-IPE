@@ -6,7 +6,7 @@
       "task_type": "Bug Fix",
       "description": "FEATURE-049-G: KB Reference Insert button does not persist .knowledge-reference.yaml when opened via KB Browse Modal → Reference KB (no onInsert callback). Added _persistReferences() fallback.",
       "role": "Ember 🔥",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-13T22:15:00+00:00",
       "last_updated": "2026-03-13T22:15:00+00:00",
       "output_links": [
@@ -20,7 +20,7 @@
       "task_type": "Code Implementation",
       "description": "Implement FEATURE-049-G CR-004: KB Reference button in compose pane, YAML persistence, count label/popup — workplace.js + ideas_routes.py + ideas_service.py",
       "role": "Pulse 💓",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-13T13:35:00+00:00",
       "last_updated": "2026-03-13T13:35:00+00:00",
       "output_links": [
@@ -34,7 +34,7 @@
       "task_type": "Technical Design",
       "description": "Design FEATURE-049-G CR-004: KB Reference in compose — button placement, picker integration, YAML persistence, count label/popup, API changes",
       "role": "Pulse 💓",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-13T13:22:00+00:00",
       "last_updated": "2026-03-13T13:22:00+00:00",
       "output_links": [
@@ -48,7 +48,7 @@
       "task_type": "Feature Refinement",
       "description": "Refine FEATURE-049-G specification for CR-004: Add KB Reference integration in Workplace compose — new user stories, ACs, FRs for button, picker invocation, .knowledge-reference.yaml, count label",
       "role": "Pulse 💓",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-13T13:20:00+00:00",
       "last_updated": "2026-03-13T13:20:00+00:00",
       "output_links": [
@@ -61,7 +61,7 @@
       "task_type": "Change Request",
       "description": "UIUX Feedback-20260313-165013: Add KB Reference button to Workplace compose pane — open KB Reference Picker, insert .knowledge-reference.yaml, show reference count label",
       "role": "Pulse 💓",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-13T13:08:00+00:00",
       "last_updated": "2026-03-13T13:08:00+00:00",
       "output_links": [
@@ -74,7 +74,7 @@
       "task_type": "Bug Fix",
       "description": "FEATURE-049-G modal size — change from max-width:800px/max-height:600px to 90vw×90vh to match all other modals",
       "role": "Drift 🌊",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-13T05:59:00+00:00",
       "last_updated": "2026-03-13T05:59:00+00:00",
       "output_links": [
@@ -87,7 +87,7 @@
       "task_type": "Acceptance Testing",
       "description": "FEATURE-049-G acceptance tests: verify all 29 ACs (UI + Unit + Integration) against CR-003 implementation via Chrome DevTools MCP for UI tests",
       "role": "Drift 🌊",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-13T05:40:00+00:00",
       "last_updated": "2026-03-13T05:40:00+00:00",
       "output_links": [
@@ -100,7 +100,7 @@
       "task_type": "Bug Fix",
       "description": "FEATURE-049-G (KB Reference Picker) reported non-functional — diagnose root cause, write failing test, fix, verify",
       "role": "Ember 🔥",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-13T02:25:00+00:00",
       "last_updated": "2026-03-13T02:25:00+00:00",
       "output_links": [
@@ -114,7 +114,7 @@
       "task_type": "Change Request",
       "description": "CR-002 on FEATURE-049-G: (1) sub-folder checkboxes in file list, (2) list/icon view toggle, (3) icon-view checkbox at bottom-right, (4) click to check, dblclick to navigate folders, footer tip",
       "role": "Ember 🔥",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-13T08:55:00+00:00",
       "last_updated": "2026-03-13T08:55:00+00:00",
       "output_links": [
@@ -129,7 +129,7 @@
       "task_type": "Change Request + Implementation",
       "description": "CR-003: 8-point UIUX redesign of FEATURE-049-G (KB Reference Picker) — folder navigation, light theme, standard modal, breadcrumb nav, tag separation, full paths. Includes refinement, design, and implementation.",
       "role": "Drift 🌊",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-13T02:35:00+00:00",
       "last_updated": "2026-03-13T02:35:00+00:00",
       "output_links": [
@@ -146,7 +146,7 @@
       "task_type": "Bug Fix",
       "description": "Intake view doesn't show uploaded files — _renderIntakeScene() uses hardcoded zeros, trigger-intake-upload closes modal, intake files not persisted on scene re-render",
       "role": "Echo 📡",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-13T00:23:00+00:00",
       "last_updated": "2026-03-13T00:23:00+00:00",
       "output_links": [

@@ -90,7 +90,7 @@ class TestStripEmoji:
 
 class TestNormalizeStatus:
     def test_done_with_emoji(self):
-        assert _normalize_status("✅ done") == "done"
+        assert _normalize_status("✅ done") == "completed"
 
     def test_completed_with_emoji(self):
         assert _normalize_status("✅ completed") == "completed"
@@ -203,7 +203,7 @@ class TestParseTasksMd:
         md_path.write_text(SAMPLE_TASK_MD)
         tasks = parse_tasks_md(md_path)
         t101 = next(t for t in tasks if t["task_id"] == "TASK-101")
-        assert t101["status"] == "done"
+        assert t101["status"] == "completed"
 
 
 class TestParseFeaturesMd:

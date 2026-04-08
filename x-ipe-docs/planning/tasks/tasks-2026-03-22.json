@@ -6,7 +6,7 @@
       "task_type": "Code Refactor",
       "description": "Refactor action-execution-modal i18n from static _I18N code map to data-driven config in copilot-prompt.json (matching copilot button dropdown pattern). Move labels to ui-labels section. DAO mode.",
       "role": "Ember 🔥",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-22T00:00:00+00:00",
       "last_updated": "2026-03-22T00:00:00+00:00",
       "output_links": [
@@ -20,7 +20,7 @@
       "task_type": "Bug Fix",
       "description": "Instruction modal text not localized to Chinese when .x-ipe.yaml language=zh. The INSTRUCTIONS section (e.g., \"Refine Idea\" modal) shows English text; should be Chinese except CLI flags (--workflow-mode etc). Source: Feedback-20260322-215956. DAO mode.",
       "role": "Ember 🔥",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-22T00:00:00+00:00",
       "last_updated": "2026-03-22T00:00:00+00:00",
       "output_links": [

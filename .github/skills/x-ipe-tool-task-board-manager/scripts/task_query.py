@@ -18,6 +18,7 @@ from _board_lib import (
     EXIT_FILE_NOT_FOUND,
     atomic_read_json,
     exit_with_error,
+    normalize_task_status,
     output_result,
     resolve_data_path,
 )
@@ -56,8 +57,11 @@ def _files_in_range(tasks_dir: Path, range_str: str) -> list[Path]:
 
 def _matches_filters(task: dict, status: str | None, search: str | None) -> bool:
     """Check if task matches optional status and search filters."""
-    if status and task.get("status") != status:
-        return False
+    if status:
+        normalized_filter = normalize_task_status(status)
+        normalized_task = normalize_task_status(task.get("status", ""))
+        if normalized_task != normalized_filter:
+            return False
     if search:
         search_lower = search.lower()
         searchable = " ".join(

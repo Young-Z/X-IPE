@@ -20,6 +20,7 @@ from _board_lib import (
     atomic_read_json,
     atomic_write_json,
     exit_with_error,
+    normalize_task_status,
     output_result,
     resolve_data_path,
     with_file_lock,
@@ -49,6 +50,9 @@ def main(argv: list[str] | None = None) -> None:
 
     # Strip auto-managed field
     updates.pop("last_updated", None)
+
+    if "status" in updates:
+        updates["status"] = normalize_task_status(updates["status"])
 
     if not updates:
         exit_with_error(EXIT_VALIDATION_ERROR, "EMPTY_UPDATES", "No update fields provided")

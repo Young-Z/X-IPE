@@ -27,7 +27,6 @@
 
     // ── Constants ────────────────────────────────────────────────────
     const STATUS_COLORS = {
-        done: { color: '#22c55e', bg: '#f0fdf4', label: 'Done' },
         completed: { color: '#22c55e', bg: '#f0fdf4', label: 'Completed' },
         in_progress: { color: '#3b82f6', bg: '#eff6ff', label: 'In Progress' },
         pending: { color: '#f59e0b', bg: '#fffbeb', label: 'Pending' },
@@ -60,7 +59,7 @@
     const STAT_CARDS = [
         { key: 'total', label: 'Total Tasks', borderColor: '#475569' },
         { key: 'in_progress', label: 'In Progress', borderColor: '#3b82f6' },
-        { key: 'done', label: 'Completed', borderColor: '#22c55e' },
+        { key: 'completed', label: 'Completed', borderColor: '#22c55e' },
         { key: 'blocked', label: 'Blocked', borderColor: '#ef4444' },
         { key: 'pending', label: 'Pending', borderColor: '#f59e0b' },
     ];
@@ -186,14 +185,14 @@
     }
 
     function renderStats() {
-        const counts = { total: 0, in_progress: 0, done: 0, blocked: 0, pending: 0 };
+        const counts = { total: 0, in_progress: 0, completed: 0, blocked: 0, pending: 0 };
         if (state.pagination) {
             counts.total = state.pagination.total;
         }
         state.tasks.forEach(function (t) {
             const s = (t.status || '').toLowerCase();
             if (s === 'in_progress') counts.in_progress++;
-            else if (s === 'done' || s === 'completed') counts.done++;
+            else if (s === 'done' || s === 'completed') counts.completed++;
             else if (s === 'blocked') counts.blocked++;
             else if (s === 'pending') counts.pending++;
         });
@@ -218,7 +217,8 @@
 
         var sorted = sortTasks(state.tasks);
         elBody.innerHTML = sorted.map(function (task) {
-            var statusCls = (task.status || '').toLowerCase().replace(/\s+/g, '_');
+            var rawStatus = (task.status || '').toLowerCase().replace(/\s+/g, '_');
+            var statusCls = rawStatus === 'done' ? 'completed' : rawStatus;
             var statusInfo = STATUS_COLORS[statusCls] || { label: task.status || '—' };
             var typeInfo = TYPE_COLORS[task.task_type] || { bg: '#f1f5f9', color: '#334155' };
             var outputHtml = renderOutputLinks(task.output_links);
@@ -354,7 +354,7 @@
         '<div class="tb-filter-divider"></div>' +
         '<select id="tb-status-filter" class="tb-select">' +
         '<option value="">All Statuses</option><option value="in_progress">In Progress</option>' +
-        '<option value="done">Done</option><option value="completed">Completed</option>' +
+        '<option value="completed">Completed</option>' +
         '<option value="pending">Pending</option><option value="blocked">Blocked</option>' +
         '<option value="deferred">Deferred</option></select>' +
         '<div class="tb-filter-divider"></div>' +

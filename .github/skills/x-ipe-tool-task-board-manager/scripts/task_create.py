@@ -19,6 +19,7 @@ from _board_lib import (
     atomic_read_json,
     atomic_write_json,
     exit_with_error,
+    normalize_task_status,
     output_result,
     resolve_data_path,
     validate_schema,
@@ -67,6 +68,9 @@ def main(argv: list[str] | None = None) -> None:
     # Strip system-managed fields — caller cannot override
     task.pop("created_at", None)
     task.pop("last_updated", None)
+
+    if "status" in task:
+        task["status"] = normalize_task_status(task["status"])
 
     now = datetime.now(timezone.utc).isoformat()
     task["created_at"] = now

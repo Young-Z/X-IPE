@@ -6,7 +6,7 @@
       "task_type": "Skill Update",
       "description": "Update x-ipe-task-based-feature-refinement: (1) Test Type column, (2) epic-folder mockup discovery, (3) scope-aware linking, (4) Linked Date, (5) enforce mockup→spec AC refs",
       "role": "Spark ✨",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-11T14:10:00+00:00",
       "last_updated": "2026-03-11T14:10:00+00:00",
       "output_links": [
@@ -20,7 +20,7 @@
       "task_type": "Requirement Gathering",
       "description": "Gather requirements for Knowledge Base (EPIC-049) — storage, sidebar, browse, upload, tags, search, agent integration, reference picker, AI Librarian",
       "role": "Echo 📡",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-11T03:50:00+00:00",
       "last_updated": "2026-03-11T03:50:00+00:00",
       "output_links": [
@@ -33,7 +33,7 @@
       "task_type": "Feature Breakdown",
       "description": "Break EPIC-049 (Knowledge Base) into features with MVP-first ordering, create feature board entries, update requirement-details-part-20.md",
       "role": "Echo 📡",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-11T05:18:00+00:00",
       "last_updated": "2026-03-11T05:18:00+00:00",
       "output_links": [
@@ -47,7 +47,7 @@
       "task_type": "Feature Refinement",
       "description": "Refine FEATURE-049-A (KB Backend & Storage Foundation) — create specification.md with user stories, ACs, FRs, NFRs",
       "role": "Echo 📡",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-11T05:27:00+00:00",
       "last_updated": "2026-03-11T05:27:00+00:00",
       "output_links": [
@@ -60,7 +60,7 @@
       "task_type": "Technical Design",
       "description": "Design FEATURE-049-A (KB Backend & Storage Foundation) — kb_service.py, kb_routes.py, data models, API contracts",
       "role": "Echo 📡",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-11T10:12:00+00:00",
       "last_updated": "2026-03-11T10:12:00+00:00",
       "output_links": [
@@ -73,7 +73,7 @@
       "task_type": "Code Implementation",
       "description": "Implement FEATURE-049-A (KB Backend & Storage Foundation) — kb_service.py, kb_routes.py, app.py integration, tests",
       "role": "Echo 📡",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-11T10:20:00+00:00",
       "last_updated": "2026-03-11T10:20:00+00:00",
       "output_links": [
@@ -88,7 +88,7 @@
       "task_type": "Feature Refinement",
       "description": "Refine FEATURE-049-B (KB Sidebar & Navigation) — specification with ACs, FRs, NFRs for sidebar folder tree, drag-drop, auto-refresh",
       "role": "Echo 📡",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-11T10:35:00+00:00",
       "last_updated": "2026-03-11T10:35:00+00:00",
       "output_links": [
@@ -101,7 +101,7 @@
       "task_type": "Technical Design + Implementation",
       "description": "Design and implement FEATURE-049-B (KB Sidebar & Navigation) — sidebar section, folder tree, drag-drop, auto-refresh",
       "role": "Echo 📡",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-11T10:45:00+00:00",
       "last_updated": "2026-03-11T10:45:00+00:00",
       "output_links": [
@@ -117,7 +117,7 @@
       "task_type": "Refinement + Design + Implementation",
       "description": "FEATURE-049-D (KB Article Editor) — modal editor with EasyMDE, tag chips, frontmatter, save/edit",
       "role": "Echo 📡",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-11T10:55:00+00:00",
       "last_updated": "2026-03-11T10:55:00+00:00",
       "output_links": [
@@ -132,7 +132,7 @@
       "task_type": "Refinement + Design + Implementation",
       "description": "FEATURE-049-C (KB Browse & Search) — grid view, search, sort, tag filters, card navigation",
       "role": "Echo 📡",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-11T11:10:00+00:00",
       "last_updated": "2026-03-11T11:10:00+00:00",
       "output_links": [
@@ -147,7 +147,7 @@
       "task_type": "Refinement + Design + Implementation",
       "description": "FEATURE-049-E (KB File Upload) — upload modal, dropzone, folder selector, archive extraction, backend upload endpoint",
       "role": "Echo 📡",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-11T11:30:00+00:00",
       "last_updated": "2026-03-11T11:30:00+00:00",
       "output_links": [
@@ -163,7 +163,7 @@
       "task_type": "Refinement + Design + Implementation",
       "description": "FEATURE-049-G (KB Reference Picker) — two-panel modal, folder tree, file list, search, tag filters, multi-select, copy, insert",
       "role": "Echo 📡",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-11T11:45:00+00:00",
       "last_updated": "2026-03-11T11:45:00+00:00",
       "output_links": [
@@ -178,7 +178,7 @@
       "task_type": "Workflow Remediation",
       "description": "Acceptance testing + code refactor + feature closing for all 6 MVP features (A→B→C→D→E→G). 69 Python + 616 JS tests. Quality scores improved across all features.",
       "role": "Echo 📡",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-11T12:42:00+00:00",
       "last_updated": "2026-03-11T12:42:00+00:00",
       "output_links": [
@@ -196,7 +196,7 @@
       "task_type": "Refactoring Analysis",
       "description": "Refactoring analysis for FEATURE-049-A (KB Backend & Storage Foundation) — evaluate code quality across 6 dimensions, identify refactoring suggestions, produce report",
       "role": "Nova ⭐",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-11T12:00:00+00:00",
       "last_updated": "2026-03-11T12:00:00+00:00",
       "output_links": [
@@ -210,7 +210,7 @@
       "task_type": "Skill Update",
       "description": "Update x-ipe-dao-end-user-representative: add parallelism-awareness — when multiple independent instruction units identified, suggest parallel execution plan in output",
       "role": "Spark ✨",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-11T13:50:00+00:00",
       "last_updated": "2026-03-11T13:50:00+00:00",
       "output_links": [
@@ -224,7 +224,7 @@
       "task_type": "Skill Update",
       "description": "Simplify x-ipe-dao-end-user-representative: remove step 1.3 (Direction/Timing/Environment) and step 2.3 (Validate) — absorbed by steps 1.2 and 2.2 respectively",
       "role": "Spark ✨",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-11T13:55:00+00:00",
       "last_updated": "2026-03-11T13:55:00+00:00",
       "output_links": [
@@ -237,7 +237,7 @@
       "task_type": "Skill Update",
       "description": "Update x-ipe-task-based-feature-acceptance-test: (1) remove web-UI-only gate — run ALL tests from spec routing to best tool per type, (2) add chrome-devtools-mcp to tools.json quality.testing, (3) skill reads tools.json config like ideation",
       "role": "Flux ⚡",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-11T11:25:00+00:00",
       "last_updated": "2026-03-11T11:25:00+00:00",
       "output_links": [
@@ -251,7 +251,7 @@
       "task_type": "Skill Update",
       "description": "Change next_task_based_skill in x-ipe-task-based-feature-acceptance-test to only include x-ipe-task-based-code-refactor (remove feature-closing and human-playground). Update engineering-workflow.md reference.",
       "role": "Sage 🌿",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-11T11:53:00+00:00",
       "last_updated": "2026-03-11T11:53:00+00:00",
       "output_links": [
@@ -265,7 +265,7 @@
       "task_type": "Feature Refinement (Re-align)",
       "description": "Re-refine all 6 EPIC-049 specification.md files (A,B,C,D,E,G) per updated feature refinement skill template: (1) AC header → Criterion (Given/When/Then), (2) All ACs to GWT format, (3) Add Linked Mockups with Linked Date, (4) Version History, (5) Test Type Legend, (6) Standardize all template sections",
       "role": "Echo 📡",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-11T14:35:00+00:00",
       "last_updated": "2026-03-11T14:35:00+00:00",
       "output_links": [
@@ -283,7 +283,7 @@
       "task_type": "Technical Design (Re-align)",
       "description": "Re-aligned FEATURE-049-B technical-design.md — rewritten from 116→201 lines fixing 14 template gaps. A,C,D,E,G confirmed compliant.",
       "role": "Echo 📡",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-11T14:46:00+00:00",
       "last_updated": "2026-03-11T14:46:00+00:00",
       "output_links": [],
@@ -294,7 +294,7 @@
       "task_type": "Code-Implementation DoD Validation",
       "description": "Wrote 24 new tests (5 JS + 19 Python), verified tracing on all public methods, achieved 82% coverage (service 91%, routes 69%). All 5 audit gaps closed.",
       "role": "Echo 📡",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-11T15:10:00+00:00",
       "last_updated": "2026-03-11T15:10:00+00:00",
       "output_links": [],
@@ -305,7 +305,7 @@
       "task_type": "Acceptance Testing (Re-run)",
       "description": "Re-run acceptance testing for all 6 MVP features (A,B,C,D,E,G) after spec/design/code changes. Update acceptance-test-cases.md per feature with current test results.",
       "role": "Echo 📡",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-11T15:43:00+00:00",
       "last_updated": "2026-03-11T15:43:00+00:00",
       "output_links": [
@@ -319,7 +319,7 @@
       "task_type": "Skill Update",
       "description": "Add engineering workflow reference to x-ipe-dao-end-user-representative: create references/engineering-workflow.md with full DAG, update Step 2.1 to consult workflow position",
       "role": "Cipher 🔐",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-11T10:57:00+00:00",
       "last_updated": "2026-03-11T10:57:00+00:00",
       "output_links": [],
@@ -330,7 +330,7 @@
       "task_type": "Skill Update",
       "description": "Optimize x-ipe-dao-end-user-representative: (1) add yy-mm-dd date subfolders for DAO logs, update Phase 3 paths; (2) restore DoR/DoD/Input Init to mandatory XML format per skill creator template",
       "role": "Cipher 🔐",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-11T03:21:00+00:00",
       "last_updated": "2026-03-11T03:21:00+00:00",
       "output_links": [],
@@ -341,7 +341,7 @@
       "task_type": "Design Mockup",
       "description": "KB interface mockup — 4 scenes: Browse Articles (grid/list, 2D tags, sort, dual-mode upload w/ folder picker), Article Detail, Reference Picker (copy+insert), 📥 Intake (AI Librarian file management)",
       "role": "Echo 📡",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-11T03:50:00+00:00",
       "last_updated": "2026-03-11T03:50:00+00:00",
       "output_links": [
@@ -354,7 +354,7 @@
       "task_type": "Skill Update",
       "description": "Optimize x-ipe-dao-end-user-representative: compress execution procedure steps via reference extraction and concise rewrites, following x-ipe-meta-skill-creator process",
       "role": "Cipher 🔐",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-11T03:08:00+00:00",
       "last_updated": "2026-03-11T03:08:00+00:00",
       "output_links": [],

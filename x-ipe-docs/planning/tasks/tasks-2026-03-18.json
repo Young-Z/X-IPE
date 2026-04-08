@@ -6,7 +6,7 @@
       "task_type": "Bug Fix",
       "description": "CR-008 follow-up: Unify 4 remaining preview locations (workplace.js, folder-browser-modal.js, compose-idea-modal.js, link-preview-manager.js) to use shared FilePreviewRenderer. Added /api/file/raw endpoint with DOCX/MSG conversion. All 6 preview locations now unified. DAO mode.",
       "role": "Pulse 💫",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-18T00:00:00+00:00",
       "last_updated": "2026-03-18T00:00:00+00:00",
       "output_links": [
@@ -19,7 +19,7 @@
       "task_type": "Change Request",
       "description": "CR-008 for FEATURE-049-F: Unify file preview across KB browse, workflow deliverables, and all other preview locations — shared preview component for consistency. Source: UIUX Feedback Feedback-20260318-213942. DAO mode.",
       "role": "Pulse 💫",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-18T00:00:00+00:00",
       "last_updated": "2026-03-18T00:00:00+00:00",
       "output_links": [
@@ -33,7 +33,7 @@
       "task_type": "Feature Refinement",
       "description": "Refine FEATURE-049-F specification for CR-008: Detail FilePreviewRenderer shared component ACs, UI/UX requirements, edge cases, technical considerations. DAO mode.",
       "role": "Pulse 💫",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-18T00:00:00+00:00",
       "last_updated": "2026-03-18T00:00:00+00:00",
       "output_links": [
@@ -46,7 +46,7 @@
       "task_type": "Technical Design",
       "description": "Design CR-008 for FEATURE-049-F: FilePreviewRenderer shared component in core/file-preview-renderer.js. Configurable endpoint, blob lifecycle, KB browse + deliverable viewer integration. DAO mode.",
       "role": "Pulse 💫",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-18T00:00:00+00:00",
       "last_updated": "2026-03-18T00:00:00+00:00",
       "output_links": [
@@ -59,7 +59,7 @@
       "task_type": "Code Implementation",
       "description": "Implement CR-008 for FEATURE-049-F: FilePreviewRenderer in core/file-preview-renderer.js (~180 LOC), refactor KB browse modal + deliverable viewer to delegate. 16 ACs. DAO mode.",
       "role": "Pulse 💫",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-18T00:00:00+00:00",
       "last_updated": "2026-03-18T00:00:00+00:00",
       "output_links": [
@@ -73,7 +73,7 @@
       "task_type": "Acceptance Testing",
       "description": "Execute acceptance tests for CR-008 FEATURE-049-F: Validate 16 ACs (18a–18p) for FilePreviewRenderer. Unit tests via Vitest, UI tests via Chrome DevTools MCP. DAO mode.",
       "role": "Pulse 💫",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-18T00:00:00+00:00",
       "last_updated": "2026-03-18T00:00:00+00:00",
       "output_links": [
@@ -86,7 +86,7 @@
       "task_type": "Feature Closing",
       "description": "Close CR-008 FEATURE-049-F: Verify ACs, code-to-docs review, commit changes to main. Git strategy: main-branch-only. DAO mode.",
       "role": "Pulse 💫",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-18T00:00:00+00:00",
       "last_updated": "2026-03-18T00:00:00+00:00",
       "output_links": [
@@ -99,7 +99,7 @@
       "task_type": "Bug Fix",
       "description": "Fix stale `kb-config.json` references in docstrings, docs, specs, and skill files — should be `knowledgebase-config.json`. 82 replacements across 17 files. DAO mode.",
       "role": "Bolt ⚡",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-18T00:00:00+00:00",
       "last_updated": "2026-03-18T00:00:00+00:00",
       "output_links": [],
@@ -110,7 +110,7 @@
       "task_type": "Change Request",
       "description": "CR-007 for FEATURE-049-F: Normal Upload zone — add click-to-browse native file selection and upload success indication. Source: UIUX Feedback Feedback-20260318-205614. DAO mode.",
       "role": "Nova ✨",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-18T00:00:00+00:00",
       "last_updated": "2026-03-18T00:00:00+00:00",
       "output_links": [
@@ -124,7 +124,7 @@
       "task_type": "Feature Refinement",
       "description": "Refine FEATURE-049-F specification for CR-007: Add FRs (FR-049-F.21, FR-049-F.22), UI/UX requirements, edge cases, and technical considerations for Normal Upload click-to-browse and success indication. DAO mode.",
       "role": "Nova ✨",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-18T00:00:00+00:00",
       "last_updated": "2026-03-18T00:00:00+00:00",
       "output_links": [
@@ -137,7 +137,7 @@
       "task_type": "Technical Design",
       "description": "Design CR-007 changes for FEATURE-049-F: _triggerNormalFileInput(), _uploadFilesWithFeedback(), _showUploadFeedback() in kb-browse-modal.js. Added Step 12 to TD v1.4. DAO mode.",
       "role": "Nova ✨",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-18T00:00:00+00:00",
       "last_updated": "2026-03-18T00:00:00+00:00",
       "output_links": [
@@ -150,7 +150,7 @@
       "task_type": "Code Implementation",
       "description": "Implement CR-007 for FEATURE-049-F in kb-browse-modal.js: replaced trigger-upload handler with _triggerNormalFileInput(), added _uploadFilesWithFeedback() and _showUploadFeedback(), updated _handleNormalDrop(). All 808 tests pass. DAO mode.",
       "role": "Nova ✨",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-18T00:00:00+00:00",
       "last_updated": "2026-03-18T00:00:00+00:00",
       "output_links": [
@@ -163,7 +163,7 @@
       "task_type": "Config Change",
       "description": "Make refine_idea optional in workflow; compose_idea can suggest requirement_gathering directly. Source: user request. DAO mode.",
       "role": "Sage 🌿",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-18T00:00:00+00:00",
       "last_updated": "2026-03-18T00:00:00+00:00",
       "output_links": [
@@ -177,7 +177,7 @@
       "task_type": "Bug Fix",
       "description": "Workflow mode instructions hardcode 'en' language — should respect project language config (zh etc). Source: Feedback-20260318-173426 #1. DAO mode.",
       "role": "Sage 🌿",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-18T00:00:00+00:00",
       "last_updated": "2026-03-18T00:00:00+00:00",
       "output_links": [
@@ -190,7 +190,7 @@
       "task_type": "Bug Fix",
       "description": "Claude Code CLI adapter uses wrong `-p` flag in command. Should be `claude \"prompt\"` not `claude -p \"prompt\"`. Source: Feedback-20260318-173426 #2. DAO mode.",
       "role": "Sage 🌿",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-18T00:00:00+00:00",
       "last_updated": "2026-03-18T00:00:00+00:00",
       "output_links": [
@@ -203,7 +203,7 @@
       "task_type": "Feature Closing",
       "description": "Close CR-006 full-width layout for FEATURE-049-F: verify ACs, commit changes. DAO mode.",
       "role": "Flux ⚡",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-18T00:00:00+00:00",
       "last_updated": "2026-03-18T00:00:00+00:00",
       "output_links": [
@@ -216,7 +216,7 @@
       "task_type": "Acceptance Test",
       "description": "Validate CR-006 full-width layout ACs for FEATURE-049-F: 6/6 CSS assertion tests pass, live browser verification confirms no max-width on .kb-article-main. DAO mode.",
       "role": "Flux ⚡",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-18T00:00:00+00:00",
       "last_updated": "2026-03-18T00:00:00+00:00",
       "output_links": [
@@ -229,7 +229,7 @@
       "task_type": "Code Implementation",
       "description": "Implement CR-006 for FEATURE-049-F: Remove max-width: 780px from .kb-article-main in kb-browse-modal.css + 6 frontend tests. DAO mode.",
       "role": "Flux ⚡",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-18T00:00:00+00:00",
       "last_updated": "2026-03-18T00:00:00+00:00",
       "output_links": [
@@ -243,7 +243,7 @@
       "task_type": "Technical Design",
       "description": "Design CR-006 full-width article layout delta for FEATURE-049-F: remove max-width constraint, add padding, verify sidebar compatibility. DAO mode.",
       "role": "Flux ⚡",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-18T00:00:00+00:00",
       "last_updated": "2026-03-18T00:00:00+00:00",
       "output_links": [
@@ -256,7 +256,7 @@
       "task_type": "Feature Refinement",
       "description": "Refine FEATURE-049-F specification for CR-006: Add ACs for full-width article content area, clarify AC-049-F-16b image scaling wording. DAO mode.",
       "role": "Flux ⚡",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-18T00:00:00+00:00",
       "last_updated": "2026-03-18T00:00:00+00:00",
       "output_links": [
@@ -269,7 +269,7 @@
       "task_type": "Change Request",
       "description": "CR-006 for FEATURE-049-F: Widen article content/image rendering area to span full available width with margins, eliminating wasted white space. Source: UIUX Feedback Feedback-20260318-102218. DAO mode.",
       "role": "Flux ⚡",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-18T00:00:00+00:00",
       "last_updated": "2026-03-18T00:00:00+00:00",
       "output_links": [
@@ -283,7 +283,7 @@
       "task_type": "Feature Closing",
       "description": "Close CR-005 folder support for FEATURE-049-F: verify ACs, code-to-docs review, refactoring analysis, push to main. DAO mode.",
       "role": "Ember 🔥",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-18T00:00:00+00:00",
       "last_updated": "2026-03-18T00:00:00+00:00",
       "output_links": [
@@ -296,7 +296,7 @@
       "task_type": "Acceptance Test",
       "description": "Validate CR-005 folder support ACs for FEATURE-049-F: backend tree/status/cascade tests, frontend tree rendering/toggle/filter/action tests, structured review of API response schema. DAO mode.",
       "role": "Ember 🔥",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-18T00:00:00+00:00",
       "last_updated": "2026-03-18T00:00:00+00:00",
       "output_links": [
@@ -310,7 +310,7 @@
       "task_type": "Code Implementation",
       "description": "Implement CR-005 folder support for FEATURE-049-F: backend tree builder, derived status, deep pending count, folder cascade; frontend tree rendering with expand/collapse, filter, folder actions. Fullstack (Python/Flask + JS). DAO mode.",
       "role": "Ember 🔥",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-18T00:00:00+00:00",
       "last_updated": "2026-03-18T00:00:00+00:00",
       "output_links": [
@@ -324,7 +324,7 @@
       "task_type": "Technical Design",
       "description": "Design CR-005 folder support delta for FEATURE-049-F: tree data model, derived status algorithm, folder actions, pre-loaded API response, folder tree UI rendering. DAO mode.",
       "role": "Ember 🔥",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-18T00:00:00+00:00",
       "last_updated": "2026-03-18T00:00:00+00:00",
       "output_links": [
@@ -337,7 +337,7 @@
       "task_type": "Feature Refinement",
       "description": "Refine FEATURE-049-F specification for CR-005 (folder support in intake). Update ACs, UI/UX requirements, functional requirements for folder tree display and count logic. DAO mode.",
       "role": "Ember 🔥",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-18T00:00:00+00:00",
       "last_updated": "2026-03-18T00:00:00+00:00",
       "output_links": [
@@ -350,7 +350,7 @@
       "task_type": "Change Request",
       "description": "CR for KB intake: fix file count logic for uploaded folders (shows 0) and add folder tree display with expand/collapse in intake file list view. Source: UIUX Feedback Feedback-20260318-083710",
       "role": "Ember 🔥",
-      "status": "done",
+      "status": "completed",
       "created_at": "2026-03-18T00:00:00+00:00",
       "last_updated": "2026-03-18T00:00:00+00:00",
       "output_links": [
