@@ -19,7 +19,7 @@ AI Agents follow this skill to retrieve and interpret user manual instructions f
 
 BLOCKING: This skill is **read-only** — it retrieves and interprets existing manual content. It MUST NOT create, modify, or delete any knowledge base files.
 
-BLOCKING: Every instruction-returning operation MUST include a `clarity_score` (0.0–1.0). If `clarity_score < 0.6`, set `needs_human_feedback: true` with a reason explaining which steps are unclear.
+BLOCKING: Every instruction-returning operation MUST include a `clarity_score` (0.0–1.0). If `clarity_score < clarity_threshold` (default 0.6, configurable via input), set `needs_human_feedback: true` with a reason explaining which steps are unclear.
 
 CRITICAL: Always use project-root-relative paths (e.g., `x-ipe-docs/knowledge-base/{manual-name}/04-core-features/feature01-stage-toolbox.md`) in all output references.
 
@@ -72,6 +72,9 @@ input:
   query: ""             # Natural language description of what the caller is looking for
   section_filter: ""    # Optional: "core-features" | "workflows" | "getting-started" | "troubleshooting" | "configuration" | null
   feature_id: ""        # Optional: specific feature file name (e.g., "feature01-stage-toolbox")
+  clarity_threshold: 0.6  # Optional: threshold for needs_human_feedback (default 0.6)
+    # Caller derives from execution_temperature: strict → 0.8, balanced → 0.6, creative → 0.4
+    # When clarity_score < clarity_threshold → needs_human_feedback = true
 ```
 
 ### Input Initialization
@@ -113,6 +116,14 @@ input:
     <steps>
       1. IF provided, search for matching file in 04-core-features/ and 05-common-workflows/
       2. IF no match found → fail with FEATURE_NOT_FOUND
+    </steps>
+  </field>
+
+  <field name="clarity_threshold" source="Optional — caller derives from execution_temperature">
+    <steps>
+      1. IF provided → use as threshold for needs_human_feedback evaluation
+      2. IF not provided → default to 0.6
+      3. Valid range: 0.0–1.0. Values outside this range → clamp to nearest boundary
     </steps>
   </field>
 </input_init>
@@ -172,7 +183,7 @@ input:
        - Deduct 0.15 per step missing any of these components
        - Minimum clarity_score is 0.0
 
-    6. IF clarity_score < 0.6:
+    6. IF clarity_score < clarity_threshold (default 0.6):
        - Set needs_human_feedback: true
        - Provide feedback_reason listing which aspects are unclear
   </action>
@@ -217,7 +228,7 @@ input:
 
     5. Collect tips from the Tips section (if present)
 
-    6. IF clarity_score < 0.6:
+    6. IF clarity_score < clarity_threshold (default 0.6):
        - Set needs_human_feedback: true
        - Include unclear_steps list identifying which steps need clarification
   </action>
@@ -339,7 +350,7 @@ operation_output:
   </checkpoint>
   <checkpoint required="true">
     <name>Human feedback flag set when needed</name>
-    <verification>needs_human_feedback is true when clarity_score &lt; 0.6 or troubleshoot finds no match</verification>
+    <verification>needs_human_feedback is true when clarity_score &lt; clarity_threshold (default 0.6) or troubleshoot finds no match</verification>
   </checkpoint>
 </definition_of_done>
 ```

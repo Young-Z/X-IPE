@@ -7,7 +7,7 @@
 # ─────────────────────────────────────────────────────────────
 skill_name: x-ipe-task-based-general-purpose-executor
 skill_type: x-ipe-task-based
-version: "1.0.0"
+version: "1.1.0"
 status: candidate
 created: 2026-04-07
 updated: 2026-04-07
@@ -56,6 +56,11 @@ inputs:
     - name: execution_instructions
       type: string
       description: "Step-by-step or high-level instructions to follow"
+
+    - name: execution_temperature
+      type: string
+      default: "balanced"
+      description: "Execution temperature: strict (confirm everything, threshold 0.8), balanced (standard, threshold 0.6), creative (tolerant, threshold 0.4). Ask-user if not provided."
 
     - name: kb_reference
       type: object

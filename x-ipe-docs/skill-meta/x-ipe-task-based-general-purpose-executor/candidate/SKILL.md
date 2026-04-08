@@ -48,6 +48,13 @@ input:
   # Required inputs
   goal: ""                    # What the executor should accomplish
   execution_instructions: ""  # Step-by-step or high-level instructions to follow
+  execution_temperature: ""   # strict | balanced | creative (default: balanced, ask-user if not provided)
+    # strict:   High bar for clarity. Confirm with human on ANY ambiguity in goal, instructions,
+    #           or manual content. clarity_threshold = 0.8. No guessing or inference.
+    # balanced: Standard clarity expectations. Ask human when moderately unclear.
+    #           clarity_threshold = 0.6. Light inference allowed for trivial gaps.
+    # creative: Tolerant of ambiguity. Only ask human when instructions are very unclear.
+    #           clarity_threshold = 0.4. Infer reasonable defaults for minor gaps.
 
   # Knowledge base reference
   kb_reference:
@@ -65,6 +72,14 @@ input:
   <field name="process_preference.interaction_mode" source="from caller (x-ipe-workflow-task-execution) or default 'interact-with-human'" />
   <field name="goal" source="ask-user: 'What is the goal you want to accomplish?'" />
   <field name="execution_instructions" source="ask-user: 'What instructions should I follow?'" />
+  <field name="execution_temperature" source="ask-user if not provided: 'What execution temperature? Strict (confirm every ambiguity), Balanced (standard, default), or Creative (tolerant of ambiguity)?'. Default: balanced.">
+    <steps>
+      1. Must be one of: strict, balanced, creative
+      2. IF null or omitted → ask human with choices: [Balanced (Recommended), Strict, Creative]
+      3. Resolve clarity_threshold: strict → 0.8, balanced → 0.6, creative → 0.4
+      4. Pass clarity_threshold to x-ipe-tool-user-manual-referencer calls
+    </steps>
+  </field>
   <field name="kb_reference.manual_name" source="ask-user: 'Which user manual should I reference?'" />
   <field name="kb_reference.path" source="resolve from manual_name → x-ipe-docs/knowledge-base/{manual_name}/. If path not found, ask user." />
 </input_init>
@@ -143,15 +158,23 @@ BLOCKING: Step 5.1 must complete before Step 5.2 — do NOT report until all ste
     <step_1_1>
       <name>Parse Goal &amp; Instructions</name>
       <action>
-        1. Read goal and execution_instructions from input
-        2. Break execution_instructions into discrete, numbered steps
-        3. For each step, classify:
-           - "direct": can execute without external guidance (e.g., run a command, create a file)
-           - "manual-guided": references an app feature, UI action, or workflow that
-             needs user manual lookup
-        4. Produce an ordered step plan with classification tags
+        1. Read goal, execution_instructions, and execution_temperature from input
+        2. Resolve clarity_threshold from execution_temperature:
+           - strict → 0.8 | balanced → 0.6 | creative → 0.4
+        3. Evaluate input clarity against clarity_threshold:
+           - Rate goal clarity (0.0–1.0): is goal specific and measurable?
+           - Rate instruction clarity (0.0–1.0): are steps actionable?
+           - IF goal clarity &lt; clarity_threshold:
+             Ask human: "Your goal '{goal}' is not specific enough. Can you clarify what 'done' looks like?"
+           - IF instruction clarity &lt; clarity_threshold:
+             Ask human: "The instructions are ambiguous. Can you provide more detail for: {vague_parts}?"
+        4. Break execution_instructions into discrete, numbered steps
+        5. For each step, classify:
+           - "direct": can execute without external guidance
+           - "manual-guided": references an app feature/UI/workflow needing manual lookup
+        6. Produce an ordered step plan with classification tags
       </action>
-      <output>Ordered step plan with classification (direct vs manual-guided)</output>
+      <output>clarity_threshold, ordered step plan with classification (direct vs manual-guided)</output>
     </step_1_1>
 
     <step_1_2>
@@ -180,9 +203,10 @@ BLOCKING: Step 5.1 must complete before Step 5.2 — do NOT report until all ste
              - query: the step's description
              - manual_name: kb_reference.manual_name
              - kb_path: kb_reference.path
-           → IF referencer returns clarity_score >= 0.6:
+             - clarity_threshold: {from step 1.1}
+           → IF referencer returns clarity_score >= clarity_threshold:
              Attach returned instructions to the step (resolved)
-           → IF referencer returns clarity_score &lt; 0.6:
+           → IF referencer returns clarity_score &lt; clarity_threshold:
              Response source (based on interaction_mode):
              IF process_preference.interaction_mode == "dao-represent-human-to-interact":
                → Resolve via x-ipe-dao-end-user-representative
@@ -214,13 +238,20 @@ BLOCKING: Step 5.1 must complete before Step 5.2 — do NOT report until all ste
       <name>Execute Instructions</name>
       <action>
         For each step in the resolved step plan (in order):
+        1. IF execution_temperature == "strict":
+           → Show human the step about to execute and ask: "Proceed with this step? [Yes/Skip/Modify]"
+           → IF human modifies → use modified instructions
+           → IF human skips → log as skipped and continue
         1. IF step requires user manual guidance (manual-guided):
            → Call `x-ipe-tool-user-manual-referencer` with operation `get_step_by_step`:
              - query: the step's description
              - manual_name: kb_reference.manual_name
              - kb_path: kb_reference.path
+             - clarity_threshold: {from step 1.1}
            → IF manual instructions include screenshots:
              Use them as visual reference for UI actions
+           → IF clarity_score &lt; clarity_threshold on returned steps:
+             Ask human to clarify the unclear steps before executing
            → Follow the detailed walkthrough step by step
         2. Execute the step using the appropriate tool:
            - Web UI actions → Chrome DevTools tools (navigate, click, fill, snapshot)
@@ -232,13 +263,17 @@ BLOCKING: Step 5.1 must complete before Step 5.2 — do NOT report until all ste
            → Call `x-ipe-tool-user-manual-referencer` with operation `troubleshoot`:
              - issue: description of mismatch
              - step_context: current step details
+             - clarity_threshold: {from step 1.1}
            → IF troubleshoot provides resolution: apply it and retry
            → IF troubleshoot doesn't help:
-             Response source (based on interaction_mode):
-             IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-               → Resolve via x-ipe-dao-end-user-representative
+             IF execution_temperature == "creative":
+               → Log mismatch, infer best-effort resolution, continue
              ELSE:
-               → Ask human for guidance
+               Response source (based on interaction_mode):
+               IF process_preference.interaction_mode == "dao-represent-human-to-interact":
+                 → Resolve via x-ipe-dao-end-user-representative
+               ELSE:
+                 → Ask human for guidance
         5. Log step result:
            - status: success | failure | skipped
            - reason: (for failure/skipped) what went wrong or why skipped

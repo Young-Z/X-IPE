@@ -1,0 +1,40 @@
+{
+  "_version": "1.0",
+  "tasks": [
+    {
+      "task_id": "TASK-1089",
+      "task_type": "Knowledge Extraction",
+      "description": "Extract and analyze knowledge from ontology-1.0.4 skill (x-ipe-docs/ideas/103. Research-Ontology/ontology-1.0.4). Purpose: application-reverse-engineering.",
+      "role": "Zephyr",
+      "status": "done",
+      "output_links": [
+        "x-ipe-docs/knowledge-base/.intake/ontology-application-reverse-engineering/"
+      ],
+      "next_task": "",
+      "created_at": "2026-04-08T00:25:42.944723+00:00",
+      "last_updated": "2026-04-08T00:31:14.206285+00:00"
+    },
+    {
+      "task_id": "TASK-1090",
+      "task_type": "Ideation",
+      "description": "Refine idea #40: Feature-Ontology For Knowledgebase - introduce ontology-based multi-dimensional knowledge tagging, knowledge graph creation, and graph-based search UI",
+      "status": "in_progress",
+      "role": "Ember 🔥",
+      "output_links": [],
+      "next_task": "x-ipe-task-based-idea-mockup",
+      "created_at": "2026-04-08T02:17:52.949234+00:00",
+      "last_updated": "2026-04-08T02:17:52.949234+00:00"
+    },
+    {
+      "task_id": "TASK-1079",
+      "task_type": "skill-update",
+      "description": "Add execution_temperature param to general-purpose-executor and user-manual-referencer",
+      "role": "Ember",
+      "status": "🔄 in_progress",
+      "output_links": [],
+      "next_task": "",
+      "created_at": "2026-04-08T02:22:50.465920+00:00",
+      "last_updated": "2026-04-08T02:22:50.465920+00:00"
+    }
+  ]
+}

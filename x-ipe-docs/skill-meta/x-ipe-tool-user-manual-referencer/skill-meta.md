@@ -7,7 +7,7 @@
 # ─────────────────────────────────────────────────────────────
 skill_name: x-ipe-tool-user-manual-referencer
 skill_type: x-ipe-tool
-version: "1.0.0"
+version: "1.1.0"
 status: candidate
 created: 2026-04-07
 updated: 2026-04-07
@@ -59,6 +59,11 @@ inputs:
       type: string
       default: null
       description: "Specific feature file name (e.g., feature01-stage-toolbox)"
+
+    - name: clarity_threshold
+      type: float
+      default: 0.6
+      description: "Threshold for needs_human_feedback. Caller derives from execution_temperature: strict→0.8, balanced→0.6, creative→0.4"
 
 outputs:
   state:
