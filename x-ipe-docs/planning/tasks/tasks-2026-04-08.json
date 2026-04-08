@@ -18,23 +18,56 @@
       "task_id": "TASK-1090",
       "task_type": "Ideation",
       "description": "Refine idea #40: Feature-Ontology For Knowledgebase - introduce ontology-based multi-dimensional knowledge tagging, knowledge graph creation, and graph-based search UI",
-      "status": "in_progress",
+      "status": "done",
       "role": "Ember 🔥",
-      "output_links": [],
+      "output_links": [
+        "x-ipe-docs/ideas/40. Feature-Ontology For Knowledgebase/refined-idea/idea-summary-v1.md",
+        "x-ipe-docs/ideas/40. Feature-Ontology For Knowledgebase/refined-idea/"
+      ],
       "next_task": "x-ipe-task-based-idea-mockup",
       "created_at": "2026-04-08T02:17:52.949234+00:00",
-      "last_updated": "2026-04-08T02:17:52.949234+00:00"
+      "last_updated": "2026-04-08T03:15:22.453236+00:00"
     },
     {
       "task_id": "TASK-1079",
       "task_type": "skill-update",
       "description": "Add execution_temperature param to general-purpose-executor and user-manual-referencer",
       "role": "Ember",
-      "status": "🔄 in_progress",
-      "output_links": [],
+      "status": "done",
+      "output_links": [
+        ".github/skills/x-ipe-task-based-general-purpose-executor/SKILL.md",
+        ".github/skills/x-ipe-tool-user-manual-referencer/SKILL.md"
+      ],
       "next_task": "",
       "created_at": "2026-04-08T02:22:50.465920+00:00",
-      "last_updated": "2026-04-08T02:22:50.465920+00:00"
+      "last_updated": "2026-04-08T02:26:54.090374+00:00"
+    },
+    {
+      "task_id": "TASK-1091",
+      "task_type": "Ideation",
+      "description": "Idea #40 v2: Combine Feature-Ontology design with ontology-1.0.4 data engine — updated idea-summary-v2.md with merged architecture",
+      "status": "done",
+      "role": "Ember 🔥",
+      "output_links": [
+        "x-ipe-docs/ideas/40. Feature-Ontology For Knowledgebase/refined-idea/idea-summary-v2.md"
+      ],
+      "next_task": "x-ipe-task-based-idea-mockup OR x-ipe-task-based-idea-to-architecture OR x-ipe-task-based-requirement-gathering",
+      "created_at": "2026-04-08T03:29:44.576207+00:00",
+      "last_updated": "2026-04-08T03:29:44.576207+00:00"
+    },
+    {
+      "task_id": "TASK-1092",
+      "task_type": "Idea Mockup",
+      "description": "Create visual mockup for Idea #40 Feature-Ontology for Knowledgebase v2 — Ontology Graph Viewer UI",
+      "status": "done",
+      "role": "Ember 🔥",
+      "output_links": [
+        "x-ipe-docs/ideas/40. Feature-Ontology For Knowledgebase/mockups/ontology-graph-viewer-v1.html",
+        "x-ipe-docs/ideas/40. Feature-Ontology For Knowledgebase/refined-idea/idea-summary-v2.md"
+      ],
+      "next_task": "x-ipe-task-based-requirement-gathering",
+      "created_at": "2026-04-08T03:33:30.678678+00:00",
+      "last_updated": "2026-04-08T03:39:47.851555+00:00"
     }
   ]
 }
