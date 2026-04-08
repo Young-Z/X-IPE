@@ -17,6 +17,7 @@ Usage:
     python3 ontology.py find-path --from id1 --to id2 --graph path.jsonl
     python3 ontology.py validate --graph path.jsonl
     python3 ontology.py load --graph path.jsonl
+    python3 ontology.py retag --scope /path/to/kb --ontology-dir /path/.ontology --intake-status /path/.intake-status.json
 """
 
 import argparse
@@ -544,6 +545,122 @@ def merge_schema(base: dict, incoming: dict) -> dict:
     return result
 
 
+def retag_files(
+    scope: str,
+    ontology_dir: str,
+    intake_status_path: str,
+) -> dict:
+    """Re-tag files with status 'filed-untagged' by creating minimal entities.
+
+    Reads .intake-status.json, finds untagged files under scope,
+    creates a KnowledgeNode for each (or updates existing), and
+    updates status to 'filed'.
+
+    Returns summary: {"retagged": N, "failed": M, "files": [...]}.
+    """
+    status_path = Path(intake_status_path)
+    if not status_path.exists():
+        raise ValueError(f"Intake status file not found: {intake_status_path}")
+
+    with open(status_path) as f:
+        try:
+            status_data = json.load(f)
+        except json.JSONDecodeError as e:
+            raise ValueError(f"Invalid JSON in intake status: {e}") from e
+
+    scope_resolved = str(Path(scope).resolve())
+    entities_path = str(Path(ontology_dir) / "_entities.jsonl")
+
+    # Filter to filed-untagged entries within scope
+    untagged = {}
+    for filename, entry in status_data.items():
+        if entry.get("status") != "filed-untagged":
+            continue
+        dest = entry.get("destination", "")
+        try:
+            dest_resolved = str(Path(dest).resolve())
+        except (OSError, ValueError):
+            continue
+        if dest_resolved.startswith(scope_resolved):
+            untagged[filename] = entry
+
+    if not untagged:
+        return {"retagged": 0, "failed": 0, "files": []}
+
+    files_result = []
+    retagged = 0
+    failed = 0
+
+    for filename, entry in untagged.items():
+        dest = entry["destination"]
+        dest_path = Path(dest)
+
+        if not dest_path.exists():
+            files_result.append({
+                "file": filename,
+                "status": "failed",
+                "error": f"File not found: {dest}",
+            })
+            failed += 1
+            continue
+
+        try:
+            # Check if entity already exists for this file
+            entities, _ = load_graph(entities_path)
+            existing_id = None
+            for eid, ent in entities.items():
+                sf = ent.get("properties", {}).get("source_files", [])
+                if dest in sf:
+                    existing_id = eid
+                    break
+
+            if existing_id:
+                # Update existing entity
+                update_entity(
+                    existing_id,
+                    {"source_files": [dest]},
+                    entities_path,
+                )
+                entity_id = existing_id
+            else:
+                # Create minimal entity — label derived from filename
+                label = dest_path.stem.replace("-", " ").replace("_", " ").title()
+                props = {
+                    "label": label,
+                    "node_type": "document",
+                    "source_files": [dest],
+                }
+                entity = create_entity("KnowledgeNode", props, entities_path)
+                entity_id = entity["id"]
+
+            # Update status
+            status_data[filename]["status"] = "filed"
+            if "error" in status_data[filename]:
+                del status_data[filename]["error"]
+
+            files_result.append({
+                "file": filename,
+                "entity_id": entity_id,
+                "status": "tagged",
+            })
+            retagged += 1
+        except (ValueError, OSError) as e:
+            files_result.append({
+                "file": filename,
+                "status": "failed",
+                "error": str(e),
+            })
+            failed += 1
+
+    # Write updated status atomically
+    tmp_path = status_path.with_suffix(".json.tmp")
+    with open(tmp_path, "w") as f:
+        json.dump(status_data, f, indent=2, ensure_ascii=False)
+    tmp_path.rename(status_path)
+
+    return {"retagged": retagged, "failed": failed, "files": files_result}
+
+
 def _output_json(data: object) -> None:
     """Print JSON to stdout."""
     print(json.dumps(data, indent=2, ensure_ascii=False))
@@ -622,6 +739,12 @@ def main() -> None:
     p_load = sub.add_parser("load", help="Load and display graph state")
     p_load.add_argument("--graph", required=True)
 
+    # retag
+    p_retag = sub.add_parser("retag", help="Re-tag filed-untagged files")
+    p_retag.add_argument("--scope", required=True, help="KB folder path to scan")
+    p_retag.add_argument("--ontology-dir", required=True, help="Path to .ontology/ directory")
+    p_retag.add_argument("--intake-status", required=True, help="Path to .intake-status.json")
+
     args = parser.parse_args()
 
     try:
@@ -685,6 +808,14 @@ def main() -> None:
                     "relation_count": len(relations),
                 }
             )
+
+        elif args.command == "retag":
+            result = retag_files(
+                scope=args.scope,
+                ontology_dir=args.ontology_dir,
+                intake_status_path=args.intake_status,
+            )
+            _output_json(result)
 
     except (ValueError, json.JSONDecodeError) as e:
         _error_exit(str(e))

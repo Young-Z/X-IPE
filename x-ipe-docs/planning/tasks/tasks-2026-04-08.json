@@ -179,12 +179,83 @@
       "task_id": "TASK-1100",
       "task_type": "Feature Closing",
       "description": "Close FEATURE-058-A: Ontology Tool Skill. Verify ACs, review code-to-docs, refactoring analysis, commit & push.",
-      "status": "in_progress",
+      "status": "completed",
       "role": "Ember 🔥",
-      "output_links": [],
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-058/FEATURE-058-A/",
+        "tests/test_ontology_tool.py",
+        ".github/skills/x-ipe-tool-ontology/"
+      ],
       "next_task": "x-ipe-task-based-feature-refinement",
       "created_at": "2026-04-08T10:28:11.933785+00:00",
-      "last_updated": "2026-04-08T10:28:11.933785+00:00"
+      "last_updated": "2026-04-08T10:32:47.783137+00:00"
+    },
+    {
+      "task_id": "TASK-1101",
+      "task_type": "Feature Refinement",
+      "description": "Refine FEATURE-058-D (KB Librarian Ontology Integration) — detail specification with ACs for updating x-ipe-tool-kb-librarian to call ontology tool during intake",
+      "status": "completed",
+      "role": "developer",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-058/FEATURE-058-D/specification.md"
+      ],
+      "next_task": "x-ipe-task-based-technical-design",
+      "created_at": "2026-04-08T10:33:57.722884+00:00",
+      "last_updated": "2026-04-08T10:50:43.067302+00:00"
+    },
+    {
+      "task_id": "TASK-1102",
+      "task_type": "Technical Design",
+      "description": "Technical design for FEATURE-058-D (KB Librarian Ontology Integration) — design integration points, .graph-index.json manifest, retag CLI, SKILL.md updates",
+      "status": "completed",
+      "role": "developer",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-058/FEATURE-058-D/technical-design.md"
+      ],
+      "next_task": "x-ipe-task-based-code-implementation",
+      "created_at": "2026-04-08T10:52:06.351048+00:00",
+      "last_updated": "2026-04-08T10:58:11.782427+00:00"
+    },
+    {
+      "task_id": "TASK-1103",
+      "task_type": "Code Implementation",
+      "description": "Implement FEATURE-058-D — extend graph_ops.py with .graph-index.json, add retag CLI to ontology.py, update KB Librarian SKILL.md",
+      "status": "completed",
+      "role": "developer",
+      "output_links": [
+        ".github/skills/x-ipe-tool-ontology/scripts/graph_ops.py",
+        ".github/skills/x-ipe-tool-ontology/scripts/ontology.py",
+        ".github/skills/x-ipe-tool-kb-librarian/SKILL.md",
+        ".github/skills/x-ipe-tool-ontology/SKILL.md",
+        "tests/test_ontology_tool.py"
+      ],
+      "next_task": "x-ipe-task-based-feature-acceptance-test",
+      "created_at": "2026-04-08T10:58:20.427690+00:00",
+      "last_updated": "2026-04-08T11:03:36.041541+00:00"
+    },
+    {
+      "task_id": "TASK-1104",
+      "task_type": "Feature Acceptance Test",
+      "description": "Acceptance testing for FEATURE-058-D (KB Librarian Ontology Integration)",
+      "status": "completed",
+      "role": "Ember 🔥",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-058/FEATURE-058-D/acceptance-test-cases.md"
+      ],
+      "next_task": "x-ipe-task-based-feature-closing",
+      "created_at": "2026-04-08T11:14:56.120907+00:00",
+      "last_updated": "2026-04-08T11:18:38.009323+00:00"
+    },
+    {
+      "task_id": "TASK-1105",
+      "task_type": "Feature Closing",
+      "description": "Close FEATURE-058-D (KB Librarian Ontology Integration) - verify ACs, code-to-docs review, refactoring analysis, commit and push to main",
+      "role": "developer",
+      "status": "in_progress",
+      "output_links": [],
+      "next_task": "x-ipe-task-based-feature-refinement",
+      "created_at": "2026-04-08T11:22:43.934276+00:00",
+      "last_updated": "2026-04-08T11:22:43.934276+00:00"
     }
   ]
 }

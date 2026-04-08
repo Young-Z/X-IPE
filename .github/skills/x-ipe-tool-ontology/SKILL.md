@@ -16,6 +16,7 @@ Provides the runtime engine for the Knowledge Base Ontology system. Manages Know
 | Master entities | `x-ipe-docs/knowledge-base/.ontology/_entities.jsonl` | Append-only JSONL events |
 | Named graphs | `x-ipe-docs/knowledge-base/.ontology/{cluster}.jsonl` | Derived views (auto-generated) |
 | Dimension registry | `x-ipe-docs/knowledge-base/.ontology/.dimension-registry.json` | JSON taxonomy |
+| Graph index | `x-ipe-docs/knowledge-base/.ontology/.graph-index.json` | Auto-generated manifest of all named graphs |
 
 ## Available Scripts
 
@@ -36,6 +37,7 @@ All scripts are in `.github/skills/x-ipe-tool-ontology/scripts/`.
 | `find-path` | BFS shortest path | `python3 ontology.py find-path --from ID1 --to ID2 --graph PATH` |
 | `validate` | Validate constraints | `python3 ontology.py validate --graph PATH` |
 | `load` | Load full graph state | `python3 ontology.py load --graph PATH` |
+| `retag` | Re-tag filed-untagged files | `python3 ontology.py retag --scope PATH --ontology-dir PATH --intake-status PATH` |
 
 ### Dimension Registry (`dimension_registry.py`)
 
@@ -74,7 +76,7 @@ AI agent reads KB content, discovers dimensions, resolves aliases via dimension 
 
 ### Operation B: Build Graph
 
-Automated script that builds named graph files from the master entity store:
+Automated script that builds named graph files from the master entity store. Also generates `.graph-index.json` — a manifest listing all named graphs with metadata (entity count, dimensions, root entity info).
 
 ```bash
 python3 graph_ops.py build \
@@ -82,6 +84,8 @@ python3 graph_ops.py build \
     --output x-ipe-docs/knowledge-base/.ontology/ \
     --entities x-ipe-docs/knowledge-base/.ontology/_entities.jsonl
 ```
+
+**Output includes:** `graph_index` field with the generated manifest content.
 
 ### Operation C: Search
 
@@ -92,6 +96,17 @@ python3 search.py \
     --query "authentication" \
     --scope all \
     --ontology-dir x-ipe-docs/knowledge-base/.ontology/
+```
+
+### Operation D: Retag (Re-tag Filed-Untagged Files)
+
+Re-processes KB files that were moved but failed ontology tagging (status `filed-untagged` in `.intake-status.json`). Creates minimal entities and updates status to `filed`.
+
+```bash
+python3 ontology.py retag \
+    --scope x-ipe-docs/knowledge-base/ \
+    --ontology-dir x-ipe-docs/knowledge-base/.ontology/ \
+    --intake-status x-ipe-docs/knowledge-base/.intake/.intake-status.json
 ```
 
 ## Entity Model

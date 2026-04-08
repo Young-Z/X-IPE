@@ -106,6 +106,20 @@ input:
 
 ---
 
+## Skill Dependencies
+
+| Dependency | Required? | Purpose |
+|-----------|-----------|---------|
+| `x-ipe-tool-ontology` | Optional | Creates ontology entities for filed knowledge items. If ontology tooling is not available, files are moved and tagged normally (no entity creation). |
+
+**Ontology Contract:**
+- After filing each file, invoke `ontology.py create` to create a `KnowledgeNode` entity
+- If entity creation fails, set status to `filed-untagged` (not `filed`) and continue
+- `filed-untagged` files can be re-tagged later via `ontology.py retag`
+- The `.intake-status.json` supports statuses: `pending`, `processing`, `filed`, `filed-untagged`
+
+---
+
 ## Operations
 
 ### Operation: organize_intake
@@ -165,9 +179,26 @@ input:
        g. Update status to "filed":
           - Call PUT /api/kb/intake/status with {filename, status: "filed", destination: "{destination_path}"}
 
-    4. Print terminal summary:
+       h. Ontology tagging (Phase 2 — optional):
+          - IF ontology tooling is available (.ontology/ directory exists under KB root):
+            * Run via bash: `python3 .github/skills/x-ipe-tool-ontology/scripts/ontology.py create \
+                --type KnowledgeNode \
+                --props '{"label":"<derived from title>","node_type":"document","source_files":["<destination_path>"]}' \
+                --graph {kb_root}/.ontology/_entities.jsonl`
+            * IF creation succeeds → entity_id recorded (no status change needed, already "filed")
+            * IF creation fails → update status to "filed-untagged" and record error:
+              Call PUT /api/kb/intake/status with {filename, status: "filed-untagged", error: "<error message>"}
+          - IF ontology tooling NOT available → skip (file remains with status "filed")
+
+    4. After ontology tagging completes, IF at least one entity was successfully created in step 3h,
+       trigger graph rebuild:
+       - Run via bash: `python3 .github/skills/x-ipe-tool-ontology/scripts/graph_ops.py build \
+           --scope {kb_root} --output {kb_root}/.ontology --entities {kb_root}/.ontology/_entities.jsonl`
+
+    5. Print terminal summary:
        - Format: "{N} files processed → {folder1}/ ({count1}), {folder2}/ ({count2})"
-       - If any errors occurred: also print "{M} files failed: {error details}"
+       - If any files filed-untagged: ", {M} filed-untagged (retag with: ontology.py retag)"
+       - If any errors occurred: also print "{E} files failed: {error details}"
   </action>
   <constraints>
     - BLOCKING: Must set status to "processing" BEFORE analyzing each file
@@ -189,10 +220,12 @@ operation_output:
   success: true | false
   result:
     files_processed: 3
+    files_tagged: 2
+    files_untagged: 1
     destinations:
       - "docs/guides/"
       - "docs/references/"
-    summary: "3 files processed → docs/guides/ (2), docs/references/ (1)"
+    summary: "3 files processed → docs/guides/ (2), docs/references/ (1), 1 filed-untagged"
   errors: []
 ```
 
@@ -237,6 +270,8 @@ operation_output:
 | `FILE_READ_ERROR` | Cannot read file from .intake/ | Check file permissions; skip file and continue |
 | `MOVE_FAILED` | File move operation failed | Check destination path validity and permissions; retry once |
 | `NO_PENDING_FILES` | All intake files already processed | Not an error — print message and exit with success |
+| `ONTOLOGY_TAG_FAILED` | Entity creation failed during ontology tagging | Set status to `filed-untagged`, record error, continue processing. Use `ontology.py retag` later to retry. |
+| `ONTOLOGY_NOT_AVAILABLE` | `.ontology/` directory not found under KB root | Not an error — skip ontology tagging entirely, file remains `filed` |
 
 ---
 

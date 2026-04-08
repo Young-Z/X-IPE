@@ -1856,9 +1856,9 @@
       "version": "v1.0",
       "description": "Complete x-ipe-tool-ontology skill with 3 operations: (A) Knowledge Tagging — AI-driven content analysis, dynamic dimension discovery, KnowledgeNode/KnowledgeDimension entity model, dimension registry normalization; (B) Graph Creation — collect entities, build graph, detect disconnected clusters, auto-split JSONL, stale reference pruning; (C) Knowledge Search — text matching + BFS traversal, multi-graph cross-search, configurable depth",
       "dependencies": [],
-      "status": "Tested",
+      "status": "Completed",
       "created_at": "2026-04-08T09:29:08.079225+00:00",
-      "last_updated": "2026-04-08T10:27:36.984021+00:00"
+      "last_updated": "2026-04-08T10:32:47.812194+00:00"
     },
     {
       "feature_id": "FEATURE-058-B",
@@ -1896,9 +1896,9 @@
       "dependencies": [
         "FEATURE-058-A"
       ],
-      "status": "Planned",
+      "status": "Tested",
       "created_at": "2026-04-08T09:29:23.941312+00:00",
-      "last_updated": "2026-04-08T09:29:23.941312+00:00"
+      "last_updated": "2026-04-08T11:18:38.039577+00:00"
     },
     {
       "feature_id": "FEATURE-058-E",

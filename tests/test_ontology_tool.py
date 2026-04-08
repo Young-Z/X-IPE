@@ -833,3 +833,315 @@ class TestOntologyCLI:
         rc, out = self._run_main(search, ["--query", "JWT", "--scope", "all", "--ontology-dir", ont_dir], capsys)
         assert rc == 0
         assert json.loads(out)["total_count"] >= 1
+
+
+# ══════════════════════════════════════════════════
+#  FEATURE-058-D Tests: .graph-index.json & retag
+# ══════════════════════════════════════════════════
+
+
+class TestGraphIndex:
+    """Tests for .graph-index.json manifest generation in graph_ops.build()."""
+
+    def test_build_generates_graph_index_file(self, tmp_path):
+        """Build should create .graph-index.json in the output dir."""
+        scope = tmp_path / "kb"
+        scope.mkdir()
+        (scope / "doc.md").write_text("test")
+        ont_dir = tmp_path / ".ontology"
+        ont_dir.mkdir()
+        ents = str(ont_dir / "_entities.jsonl")
+        ontology.create_entity(
+            "KnowledgeNode",
+            {"label": "Test Doc", "node_type": "document", "source_files": [str(scope / "doc.md")]},
+            ents,
+        )
+        result = graph_ops.build(str(scope), str(ont_dir), ents)
+        index_path = ont_dir / ".graph-index.json"
+        assert index_path.exists()
+        manifest = json.loads(index_path.read_text())
+        assert manifest["version"] == "1.0"
+        assert len(manifest["graphs"]) == 1
+        assert "graph_index" in result
+
+    def test_graph_index_has_correct_fields(self, tmp_path):
+        """Each graph entry should have name, file, entity_count, etc."""
+        scope = tmp_path / "kb"
+        scope.mkdir()
+        (scope / "a.py").write_text("code")
+        ont_dir = tmp_path / ".ontology"
+        ont_dir.mkdir()
+        ents = str(ont_dir / "_entities.jsonl")
+        ontology.create_entity(
+            "KnowledgeNode",
+            {"label": "Module A", "node_type": "concept", "source_files": [str(scope / "a.py")],
+             "dimensions": {"technology": "Python"}},
+            ents,
+        )
+        result = graph_ops.build(str(scope), str(ont_dir), ents)
+        gi = result["graph_index"]
+        graph_entry = gi["graphs"][0]
+        assert "name" in graph_entry
+        assert "file" in graph_entry
+        assert "description" in graph_entry
+        assert "entity_count" in graph_entry
+        assert "relation_count" in graph_entry
+        assert "dimensions" in graph_entry
+        assert "root_entity_id" in graph_entry
+        assert "root_label" in graph_entry
+        assert graph_entry["root_label"] == "Module A"
+        assert graph_entry["entity_count"] == 1
+
+    def test_graph_index_multiple_clusters(self, tmp_path):
+        """Multiple clusters should produce multiple entries in graph index."""
+        scope = tmp_path / "kb"
+        scope.mkdir()
+        (scope / "a.py").write_text("code a")
+        (scope / "b.py").write_text("code b")
+        ont_dir = tmp_path / ".ontology"
+        ont_dir.mkdir()
+        ents = str(ont_dir / "_entities.jsonl")
+        # Two unrelated entities => two clusters
+        ontology.create_entity(
+            "KnowledgeNode",
+            {"label": "Alpha", "node_type": "concept", "source_files": [str(scope / "a.py")]},
+            ents,
+        )
+        ontology.create_entity(
+            "KnowledgeNode",
+            {"label": "Beta", "node_type": "concept", "source_files": [str(scope / "b.py")]},
+            ents,
+        )
+        result = graph_ops.build(str(scope), str(ont_dir), ents)
+        gi = result["graph_index"]
+        assert len(gi["graphs"]) == 2
+
+    def test_graph_index_empty_build(self, tmp_path):
+        """Build with no entities should produce empty graphs list."""
+        scope = tmp_path / "kb"
+        scope.mkdir()
+        ont_dir = tmp_path / ".ontology"
+        ont_dir.mkdir()
+        ents = str(ont_dir / "_entities.jsonl")
+        Path(ents).touch()
+        result = graph_ops.build(str(scope), str(ont_dir), ents)
+        gi = result["graph_index"]
+        assert gi["graphs"] == []
+        assert (ont_dir / ".graph-index.json").exists()
+
+    def test_graph_index_dimensions_collected(self, tmp_path):
+        """Dimensions from entities should appear in graph index entries."""
+        scope = tmp_path / "kb"
+        scope.mkdir()
+        (scope / "doc.md").write_text("test")
+        ont_dir = tmp_path / ".ontology"
+        ont_dir.mkdir()
+        ents = str(ont_dir / "_entities.jsonl")
+        ontology.create_entity(
+            "KnowledgeNode",
+            {
+                "label": "Auth Module",
+                "node_type": "concept",
+                "source_files": [str(scope / "doc.md")],
+                "dimensions": {"technology": "Python", "domain": "Security"},
+            },
+            ents,
+        )
+        result = graph_ops.build(str(scope), str(ont_dir), ents)
+        dims = result["graph_index"]["graphs"][0]["dimensions"]
+        assert "technology" in dims
+        assert "domain" in dims
+
+    def test_graph_index_atomic_write(self, tmp_path):
+        """No .json.tmp file should remain after build."""
+        scope = tmp_path / "kb"
+        scope.mkdir()
+        (scope / "f.py").write_text("x")
+        ont_dir = tmp_path / ".ontology"
+        ont_dir.mkdir()
+        ents = str(ont_dir / "_entities.jsonl")
+        ontology.create_entity(
+            "KnowledgeNode",
+            {"label": "F", "node_type": "concept", "source_files": [str(scope / "f.py")]},
+            ents,
+        )
+        graph_ops.build(str(scope), str(ont_dir), ents)
+        assert not (ont_dir / ".graph-index.json.tmp").exists()
+        assert (ont_dir / ".graph-index.json").exists()
+
+    def test_rebuild_replaces_old_index(self, tmp_path):
+        """Rebuilding should replace the old .graph-index.json."""
+        scope = tmp_path / "kb"
+        scope.mkdir()
+        (scope / "doc.md").write_text("test")
+        ont_dir = tmp_path / ".ontology"
+        ont_dir.mkdir()
+        ents = str(ont_dir / "_entities.jsonl")
+        ontology.create_entity(
+            "KnowledgeNode",
+            {"label": "First", "node_type": "concept", "source_files": [str(scope / "doc.md")]},
+            ents,
+        )
+        graph_ops.build(str(scope), str(ont_dir), ents)
+        old_content = (ont_dir / ".graph-index.json").read_text()
+        # Add another entity and rebuild
+        (scope / "doc2.md").write_text("test2")
+        ontology.create_entity(
+            "KnowledgeNode",
+            {"label": "Second", "node_type": "concept", "source_files": [str(scope / "doc2.md")]},
+            ents,
+        )
+        graph_ops.build(str(scope), str(ont_dir), ents)
+        new_content = (ont_dir / ".graph-index.json").read_text()
+        assert old_content != new_content
+        assert len(json.loads(new_content)["graphs"]) == 2
+
+
+class TestRetag:
+    """Tests for ontology.py retag_files() function."""
+
+    def _setup_intake(self, tmp_path, files_config):
+        """Helper: set up a scope dir, ontology dir, and intake-status.json."""
+        scope = tmp_path / "kb"
+        scope.mkdir(parents=True, exist_ok=True)
+        ont_dir = tmp_path / ".ontology"
+        ont_dir.mkdir(exist_ok=True)
+        ents = str(ont_dir / "_entities.jsonl")
+        Path(ents).touch()
+
+        status = {}
+        for fname, dest_rel, file_status in files_config:
+            dest = scope / dest_rel
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            dest.write_text(f"content of {fname}")
+            status[fname] = {"status": file_status, "destination": str(dest)}
+
+        status_path = tmp_path / ".intake-status.json"
+        status_path.write_text(json.dumps(status))
+        return str(scope), str(ont_dir), str(status_path), ents
+
+    def test_retag_happy_path(self, tmp_path):
+        """Retag filed-untagged files creates entities and updates status."""
+        scope, ont_dir, status_path, ents = self._setup_intake(tmp_path, [
+            ("readme.md", "docs/readme.md", "filed-untagged"),
+        ])
+        result = ontology.retag_files(scope, ont_dir, status_path)
+        assert result["retagged"] == 1
+        assert result["failed"] == 0
+        assert result["files"][0]["status"] == "tagged"
+        assert result["files"][0]["entity_id"].startswith("know_")
+        # Check status file updated
+        with open(status_path) as f:
+            updated = json.load(f)
+        assert updated["readme.md"]["status"] == "filed"
+
+    def test_retag_no_untagged_files(self, tmp_path):
+        """Retag with no filed-untagged entries returns zeros."""
+        scope, ont_dir, status_path, _ = self._setup_intake(tmp_path, [
+            ("readme.md", "docs/readme.md", "filed"),
+        ])
+        result = ontology.retag_files(scope, ont_dir, status_path)
+        assert result["retagged"] == 0
+        assert result["failed"] == 0
+        assert result["files"] == []
+
+    def test_retag_file_not_found(self, tmp_path):
+        """Retag fails gracefully when destination file is missing."""
+        scope = tmp_path / "kb"
+        scope.mkdir()
+        ont_dir = tmp_path / ".ontology"
+        ont_dir.mkdir()
+        Path(ont_dir / "_entities.jsonl").touch()
+        # Point to non-existent file
+        missing = scope / "gone" / "missing.md"
+        status = {"missing.md": {"status": "filed-untagged", "destination": str(missing)}}
+        status_path = tmp_path / ".intake-status.json"
+        status_path.write_text(json.dumps(status))
+        result = ontology.retag_files(str(scope), str(ont_dir), str(status_path))
+        assert result["retagged"] == 0
+        assert result["failed"] == 1
+        assert "not found" in result["files"][0]["error"].lower()
+
+    def test_retag_mixed_statuses(self, tmp_path):
+        """Only filed-untagged files are processed; filed and pending are skipped."""
+        scope, ont_dir, status_path, _ = self._setup_intake(tmp_path, [
+            ("a.md", "docs/a.md", "filed-untagged"),
+            ("b.md", "docs/b.md", "filed"),
+            ("c.md", "docs/c.md", "pending"),
+        ])
+        result = ontology.retag_files(scope, ont_dir, status_path)
+        assert result["retagged"] == 1
+        assert result["failed"] == 0
+        assert len(result["files"]) == 1
+        assert result["files"][0]["file"] == "a.md"
+
+    def test_retag_out_of_scope(self, tmp_path):
+        """Files outside scope are not processed even if filed-untagged."""
+        scope = tmp_path / "kb"
+        scope.mkdir()
+        other = tmp_path / "other"
+        other.mkdir()
+        (other / "external.md").write_text("content")
+        ont_dir = tmp_path / ".ontology"
+        ont_dir.mkdir()
+        Path(ont_dir / "_entities.jsonl").touch()
+        status = {"external.md": {"status": "filed-untagged", "destination": str(other / "external.md")}}
+        status_path = tmp_path / ".intake-status.json"
+        status_path.write_text(json.dumps(status))
+        result = ontology.retag_files(str(scope), str(ont_dir), str(status_path))
+        assert result["retagged"] == 0
+
+    def test_retag_updates_existing_entity(self, tmp_path):
+        """Retag finds existing entity for same source file and updates instead of creating."""
+        scope = tmp_path / "kb"
+        scope.mkdir()
+        doc = scope / "doc.md"
+        doc.write_text("content")
+        ont_dir = tmp_path / ".ontology"
+        ont_dir.mkdir()
+        ents = str(ont_dir / "_entities.jsonl")
+        # Pre-create entity
+        existing = ontology.create_entity(
+            "KnowledgeNode",
+            {"label": "Doc", "node_type": "document", "source_files": [str(doc)]},
+            ents,
+        )
+        status = {"doc.md": {"status": "filed-untagged", "destination": str(doc)}}
+        status_path = tmp_path / ".intake-status.json"
+        status_path.write_text(json.dumps(status))
+        result = ontology.retag_files(str(scope), str(ont_dir), str(status_path))
+        assert result["retagged"] == 1
+        assert result["files"][0]["entity_id"] == existing["id"]
+
+    def test_retag_intake_status_not_found(self, tmp_path):
+        """Retag raises ValueError when intake status file doesn't exist."""
+        with pytest.raises(ValueError, match="not found"):
+            ontology.retag_files(
+                str(tmp_path), str(tmp_path), str(tmp_path / "nonexistent.json")
+            )
+
+    def test_retag_cli_happy_path(self, tmp_path, capsys):
+        """Test retag via CLI main()."""
+        scope = tmp_path / "kb"
+        scope.mkdir()
+        doc = scope / "doc.md"
+        doc.write_text("content")
+        ont_dir = tmp_path / ".ontology"
+        ont_dir.mkdir()
+        Path(ont_dir / "_entities.jsonl").touch()
+        status = {"doc.md": {"status": "filed-untagged", "destination": str(doc)}}
+        status_path = tmp_path / ".intake-status.json"
+        status_path.write_text(json.dumps(status))
+        sys.argv = [
+            "ontology.py", "retag",
+            "--scope", str(scope),
+            "--ontology-dir", str(ont_dir),
+            "--intake-status", str(status_path),
+        ]
+        try:
+            ontology.main()
+        except SystemExit:
+            pass
+        captured = capsys.readouterr()
+        result = json.loads(captured.out)
+        assert result["retagged"] == 1

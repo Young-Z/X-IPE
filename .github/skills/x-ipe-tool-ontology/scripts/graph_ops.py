@@ -158,7 +158,8 @@ def build(
     6. Clean old named .jsonl files in output dir
     7. Save each cluster as {root-label-slugified}.jsonl
     8. Validate each output file
-    9. Return summary
+    9. Generate .graph-index.json manifest
+    10. Return summary
     """
     if entities_path is None:
         entities_path = str(Path(output_path) / "_entities.jsonl")
@@ -167,11 +168,14 @@ def build(
     entities, relations = load_graph(entities_path)
 
     if not entities:
+        # Write empty manifest
+        empty_manifest = _generate_graph_index(output_path, [], {}, [])
         return {
             "clusters": 0,
             "entities_total": 0,
             "entities_in_scope": 0,
             "files": [],
+            "graph_index": empty_manifest,
         }
 
     # Step 2: Filter by scope
@@ -189,11 +193,13 @@ def build(
                 continue
 
     if not filtered_ids:
+        empty_manifest = _generate_graph_index(output_path, [], {}, [])
         return {
             "clusters": 0,
             "entities_total": len(entities),
             "entities_in_scope": 0,
             "files": [],
+            "graph_index": empty_manifest,
         }
 
     # Step 3: Filter relations
@@ -228,6 +234,10 @@ def build(
     for f in output_dir.glob("*.jsonl"):
         if f.name not in protected:
             f.unlink()
+    # Also remove old .graph-index.json (will be regenerated)
+    old_index = output_dir / ".graph-index.json"
+    if old_index.exists():
+        old_index.unlink()
 
     # Step 7: Save each cluster
     files_created = []
@@ -285,6 +295,11 @@ def build(
                 [f"{fc['file']}: {e}" for e in errs]
             )
 
+    # Step 9: Generate .graph-index.json manifest
+    graph_index = _generate_graph_index(
+        output_path, files_created, filtered_entities, filtered_relations
+    )
+
     return {
         "clusters": len(clusters),
         "entities_total": len(entities),
@@ -293,7 +308,92 @@ def build(
         "pruned": prune_result["pruned"],
         "updated_stale": prune_result["updated"],
         "validation_errors": validation_errors,
+        "graph_index": graph_index,
     }
+
+
+def _generate_graph_index(
+    output_path: str,
+    cluster_files: list[dict],
+    entities: dict,
+    relations: list,
+) -> dict:
+    """Generate .graph-index.json manifest from build results.
+
+    Each graph entry includes name, file, auto-generated description,
+    entity/relation counts, dimension keys, and root entity info.
+    Written atomically (temp + rename) to prevent corruption.
+    """
+    from datetime import datetime, timezone
+
+    graphs = []
+    for cf in cluster_files:
+        root_id = cf["root"]
+        root_label = cf["root_label"]
+
+        # Collect unique dimensions and entity labels from the cluster JSONL
+        cluster_path = Path(output_path) / cf["file"]
+        cluster_dims: set[str] = set()
+        cluster_labels: list[str] = []
+        cluster_entity_ids: set[str] = set()
+        if cluster_path.exists():
+            with open(cluster_path) as f:
+                for line in f:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        record = json.loads(line)
+                    except json.JSONDecodeError:
+                        continue
+                    if record.get("op") == "create" and "entity" in record:
+                        ent = record["entity"]
+                        cluster_entity_ids.add(ent.get("id", ""))
+                        props = ent.get("properties", {})
+                        label = props.get("label", "")
+                        if label:
+                            cluster_labels.append(label)
+                        dims = props.get("dimensions", {})
+                        if isinstance(dims, dict):
+                            cluster_dims.update(dims.keys())
+
+        # Auto-generate description from root label + other labels
+        other_labels = [lb for lb in cluster_labels if lb != root_label][:5]
+        if other_labels:
+            description = (
+                f"Knowledge graph rooted at '{root_label}', "
+                f"covering: {', '.join(other_labels)}"
+            )
+        else:
+            description = f"Knowledge graph for '{root_label}'"
+
+        graphs.append({
+            "name": cf["file"].replace(".jsonl", ""),
+            "file": cf["file"],
+            "description": description,
+            "entity_count": cf["entity_count"],
+            "relation_count": cf["relation_count"],
+            "dimensions": sorted(cluster_dims),
+            "root_entity_id": root_id,
+            "root_label": root_label,
+        })
+
+    manifest = {
+        "version": "1.0",
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "ontology_dir": output_path,
+        "graphs": graphs,
+    }
+
+    # Atomic write: temp file + rename
+    index_path = Path(output_path) / ".graph-index.json"
+    index_path.parent.mkdir(parents=True, exist_ok=True)
+    tmp_path = index_path.with_suffix(".json.tmp")
+    with open(tmp_path, "w") as f:
+        json.dump(manifest, f, indent=2, ensure_ascii=False)
+    tmp_path.rename(index_path)
+
+    return manifest
 
 
 def _output_json(data: object) -> None:
