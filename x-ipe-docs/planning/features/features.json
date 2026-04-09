@@ -832,7 +832,7 @@
     {
       "feature_id": "FEATURE-037-A",
       "epic_id": "EPIC-037",
-      "title": "Compose Idea Modal — Create New",
+      "title": "Compose Idea Modal \u2014 Create New",
       "version": "v1.0",
       "status": "Completed",
       "description": "",
@@ -844,7 +844,7 @@
     {
       "feature_id": "FEATURE-037-B",
       "epic_id": "EPIC-037",
-      "title": "Compose Idea Modal — Link Existing & Re-Edit",
+      "title": "Compose Idea Modal \u2014 Link Existing & Re-Edit",
       "version": "v1.1",
       "status": "Completed",
       "description": "",
@@ -1854,7 +1854,7 @@
       "epic_id": "EPIC-058",
       "title": "Ontology Tool Skill (x-ipe-tool-ontology)",
       "version": "v1.0",
-      "description": "Complete x-ipe-tool-ontology skill with 3 operations: (A) Knowledge Tagging — AI-driven content analysis, dynamic dimension discovery, KnowledgeNode/KnowledgeDimension entity model, dimension registry normalization; (B) Graph Creation — collect entities, build graph, detect disconnected clusters, auto-split JSONL, stale reference pruning; (C) Knowledge Search — text matching + BFS traversal, multi-graph cross-search, configurable depth",
+      "description": "Complete x-ipe-tool-ontology skill with 3 operations: (A) Knowledge Tagging \u2014 AI-driven content analysis, dynamic dimension discovery, KnowledgeNode/KnowledgeDimension entity model, dimension registry normalization; (B) Graph Creation \u2014 collect entities, build graph, detect disconnected clusters, auto-split JSONL, stale reference pruning; (C) Knowledge Search \u2014 text matching + BFS traversal, multi-graph cross-search, configurable depth",
       "dependencies": [],
       "status": "Completed",
       "created_at": "2026-04-08T09:29:08.079225+00:00",
@@ -1863,7 +1863,7 @@
     {
       "feature_id": "FEATURE-058-B",
       "epic_id": "EPIC-058",
-      "title": "Ontology Tool — Graph Creation & Auto-Split",
+      "title": "Ontology Tool \u2014 Graph Creation & Auto-Split",
       "version": "v1.0",
       "description": "MERGED into FEATURE-058-A",
       "dependencies": [
@@ -1876,7 +1876,7 @@
     {
       "feature_id": "FEATURE-058-C",
       "epic_id": "EPIC-058",
-      "title": "Ontology Tool — Knowledge Search",
+      "title": "Ontology Tool \u2014 Knowledge Search",
       "version": "v1.0",
       "description": "MERGED into FEATURE-058-A",
       "dependencies": [
@@ -1923,9 +1923,9 @@
         "FEATURE-058-A",
         "FEATURE-058-E"
       ],
-      "status": "Tested",
+      "status": "Completed",
       "created_at": "2026-04-08T09:29:23.986027+00:00",
-      "last_updated": "2026-04-09T06:05:23.966560+00:00"
+      "last_updated": "2026-04-09T06:18:50.127490+00:00"
     }
   ]
 }
