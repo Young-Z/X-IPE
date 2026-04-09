@@ -1,0 +1,681 @@
+/* FEATURE-058-E: Ontology Graph Viewer — Cartographic Light Theme */
+
+/* Google Fonts: Syne (display), Outfit (body), JetBrains Mono (monospace) */
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* ---------------------------------------------------------------------------
+   Layout Container
+   --------------------------------------------------------------------------- */
+
+.ontology-graph-viewer {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    font-family: 'Outfit', sans-serif;
+    color: #1e293b;
+    background: #f8fafc;
+    position: relative;
+    overflow: hidden;
+}
+
+/* ---------------------------------------------------------------------------
+   Sidebar (260px)
+   --------------------------------------------------------------------------- */
+
+.ogv-sidebar {
+    width: 260px;
+    min-width: 260px;
+    height: 100%;
+    background: #ffffff;
+    border-right: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.ogv-sidebar-header {
+    padding: 16px 16px 12px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.ogv-sidebar-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: #0f172a;
+    margin: 0 0 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.ogv-search-bar {
+    position: relative;
+}
+
+.ogv-search-input {
+    width: 100%;
+    height: 34px;
+    padding: 0 12px 0 32px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: 'Outfit', sans-serif;
+    background: #f8fafc;
+    color: #334155;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+}
+
+.ogv-search-input:focus {
+    border-color: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.ogv-search-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    font-size: 13px;
+    pointer-events: none;
+}
+
+/* Select All bar */
+.ogv-select-all {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 12px;
+    color: #64748b;
+}
+
+.ogv-select-all label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.ogv-graph-count {
+    font-size: 11px;
+    color: #94a3b8;
+}
+
+/* Graph list */
+.ogv-graph-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 4px 0;
+}
+
+.ogv-graph-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: background 0.15s;
+    border-bottom: 1px solid #f8fafc;
+}
+
+.ogv-graph-item:hover {
+    background: #f1f5f9;
+}
+
+.ogv-graph-item input[type="checkbox"] {
+    accent-color: #10b981;
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+}
+
+.ogv-graph-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.ogv-graph-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: #1e293b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ogv-graph-meta {
+    font-size: 11px;
+    color: #94a3b8;
+    margin-top: 1px;
+}
+
+.ogv-type-badge {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.ogv-type-badge--concept { background: #10b981; }
+.ogv-type-badge--document { background: #3b82f6; }
+.ogv-type-badge--entity { background: #f59e0b; }
+.ogv-type-badge--dimension { background: #8b5cf6; }
+
+/* Legend */
+.ogv-legend {
+    padding: 12px 16px;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.ogv-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: #64748b;
+}
+
+/* ---------------------------------------------------------------------------
+   Canvas Area (center)
+   --------------------------------------------------------------------------- */
+
+.ogv-canvas-area {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    background:
+        linear-gradient(rgba(148, 163, 184, 0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(148, 163, 184, 0.06) 1px, transparent 1px);
+    background-size: 40px 40px;
+}
+
+.ogv-canvas-container {
+    width: 100%;
+    height: 100%;
+}
+
+/* Scope pills bar */
+.ogv-scope-bar {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    right: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    z-index: 5;
+    pointer-events: none;
+}
+
+.ogv-scope-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(6px);
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    font-size: 11px;
+    font-weight: 500;
+    color: #334155;
+    pointer-events: all;
+}
+
+.ogv-scope-pill-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #10b981;
+}
+
+.ogv-scope-pill-close {
+    margin-left: 2px;
+    cursor: pointer;
+    color: #94a3b8;
+    font-size: 12px;
+    line-height: 1;
+}
+
+.ogv-scope-pill-close:hover {
+    color: #ef4444;
+}
+
+.ogv-scope-add-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 1px dashed #cbd5e1;
+    background: rgba(255, 255, 255, 0.9);
+    color: #94a3b8;
+    font-size: 14px;
+    cursor: pointer;
+    pointer-events: all;
+    transition: border-color 0.2s, color 0.2s;
+}
+
+.ogv-scope-add-btn:hover {
+    border-color: #10b981;
+    color: #10b981;
+}
+
+/* Layout picker (glass-morphism) */
+.ogv-layout-picker {
+    position: absolute;
+    top: 50px;
+    left: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 6px;
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: blur(10px);
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    z-index: 5;
+}
+
+.ogv-layout-btn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 500;
+    color: #475569;
+    background: transparent;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    white-space: nowrap;
+}
+
+.ogv-layout-btn:hover {
+    background: #f1f5f9;
+}
+
+.ogv-layout-btn.active {
+    background: #10b981;
+    color: #ffffff;
+}
+
+/* Zoom controls */
+.ogv-zoom-controls {
+    position: absolute;
+    bottom: 52px;
+    right: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    z-index: 5;
+}
+
+.ogv-zoom-btn {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: blur(8px);
+    color: #475569;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.ogv-zoom-btn:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+}
+
+/* Navigator / Minimap (glass-morphism) */
+.ogv-navigator {
+    position: absolute;
+    bottom: 52px;
+    left: 12px;
+    width: 160px;
+    height: 120px;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(8px);
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    overflow: hidden;
+    z-index: 5;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* ---------------------------------------------------------------------------
+   Detail Panel (340px, slides from right)
+   --------------------------------------------------------------------------- */
+
+.ogv-detail-panel {
+    width: 0;
+    overflow: hidden;
+    background: #ffffff;
+    border-left: 1px solid #e2e8f0;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    flex-shrink: 0;
+}
+
+.ogv-detail-panel.open {
+    width: 340px;
+}
+
+.ogv-detail-inner {
+    width: 340px;
+    height: 100%;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.ogv-detail-header {
+    padding: 16px;
+    border-bottom: 1px solid #f1f5f9;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.ogv-detail-header-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.ogv-detail-node-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: #0f172a;
+    margin: 0;
+    word-break: break-word;
+}
+
+.ogv-detail-node-id {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: #94a3b8;
+    margin-top: 2px;
+}
+
+.ogv-detail-close {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: #94a3b8;
+    font-size: 16px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.ogv-detail-close:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+}
+
+.ogv-detail-section {
+    padding: 12px 16px;
+    border-bottom: 1px solid #f8fafc;
+}
+
+.ogv-detail-section-title {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #94a3b8;
+    margin: 0 0 8px;
+}
+
+.ogv-detail-description {
+    font-size: 13px;
+    color: #475569;
+    line-height: 1.5;
+}
+
+/* Dimension tags */
+.ogv-dim-group {
+    margin-bottom: 6px;
+}
+
+.ogv-dim-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: #64748b;
+    margin-bottom: 3px;
+}
+
+.ogv-dim-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.ogv-dim-tag {
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.ogv-dim-tag--topic { background: #d1fae5; color: #065f46; }
+.ogv-dim-tag--abstraction { background: #ede9fe; color: #5b21b6; }
+.ogv-dim-tag--technology { background: #dbeafe; color: #1e40af; }
+.ogv-dim-tag--audience { background: #fef3c7; color: #92400e; }
+
+/* Source files link */
+.ogv-source-files-link {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #3b82f6;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.ogv-source-files-link:hover {
+    background: #f1f5f9;
+}
+
+/* Related nodes */
+.ogv-related-node {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 0;
+    cursor: pointer;
+    transition: color 0.15s;
+}
+
+.ogv-related-node:hover {
+    color: #10b981;
+}
+
+.ogv-related-node-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: #1e293b;
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ogv-related-node-rel {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: #94a3b8;
+    white-space: nowrap;
+}
+
+/* Metadata */
+.ogv-metadata-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.ogv-metadata-item {
+    font-size: 12px;
+}
+
+.ogv-metadata-label {
+    color: #94a3b8;
+    font-size: 10px;
+    text-transform: uppercase;
+}
+
+.ogv-metadata-value {
+    color: #334155;
+    font-weight: 500;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+}
+
+/* ---------------------------------------------------------------------------
+   Status Bar (36px, bottom)
+   --------------------------------------------------------------------------- */
+
+.ogv-status-bar {
+    height: 36px;
+    min-height: 36px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    background: #ffffff;
+    border-top: 1px solid #e2e8f0;
+    font-size: 11px;
+    color: #64748b;
+    gap: 12px;
+    box-sizing: border-box;
+}
+
+.ogv-status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #10b981;
+    animation: ogv-pulse 2s ease-in-out infinite;
+}
+
+@keyframes ogv-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
+.ogv-status-sep {
+    color: #cbd5e1;
+}
+
+/* ---------------------------------------------------------------------------
+   Loading & Empty States
+   --------------------------------------------------------------------------- */
+
+.ogv-loading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(248, 250, 252, 0.85);
+    z-index: 10;
+}
+
+.ogv-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid #e2e8f0;
+    border-top-color: #10b981;
+    border-radius: 50%;
+    animation: ogv-spin 0.8s linear infinite;
+}
+
+@keyframes ogv-spin {
+    to { transform: rotate(360deg); }
+}
+
+.ogv-empty-state {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    gap: 12px;
+}
+
+.ogv-empty-icon {
+    font-size: 48px;
+    opacity: 0.4;
+}
+
+.ogv-empty-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: #64748b;
+}
+
+.ogv-empty-message {
+    font-size: 13px;
+    color: #94a3b8;
+    text-align: center;
+    max-width: 280px;
+}
+
+.ogv-error-toast {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    padding: 10px 16px;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    color: #991b1b;
+    font-size: 12px;
+    z-index: 20;
+    animation: ogv-fade-in 0.2s ease-out;
+}
+
+@keyframes ogv-fade-in {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------------------------------------------------------------------------
+   Cytoscape.js navigator plugin overrides
+   --------------------------------------------------------------------------- */
+.cytoscape-navigator { background: transparent !important; }
+.cytoscape-navigator .cytoscape-navigatorView { border: 2px solid #10b981; border-radius: 2px; }

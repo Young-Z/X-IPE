@@ -157,9 +157,14 @@ def _init_services(app):
     
     # Initialize KB service (FEATURE-049-A)
     project_root = app.config.get('PROJECT_ROOT', '.')
-    from x_ipe.services.kb_service import KBService
+    from x_ipe.services.kb_service import KBService, KB_ROOT_DIR
     kb_service = KBService(project_root)
     app.config['KB_SERVICE'] = kb_service
+
+    # Initialize Ontology Graph service (FEATURE-058-E)
+    from x_ipe.services.ontology_graph_service import OntologyGraphService
+    kb_root_path = str(Path(project_root) / KB_ROOT_DIR)
+    app.config['ONTOLOGY_GRAPH_SERVICE'] = OntologyGraphService(kb_root_path)
 
     # Cleanup old UIUX feedback on startup (TASK-237)
     if not app.config.get('TESTING'):
@@ -197,6 +202,7 @@ def _register_blueprints(app):
     from x_ipe.routes.feature_board_routes import feature_board_bp
     from x_ipe.routes.task_board_page_routes import task_board_page_bp
     from x_ipe.routes.feature_board_page_routes import feature_board_page_bp
+    from x_ipe.routes.ontology_graph_routes import ontology_graph_bp
     
     # Initialize tracing middleware (FEATURE-023)
     from x_ipe.tracing.middleware import init_tracing_middleware
@@ -220,6 +226,7 @@ def _register_blueprints(app):
     app.register_blueprint(feature_board_bp)
     app.register_blueprint(task_board_page_bp)
     app.register_blueprint(feature_board_page_bp)
+    app.register_blueprint(ontology_graph_bp)
 
 
 def _register_handlers():

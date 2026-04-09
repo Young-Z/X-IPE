@@ -164,6 +164,61 @@ function initializeApp() {
         window.kbReferencePicker = new KBReferencePicker();
     }
     
+    // FEATURE-058-E: Ontology Graph Viewer
+    if (typeof OntologyGraphViewer !== 'undefined') {
+        window.ontologyGraphViewer = new OntologyGraphViewer();
+        let kgActive = false;
+        let kgPreviousMode = null; // 'free' or 'workflow'
+        const kgBtn = document.getElementById('btn-kg-viewer');
+        if (kgBtn) {
+            kgBtn.addEventListener('click', () => {
+                const container = document.getElementById('content-body');
+                const sidebar = document.getElementById('sidebar');
+                const resizeHandle = document.querySelector('.sidebar-resize-handle');
+                const contentHeader = document.querySelector('.content-header');
+                const middleSection = document.getElementById('middle-section');
+
+                if (!kgActive) {
+                    // Enter KG mode
+                    kgPreviousMode = modeToggleBtn && modeToggleBtn.getAttribute('aria-checked') === 'true' ? 'workflow' : 'free';
+                    kgActive = true;
+                    kgBtn.classList.add('active');
+                    if (sidebar) sidebar.style.display = 'none';
+                    if (resizeHandle) resizeHandle.style.display = 'none';
+                    if (contentHeader) contentHeader.style.display = 'none';
+                    if (container) {
+                        container.className = 'content-body';
+                        container.innerHTML = '';
+                        container.style.padding = '0';
+                        container.style.overflow = 'hidden';
+                        window.ontologyGraphViewer.render(container);
+                    }
+                } else {
+                    // Exit KG mode
+                    kgActive = false;
+                    kgBtn.classList.remove('active');
+                    window.ontologyGraphViewer.destroy();
+                    if (container) {
+                        container.style.padding = '';
+                        container.style.overflow = '';
+                    }
+                    if (sidebar) sidebar.style.display = '';
+                    if (resizeHandle) resizeHandle.style.display = '';
+                    if (contentHeader) contentHeader.style.display = '';
+                    // Restore homepage
+                    if (container && typeof window.HomepageInfinity !== 'undefined') {
+                        container.className = 'content-body';
+                        container.innerHTML = window.HomepageInfinity.getTemplate();
+                        window.HomepageInfinity.init(window.projectSidebar);
+                    } else if (container) {
+                        container.className = 'content-body';
+                        container.innerHTML = '';
+                    }
+                }
+            });
+        }
+    }
+
     // FEATURE-036-B: Engineering Workflow / Free mode toggle handler
     const modeToggleBtn = document.getElementById('mode-toggle-btn');
     const modeLabelFree = document.getElementById('mode-label-free');

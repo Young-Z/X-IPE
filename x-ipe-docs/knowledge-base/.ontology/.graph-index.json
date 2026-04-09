@@ -1,0 +1,32 @@
+{
+  "version": "1.0",
+  "generated_at": "2026-01-01T00:00:00Z",
+  "ontology_dir": "x-ipe-docs/knowledge-base/.ontology",
+  "graphs": [
+    {
+      "name": "security-architecture",
+      "file": "security-architecture.jsonl",
+      "description": "Security architecture concepts",
+      "entity_count": 5,
+      "relation_count": 5,
+      "dimensions": [
+        "security",
+        "identity"
+      ],
+      "root_entity_id": "know_001",
+      "root_label": "Authentication"
+    },
+    {
+      "name": "system-architecture",
+      "file": "system-architecture.jsonl",
+      "description": "System architecture patterns",
+      "entity_count": 2,
+      "relation_count": 1,
+      "dimensions": [
+        "technology"
+      ],
+      "root_entity_id": "know_101",
+      "root_label": "Microservices"
+    }
+  ]
+}
