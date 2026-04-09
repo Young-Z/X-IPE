@@ -140,34 +140,50 @@ class OntologyGraphViewer {
             <div class="ogv-sidebar">
                 <div class="ogv-sidebar-header">
                     <div class="ogv-sidebar-title">
-                        <i class="bi bi-diagram-3"></i> Knowledge Graphs
+                        <span class="ogv-sidebar-icon">◈</span> ONTOLOGY
                     </div>
                     <div class="ogv-search-bar">
                         <i class="bi bi-search ogv-search-icon"></i>
-                        <input class="ogv-search-input" type="text" placeholder="Search nodes…" />
+                        <input class="ogv-search-input" type="text" placeholder="Search nodes… (e.g. authentication, token)" />
                     </div>
                 </div>
+                <div class="ogv-section-header">GRAPH COLLECTIONS</div>
                 <div class="ogv-select-all">
                     <label><input type="checkbox" class="ogv-select-all-cb" /> Select All</label>
                     <span class="ogv-graph-count"></span>
                 </div>
                 <div class="ogv-graph-list"></div>
                 <div class="ogv-legend">
-                    <div class="ogv-legend-item"><span class="ogv-type-badge ogv-type-badge--concept"></span>Concept</div>
-                    <div class="ogv-legend-item"><span class="ogv-type-badge ogv-type-badge--document"></span>Document</div>
-                    <div class="ogv-legend-item"><span class="ogv-type-badge ogv-type-badge--entity"></span>Entity</div>
-                    <div class="ogv-legend-item"><span class="ogv-type-badge ogv-type-badge--dimension"></span>Dimension</div>
+                    <div class="ogv-section-header ogv-section-header--legend">NODE TYPES</div>
+                    <div class="ogv-legend-items">
+                        <div class="ogv-legend-item"><span class="ogv-type-badge ogv-type-badge--concept"></span>Concept</div>
+                        <div class="ogv-legend-item"><span class="ogv-type-badge ogv-type-badge--document"></span>Document</div>
+                        <div class="ogv-legend-item"><span class="ogv-type-badge ogv-type-badge--entity"></span>Entity</div>
+                        <div class="ogv-legend-item"><span class="ogv-type-badge ogv-type-badge--dimension"></span>Dimension</div>
+                    </div>
                 </div>
             </div>
 
             <!-- Canvas Area -->
             <div class="ogv-canvas-area">
-                <div class="ogv-scope-bar"></div>
+                <div class="ogv-scope-bar">
+                    <span class="ogv-scope-label">SCOPE</span>
+                </div>
 
                 <div class="ogv-layout-picker">
-                    <button class="ogv-layout-btn active" data-layout="fcose">fCoSE</button>
-                    <button class="ogv-layout-btn" data-layout="dagre">Dagre</button>
-                    <button class="ogv-layout-btn" data-layout="concentric">Concentric</button>
+                    <div class="ogv-layout-picker-title">LAYOUT</div>
+                    <button class="ogv-layout-btn active" data-layout="fcose">
+                        <svg class="ogv-layout-icon" viewBox="0 0 16 16" width="14" height="14"><circle cx="4" cy="4" r="2" fill="currentColor"/><circle cx="12" cy="4" r="2" fill="currentColor"/><circle cx="8" cy="12" r="2" fill="currentColor"/><line x1="5.5" y1="5" x2="7" y2="10.5" stroke="currentColor" stroke-width="1"/><line x1="10.5" y1="5" x2="9" y2="10.5" stroke="currentColor" stroke-width="1"/><line x1="6" y1="4" x2="10" y2="4" stroke="currentColor" stroke-width="1"/></svg>
+                        Force-Directed
+                    </button>
+                    <button class="ogv-layout-btn" data-layout="dagre">
+                        <svg class="ogv-layout-icon" viewBox="0 0 16 16" width="14" height="14"><rect x="5" y="1" width="6" height="3" rx="1" fill="currentColor"/><rect x="1" y="11" width="6" height="3" rx="1" fill="currentColor"/><rect x="9" y="11" width="6" height="3" rx="1" fill="currentColor"/><line x1="8" y1="4" x2="4" y2="11" stroke="currentColor" stroke-width="1"/><line x1="8" y1="4" x2="12" y2="11" stroke="currentColor" stroke-width="1"/></svg>
+                        Hierarchical
+                    </button>
+                    <button class="ogv-layout-btn" data-layout="concentric">
+                        <svg class="ogv-layout-icon" viewBox="0 0 16 16" width="14" height="14"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1"/><circle cx="8" cy="8" r="3.5" fill="none" stroke="currentColor" stroke-width="1"/><circle cx="8" cy="8" r="1.5" fill="currentColor"/></svg>
+                        Radial
+                    </button>
                 </div>
 
                 <div class="ogv-canvas-container"></div>
@@ -175,18 +191,23 @@ class OntologyGraphViewer {
                 <div class="ogv-navigator"></div>
 
                 <div class="ogv-zoom-controls">
-                    <button class="ogv-zoom-btn" data-action="in" title="Zoom In"><i class="bi bi-plus-lg"></i></button>
-                    <button class="ogv-zoom-btn" data-action="out" title="Zoom Out"><i class="bi bi-dash-lg"></i></button>
-                    <button class="ogv-zoom-btn" data-action="fit" title="Fit All"><i class="bi bi-arrows-fullscreen"></i></button>
+                    <button class="ogv-zoom-btn" data-action="in" title="Zoom In">+</button>
+                    <button class="ogv-zoom-btn" data-action="out" title="Zoom Out">−</button>
+                    <button class="ogv-zoom-btn" data-action="fit" title="Fit All">⊡</button>
                 </div>
 
                 <div class="ogv-status-bar">
                     <span class="ogv-status-dot"></span>
-                    <span class="ogv-status-text">Ready</span>
-                    <span class="ogv-status-sep">|</span>
+                    <span class="ogv-status-text">Connected</span>
+                    <span class="ogv-status-sep">·</span>
                     <span class="ogv-status-nodes">0 nodes</span>
-                    <span class="ogv-status-sep">|</span>
+                    <span class="ogv-status-sep">·</span>
                     <span class="ogv-status-edges">0 edges</span>
+                    <span class="ogv-status-sep">·</span>
+                    <span class="ogv-status-layout">Layout: Force-directed</span>
+                    <span class="ogv-status-sep">·</span>
+                    <span class="ogv-status-zoom">Zoom: 100%</span>
+                    <span class="ogv-status-scope-count"></span>
                 </div>
             </div>
 
@@ -217,7 +238,7 @@ class OntologyGraphViewer {
             const data = await resp.json();
             this._graphIndex = data.graphs || [];
             this._renderGraphList();
-            this._updateStatus('Ready');
+            this._updateStatus('Connected');
         } catch (err) {
             this._showError(`Failed to load graphs: ${err.message}`);
             this._updateStatus('Error');
@@ -275,8 +296,11 @@ class OntologyGraphViewer {
             this.canvas.removeGraphElements(name);
             this._removeScopePill(name);
         }
+        // Update selected styling on graph items
+        const item = this.container.querySelector(`.ogv-graph-item[data-graph="${name}"]`);
+        if (item) item.classList.toggle('ogv-graph-item--selected', selected);
         this._updateStats();
-        this._updateStatus('Ready');
+        this._updateStatus('Connected');
     }
 
     async _selectAll(selected) {
@@ -298,7 +322,7 @@ class OntologyGraphViewer {
         }
         this._updateGraphListCheckboxes();
         this._updateStats();
-        this._updateStatus('Ready');
+        this._updateStatus('Connected');
     }
 
     // -----------------------------------------------------------------------
@@ -319,11 +343,16 @@ class OntologyGraphViewer {
 
         listEl.innerHTML = this._graphIndex.map(g => {
             const checked = this._selectedGraphs.has(g.name) ? 'checked' : '';
-            return `<div class="ogv-graph-item" data-graph="${g.name}">
+            const nodeCount = g.node_count || 0;
+            const edgeCount = g.edge_count || 0;
+            const dominantType = g.dominant_type || 'concept';
+            const badgeLabel = dominantType + '-heavy';
+            return `<div class="ogv-graph-item ${checked ? 'ogv-graph-item--selected' : ''}" data-graph="${g.name}">
                 <input type="checkbox" ${checked} />
                 <div class="ogv-graph-info">
                     <div class="ogv-graph-name" title="${g.name}">${g.name}</div>
-                    <div class="ogv-graph-meta">${g.entity_count || 0} nodes · ${g.relation_count || 0} edges</div>
+                    <div class="ogv-graph-meta">${nodeCount} nodes · ${edgeCount} edges</div>
+                    <span class="ogv-dominant-badge ogv-dominant-badge--${dominantType}">${badgeLabel}</span>
                 </div>
             </div>`;
         }).join('');
@@ -346,7 +375,9 @@ class OntologyGraphViewer {
         const items = this.container.querySelectorAll('.ogv-graph-item');
         items.forEach(item => {
             const cb = item.querySelector('input[type="checkbox"]');
-            cb.checked = this._selectedGraphs.has(item.dataset.graph);
+            const isSelected = this._selectedGraphs.has(item.dataset.graph);
+            cb.checked = isSelected;
+            item.classList.toggle('ogv-graph-item--selected', isSelected);
         });
         const selectAllCb = this.container.querySelector('.ogv-select-all-cb');
         if (selectAllCb) {
@@ -361,7 +392,7 @@ class OntologyGraphViewer {
     _renderScopePills() {
         const bar = this.container.querySelector('.ogv-scope-bar');
         if (!bar) return;
-        bar.innerHTML = '';
+        bar.innerHTML = '<span class="ogv-scope-label">SCOPE</span>';
         this._selectedGraphs.forEach(name => {
             this._addScopePillToBar(bar, name);
         });
@@ -416,6 +447,7 @@ class OntologyGraphViewer {
                 buttons.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 this.canvas.runLayout(btn.dataset.layout);
+                this._updateStats();
             });
         });
     }
@@ -501,14 +533,36 @@ class OntologyGraphViewer {
         const stats = this.canvas.getStats();
         const nodesEl = this.container.querySelector('.ogv-status-nodes');
         const edgesEl = this.container.querySelector('.ogv-status-edges');
+        const layoutEl = this.container.querySelector('.ogv-status-layout');
+        const zoomEl = this.container.querySelector('.ogv-status-zoom');
+        const scopeEl = this.container.querySelector('.ogv-status-scope-count');
         if (nodesEl) nodesEl.textContent = `${stats.nodes} node${stats.nodes !== 1 ? 's' : ''}`;
         if (edgesEl) edgesEl.textContent = `${stats.edges} edge${stats.edges !== 1 ? 's' : ''}`;
+
+        // Layout name mapping
+        const layoutNames = { fcose: 'Force-directed', dagre: 'Hierarchical', concentric: 'Radial' };
+        const currentLayout = this.canvas.currentLayout || 'fcose';
+        if (layoutEl) layoutEl.textContent = `Layout: ${layoutNames[currentLayout] || currentLayout}`;
+
+        // Zoom percentage
+        if (zoomEl && this.canvas.cy) {
+            const pct = Math.round(this.canvas.cy.zoom() * 100);
+            zoomEl.textContent = `Zoom: ${pct}%`;
+        }
+
+        // Scope count
+        if (scopeEl) {
+            const count = this._selectedGraphs.size;
+            scopeEl.textContent = count > 0 ? `${count} graph${count !== 1 ? 's' : ''} in scope` : '';
+        }
     }
 
     _updateStatus(text) {
         if (!this.container) return;
         const el = this.container.querySelector('.ogv-status-text');
         if (el) el.textContent = text;
+        // Also update layout/zoom on every status update
+        this._updateStats();
     }
 
     _showEmptyState(title, message) {
