@@ -1,5 +1,5 @@
 """
-FEATURE-058-E: Ontology Graph Viewer — Backend API & Service Tests
+FEATURE-058-E/F: Ontology Graph Viewer — Backend API & Service Tests
 
 Tests cover:
 - OntologyGraphService: list_graphs, get_graph, search
@@ -358,6 +358,7 @@ class TestBlueprintRegistration:
         assert '/api/kb/ontology/graphs' in rules
         assert '/api/kb/ontology/graph/<name>' in rules
         assert '/api/kb/ontology/search' in rules
+        assert '/api/kb/ontology/search/bfs' in rules
 
     def test_service_stored_in_config(self):
         from x_ipe.app import create_app

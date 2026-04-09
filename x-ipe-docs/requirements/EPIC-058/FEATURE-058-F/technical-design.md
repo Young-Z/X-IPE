@@ -135,7 +135,7 @@ classDiagram
         -_clearDropdown()
         -_wireAIAgentButton()
         -_openAIAgentConsole()
-        -_onScopeChange()
+        -_onScopeChange() is handled inline in _toggleGraph()
         -_selectedDropdownIndex int
     }
 
@@ -150,7 +150,6 @@ classDiagram
     class OntologyGraphService {
         +search(query, graph_names) list
         +search_bfs(query, graph_names, depth, page, page_size) dict
-        -_call_bfs_search(query, scope, depth, page, page_size) dict
         -_resolve_target_graphs(graph_names)
         -_parse_graph_jsonl(path)
     }
@@ -386,9 +385,8 @@ This follows the exact pattern from `action-execution-modal.js` lines 910-935.
 
 **File:** `src/x_ipe/static/js/features/ontology-graph-viewer.js`
 
-**Modify `_updateStats()` (existing method):**
-- Accept optional search result metadata
-- When search active: append `· Search: N matches · M related` after existing fields
+**Add `_updateSearchStatus()` method (separate from `_updateStats()`):**
+- When search active: show `Search: N matches · M related` in status bar
 - When search cleared: remove the search indicator
 
 ### Step 8: CSS Styles
@@ -407,7 +405,6 @@ This follows the exact pattern from `action-execution-modal.js` lines 910-935.
 /* AI Agent button */
 .ogv-ai-agent-btn { ... }             /* Violet gradient border, terminal icon */
 .ogv-ai-agent-btn:hover { ... }       /* Stronger gradient, box shadow */
-.ogv-ai-agent-btn--disabled { ... }   /* Grayed out when no graphs */
 .ogv-search-divider { ... }           /* Vertical divider between search and button */
 
 /* Status bar search indicator */
@@ -434,10 +431,20 @@ The `search.py` module lives in `.github/skills/x-ipe-tool-ontology/scripts/sear
 ```python
 import importlib.util
 import os
+import sys
 
 def _import_ontology_search():
     """Dynamically import search module from ontology tool skill."""
-    project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+    # ontology.py must be importable first (search.py depends on `from ontology import ...`)
+    ontology_path = os.path.join(
+        project_root, '.github', 'skills', 'x-ipe-tool-ontology', 'scripts', 'ontology.py'
+    )
+    ont_spec = importlib.util.spec_from_file_location('ontology', ontology_path)
+    ont_mod = importlib.util.module_from_spec(ont_spec)
+    sys.modules['ontology'] = ont_mod
+    ont_spec.loader.exec_module(ont_mod)
+
     search_path = os.path.join(
         project_root, '.github', 'skills', 'x-ipe-tool-ontology', 'scripts', 'search.py'
     )

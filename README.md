@@ -380,6 +380,17 @@ The skill will:
 4. Show you a proposal for review
 5. Apply decorators after your approval
 
+### 📊 Knowledge Base Ontology Graph Viewer (EPIC-058)
+
+Browse and explore your knowledge base as an interactive ontology graph:
+
+1. **Access:** Click the "Knowledge Base" tab in the Workplace sidebar, then open the Ontology Graph Viewer
+2. **Browse Graphs:** Select `.jsonl` graph files from the sidebar to visualize ontology relationships
+3. **Interactive Canvas:** Pan, zoom, and click nodes to explore concepts and their relationships
+4. **Graph Search:** Type in the search bar for BFS-based graph traversal — matching nodes and neighbors are highlighted
+5. **AI Agent Integration:** Click "Search with AI Agent" to send your search context to the AI terminal
+6. **Scope Awareness:** Toggle graphs on/off in the sidebar; search automatically re-runs within the active scope
+
 ---
 
 ## 🎯 The Vision

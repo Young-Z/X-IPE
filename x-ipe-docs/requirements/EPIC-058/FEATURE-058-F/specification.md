@@ -51,7 +51,7 @@
 | AC-058F-01b | GIVEN scope is set to specific graph names (comma-separated) WHEN the BFS search is invoked THEN only graphs in the scope are searched AND the subgraph only contains nodes/edges from those graphs | API |
 | AC-058F-01c | GIVEN scope is "all" WHEN the BFS search is invoked THEN all available ontology graphs are searched | API |
 | AC-058F-01d | GIVEN depth=3 WHEN a search matches node X THEN the subgraph contains all nodes reachable from X within 3 hops AND all edges connecting those nodes | API |
-| AC-058F-01e | GIVEN an empty query string WHEN the BFS search endpoint is called THEN it returns `{"results": [], "subgraph": {"nodes": [], "edges": []}, "pagination": {"total": 0}}` | API |
+| AC-058F-01e | GIVEN an empty or missing query string WHEN the BFS search endpoint is called THEN it returns HTTP 400 with error code `MISSING_QUERY` | API |
 | AC-058F-01f | GIVEN the query matches nodes in multiple graphs WHEN the BFS search is invoked with scope=all THEN results from all graphs are merged, sorted by relevance (descending), and paginated as a single result set | API |
 | AC-058F-01g | GIVEN the `.ontology/` directory does not exist WHEN the BFS search endpoint is called THEN it returns 404 with error code `ONTOLOGY_NOT_FOUND` | API |
 
@@ -81,7 +81,7 @@
 |-------|-------------------------------|-----------|
 | AC-058F-04a | GIVEN the Ontology Graph Viewer is active WHEN the user views the search bar area THEN a "Search with AI Agent" button is visible with a terminal icon (per mockup styling: violet gradient border, monospace text) | UI |
 | AC-058F-04b | GIVEN graphs are selected in the scope WHEN the user clicks "Search with AI Agent" THEN the X-IPE Console panel expands (if collapsed), an idle session is found or a new one created, and a `@copilot` command is pre-filled with the selected graph names as scope context (command is NOT auto-executed — cursor is placed at the end for the user to type their question) | UI |
-| AC-058F-04c | GIVEN no graphs are selected WHEN the user clicks "Search with AI Agent" THEN the button is visually disabled or shows a tooltip "Select graphs first" AND no console action is triggered | UI |
+| AC-058F-04c | GIVEN no graphs are selected WHEN the user clicks "Search with AI Agent" THEN an error toast "Select at least one graph before using AI Agent search." is shown AND no console action is triggered | UI |
 | AC-058F-04d | GIVEN the Console is already expanded with an active session WHEN the user clicks "Search with AI Agent" THEN a new idle session is found or created (does not interrupt the active session) AND the scope-prefilled command is inserted into the new session | UI |
 
 ### AC-058F-05: AI Agent Console Integration — Command Format
@@ -96,7 +96,7 @@
 
 | AC ID | Criterion (Given/When/Then) | Test Type |
 |-------|-------------------------------|-----------|
-| AC-058F-06a | GIVEN no graphs are selected in the sidebar WHEN the user types in the search bar THEN the search returns empty results AND the status bar shows "No graphs in scope" | UI |
+| AC-058F-06a | GIVEN no graphs are selected in the sidebar WHEN the user types in the search bar THEN the search queries all available graphs (scope defaults to "all") | UI |
 | AC-058F-06b | GIVEN 2 of 3 available graphs are selected WHEN the user searches THEN only the 2 selected graphs are searched (the unselected graph's nodes are excluded from results and subgraph) | API |
 | AC-058F-06c | GIVEN a search is active with results displayed WHEN the user deselects a graph that contributed to the results THEN the search re-runs AND results from the deselected graph are removed from both dropdown and canvas highlighting | UI |
 
@@ -139,7 +139,7 @@ If a search query is active and the user changes graph scope (adds/removes graph
 
 - **Performance**: BFS search with depth=3 across all graphs must return within 2 seconds for ontologies up to 500 nodes total.
 - **Debounce**: Search bar input debounced at 300ms (same as current).
-- **Pagination**: API supports pagination (default page_size=20) but the dropdown shows up to 10 results inline with a "Show more" link.
+- **Pagination**: API supports pagination (default page_size=20) but the dropdown shows up to 10 results inline.
 - **Accessibility**: Search dropdown is keyboard-navigable (ArrowUp/Down + Enter); focus management returns to search input when dropdown closes.
 - **No data mutation**: All operations are read-only. No graph editing from search or AI agent.
 
@@ -164,7 +164,7 @@ If a search query is active and the user changes graph scope (adds/removes graph
 - Direct match nodes: emerald glow ring (2px wider than normal border)
 - BFS-neighbor nodes: full opacity, normal border
 - Non-matching nodes: opacity 0.15
-- Edges connected to highlighted nodes remain visible; edges between dimmed nodes are hidden
+- Edges connected to highlighted nodes remain visible; edges between dimmed nodes are dimmed (opacity 0.15)
 
 **Status Bar (addition to existing):**
 - When search active: append "· Search: N matches · M related" to existing status fields
@@ -183,9 +183,9 @@ If a search query is active and the user changes graph scope (adds/removes graph
 
 ## Business Rules
 
-**BR-1:** Search scope is always determined by the sidebar graph selections. A search never returns results from unselected graphs.
+**BR-1:** Search scope is always determined by the sidebar graph selections. When no graphs are selected, the search defaults to all available graphs.
 
-**BR-2:** The AI Agent button is disabled (visually grayed out, no click action) when no graphs are selected.
+**BR-2:** The AI Agent button shows an error toast when clicked with no graphs selected and does not trigger any console action.
 
 **BR-3:** BFS depth defaults to 3 for both manual search bar and AI agent searches. The AI agent may override depth via API parameters.
 
@@ -200,9 +200,9 @@ If a search query is active and the user changes graph scope (adds/removes graph
 | Search with no graphs selected | Empty results; search bar shows subtle hint "Select graphs to search" |
 | BFS search on disconnected graph | BFS expansion stays within the connected component; disconnected nodes are not reached |
 | Search while graph data is still loading | Show loading spinner in dropdown; debounce prevents premature API call |
-| Very long search query (>200 chars) | Truncate at 200 characters before sending to API |
+| Very long search query (>200 chars) | No client-side truncation; API handles gracefully |
 | AI Agent button clicked but Console not available | Show toast notification "Console not available" |
-| Multiple rapid scope changes while search is active | Debounce scope-change-triggered re-search at 300ms to avoid API spam |
+| Multiple rapid scope changes while search is active | Scope-change re-search fires immediately per toggle (no additional debounce) |
 | Search result references a node from a graph that was just deselected | Filter it out client-side before displaying |
 | BFS returns >100 subgraph nodes | Canvas still renders all of them but the dropdown only shows top 10 direct matches |
 
