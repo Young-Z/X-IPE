@@ -1,0 +1,1993 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>X-IPE · Ontology Graph Viewer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/cytoscape@3.30.4/dist/cytoscape.min.js"></script>
+<!-- Cytoscape plugins: fcose (better force layout) -->
+<script src="https://unpkg.com/layout-base@2.0.1/layout-base.js"></script>
+<script src="https://unpkg.com/cose-base@2.2.0/cose-base.js"></script>
+<script src="https://unpkg.com/cytoscape-fcose@2.2.0/cytoscape-fcose.js"></script>
+<!-- dagre (directed hierarchy layout) -->
+<script src="https://unpkg.com/dagre@0.8.5/dist/dagre.min.js"></script>
+<script src="https://unpkg.com/cytoscape-dagre@2.5.0/cytoscape-dagre.js"></script>
+<!-- cxtmenu (radial context menu) -->
+<script src="https://unpkg.com/cytoscape-cxtmenu@3.5.0/cytoscape-cxtmenu.js"></script>
+<!-- navigator (bird's-eye minimap) -->
+<link rel="stylesheet" href="https://unpkg.com/cytoscape-navigator@2.0.2/cytoscape.js-navigator.css">
+<script src="https://unpkg.com/cytoscape-navigator@2.0.2/cytoscape-navigator.js"></script>
+<!-- tippy.js (rich tooltips) -->
+<script src="https://unpkg.com/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+<script src="https://unpkg.com/tippy.js@6.3.7/dist/tippy-bundle.umd.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/tippy.js@6.3.7/dist/tippy.css">
+<style>
+/* ═══════════════════════════════════════════
+   DESIGN SYSTEM — "Cartographic Light"
+   Clean, luminous workspace with vivid
+   knowledge constellations on white
+   ═══════════════════════════════════════════ */
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  /* Slate palette (from X-IPE default theme) */
+  --slate-50:  #f8fafc;
+  --slate-100: #f1f5f9;
+  --slate-200: #e2e8f0;
+  --slate-300: #cbd5e1;
+  --slate-400: #94a3b8;
+  --slate-500: #64748b;
+  --slate-600: #475569;
+  --slate-700: #334155;
+  --slate-800: #1e293b;
+  --slate-900: #0f172a;
+  --slate-950: #020617;
+
+  /* Semantic / node colors */
+  --emerald:       #10b981;
+  --emerald-light: #34d399;
+  --emerald-glow:  rgba(16, 185, 129, .25);
+  --blue:          #3b82f6;
+  --blue-light:    #60a5fa;
+  --blue-glow:     rgba(59, 130, 246, .25);
+  --amber:         #f59e0b;
+  --amber-light:   #fbbf24;
+  --amber-glow:    rgba(245, 158, 11, .25);
+  --rose:          #f43f5e;
+  --rose-glow:     rgba(244, 63, 94, .2);
+  --violet:        #8b5cf6;
+  --violet-glow:   rgba(139, 92, 246, .2);
+
+  /* Layout */
+  --sidebar-w: 260px;
+  --topbar-h:  56px;
+  --detail-w:  340px;
+  --statusbar-h: 36px;
+
+  /* Radius */
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --r-xl: 20px;
+
+  /* Shadows */
+  --glow-emerald: 0 0 12px rgba(16,185,129,.2), 0 0 30px rgba(16,185,129,.06);
+  --glow-blue:    0 0 12px rgba(59,130,246,.2), 0 0 30px rgba(59,130,246,.06);
+  --glow-amber:   0 0 12px rgba(245,158,11,.2), 0 0 30px rgba(245,158,11,.06);
+
+  /* Typography */
+  --font-display: 'Syne', sans-serif;
+  --font-body:    'Outfit', sans-serif;
+  --font-mono:    'JetBrains Mono', monospace;
+}
+
+html, body {
+  height: 100%;
+  background: #ffffff;
+  color: var(--slate-700);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.5;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── GLOBAL LAYOUT ─── */
+.app {
+  display: grid;
+  grid-template-columns: var(--sidebar-w) 1fr;
+  grid-template-rows: var(--topbar-h) 1fr var(--statusbar-h);
+  height: 100vh;
+  position: relative;
+}
+
+/* ═══════════════════════════════════════════
+   SIDEBAR — Graph file explorer
+   ═══════════════════════════════════════════ */
+.sidebar {
+  grid-row: 1 / 4;
+  background: var(--slate-50);
+  border-right: 1px solid var(--slate-200);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 20;
+}
+
+.sidebar-header {
+  padding: 16px 18px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid var(--slate-200);
+}
+
+.sidebar-header .logo-icon {
+  width: 28px; height: 28px;
+  background: linear-gradient(135deg, var(--emerald), var(--blue));
+  border-radius: 8px;
+  display: grid; place-items: center;
+  font-size: 14px;
+  color: white;
+  font-weight: 700;
+  font-family: var(--font-display);
+  flex-shrink: 0;
+}
+
+.sidebar-header h2 {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--slate-800);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.sidebar-section-title {
+  padding: 14px 18px 8px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--slate-500);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.select-all-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  margin: 0 8px 4px;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: background .15s;
+  border-bottom: 1px solid var(--slate-200);
+}
+
+.select-all-row:hover { background: var(--slate-100); }
+
+.select-all-row input[type="checkbox"] {
+  appearance: none;
+  width: 16px; height: 16px;
+  border: 1.5px solid var(--slate-300);
+  border-radius: 4px;
+  flex-shrink: 0;
+  cursor: pointer;
+  position: relative;
+  transition: all .15s;
+}
+
+.select-all-row input[type="checkbox"]:checked {
+  background: var(--emerald);
+  border-color: var(--emerald);
+}
+
+.select-all-row input[type="checkbox"]:checked::after {
+  content: '✓';
+  position: absolute;
+  top: -1px; left: 2px;
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.select-all-row input[type="checkbox"].indeterminate {
+  background: var(--emerald);
+  border-color: var(--emerald);
+}
+
+.select-all-row input[type="checkbox"].indeterminate::after {
+  content: '–';
+  position: absolute;
+  top: -2px; left: 3px;
+  color: white;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.select-all-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--slate-600);
+}
+
+.select-all-count {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--slate-400);
+}
+
+.graph-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 8px 12px;
+}
+
+.graph-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 10px;
+  border-radius: var(--r-md);
+  cursor: pointer;
+  transition: background .15s, box-shadow .15s;
+  margin-bottom: 2px;
+  position: relative;
+}
+
+.graph-item:hover {
+  background: var(--slate-100);
+}
+
+.graph-item.selected {
+  background: rgba(16, 185, 129, .06);
+  box-shadow: inset 3px 0 0 var(--emerald);
+}
+
+.graph-item input[type="checkbox"] {
+  appearance: none;
+  width: 16px; height: 16px;
+  border: 1.5px solid var(--slate-300);
+  border-radius: 4px;
+  margin-top: 2px;
+  flex-shrink: 0;
+  cursor: pointer;
+  position: relative;
+  transition: all .15s;
+}
+
+.graph-item input[type="checkbox"]:checked {
+  background: var(--emerald);
+  border-color: var(--emerald);
+}
+
+.graph-item input[type="checkbox"]:checked::after {
+  content: '✓';
+  position: absolute;
+  top: -1px; left: 2px;
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.graph-item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.graph-item-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--slate-800);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.graph-item-meta {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--slate-500);
+  margin-top: 2px;
+}
+
+.graph-item-badge {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 99px;
+  font-size: 10px;
+  font-weight: 500;
+  margin-top: 4px;
+}
+
+.badge-concept { background: rgba(16,185,129,.1); color: #059669; }
+.badge-document { background: rgba(59,130,246,.1); color: #2563eb; }
+.badge-entity { background: rgba(245,158,11,.1); color: #d97706; }
+
+/* Sidebar legend */
+.sidebar-legend {
+  padding: 14px 18px;
+  border-top: 1px solid var(--slate-200);
+}
+
+.legend-title {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--slate-500);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.legend-items {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--slate-600);
+}
+
+.legend-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.legend-dot.concept { background: var(--emerald); box-shadow: 0 0 6px rgba(16,185,129,.3); }
+.legend-dot.document { background: var(--blue); box-shadow: 0 0 6px rgba(59,130,246,.3); }
+.legend-dot.entity { background: var(--amber); box-shadow: 0 0 6px rgba(245,158,11,.3); }
+.legend-dot.dimension { background: var(--violet); box-shadow: 0 0 6px rgba(139,92,246,.3); }
+
+/* ═══════════════════════════════════════════
+   TOPBAR — Search + scope + controls
+   ═══════════════════════════════════════════ */
+.topbar {
+  background: #ffffff;
+  border-bottom: 1px solid var(--slate-200);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 12px;
+  z-index: 15;
+}
+
+.scope-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.scope-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--slate-500);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.scope-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px 4px 8px;
+  background: rgba(16, 185, 129, .1);
+  border: 1px solid rgba(16, 185, 129, .2);
+  border-radius: 99px;
+  font-size: 12px;
+  color: #059669;
+  font-weight: 500;
+  cursor: default;
+  transition: all .15s;
+  white-space: nowrap;
+}
+
+.scope-pill .dot {
+  width: 6px; height: 6px;
+  background: var(--emerald);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.scope-pill .remove {
+  margin-left: 2px;
+  cursor: pointer;
+  opacity: .6;
+  font-size: 13px;
+  line-height: 1;
+}
+
+.scope-pill .remove:hover { opacity: 1; }
+
+.scope-add {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  border: 1.5px dashed var(--slate-600);
+  display: grid; place-items: center;
+  color: var(--slate-500);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all .15s;
+  flex-shrink: 0;
+}
+
+.scope-add:hover {
+  border-color: var(--emerald);
+  color: var(--emerald);
+  background: rgba(16, 185, 129, .05);
+}
+
+.divider-v {
+  width: 1px;
+  height: 24px;
+  background: var(--slate-200);
+  flex-shrink: 0;
+}
+
+/* Search bar */
+.search-wrapper {
+  flex: 1;
+  position: relative;
+  max-width: 420px;
+}
+
+.search-wrapper svg {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--slate-500);
+  pointer-events: none;
+}
+
+.search-input {
+  width: 100%;
+  padding: 8px 12px 8px 36px;
+  background: var(--slate-100);
+  border: 1px solid var(--slate-200);
+  border-radius: var(--r-md);
+  color: var(--slate-900);
+  font-family: var(--font-body);
+  font-size: 13px;
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+
+.search-input::placeholder { color: var(--slate-500); }
+
+.search-input:focus {
+  border-color: var(--emerald);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, .12);
+}
+
+/* Layout picker (floating, top-left of canvas) */
+.layout-picker {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 15;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--slate-200);
+  border-radius: var(--r-md);
+  padding: 6px;
+  box-shadow: 0 2px 12px rgba(0,0,0,.06);
+}
+
+.layout-picker-label {
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--slate-400);
+  padding: 2px 8px 4px;
+  border-bottom: 1px solid var(--slate-100);
+  margin-bottom: 2px;
+}
+
+.layout-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  border-radius: var(--r-sm);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--slate-500);
+  transition: all .15s;
+  white-space: nowrap;
+}
+
+.layout-option:hover {
+  background: var(--slate-100);
+  color: var(--slate-800);
+}
+
+.layout-option.active {
+  background: var(--emerald);
+  color: white;
+}
+
+.layout-option.active:hover {
+  background: #059669;
+}
+
+.layout-option svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.layout-option.active svg {
+  opacity: 1;
+}
+
+/* AI Agent button */
+.ai-agent-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 14px;
+  background: linear-gradient(135deg, rgba(139,92,246,.08), rgba(59,130,246,.08));
+  border: 1px solid rgba(139,92,246,.3);
+  border-radius: var(--r-md);
+  color: #7c3aed;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .2s;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.ai-agent-btn:hover {
+  background: linear-gradient(135deg, rgba(139,92,246,.14), rgba(59,130,246,.14));
+  border-color: rgba(139,92,246,.5);
+  color: #6d28d9;
+  box-shadow: 0 4px 16px rgba(139,92,246,.12);
+}
+
+.ai-agent-btn svg { flex-shrink: 0; }
+
+/* ═══════════════════════════════════════════
+   GRAPH CANVAS — The constellation view
+   ═══════════════════════════════════════════ */
+.graph-canvas {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 80% 60% at 35% 40%, rgba(16,185,129,.04) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 50% at 70% 65%, rgba(59,130,246,.04) 0%, transparent 70%),
+    var(--slate-50);
+}
+
+/* Subtle grid overlay */
+.graph-canvas::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(148,163,184,.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148,163,184,.08) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+}
+
+/* Cytoscape container */
+#cy {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+}
+
+/* ─── Zoom controls ─── */
+.zoom-controls {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 15;
+}
+
+.zoom-btn {
+  width: 36px; height: 36px;
+  background: #ffffff;
+  border: 1px solid var(--slate-200);
+  color: var(--slate-400);
+  display: grid; place-items: center;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all .15s;
+}
+
+.zoom-btn:first-child { border-radius: var(--r-sm) var(--r-sm) 0 0; }
+.zoom-btn:last-child { border-radius: 0 0 var(--r-sm) var(--r-sm); }
+
+.zoom-btn:hover {
+  background: var(--slate-100);
+  color: var(--slate-800);
+}
+
+/* ═══════════════════════════════════════════
+   NODE DETAIL PANEL — Right slide-out
+   ═══════════════════════════════════════════ */
+.detail-panel {
+  position: fixed;
+  top: 0; right: 0;
+  width: var(--detail-w);
+  height: 100vh;
+  background: #ffffff;
+  border-left: 1px solid var(--slate-200);
+  z-index: 50;
+  transform: translateX(100%);
+  transition: transform .3s cubic-bezier(.4,0,.2,1);
+  display: flex;
+  flex-direction: column;
+  box-shadow: -10px 0 40px rgba(0,0,0,.08);
+}
+
+.detail-panel.open { transform: translateX(0); }
+
+.detail-header {
+  padding: 18px 20px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--slate-200);
+}
+
+.detail-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.detail-type-badge {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  display: grid; place-items: center;
+  font-size: 16px;
+  color: white;
+  flex-shrink: 0;
+}
+
+.detail-type-badge.concept { background: linear-gradient(135deg, #059669, var(--emerald)); }
+.detail-type-badge.document { background: linear-gradient(135deg, #2563eb, var(--blue)); }
+.detail-type-badge.entity { background: linear-gradient(135deg, #d97706, var(--amber)); }
+
+.detail-name {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--slate-900);
+}
+
+.detail-type {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--slate-500);
+  margin-top: 2px;
+}
+
+.detail-close {
+  width: 30px; height: 30px;
+  border-radius: var(--r-sm);
+  border: none;
+  background: transparent;
+  color: var(--slate-500);
+  cursor: pointer;
+  display: grid; place-items: center;
+  font-size: 18px;
+  transition: all .15s;
+  flex-shrink: 0;
+}
+
+.detail-close:hover {
+  background: var(--slate-100);
+  color: var(--slate-700);
+}
+
+.detail-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 20px 24px;
+}
+
+.detail-section {
+  margin-bottom: 20px;
+}
+
+.detail-section-title {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--slate-500);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.detail-description {
+  font-size: 13px;
+  color: var(--slate-600);
+  line-height: 1.6;
+}
+
+/* Dimension tags */
+.dimension-group {
+  margin-bottom: 10px;
+}
+
+.dimension-label {
+  font-size: 11px;
+  color: var(--slate-500);
+  margin-bottom: 4px;
+}
+
+.dimension-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.dim-tag {
+  padding: 3px 8px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.dim-tag.topic { background: rgba(16,185,129,.1); color: #059669; }
+.dim-tag.abstraction { background: rgba(139,92,246,.1); color: #7c3aed; }
+.dim-tag.technology { background: rgba(59,130,246,.1); color: #2563eb; }
+.dim-tag.audience { background: rgba(245,158,11,.1); color: #d97706; }
+
+/* Source files */
+.source-file {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: var(--slate-50);
+  border-radius: var(--r-sm);
+  margin-bottom: 4px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--slate-400);
+  cursor: pointer;
+  transition: all .15s;
+}
+
+.source-file:hover {
+  background: var(--slate-100);
+  color: var(--slate-800);
+}
+
+.source-file svg { color: var(--slate-500); flex-shrink: 0; }
+
+/* Related nodes */
+.related-node {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: background .15s;
+  margin-bottom: 2px;
+}
+
+.related-node:hover { background: var(--slate-50); }
+
+.related-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.related-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.related-name {
+  font-size: 12px;
+  color: var(--slate-800);
+  font-weight: 500;
+}
+
+.related-rel {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--slate-500);
+}
+
+/* ═══════════════════════════════════════════
+   STATUS BAR
+   ═══════════════════════════════════════════ */
+.statusbar {
+  background: var(--slate-50);
+  border-top: 1px solid var(--slate-200);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 16px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--slate-500);
+  z-index: 15;
+}
+
+.status-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.status-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--emerald);
+  animation: status-pulse 2s ease-in-out infinite;
+}
+
+@keyframes status-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .4; }
+}
+
+.status-separator {
+  color: var(--slate-300);
+}
+
+/* ═══════════════════════════════════════════
+   AI AGENT TERMINAL OVERLAY
+   ═══════════════════════════════════════════ */
+.terminal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, .5);
+  backdrop-filter: blur(8px);
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s;
+}
+
+.terminal-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.terminal-window {
+  width: 620px;
+  background: var(--slate-900);
+  border: 1px solid var(--slate-700);
+  border-radius: var(--r-xl);
+  box-shadow: 0 25px 80px rgba(0,0,0,.25), 0 0 40px rgba(139,92,246,.06);
+  overflow: hidden;
+  transform: translateY(20px) scale(.96);
+  transition: transform .3s cubic-bezier(.4,0,.2,1);
+}
+
+.terminal-overlay.open .terminal-window {
+  transform: translateY(0) scale(1);
+}
+
+.terminal-titlebar {
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--slate-800);
+  border-bottom: 1px solid var(--slate-700);
+}
+
+.terminal-titlebar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.terminal-dots {
+  display: flex;
+  gap: 6px;
+}
+
+.terminal-dots span {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+}
+
+.terminal-dots span:nth-child(1) { background: #ef4444; }
+.terminal-dots span:nth-child(2) { background: #f59e0b; }
+.terminal-dots span:nth-child(3) { background: #22c55e; }
+
+.terminal-title {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--slate-400);
+}
+
+.terminal-close {
+  background: none;
+  border: none;
+  color: var(--slate-500);
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all .15s;
+}
+
+.terminal-close:hover { color: var(--slate-200); background: rgba(148,163,184,.15); }
+
+.terminal-body {
+  padding: 20px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.7;
+  min-height: 180px;
+}
+
+.terminal-prompt {
+  color: var(--emerald);
+}
+
+.terminal-text {
+  color: var(--slate-300);
+}
+
+.terminal-cursor {
+  display: inline-block;
+  width: 8px;
+  height: 16px;
+  background: var(--slate-400);
+  animation: blink 1s step-end infinite;
+  vertical-align: text-bottom;
+  margin-left: 2px;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.terminal-hint {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--slate-700);
+  font-size: 11px;
+  color: var(--slate-500);
+}
+
+.terminal-hint kbd {
+  padding: 2px 6px;
+  background: var(--slate-800);
+  border: 1px solid var(--slate-600);
+  border-radius: 4px;
+  font-size: 10px;
+}
+
+/* ═══════════════════════════════════════════
+   NAVIGATOR (bird's-eye minimap)
+   ═══════════════════════════════════════════ */
+#cy-navigator {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  width: 160px;
+  height: 120px;
+  z-index: 15;
+  border-radius: var(--r-md);
+  overflow: hidden;
+  border: 1px solid var(--slate-200);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 2px 12px rgba(0,0,0,.06);
+}
+
+#cy-navigator canvas {
+  border-radius: var(--r-md);
+}
+
+/* Override navigator default styles */
+.cytoscape-navigator {
+  position: absolute !important;
+  border: none !important;
+  background: transparent !important;
+  width: 100% !important;
+  height: 100% !important;
+  z-index: auto !important;
+}
+
+.cytoscape-navigatorView {
+  border: 2px solid var(--emerald) !important;
+  background: rgba(16, 185, 129, 0.1) !important;
+  opacity: 1 !important;
+}
+
+.cytoscape-navigatorOverlay {
+  cursor: move;
+}
+
+/* ═══════════════════════════════════════════
+   CONTEXT MENU (cxtmenu)
+   ═══════════════════════════════════════════ */
+.cxtmenu-content {
+  font-family: var(--font-body) !important;
+  font-size: 12px !important;
+}
+
+/* ═══════════════════════════════════════════
+   TIPPY TOOLTIPS (ontology theme)
+   ═══════════════════════════════════════════ */
+.tippy-box[data-theme~='ontology'] {
+  background: #ffffff;
+  color: var(--slate-700);
+  border: 1px solid var(--slate-200);
+  border-radius: var(--r-md);
+  box-shadow: 0 8px 24px rgba(0,0,0,.1);
+  font-family: var(--font-body);
+  padding: 4px 4px;
+}
+
+.tippy-box[data-theme~='ontology'] .tippy-content {
+  padding: 8px 10px;
+}
+
+.tippy-box[data-theme~='ontology'] .tippy-arrow { color: #ffffff; }
+.tippy-box[data-theme~='ontology'][data-placement^='right'] .tippy-arrow::before { border-right-color: #ffffff; }
+.tippy-box[data-theme~='ontology'][data-placement^='top'] .tippy-arrow::before { border-top-color: #ffffff; }
+.tippy-box[data-theme~='ontology'][data-placement^='bottom'] .tippy-arrow::before { border-bottom-color: #ffffff; }
+.tippy-box[data-theme~='ontology'][data-placement^='left'] .tippy-arrow::before { border-left-color: #ffffff; }
+
+.tippy-node-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--slate-900);
+  margin-bottom: 3px;
+}
+
+.tippy-node-type {
+  font-size: 11px;
+  color: var(--slate-400);
+  line-height: 1.4;
+}
+
+.tippy-node-dims {
+  font-size: 10px;
+  color: var(--slate-500);
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px solid var(--slate-100);
+}
+
+/* ═══════════════════════════════════════════
+   SCROLLBAR
+   ═══════════════════════════════════════════ */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--slate-300); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--slate-400); }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ═══ SIDEBAR ═══ -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-icon">◈</div>
+      <h2>Ontology</h2>
+    </div>
+
+    <div class="sidebar-section-title">Graph Collections</div>
+
+    <div class="select-all-row" onclick="toggleSelectAll()">
+      <input type="checkbox" id="selectAllCb">
+      <span class="select-all-label">Select All</span>
+      <span class="select-all-count" id="selectAllCount">2 / 6</span>
+    </div>
+
+    <div class="graph-list">
+      <div class="graph-item selected" data-graph="jwt" onclick="toggleGraph(this)">
+        <input type="checkbox" checked>
+        <div class="graph-item-info">
+          <div class="graph-item-name">jwt-authentication</div>
+          <div class="graph-item-meta">12 nodes · 18 edges</div>
+          <span class="graph-item-badge badge-concept">concept-heavy</span>
+        </div>
+      </div>
+
+      <div class="graph-item selected" data-graph="oauth" onclick="toggleGraph(this)">
+        <input type="checkbox" checked>
+        <div class="graph-item-info">
+          <div class="graph-item-name">oauth2-security</div>
+          <div class="graph-item-meta">6 nodes · 9 edges</div>
+          <span class="graph-item-badge badge-document">doc-heavy</span>
+        </div>
+      </div>
+
+      <div class="graph-item" data-graph="cicd" onclick="toggleGraph(this)">
+        <input type="checkbox">
+        <div class="graph-item-info">
+          <div class="graph-item-name">ci-cd-pipeline</div>
+          <div class="graph-item-meta">15 nodes · 22 edges</div>
+          <span class="graph-item-badge badge-entity">entity-heavy</span>
+        </div>
+      </div>
+
+      <div class="graph-item" data-graph="flask" onclick="toggleGraph(this)">
+        <input type="checkbox">
+        <div class="graph-item-info">
+          <div class="graph-item-name">python-flask-patterns</div>
+          <div class="graph-item-meta">8 nodes · 11 edges</div>
+          <span class="graph-item-badge badge-concept">concept-heavy</span>
+        </div>
+      </div>
+
+      <div class="graph-item" data-graph="testing" onclick="toggleGraph(this)">
+        <input type="checkbox">
+        <div class="graph-item-info">
+          <div class="graph-item-name">testing-strategies</div>
+          <div class="graph-item-meta">10 nodes · 14 edges</div>
+          <span class="graph-item-badge badge-document">doc-heavy</span>
+        </div>
+      </div>
+
+      <div class="graph-item" data-graph="docker" onclick="toggleGraph(this)">
+        <input type="checkbox">
+        <div class="graph-item-info">
+          <div class="graph-item-name">docker-deployment</div>
+          <div class="graph-item-meta">7 nodes · 8 edges</div>
+          <span class="graph-item-badge badge-entity">entity-heavy</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-legend">
+      <div class="legend-title">Node Types</div>
+      <div class="legend-items">
+        <div class="legend-item"><span class="legend-dot concept"></span> Concept</div>
+        <div class="legend-item"><span class="legend-dot document"></span> Document</div>
+        <div class="legend-item"><span class="legend-dot entity"></span> Entity</div>
+        <div class="legend-item"><span class="legend-dot dimension"></span> Dimension</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══ TOPBAR ═══ -->
+  <header class="topbar">
+    <div class="scope-section">
+      <span class="scope-label">Scope</span>
+      <span class="scope-pill"><span class="dot"></span> jwt-authentication <span class="remove" onclick="this.parentElement.remove()">×</span></span>
+      <span class="scope-pill"><span class="dot"></span> oauth2-security <span class="remove" onclick="this.parentElement.remove()">×</span></span>
+      <div class="scope-add" title="Add graph to scope">+</div>
+    </div>
+
+    <div class="divider-v"></div>
+
+    <div class="search-wrapper">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" type="text" placeholder="Search nodes… (e.g. authentication, token)" id="searchInput" oninput="handleSearch(this.value)">
+    </div>
+
+    <div class="divider-v"></div>
+
+    <button class="ai-agent-btn" onclick="openTerminal()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+      Search with AI Agent
+    </button>
+  </header>
+
+  <!-- ═══ GRAPH CANVAS ═══ -->
+  <main class="graph-canvas" id="graphCanvas">
+    <div id="cy"></div>
+    <div id="cy-navigator"></div>
+
+    <!-- Layout Picker (top-left) -->
+    <div class="layout-picker">
+      <div class="layout-picker-label">Layout</div>
+      <button class="layout-option active" onclick="setLayout(this, 'force')" title="Force-Directed (fCoSE)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="12" cy="18" r="2.5"/>
+          <line x1="8.2" y1="7" x2="15.8" y2="7"/><line x1="7.3" y1="8.2" x2="10.7" y2="16"/><line x1="16.7" y1="8.2" x2="13.3" y2="16"/>
+        </svg>
+        <span>Force-Directed</span>
+      </button>
+      <button class="layout-option" onclick="setLayout(this, 'hierarchy')" title="Hierarchical & Layered (Dagre)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <rect x="8" y="2" width="8" height="5" rx="1.5"/><rect x="2" y="17" width="7" height="5" rx="1.5"/>
+          <rect x="15" y="17" width="7" height="5" rx="1.5"/><line x1="12" y1="7" x2="12" y2="12"/>
+          <line x1="5.5" y1="17" x2="5.5" y2="12"/><line x1="18.5" y1="17" x2="18.5" y2="12"/>
+          <line x1="5.5" y1="12" x2="18.5" y2="12"/>
+        </svg>
+        <span>Hierarchical</span>
+      </button>
+      <button class="layout-option" onclick="setLayout(this, 'radial')" title="Radial & Circular (Concentric)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="7" stroke-dasharray="2 2"/>
+          <circle cx="12" cy="12" r="10.5" stroke-dasharray="2 3"/>
+          <circle cx="12" cy="5" r="1.5" fill="currentColor" stroke="none"/>
+          <circle cx="18.1" cy="15.5" r="1.5" fill="currentColor" stroke="none"/>
+          <circle cx="5.9" cy="15.5" r="1.5" fill="currentColor" stroke="none"/>
+        </svg>
+        <span>Radial</span>
+      </button>
+    </div>
+
+    <!-- Zoom controls -->
+    <div class="zoom-controls">
+      <button class="zoom-btn" onclick="cy.zoom(cy.zoom() * 1.2); cy.center()">+</button>
+      <button class="zoom-btn" onclick="cy.zoom(cy.zoom() / 1.2); cy.center()">−</button>
+      <button class="zoom-btn" title="Fit to view" onclick="cy.fit(undefined, 40)">⊡</button>
+    </div>
+  </main>
+
+  <!-- ═══ STATUS BAR ═══ -->
+  <footer class="statusbar">
+    <div class="status-item">
+      <span class="status-dot"></span>
+      <span>Connected</span>
+    </div>
+    <span class="status-separator">·</span>
+    <span class="status-item">18 nodes</span>
+    <span class="status-separator">·</span>
+    <span class="status-item">27 edges</span>
+    <span class="status-separator">·</span>
+    <span class="status-item" id="statusLayout">Layout: Force-directed</span>
+    <span class="status-separator">·</span>
+    <span class="status-item">Zoom: 100%</span>
+    <span style="flex:1"></span>
+    <span class="status-item">2 graphs in scope</span>
+  </footer>
+</div>
+
+<!-- ═══ DETAIL PANEL ═══ -->
+<div class="detail-panel" id="detailPanel">
+  <div class="detail-header">
+    <div class="detail-header-left">
+      <div class="detail-type-badge concept" id="detailBadge">🔐</div>
+      <div>
+        <div class="detail-name" id="detailName">JWT Authentication</div>
+        <div class="detail-type" id="detailType">know_a1b2c3d4 · concept</div>
+      </div>
+    </div>
+    <button class="detail-close" onclick="closeDetail()">✕</button>
+  </div>
+  <div class="detail-body">
+
+    <div class="detail-section">
+      <div class="detail-section-title">Description</div>
+      <div class="detail-description" id="detailDesc">
+        JSON Web Token authentication patterns for securing API endpoints. Covers token generation, validation, refresh flows, and middleware integration for Flask-based web applications.
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">Dimensions</div>
+      <div class="dimension-group">
+        <div class="dimension-label">topic</div>
+        <div class="dimension-tags">
+          <span class="dim-tag topic">authentication</span>
+          <span class="dim-tag topic">security</span>
+          <span class="dim-tag topic">web-api</span>
+        </div>
+      </div>
+      <div class="dimension-group">
+        <div class="dimension-label">abstraction</div>
+        <div class="dimension-tags">
+          <span class="dim-tag abstraction">pattern</span>
+        </div>
+      </div>
+      <div class="dimension-group">
+        <div class="dimension-label">technology</div>
+        <div class="dimension-tags">
+          <span class="dim-tag technology">Flask</span>
+          <span class="dim-tag technology">JWT</span>
+          <span class="dim-tag technology">Python</span>
+        </div>
+      </div>
+      <div class="dimension-group">
+        <div class="dimension-label">audience</div>
+        <div class="dimension-tags">
+          <span class="dim-tag audience">developer</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">Source Files</div>
+      <div class="source-file">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        knowledge-base/backend/jwt-auth-guide.md
+      </div>
+      <div class="source-file">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        knowledge-base/backend/token-patterns.md
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">Related Nodes</div>
+      <div class="related-node">
+        <span class="related-dot" style="background:var(--emerald)"></span>
+        <div class="related-info">
+          <div class="related-name">Token Management</div>
+          <div class="related-rel">← depends_on</div>
+        </div>
+      </div>
+      <div class="related-node">
+        <span class="related-dot" style="background:var(--blue)"></span>
+        <div class="related-info">
+          <div class="related-name">Auth Middleware Guide</div>
+          <div class="related-rel">← part_of</div>
+        </div>
+      </div>
+      <div class="related-node">
+        <span class="related-dot" style="background:var(--emerald)"></span>
+        <div class="related-info">
+          <div class="related-name">Session Refresh</div>
+          <div class="related-rel">↔ related_to</div>
+        </div>
+      </div>
+      <div class="related-node">
+        <span class="related-dot" style="background:var(--emerald)"></span>
+        <div class="related-info">
+          <div class="related-name">OAuth2 Protocol</div>
+          <div class="related-rel">→ depends_on</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">Metadata</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px">
+        <div>
+          <div style="color:var(--slate-500);font-size:11px">Weight</div>
+          <div style="color:var(--slate-800);font-weight:500;margin-top:2px">8 <span style="color:var(--slate-500);font-size:10px">(high centrality)</span></div>
+        </div>
+        <div>
+          <div style="color:var(--slate-500);font-size:11px">Connections</div>
+          <div style="color:var(--slate-800);font-weight:500;margin-top:2px">5 edges</div>
+        </div>
+        <div>
+          <div style="color:var(--slate-500);font-size:11px">Created</div>
+          <div style="color:var(--slate-800);font-weight:500;margin-top:2px">2026-04-05</div>
+        </div>
+        <div>
+          <div style="color:var(--slate-500);font-size:11px">Updated</div>
+          <div style="color:var(--slate-800);font-weight:500;margin-top:2px">2026-04-07</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══ TERMINAL OVERLAY ═══ -->
+<div class="terminal-overlay" id="terminalOverlay" onclick="if(event.target===this)closeTerminal()">
+  <div class="terminal-window">
+    <div class="terminal-titlebar">
+      <div class="terminal-titlebar-left">
+        <div class="terminal-dots"><span></span><span></span><span></span></div>
+        <span class="terminal-title">X-IPE Agent Terminal</span>
+      </div>
+      <button class="terminal-close" onclick="closeTerminal()">✕</button>
+    </div>
+    <div class="terminal-body">
+      <div>
+        <span class="terminal-prompt">❯ </span>
+        <span class="terminal-text">@copilot search the knowledge graph scoped to </span>
+        <span style="color:var(--emerald)">jwt-authentication, oauth2-security</span>
+        <span class="terminal-text"> for: </span>
+        <span class="terminal-cursor"></span>
+      </div>
+      <div class="terminal-hint">
+        Type your natural language query and press <kbd>Enter</kbd> to search.
+        The AI agent will traverse the selected ontology graphs and return related knowledge nodes.
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+/* ═══ NODE DATA (detail panel info) ═══ */
+const nodeData = {
+  n1: {
+    name: 'JWT Authentication', type: 'concept', icon: '🔐',
+    desc: 'JSON Web Token authentication patterns for securing API endpoints. Covers token generation, validation, refresh flows, and middleware integration for Flask-based web applications.',
+    dimensions: { topic: ['authentication', 'security', 'web-api'], abstraction: ['pattern'], technology: ['Flask', 'JWT', 'Python'], audience: ['developer'] },
+    files: ['knowledge-base/backend/jwt-auth-guide.md', 'knowledge-base/backend/token-patterns.md'],
+    related: [
+      { name: 'Token Management', type: 'concept', rel: '← depends_on' },
+      { name: 'Auth Middleware Guide', type: 'document', rel: '← part_of' },
+      { name: 'Session Refresh', type: 'concept', rel: '↔ related_to' },
+      { name: 'OAuth2 Protocol', type: 'concept', rel: '→ depends_on' }
+    ]
+  },
+  n2: {
+    name: 'Token Management', type: 'concept', icon: '🎟',
+    desc: 'Strategies for managing JWT token lifecycle including issuance, storage, revocation, and rotation. Covers access tokens, refresh tokens, and token blacklisting patterns.',
+    dimensions: { topic: ['authentication', 'token-management'], abstraction: ['pattern'], technology: ['JWT'] },
+    files: ['knowledge-base/backend/token-patterns.md'],
+    related: [
+      { name: 'JWT Authentication', type: 'concept', rel: '→ depends_on' },
+      { name: 'Bearer Token', type: 'entity', rel: '← is_type_of' },
+      { name: 'Auth Middleware Guide', type: 'document', rel: '↔ related_to' }
+    ]
+  },
+  n3: {
+    name: 'Auth Middleware Guide', type: 'document', icon: '📄',
+    desc: 'Step-by-step guide for implementing authentication middleware in Flask applications. Includes decorator patterns, error handling, and role-based access control.',
+    dimensions: { topic: ['authentication', 'middleware'], abstraction: ['tutorial'], technology: ['Flask', 'Python'] },
+    files: ['knowledge-base/backend/auth-middleware.md'],
+    related: [
+      { name: 'JWT Authentication', type: 'concept', rel: '→ part_of' },
+      { name: 'Token Management', type: 'concept', rel: '↔ related_to' },
+      { name: 'Security', type: 'dimension', rel: '← described_by' }
+    ]
+  },
+  n4: {
+    name: 'Session Refresh', type: 'concept', icon: '🔄',
+    desc: 'Token refresh flow patterns including sliding window refresh, absolute expiry, and silent refresh strategies for single-page applications.',
+    dimensions: { topic: ['authentication', 'session-management'], abstraction: ['pattern'], technology: ['JWT', 'SPA'] },
+    files: ['knowledge-base/backend/session-refresh.md'],
+    related: [
+      { name: 'JWT Authentication', type: 'concept', rel: '↔ related_to' },
+      { name: 'Flask-JWT-Extended', type: 'entity', rel: '← described_by' },
+      { name: 'OAuth2 Protocol', type: 'concept', rel: '→ depends_on' }
+    ]
+  },
+  n5: {
+    name: 'Bearer Token', type: 'entity', icon: '🏷',
+    desc: 'A security token with the property that any party in possession of the token can use it in the same way as any other party.',
+    dimensions: { topic: ['authentication'], abstraction: ['entity'], technology: ['HTTP', 'JWT'] },
+    files: ['knowledge-base/backend/token-patterns.md'],
+    related: [
+      { name: 'Token Management', type: 'concept', rel: '→ is_type_of' }
+    ]
+  },
+  n6: {
+    name: 'Security', type: 'dimension', icon: '🛡',
+    desc: 'Security dimension — groups knowledge entities related to application security, authentication, authorization, and threat mitigation.',
+    dimensions: { topic: ['security'], abstraction: ['dimension'] },
+    files: [],
+    related: [
+      { name: 'Auth Middleware Guide', type: 'document', rel: '→ described_by' }
+    ]
+  },
+  n7: {
+    name: 'Flask-JWT-Extended', type: 'entity', icon: '⚙',
+    desc: 'Flask extension providing JWT support with built-in refresh token handling, token revocation, and fresh token patterns.',
+    dimensions: { topic: ['authentication'], abstraction: ['library'], technology: ['Flask', 'Python'] },
+    files: ['knowledge-base/backend/flask-jwt-extended.md'],
+    related: [
+      { name: 'Session Refresh', type: 'concept', rel: '→ described_by' }
+    ]
+  },
+  n8: {
+    name: 'OAuth2 Protocol', type: 'concept', icon: '🌐',
+    desc: 'OAuth 2.0 authorization framework specification covering grant types, token endpoints, client authentication, and security considerations for delegated authorization.',
+    dimensions: { topic: ['authorization', 'security', 'protocol'], abstraction: ['reference'], technology: ['OAuth2', 'HTTP'] },
+    files: ['knowledge-base/security/oauth2-overview.md'],
+    related: [
+      { name: 'OAuth2 RFC 6749', type: 'document', rel: '← part_of' },
+      { name: 'Authorization Code', type: 'entity', rel: '← is_type_of' },
+      { name: 'Session Refresh', type: 'concept', rel: '↔ related_to' }
+    ]
+  },
+  n9: {
+    name: 'OAuth2 RFC 6749', type: 'document', icon: '📋',
+    desc: 'The OAuth 2.0 Authorization Framework — IETF RFC 6749. Defines roles, grant types, and protocol flow.',
+    dimensions: { topic: ['authorization', 'protocol'], abstraction: ['reference'], technology: ['OAuth2'] },
+    files: ['knowledge-base/security/rfc6749.md'],
+    related: [
+      { name: 'OAuth2 Protocol', type: 'concept', rel: '→ part_of' },
+      { name: 'PKCE Extension', type: 'document', rel: '↔ related_to' }
+    ]
+  },
+  n10: {
+    name: 'Authorization Code', type: 'entity', icon: '🔑',
+    desc: 'The authorization code grant type used to obtain access tokens. Provides a temporary code exchanged for tokens via a back-channel request.',
+    dimensions: { topic: ['authorization'], abstraction: ['entity'], technology: ['OAuth2'] },
+    files: ['knowledge-base/security/oauth2-overview.md'],
+    related: [
+      { name: 'OAuth2 Protocol', type: 'concept', rel: '→ is_type_of' }
+    ]
+  },
+  n11: {
+    name: 'PKCE Extension', type: 'document', icon: '📝',
+    desc: 'Proof Key for Code Exchange (RFC 7636) — prevents authorization code interception attacks for public clients.',
+    dimensions: { topic: ['authorization', 'security'], abstraction: ['reference'], technology: ['OAuth2'] },
+    files: ['knowledge-base/security/pkce.md'],
+    related: [
+      { name: 'OAuth2 RFC 6749', type: 'document', rel: '↔ related_to' }
+    ]
+  }
+};
+
+/* ═══ NODE COLOR MAP ═══ */
+const typeColors = {
+  concept:   { bg: '#10b981', border: '#059669' },
+  document:  { bg: '#3b82f6', border: '#2563eb' },
+  entity:    { bg: '#f59e0b', border: '#d97706' },
+  dimension: { bg: '#8b5cf6', border: '#7c3aed' }
+};
+
+/* ═══ CYTOSCAPE GRAPH DATA ═══ */
+const graphElements = [
+  // JWT cluster nodes
+  { data: { id: 'n1',  label: 'JWT Authentication',    type: 'concept',   icon: '🔐', weight: 8, cluster: 'jwt' } },
+  { data: { id: 'n2',  label: 'Token Management',      type: 'concept',   icon: '🎟', weight: 5, cluster: 'jwt' } },
+  { data: { id: 'n3',  label: 'Auth Middleware Guide',  type: 'document',  icon: '📄', weight: 4, cluster: 'jwt' } },
+  { data: { id: 'n4',  label: 'Session Refresh',        type: 'concept',   icon: '🔄', weight: 4, cluster: 'jwt' } },
+  { data: { id: 'n5',  label: 'Bearer Token',           type: 'entity',    icon: '🏷', weight: 3, cluster: 'jwt' } },
+  { data: { id: 'n6',  label: 'Security',               type: 'dimension', icon: '🛡', weight: 3, cluster: 'jwt' } },
+  { data: { id: 'n7',  label: 'Flask-JWT-Extended',     type: 'entity',    icon: '⚙', weight: 4, cluster: 'jwt' } },
+  // OAuth cluster nodes
+  { data: { id: 'n8',  label: 'OAuth2 Protocol',        type: 'concept',   icon: '🌐', weight: 7, cluster: 'oauth' } },
+  { data: { id: 'n9',  label: 'OAuth2 RFC 6749',        type: 'document',  icon: '📋', weight: 4, cluster: 'oauth' } },
+  { data: { id: 'n10', label: 'Authorization Code',     type: 'entity',    icon: '🔑', weight: 3, cluster: 'oauth' } },
+  { data: { id: 'n11', label: 'PKCE Extension',         type: 'document',  icon: '📝', weight: 3, cluster: 'oauth' } },
+  // JWT cluster edges
+  { data: { id: 'e1',  source: 'n1', target: 'n2', relation: 'depends_on' } },
+  { data: { id: 'e2',  source: 'n1', target: 'n3', relation: 'part_of' } },
+  { data: { id: 'e3',  source: 'n1', target: 'n4', relation: 'related_to' } },
+  { data: { id: 'e4',  source: 'n2', target: 'n5', relation: 'is_type_of' } },
+  { data: { id: 'e5',  source: 'n3', target: 'n6', relation: 'described_by' } },
+  { data: { id: 'e6',  source: 'n4', target: 'n7', relation: 'described_by' } },
+  { data: { id: 'e7',  source: 'n2', target: 'n3', relation: 'related_to' } },
+  { data: { id: 'e8',  source: 'n4', target: 'n3', relation: 'related_to' } },
+  // Cross-cluster edges
+  { data: { id: 'e9',  source: 'n4', target: 'n8', relation: 'depends_on' } },
+  { data: { id: 'e10', source: 'n7', target: 'n9', relation: 'related_to' } },
+  // OAuth cluster edges
+  { data: { id: 'e11', source: 'n8', target: 'n9', relation: 'part_of' } },
+  { data: { id: 'e12', source: 'n8', target: 'n10', relation: 'is_type_of' } },
+  { data: { id: 'e13', source: 'n9', target: 'n11', relation: 'related_to' } },
+];
+
+/* ═══ INIT CYTOSCAPE ═══ */
+const cy = cytoscape({
+  container: document.getElementById('cy'),
+  elements: graphElements,
+  style: [
+    {
+      selector: 'node',
+      style: {
+        'label': 'data(label)',
+        'text-valign': 'bottom',
+        'text-halign': 'center',
+        'text-margin-y': 8,
+        'font-family': 'Outfit, sans-serif',
+        'font-size': 11,
+        'font-weight': 500,
+        'color': '#334155',
+        'text-outline-width': 2,
+        'text-outline-color': '#ffffff',
+        'text-outline-opacity': 0.8,
+        'width': ele => 28 + ele.data('weight') * 4,
+        'height': ele => 28 + ele.data('weight') * 4,
+        'background-color': ele => typeColors[ele.data('type')]?.bg || '#94a3b8',
+        'border-width': 2,
+        'border-color': ele => typeColors[ele.data('type')]?.border || '#64748b',
+        'shadow-blur': 10,
+        'shadow-color': ele => typeColors[ele.data('type')]?.bg || '#94a3b8',
+        'shadow-opacity': 0.25,
+        'shadow-offset-x': 0,
+        'shadow-offset-y': 2,
+        'transition-property': 'opacity, background-color, border-color, width, height',
+        'transition-duration': '0.2s',
+      }
+    },
+    {
+      selector: 'node:selected',
+      style: {
+        'border-width': 4,
+        'border-color': '#0f172a',
+        'font-weight': 600,
+        'color': '#0f172a',
+        'shadow-blur': 16,
+        'shadow-opacity': 0.4,
+      }
+    },
+    {
+      selector: 'edge',
+      style: {
+        'width': 1.5,
+        'line-color': '#cbd5e1',
+        'target-arrow-color': '#cbd5e1',
+        'target-arrow-shape': 'triangle',
+        'arrow-scale': 0.8,
+        'curve-style': 'bezier',
+        'label': 'data(relation)',
+        'font-family': 'JetBrains Mono, monospace',
+        'font-size': 9,
+        'color': '#94a3b8',
+        'text-rotation': 'autorotate',
+        'text-background-color': '#ffffff',
+        'text-background-opacity': 0.85,
+        'text-background-padding': '2px',
+        'text-background-shape': 'roundrectangle',
+        'transition-property': 'opacity, line-color, width',
+        'transition-duration': '0.2s',
+      }
+    },
+    {
+      selector: 'edge:selected',
+      style: {
+        'width': 2.5,
+        'line-color': '#10b981',
+        'target-arrow-color': '#10b981',
+        'color': '#10b981',
+      }
+    },
+    {
+      selector: '.dimmed',
+      style: { 'opacity': 0.15 }
+    },
+    {
+      selector: '.highlighted',
+      style: {
+        'border-width': 4,
+        'border-color': '#0f172a',
+        'shadow-blur': 20,
+        'shadow-opacity': 0.5,
+      }
+    },
+    {
+      selector: 'edge.highlighted',
+      style: {
+        'width': 2.5,
+        'line-color': '#10b981',
+        'target-arrow-color': '#10b981',
+      }
+    },
+  ],
+  layout: {
+    name: 'fcose',
+    quality: 'default',
+    animate: true,
+    animationDuration: 800,
+    fit: true,
+    padding: 50,
+    nodeSeparation: 100,
+    idealEdgeLength: edge => {
+      const s = edge.source().data('cluster');
+      const t = edge.target().data('cluster');
+      return s !== t ? 200 : 120;
+    },
+    edgeElasticity: 0.45,
+    nestingFactor: 0.1,
+    gravity: 0.25,
+    gravityRange: 3.8,
+    nodeRepulsion: 5500,
+    tile: true,
+    tilingPaddingVertical: 10,
+    tilingPaddingHorizontal: 10,
+    randomize: true,
+  },
+  minZoom: 0.3,
+  maxZoom: 3,
+  wheelSensitivity: 0.3,
+});
+
+/* ═══ CYTOSCAPE EVENT HANDLERS ═══ */
+cy.on('tap', 'node', function(evt) {
+  const node = evt.target;
+  selectNodeById(node.id());
+});
+
+cy.on('tap', function(evt) {
+  if (evt.target === cy) {
+    closeDetail();
+    cy.elements().removeClass('highlighted dimmed');
+  }
+});
+
+/* ═══ TIPPY TOOLTIPS ═══ */
+const tippyAnchor = document.createElement('div');
+tippyAnchor.style.cssText = 'position:fixed;width:1px;height:1px;pointer-events:none;z-index:-1;';
+document.body.appendChild(tippyAnchor);
+let activeTippy = null;
+
+cy.on('mouseover', 'node', function(evt) {
+  const node = evt.target;
+  const data = nodeData[node.id()];
+
+  if (activeTippy) { activeTippy.destroy(); activeTippy = null; }
+
+  const pos = node.renderedPosition();
+  const cyRect = document.getElementById('cy').getBoundingClientRect();
+
+  tippyAnchor.style.left = (cyRect.left + pos.x) + 'px';
+  tippyAnchor.style.top = (cyRect.top + pos.y) + 'px';
+
+  const dims = data?.dimensions?.topic;
+  const dimsHtml = dims?.length
+    ? `<div class="tippy-node-dims">📐 ${dims.join(' · ')}</div>` : '';
+
+  activeTippy = tippy(tippyAnchor, {
+    content: `<div class="tippy-node-title">${data?.icon || '●'} ${node.data('label')}</div>
+              <div class="tippy-node-type">${node.data('type')} · weight ${node.data('weight')}</div>
+              ${dimsHtml}`,
+    allowHTML: true,
+    showOnCreate: true,
+    trigger: 'manual',
+    placement: 'right',
+    theme: 'ontology',
+    arrow: true,
+    offset: [0, 20],
+    duration: [150, 100],
+  });
+});
+
+cy.on('mouseout', 'node', function() {
+  if (activeTippy) { activeTippy.destroy(); activeTippy = null; }
+});
+
+/* ═══ RADIAL CONTEXT MENU (cxtmenu) ═══ */
+cy.cxtmenu({
+  selector: 'node',
+  commands: [
+    {
+      content: '🔍 Details',
+      select: function(ele) { selectNodeById(ele.id()); }
+    },
+    {
+      content: '🔗 Expand',
+      select: function(ele) {
+        cy.elements().removeClass('highlighted dimmed');
+        const hood = ele.closedNeighborhood();
+        cy.elements().not(hood).addClass('dimmed');
+        hood.addClass('highlighted');
+      }
+    },
+    {
+      content: '📌 Pin',
+      select: function(ele) { ele.lock(); }
+    },
+    {
+      content: '🔓 Unpin',
+      select: function(ele) { ele.unlock(); }
+    },
+  ],
+  fillColor: 'rgba(15, 23, 42, 0.88)',
+  activeFillColor: '#10b981',
+  activePadding: 12,
+  indicatorSize: 14,
+  separatorWidth: 3,
+  spotlightPadding: 6,
+  adaptativeNodeSpotlightRadius: true,
+  minSpotlightRadius: 24,
+  maxSpotlightRadius: 44,
+  openMenuEvents: 'cxttapstart taphold',
+  itemColor: 'white',
+  itemTextShadowColor: 'transparent',
+  zIndex: 9999,
+  atMouse: false,
+  outsideMenuCancel: 10,
+});
+
+cy.cxtmenu({
+  selector: 'core',
+  commands: [
+    {
+      content: '⊡ Fit View',
+      select: function() { cy.fit(undefined, 40); }
+    },
+    {
+      content: '🔄 Reset',
+      select: function() {
+        cy.elements().removeClass('highlighted dimmed');
+        cy.fit(undefined, 40);
+      }
+    },
+    {
+      content: '🌿 Force',
+      select: function() {
+        const btn = document.querySelectorAll('.layout-option')[0];
+        setLayout(btn, 'force');
+      }
+    },
+    {
+      content: '🏗 Hierarchy',
+      select: function() {
+        const btn = document.querySelectorAll('.layout-option')[1];
+        setLayout(btn, 'hierarchy');
+      }
+    },
+    {
+      content: '🎯 Radial',
+      select: function() {
+        const btn = document.querySelectorAll('.layout-option')[2];
+        setLayout(btn, 'radial');
+      }
+    },
+  ],
+  fillColor: 'rgba(15, 23, 42, 0.88)',
+  activeFillColor: '#3b82f6',
+  activePadding: 12,
+  indicatorSize: 14,
+  separatorWidth: 3,
+  spotlightPadding: 0,
+  openMenuEvents: 'cxttapstart taphold',
+  itemColor: 'white',
+  itemTextShadowColor: 'transparent',
+  zIndex: 9999,
+  atMouse: true,
+  outsideMenuCancel: 10,
+});
+
+/* ═══ NAVIGATOR (bird's-eye minimap) ═══ */
+cy.navigator({
+  container: '#cy-navigator',
+  viewLiveFramerate: 0,
+  thumbnailEventFramerate: 30,
+  thumbnailLiveFramerate: false,
+  dblClickDelay: 200,
+  removeCustomContainer: false,
+  rerenderDelay: 100,
+});
+
+/* ═══ INTERACTIONS ═══ */
+function selectNodeById(id) {
+  const data = nodeData[id];
+  const node = cy.getElementById(id);
+
+  // Highlight neighborhood
+  cy.elements().removeClass('highlighted dimmed');
+  const neighborhood = node.closedNeighborhood();
+  cy.elements().not(neighborhood).addClass('dimmed');
+  neighborhood.addClass('highlighted');
+
+  if (!data) {
+    document.getElementById('detailPanel').classList.add('open');
+    document.getElementById('detailName').textContent = node.data('label');
+    document.getElementById('detailType').textContent = node.data('type');
+    return;
+  }
+
+  // Populate detail panel
+  document.getElementById('detailName').textContent = data.name;
+  document.getElementById('detailType').textContent = `know_${id.replace('n','')}b2c3d4 · ${data.type}`;
+  document.getElementById('detailBadge').textContent = data.icon;
+  document.getElementById('detailBadge').className = `detail-type-badge ${data.type}`;
+  document.getElementById('detailDesc').textContent = data.desc;
+  document.getElementById('detailPanel').classList.add('open');
+}
+
+function closeDetail() {
+  document.getElementById('detailPanel').classList.remove('open');
+  cy.elements().removeClass('highlighted dimmed');
+}
+
+function toggleGraph(item) {
+  item.classList.toggle('selected');
+  const cb = item.querySelector('input[type="checkbox"]');
+  cb.checked = !cb.checked;
+  updateSelectAllState();
+}
+
+function toggleSelectAll() {
+  const items = document.querySelectorAll('.graph-item');
+  const allSelected = [...items].every(i => i.classList.contains('selected'));
+  const newState = !allSelected;
+  items.forEach(item => {
+    const cb = item.querySelector('input[type="checkbox"]');
+    if (newState) { item.classList.add('selected'); cb.checked = true; }
+    else { item.classList.remove('selected'); cb.checked = false; }
+  });
+  updateSelectAllState();
+}
+
+function updateSelectAllState() {
+  const items = document.querySelectorAll('.graph-item');
+  const total = items.length;
+  const selected = document.querySelectorAll('.graph-item.selected').length;
+  const selectAllCb = document.getElementById('selectAllCb');
+  const countEl = document.getElementById('selectAllCount');
+  selectAllCb.checked = selected === total;
+  selectAllCb.classList.toggle('indeterminate', selected > 0 && selected < total);
+  if (selected === total) selectAllCb.classList.remove('indeterminate');
+  countEl.textContent = `${selected} / ${total}`;
+}
+
+function setLayout(btn, type) {
+  document.querySelectorAll('.layout-option').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  let layoutOpts;
+  if (type === 'hierarchy') {
+    layoutOpts = { name: 'dagre', rankDir: 'TB', nodeSep: 60, rankSep: 80, edgeSep: 20, fit: true, padding: 40, animate: true, animationDuration: 600 };
+  } else if (type === 'radial') {
+    layoutOpts = {
+      name: 'concentric',
+      fit: true,
+      concentric: function(node) { return node.data('weight') || 1; },
+      levelWidth: function() { return 2; },
+      minNodeSpacing: 50,
+      padding: 40,
+      animate: true,
+      animationDuration: 600,
+      equidistant: false,
+    };
+  } else {
+    layoutOpts = { name: 'fcose', quality: 'default', animate: true, animationDuration: 800, fit: true, padding: 50, nodeSeparation: 100, idealEdgeLength: function(edge) { var s = edge.source().data('cluster'); var t = edge.target().data('cluster'); return s !== t ? 200 : 120; }, edgeElasticity: 0.45, nestingFactor: 0.1, gravity: 0.25, gravityRange: 3.8, nodeRepulsion: 5500, tile: true, tilingPaddingVertical: 10, tilingPaddingHorizontal: 10, randomize: true };
+  }
+  cy.layout(layoutOpts).run();
+
+  // Update statusbar
+  const labels = { force: 'Force-directed', hierarchy: 'Hierarchical', radial: 'Radial' };
+  const statusLayout = document.getElementById('statusLayout');
+  if (statusLayout) statusLayout.textContent = 'Layout: ' + (labels[type] || type);
+}
+
+function handleSearch(query) {
+  if (!query.trim()) {
+    cy.elements().removeClass('dimmed highlighted');
+    return;
+  }
+  const q = query.toLowerCase();
+  cy.elements().removeClass('dimmed highlighted');
+  const matchedNodes = cy.nodes().filter(n => n.data('label').toLowerCase().includes(q));
+  if (matchedNodes.length > 0) {
+    const neighborhood = matchedNodes.closedNeighborhood();
+    cy.elements().not(neighborhood).addClass('dimmed');
+    matchedNodes.addClass('highlighted');
+  } else {
+    cy.elements().addClass('dimmed');
+  }
+}
+
+function openTerminal() {
+  document.getElementById('terminalOverlay').classList.add('open');
+}
+
+function closeTerminal() {
+  document.getElementById('terminalOverlay').classList.remove('open');
+}
+
+/* Keyboard shortcuts */
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') { closeDetail(); closeTerminal(); }
+  if (e.key === '/' && !e.ctrlKey && !e.metaKey) {
+    if (document.activeElement.tagName !== 'INPUT') {
+      e.preventDefault();
+      document.getElementById('searchInput').focus();
+    }
+  }
+});
+</script>
+
+</body>
+</html>
