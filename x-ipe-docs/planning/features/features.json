@@ -1896,9 +1896,9 @@
       "dependencies": [
         "FEATURE-058-A"
       ],
-      "status": "Tested",
+      "status": "Completed",
       "created_at": "2026-04-08T09:29:23.941312+00:00",
-      "last_updated": "2026-04-08T11:18:38.039577+00:00"
+      "last_updated": "2026-04-08T11:30:03.478684+00:00"
     },
     {
       "feature_id": "FEATURE-058-E",
@@ -1909,9 +1909,9 @@
       "dependencies": [
         "FEATURE-058-A"
       ],
-      "status": "Planned",
+      "status": "Tested",
       "created_at": "2026-04-08T09:29:23.964279+00:00",
-      "last_updated": "2026-04-08T09:42:34.471172+00:00"
+      "last_updated": "2026-04-09T03:35:37.306858+00:00"
     },
     {
       "feature_id": "FEATURE-058-F",

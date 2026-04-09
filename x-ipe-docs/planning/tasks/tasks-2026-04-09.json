@@ -1,0 +1,60 @@
+{
+  "_version": "1.0",
+  "tasks": [
+    {
+      "task_id": "TASK-1107",
+      "task_type": "Technical Design",
+      "description": "Technical design for FEATURE-058-E Ontology Graph Viewer UI",
+      "role": "Ember",
+      "status": "completed",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-058/FEATURE-058-E/technical-design.md"
+      ],
+      "next_task": "x-ipe-task-based-code-implementation",
+      "created_at": "2026-04-09T02:46:37.811646+00:00",
+      "last_updated": "2026-04-09T02:52:58.500265+00:00"
+    },
+    {
+      "task_id": "TASK-1108",
+      "task_type": "Code Implementation",
+      "description": "Implement FEATURE-058-E: Ontology Graph Viewer UI",
+      "status": "completed",
+      "role": "developer",
+      "output_links": [
+        "src/x_ipe/routes/ontology_graph_routes.py",
+        "src/x_ipe/services/ontology_graph_service.py",
+        "src/x_ipe/static/js/features/ontology-graph-viewer.js",
+        "src/x_ipe/static/js/features/ontology-graph-canvas.js",
+        "src/x_ipe/static/css/ontology-graph-viewer.css"
+      ],
+      "next_task": "x-ipe-task-based-feature-acceptance-test",
+      "created_at": "2026-04-09T03:00:32.390810+00:00",
+      "last_updated": "2026-04-09T03:09:20.292328+00:00"
+    },
+    {
+      "task_id": "TASK-1109",
+      "task_type": "Feature Acceptance Test",
+      "description": "FEATURE-058-E Ontology Graph Viewer UI — acceptance testing",
+      "status": "completed",
+      "role": "QA",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-058/FEATURE-058-E/acceptance-test-cases.md",
+        "tests/test_ontology_graph_viewer.py"
+      ],
+      "next_task": "x-ipe-task-based-feature-closing",
+      "created_at": "2026-04-09T03:19:23.784043+00:00",
+      "last_updated": "2026-04-09T03:35:32.262081+00:00"
+    },
+    {
+      "task_id": "TASK-1110",
+      "task_type": "Feature Closing",
+      "description": "Close FEATURE-058-E (Ontology Graph Viewer UI)",
+      "status": "in_progress",
+      "role": "agent",
+      "output_links": [],
+      "next_task": "x-ipe-task-based-feature-refinement",
+      "created_at": "2026-04-09T03:39:31.943257+00:00",
+      "last_updated": "2026-04-09T03:39:31.943257+00:00"
+    }
+  ]
+}

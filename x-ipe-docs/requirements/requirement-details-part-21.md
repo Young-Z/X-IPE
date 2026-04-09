@@ -45,6 +45,10 @@ Create a two-tier AI skill system for structured knowledge extraction from appli
 
 9. **KB Intake Output:** Final validated and packed output goes to `x-ipe-docs/knowledge-base/.intake/` folder for EPIC-049 AI Librarian processing. Output follows KB intake format conventions.
 
+> **📋 CR Impact — EPIC-058 (Feature-Ontology for Knowledgebase)**
+> Date: 2026-04-08 | Decision: CR on EPIC-050
+> EPIC-049's AI Librarian (which processes EPIC-050's intake output) is being extended by EPIC-058 to call `x-ipe-tool-ontology` for multi-dimensional ontology tagging. EPIC-050's extraction output format to `.intake/` does NOT change — the librarian just does more with it (ontology tagging + graph recreation). No changes needed to EPIC-050 features, but intake contract now includes ontology enrichment as a downstream step. See [EPIC-058 requirements](x-ipe-docs/requirements/requirement-details-part-24.md).
+
 10. **Error Handling:** On inaccessible sources (broken URLs, permission denied, app not running): retry automatically (configurable max retries, default 3), then pause and present the issue to the user for guidance (skip source, provide alternative, abort).
 
 11. **Quality Dual-Metric:** Each tool skill runs its own per-section critique sub-agent to validate individual sections against acceptance criteria. Additionally, maintain an overall quality score tracking coverage percentage, clarity, and completeness across all sections.

@@ -633,7 +633,8 @@ A project-scoped Knowledge Base (KB) integrated into X-IPE that serves as persis
 - [ ] Status filter pills: All / Pending / Processing / Filed
 - [ ] Per-file actions: Preview, Assign folder manually, Remove
 - [ ] "✨ Run AI Librarian" button triggers CLI agent session via `x-ipe-tool-kb-librarian` skill
-- [ ] AI Librarian auto-handles: move files to folders, assign lifecycle+domain tags, generate frontmatter
+- [ ] AI Librarian auto-handles: move files to folders, call ontology tool for multi-dimensional tagging (replaces basic lifecycle+domain 2D tags), generate frontmatter
+- [ ] After tagging batch completes, AI Librarian triggers ontology graph recreation for affected KB folders
 - [ ] Filed files disappear from Intake and appear in destination folders
 - [ ] Agent write access controlled by `agent_write_allowlist` in knowledgebase-config.json
 - [ ] Agent-generated articles tagged with `auto_generated: true` in frontmatter
@@ -648,6 +649,10 @@ A project-scoped Knowledge Base (KB) integrated into X-IPE that serves as persis
 - `.intake/` folder excluded from regular KB browsing (NFR-049.6)
 - AI Librarian skill is tool-type (not task-based) — invoked by agent during CLI session
 - Requires new skill file: `.github/skills/x-ipe-tool-kb-librarian/SKILL.md`
+
+> **📋 CR Impact — EPIC-058 (Feature-Ontology for Knowledgebase)**
+> Date: 2026-04-08 | Decision: CR on EPIC-049
+> FEATURE-049-F's AI Librarian intake workflow is extended by EPIC-058 to call `x-ipe-tool-ontology` for multi-dimensional knowledge tagging (replacing basic 2D lifecycle+domain tags). Lifecycle tags remain in `.kb-index.json`; domain classification migrates into ontology dimensions. After each tagging batch, the librarian triggers ontology graph recreation. The librarian skill must declare an ontology skill contract. See [EPIC-058 requirements](x-ipe-docs/requirements/requirement-details-part-24.md) for full details.
 
 ---
 

@@ -617,6 +617,10 @@ As applications grow in complexity, understanding execution flow becomes challen
 
 **Total Acceptance Criteria:** ~60
 
+> **📋 CR Impact — EPIC-058 (Feature-Ontology for Knowledgebase)**
+> Date: 2026-04-08 | Decision: CR on EPIC-023
+> EPIC-058 introduces Cytoscape.js (+ fcose, dagre, cxtmenu, navigator, tippy plugins) for ontology graph visualization. FEATURE-023-C currently uses G6 (AntV) for DAG visualization. To standardize on a single graph library, a future CR should migrate FEATURE-023-C from G6 to Cytoscape.js (using dagre layout for equivalent DAG rendering). See [EPIC-058 requirements](x-ipe-docs/requirements/requirement-details-part-24.md).
+
 ---
 
 ### FEATURE-023-D: Tracing Skill Integration

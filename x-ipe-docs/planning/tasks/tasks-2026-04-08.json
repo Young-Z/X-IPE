@@ -251,11 +251,27 @@
       "task_type": "Feature Closing",
       "description": "Close FEATURE-058-D (KB Librarian Ontology Integration) - verify ACs, code-to-docs review, refactoring analysis, commit and push to main",
       "role": "developer",
-      "status": "in_progress",
-      "output_links": [],
+      "status": "completed",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-058/FEATURE-058-D/"
+      ],
       "next_task": "x-ipe-task-based-feature-refinement",
       "created_at": "2026-04-08T11:22:43.934276+00:00",
-      "last_updated": "2026-04-08T11:22:43.934276+00:00"
+      "last_updated": "2026-04-08T11:30:03.448750+00:00"
+    },
+    {
+      "task_id": "TASK-1106",
+      "task_type": "Feature Refinement",
+      "description": "Refine FEATURE-058-E (Ontology Graph Viewer UI) — create specification with acceptance criteria",
+      "role": "developer",
+      "status": "completed",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-058/FEATURE-058-E/specification.md",
+        "x-ipe-docs/requirements/EPIC-058/FEATURE-058-E/mockups/ontology-graph-viewer-v1.html"
+      ],
+      "next_task": "x-ipe-task-based-technical-design",
+      "created_at": "2026-04-08T12:40:55.371034+00:00",
+      "last_updated": "2026-04-09T02:38:46.490283+00:00"
     }
   ]
 }
