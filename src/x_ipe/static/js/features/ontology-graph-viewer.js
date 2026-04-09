@@ -147,18 +147,6 @@ class OntologyGraphViewer {
                     <div class="ogv-sidebar-title">
                         <span class="ogv-sidebar-icon">◈</span> ONTOLOGY
                     </div>
-                    <div class="ogv-search-bar">
-                        <i class="bi bi-search ogv-search-icon"></i>
-                        <input class="ogv-search-input" type="text" placeholder="Search nodes… (e.g. authentication, token)" />
-                        <div class="ogv-search-divider"></div>
-                        <button class="ogv-ai-agent-btn" title="Search with AI Agent">
-                            <svg class="ogv-ai-icon" viewBox="0 0 16 16" width="14" height="14" fill="currentColor">
-                                <path d="M2 2h12v10H4l-2 2V2zm2 2v6h8V4H4zm1 1h6v1H5V5zm0 2h4v1H5V7z"/>
-                            </svg>
-                            <span>AI Agent</span>
-                        </button>
-                    </div>
-                    <div class="ogv-search-dropdown"></div>
                 </div>
                 <div class="ogv-section-header">GRAPH COLLECTIONS</div>
                 <div class="ogv-select-all">
@@ -177,12 +165,28 @@ class OntologyGraphViewer {
                 </div>
             </div>
 
-            <!-- Canvas Area -->
-            <div class="ogv-canvas-area">
+            <!-- Topbar (Scope + Search + AI Agent) -->
+            <header class="ogv-topbar">
                 <div class="ogv-scope-bar">
                     <span class="ogv-scope-label">SCOPE</span>
                 </div>
+                <div class="ogv-topbar-divider"></div>
+                <div class="ogv-search-bar">
+                    <i class="bi bi-search ogv-search-icon"></i>
+                    <input class="ogv-search-input" type="text" placeholder="Search nodes… (e.g. authentication, token)" />
+                </div>
+                <div class="ogv-search-dropdown"></div>
+                <div class="ogv-topbar-divider"></div>
+                <button class="ogv-ai-agent-btn" title="Search with AI Agent">
+                    <svg class="ogv-ai-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                        <polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/>
+                    </svg>
+                    <span>Search with AI Agent</span>
+                </button>
+            </header>
 
+            <!-- Canvas Area -->
+            <div class="ogv-canvas-area">
                 <div class="ogv-layout-picker">
                     <div class="ogv-layout-picker-title">LAYOUT</div>
                     <button class="ogv-layout-btn active" data-layout="fcose">
@@ -208,21 +212,22 @@ class OntologyGraphViewer {
                     <button class="ogv-zoom-btn" data-action="out" title="Zoom Out">−</button>
                     <button class="ogv-zoom-btn" data-action="fit" title="Fit All">⊡</button>
                 </div>
-
-                <div class="ogv-status-bar">
-                    <span class="ogv-status-dot"></span>
-                    <span class="ogv-status-text">Connected</span>
-                    <span class="ogv-status-sep">·</span>
-                    <span class="ogv-status-nodes">0 nodes</span>
-                    <span class="ogv-status-sep">·</span>
-                    <span class="ogv-status-edges">0 edges</span>
-                    <span class="ogv-status-sep">·</span>
-                    <span class="ogv-status-layout">Layout: Force-directed</span>
-                    <span class="ogv-status-sep">·</span>
-                    <span class="ogv-status-zoom">Zoom: 100%</span>
-                    <span class="ogv-status-scope-count"></span>
-                </div>
             </div>
+
+            <!-- Status Bar -->
+            <footer class="ogv-status-bar">
+                <span class="ogv-status-dot"></span>
+                <span class="ogv-status-text">Connected</span>
+                <span class="ogv-status-sep">·</span>
+                <span class="ogv-status-nodes">0 nodes</span>
+                <span class="ogv-status-sep">·</span>
+                <span class="ogv-status-edges">0 edges</span>
+                <span class="ogv-status-sep">·</span>
+                <span class="ogv-status-layout">Layout: Force-directed</span>
+                <span class="ogv-status-sep">·</span>
+                <span class="ogv-status-zoom">Zoom: 100%</span>
+                <span class="ogv-status-scope-count"></span>
+            </footer>
 
             <!-- Detail Panel -->
             <div class="ogv-detail-panel">
@@ -611,6 +616,7 @@ class OntologyGraphViewer {
         this._selectedGraphs.forEach(name => {
             this._addScopePillToBar(bar, name);
         });
+        this._appendScopeAddBtn(bar);
     }
 
     _addScopePill(name) {
@@ -640,6 +646,22 @@ class OntologyGraphViewer {
         if (!bar) return;
         const pill = bar.querySelector(`[data-scope="${name}"]`);
         if (pill) pill.remove();
+    }
+
+    _appendScopeAddBtn(bar) {
+        if (bar.querySelector('.ogv-scope-add-btn')) return;
+        const btn = document.createElement('div');
+        btn.className = 'ogv-scope-add-btn';
+        btn.title = 'Add graph to scope';
+        btn.textContent = '+';
+        btn.addEventListener('click', () => {
+            const selectAllCb = this.container.querySelector('.ogv-select-all-cb');
+            if (selectAllCb && !selectAllCb.checked) {
+                selectAllCb.checked = true;
+                this._selectAll(true);
+            }
+        });
+        bar.appendChild(btn);
     }
 
     _wireScopeBar() {
@@ -725,7 +747,7 @@ class OntologyGraphViewer {
 
         // Close dropdown on click outside
         document.addEventListener('click', (e) => {
-            if (this.container && !this.container.querySelector('.ogv-sidebar-header')?.contains(e.target)) {
+            if (this.container && !this.container.querySelector('.ogv-topbar')?.contains(e.target)) {
                 this._clearDropdown();
             }
         });
