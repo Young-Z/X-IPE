@@ -258,14 +258,71 @@ class OntologyGraphCanvas {
 
     initNavigator(navContainer) {
         if (!this.cy || !navContainer) return;
-        if (typeof this.cy.navigator === 'function') {
-            this._navigator = this.cy.navigator({
-                container: navContainer,
-                viewLiveFramerate: 0,
-                thumbnailLiveFramerate: false,
-                dblClickDelay: 200,
-            });
-        }
+        this._navContainer = navContainer;
+        // Build simple minimap using cy.png() instead of the buggy plugin
+        this._navContainer.innerHTML = '<img class="ogv-nav-thumb" alt="Graph navigator" /><div class="ogv-nav-viewport"></div>';
+        this._navThumb = this._navContainer.querySelector('.ogv-nav-thumb');
+        this._navViewport = this._navContainer.querySelector('.ogv-nav-viewport');
+
+        // Update minimap on viewport changes
+        this.cy.on('viewport', () => this._updateNavViewport());
+        this.cy.on('render', () => this._debouncedNavUpdate());
+    }
+
+    _debouncedNavUpdate() {
+        clearTimeout(this._navTimer);
+        this._navTimer = setTimeout(() => this._updateNavThumbnail(), 200);
+    }
+
+    _updateNavThumbnail() {
+        if (!this.cy || !this._navThumb || this.cy.nodes().length === 0) return;
+        try {
+            const png = this.cy.png({ scale: 0.15, bg: 'transparent', full: true });
+            if (png) {
+                this._navThumb.src = png;
+                this._updateNavViewport();
+            }
+        } catch (_e) { /* ignore export errors */ }
+    }
+
+    _updateNavViewport() {
+        if (!this.cy || !this._navViewport || !this._navContainer || !this._navThumb) return;
+        if (!this._navThumb.naturalWidth) return;
+
+        const ext = this.cy.extent();
+        const bb = this.cy.elements().boundingBox();
+        if (bb.w === 0 || bb.h === 0) return;
+
+        const cw = this._navContainer.clientWidth;
+        const ch = this._navContainer.clientHeight;
+        const imgW = this._navThumb.naturalWidth;
+        const imgH = this._navThumb.naturalHeight;
+
+        // Fit the thumb image within the container
+        const scale = Math.min(cw / imgW, ch / imgH);
+        const thumbW = imgW * scale;
+        const thumbH = imgH * scale;
+        const offsetX = (cw - thumbW) / 2;
+        const offsetY = (ch - thumbH) / 2;
+
+        // Map viewport extent to thumbnail coordinates
+        const vx = ((ext.x1 - bb.x1) / bb.w) * thumbW + offsetX;
+        const vy = ((ext.y1 - bb.y1) / bb.h) * thumbH + offsetY;
+        const vw = ((ext.x2 - ext.x1) / bb.w) * thumbW;
+        const vh = ((ext.y2 - ext.y1) / bb.h) * thumbH;
+
+        Object.assign(this._navViewport.style, {
+            left: `${Math.max(0, vx)}px`,
+            top: `${Math.max(0, vy)}px`,
+            width: `${Math.min(vw, cw)}px`,
+            height: `${Math.min(vh, ch)}px`,
+        });
+    }
+
+    refreshNavigator() {
+        // Remove stale plugin elements from body (legacy cleanup)
+        document.querySelectorAll('body > .cytoscape-navigator').forEach(el => el.remove());
+        this._updateNavThumbnail();
     }
 
     // -----------------------------------------------------------------------
@@ -487,10 +544,11 @@ class OntologyGraphCanvas {
 
     destroy() {
         this._hideTooltips();
-        if (this._navigator) {
-            try { this._navigator.destroy(); } catch (_e) { /* ignore */ }
-            this._navigator = null;
-        }
+        clearTimeout(this._navTimer);
+        this._navContainer = null;
+        this._navThumb = null;
+        this._navViewport = null;
+        document.querySelectorAll('body > .cytoscape-navigator').forEach(el => el.remove());
         if (this.cy) {
             this.cy.destroy();
             this.cy = null;

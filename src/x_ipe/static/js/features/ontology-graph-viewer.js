@@ -62,7 +62,6 @@ class OntologyGraphViewer {
             loadScript('https://unpkg.com/cytoscape-fcose@2.2.0/cytoscape-fcose.js'),
             loadScript('https://unpkg.com/cytoscape-dagre@2.5.0/cytoscape-dagre.js'),
             loadScript('https://unpkg.com/cytoscape-cxtmenu@3.5.0/cytoscape-cxtmenu.js'),
-            loadScript('https://unpkg.com/cytoscape-navigator@2.0.2/cytoscape-navigator.js'),
             loadScript('https://unpkg.com/tippy.js@6.3.7/dist/tippy-bundle.umd.min.js'),
         ]);
 
@@ -71,7 +70,6 @@ class OntologyGraphViewer {
             if (typeof cytoscapeFcose !== 'undefined') cytoscape.use(cytoscapeFcose);
             if (typeof cytoscapeDagre !== 'undefined') cytoscape.use(cytoscapeDagre);
             if (typeof cytoscapeCxtmenu !== 'undefined') cytoscape.use(cytoscapeCxtmenu);
-            if (typeof cytoscapeNavigator !== 'undefined') cytoscape.use(cytoscapeNavigator);
         }
 
         this._cdnLoaded = true;
@@ -502,9 +500,8 @@ class OntologyGraphViewer {
         const item = this.container.querySelector(`.ogv-graph-item[data-graph="${name}"]`);
         if (item) item.classList.toggle('ogv-graph-item--selected', selected);
         this._updateStats();
+        this._refreshNav();
         this._updateStatus('Connected');
-
-        // Re-run BFS search if there's an active query
         if (this._lastSearchQuery) {
             const data = await this._searchBFS(this._lastSearchQuery);
             if (!data) return;
@@ -542,6 +539,7 @@ class OntologyGraphViewer {
         }
         this._updateGraphListCheckboxes();
         this._updateStats();
+        this._refreshNav();
         this._updateStatus('Connected');
     }
 
@@ -775,12 +773,69 @@ class OntologyGraphViewer {
                     this._onNodeSelect(targetId);
                 });
             });
+
+            // Wire source files click
+            const srcLink = this.container.querySelector('.ogv-source-files-link');
+            if (srcLink) {
+                srcLink.addEventListener('click', () => {
+                    try {
+                        const files = JSON.parse(srcLink.dataset.files || '[]');
+                        this._showSourceFilesModal(files, nodeData);
+                    } catch (_e) { /* ignore parse error */ }
+                });
+            }
         }, 50);
     }
 
     _onNodeDeselect() {
         if (this.detailPanel) {
             this.detailPanel.close();
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    // Source Files Modal
+    // -----------------------------------------------------------------------
+
+    _showSourceFilesModal(files, nodeData) {
+        // Remove existing modal
+        const old = this.container.querySelector('.ogv-source-modal-overlay');
+        if (old) old.remove();
+
+        const rows = files.map(f => {
+            const name = typeof f === 'string' ? f : (f.path || f.name || JSON.stringify(f));
+            return `<div class="ogv-source-modal-row">
+                <i class="bi bi-file-earmark-text"></i>
+                <span class="ogv-source-modal-path">${name}</span>
+            </div>`;
+        }).join('');
+
+        const overlay = document.createElement('div');
+        overlay.className = 'ogv-source-modal-overlay';
+        overlay.innerHTML = `
+            <div class="ogv-source-modal">
+                <div class="ogv-source-modal-header">
+                    <span>Source Files — ${nodeData.label || nodeData.id}</span>
+                    <button class="ogv-source-modal-close">&times;</button>
+                </div>
+                <div class="ogv-source-modal-body">${rows || '<div style="padding:16px;color:#94a3b8;">No files available</div>'}</div>
+            </div>`;
+
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) overlay.remove();
+        });
+        overlay.querySelector('.ogv-source-modal-close').addEventListener('click', () => overlay.remove());
+
+        this.container.appendChild(overlay);
+    }
+
+    // -----------------------------------------------------------------------
+    // Navigator refresh
+    // -----------------------------------------------------------------------
+
+    _refreshNav() {
+        if (this.canvas && typeof this.canvas.refreshNavigator === 'function') {
+            setTimeout(() => this.canvas.refreshNavigator(), 300);
         }
     }
 
