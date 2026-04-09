@@ -49,12 +49,66 @@
       "task_id": "TASK-1110",
       "task_type": "Feature Closing",
       "description": "Close FEATURE-058-E (Ontology Graph Viewer UI)",
-      "status": "in_progress",
+      "status": "completed",
       "role": "agent",
-      "output_links": [],
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-058/FEATURE-058-E/acceptance-test-cases.md",
+        "x-ipe-docs/requirements/EPIC-058/FEATURE-058-E/technical-design.md",
+        "tests/test_ontology_graph_viewer.py"
+      ],
       "next_task": "x-ipe-task-based-feature-refinement",
       "created_at": "2026-04-09T03:39:31.943257+00:00",
-      "last_updated": "2026-04-09T03:39:31.943257+00:00"
+      "last_updated": "2026-04-09T03:46:13.259161+00:00"
+    },
+    {
+      "task_id": "TASK-1111",
+      "task_type": "Bug Fix",
+      "description": "FEATURE-058-E Ontology Graph Viewer UI: implementation does not match approved mockup. 9 visual differences need fixing.",
+      "role": "developer",
+      "status": "completed",
+      "output_links": [
+        "commit:4cb60c0"
+      ],
+      "next_task": "N/A",
+      "created_at": "2026-04-09T04:22:55.302452+00:00",
+      "last_updated": "2026-04-09T04:30:18.888955+00:00"
+    },
+    {
+      "task_id": "TASK-1112",
+      "task_type": "Feature Refinement",
+      "description": "Refine FEATURE-058-F: Graph Search & AI Agent Integration — create specification",
+      "status": "completed",
+      "role": "Product Analyst",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-058/FEATURE-058-F/specification.md"
+      ],
+      "next_task": "x-ipe-task-based-technical-design",
+      "created_at": "2026-04-09T04:55:22.201295+00:00",
+      "last_updated": "2026-04-09T05:13:53.249602+00:00"
+    },
+    {
+      "task_id": "TASK-1113",
+      "task_type": "Technical Design",
+      "description": "Technical design for FEATURE-058-F: Graph Search & AI Agent Integration",
+      "status": "completed",
+      "role": "Software Architect",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-058/FEATURE-058-F/technical-design.md"
+      ],
+      "next_task": "x-ipe-task-based-code-implementation",
+      "created_at": "2026-04-09T05:21:26.733688+00:00",
+      "last_updated": "2026-04-09T05:26:22.065411+00:00"
+    },
+    {
+      "task_id": "TASK-4832",
+      "task_type": "Code Implementation",
+      "description": "Implement FEATURE-058-F: Graph Search & AI Agent Integration",
+      "status": "in_progress",
+      "role": "Ember",
+      "output_links": [],
+      "next_task": "x-ipe-task-based-feature-acceptance-test",
+      "created_at": "2026-04-09T05:40:50.773411+00:00",
+      "last_updated": "2026-04-09T05:40:50.773411+00:00"
     }
   ]
 }

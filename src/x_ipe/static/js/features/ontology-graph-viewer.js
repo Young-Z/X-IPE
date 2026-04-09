@@ -1,9 +1,10 @@
 /**
- * FEATURE-058-E: Ontology Graph Viewer — Orchestrator
+ * FEATURE-058-E/F: Ontology Graph Viewer — Orchestrator
  *
  * Top-level class that manages the viewer lifecycle: CDN loading,
- * sidebar graph list, scope pills, search, API calls, layout picker,
- * status bar, and wiring to OntologyGraphCanvas + OntologyDetailPanel.
+ * sidebar graph list, scope pills, search, BFS search with dropdown,
+ * AI Agent Console bridge, layout picker, status bar, and wiring to
+ * OntologyGraphCanvas + OntologyDetailPanel.
  */
 
 class OntologyGraphViewer {
@@ -15,6 +16,9 @@ class OntologyGraphViewer {
         this._graphIndex = [];
         this._cdnLoaded = false;
         this._destroyed = false;
+        this._selectedDropdownIndex = -1;
+        this._searchAbortController = null;
+        this._lastSearchQuery = '';
     }
 
     // -----------------------------------------------------------------------
@@ -121,6 +125,7 @@ class OntologyGraphViewer {
         this._wireLayoutPicker(canvasArea);
         this._wireZoomControls(canvasArea);
         this._wireSearch();
+        this._wireAIAgentButton();
         this._wireScopeBar();
 
         // Load graph index
@@ -145,7 +150,15 @@ class OntologyGraphViewer {
                     <div class="ogv-search-bar">
                         <i class="bi bi-search ogv-search-icon"></i>
                         <input class="ogv-search-input" type="text" placeholder="Search nodes… (e.g. authentication, token)" />
+                        <div class="ogv-search-divider"></div>
+                        <button class="ogv-ai-agent-btn" title="Search with AI Agent">
+                            <svg class="ogv-ai-icon" viewBox="0 0 16 16" width="14" height="14" fill="currentColor">
+                                <path d="M2 2h12v10H4l-2 2V2zm2 2v6h8V4H4zm1 1h6v1H5V5zm0 2h4v1H5V7z"/>
+                            </svg>
+                            <span>AI Agent</span>
+                        </button>
                     </div>
+                    <div class="ogv-search-dropdown"></div>
                 </div>
                 <div class="ogv-section-header">GRAPH COLLECTIONS</div>
                 <div class="ogv-select-all">
@@ -279,6 +292,190 @@ class OntologyGraphViewer {
         }
     }
 
+    async _searchBFS(query) {
+        // Cancel any in-flight search
+        if (this._searchAbortController) {
+            this._searchAbortController.abort();
+        }
+        this._searchAbortController = new AbortController();
+
+        const scope = this._selectedGraphs.size > 0
+            ? Array.from(this._selectedGraphs).join(',')
+            : 'all';
+        try {
+            const resp = await fetch(
+                `/api/kb/ontology/search/bfs?q=${encodeURIComponent(query)}&scope=${encodeURIComponent(scope)}&depth=3&page=1&page_size=20`,
+                { signal: this._searchAbortController.signal }
+            );
+            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+            return await resp.json();
+        } catch (err) {
+            if (err.name === 'AbortError') return null;
+            return { results: [], subgraph: { nodes: [], edges: [] }, pagination: { total: 0 } };
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    // Search Dropdown
+    // -----------------------------------------------------------------------
+
+    _renderDropdown(results) {
+        const dropdown = this.container.querySelector('.ogv-search-dropdown');
+        if (!dropdown) return;
+
+        this._selectedDropdownIndex = -1;
+
+        if (!results || results.length === 0) {
+            dropdown.innerHTML = '<div class="ogv-search-dropdown-empty">No results found</div>';
+            dropdown.classList.add('ogv-search-dropdown--visible');
+            return;
+        }
+
+        const typeColors = {
+            concept: '#10b981', document: '#3b82f6',
+            entity: '#f59e0b', dimension: '#8b5cf6',
+        };
+
+        const items = results.slice(0, 10).map((r, i) => {
+            const color = typeColors[r.node_type] || '#94a3b8';
+            const relevanceWidth = Math.round((r.relevance || 0) * 100);
+            return `<div class="ogv-search-dropdown-item" data-index="${i}" data-node-id="${r.node_id}" data-graph="${r.graph}">
+                <span class="ogv-dropdown-type-dot" style="background:${color}"></span>
+                <span class="ogv-dropdown-label">${this._escapeHtml(r.label)}</span>
+                <span class="ogv-dropdown-graph">${this._escapeHtml(r.graph)}</span>
+                <span class="ogv-dropdown-relevance"><span class="ogv-dropdown-relevance-bar" style="width:${relevanceWidth}%"></span></span>
+            </div>`;
+        }).join('');
+
+        dropdown.innerHTML = items;
+        dropdown.classList.add('ogv-search-dropdown--visible');
+
+        // Wire click handlers
+        dropdown.querySelectorAll('.ogv-search-dropdown-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const nodeId = item.dataset.nodeId;
+                this.canvas.focusNode(nodeId);
+                this._onNodeSelect(nodeId);
+                this._clearDropdown();
+            });
+        });
+    }
+
+    _clearDropdown() {
+        const dropdown = this.container.querySelector('.ogv-search-dropdown');
+        if (dropdown) {
+            dropdown.innerHTML = '';
+            dropdown.classList.remove('ogv-search-dropdown--visible');
+        }
+        this._selectedDropdownIndex = -1;
+    }
+
+    _handleDropdownKeyboard(event) {
+        const dropdown = this.container.querySelector('.ogv-search-dropdown');
+        if (!dropdown || !dropdown.classList.contains('ogv-search-dropdown--visible')) return false;
+
+        const items = dropdown.querySelectorAll('.ogv-search-dropdown-item');
+        if (items.length === 0) return false;
+
+        if (event.key === 'ArrowDown') {
+            event.preventDefault();
+            this._selectedDropdownIndex = Math.min(this._selectedDropdownIndex + 1, items.length - 1);
+            this._highlightDropdownItem(items);
+            return true;
+        }
+        if (event.key === 'ArrowUp') {
+            event.preventDefault();
+            this._selectedDropdownIndex = Math.max(this._selectedDropdownIndex - 1, 0);
+            this._highlightDropdownItem(items);
+            return true;
+        }
+        if (event.key === 'Enter' && this._selectedDropdownIndex >= 0) {
+            event.preventDefault();
+            const selected = items[this._selectedDropdownIndex];
+            if (selected) {
+                const nodeId = selected.dataset.nodeId;
+                this.canvas.focusNode(nodeId);
+                this._onNodeSelect(nodeId);
+                this._clearDropdown();
+            }
+            return true;
+        }
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            this._clearDropdown();
+            this.canvas.clearHighlight();
+            this._updateSearchStatus(null);
+            return true;
+        }
+        return false;
+    }
+
+    _highlightDropdownItem(items) {
+        items.forEach((item, i) => {
+            item.classList.toggle('ogv-search-dropdown-item--selected', i === this._selectedDropdownIndex);
+        });
+        // Scroll into view
+        if (this._selectedDropdownIndex >= 0 && items[this._selectedDropdownIndex]) {
+            items[this._selectedDropdownIndex].scrollIntoView({ block: 'nearest' });
+        }
+    }
+
+    _escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str || '';
+        return div.innerHTML;
+    }
+
+    // -----------------------------------------------------------------------
+    // AI Agent Console Bridge
+    // -----------------------------------------------------------------------
+
+    _wireAIAgentButton() {
+        const btn = this.container.querySelector('.ogv-ai-agent-btn');
+        if (!btn) return;
+        btn.addEventListener('click', () => this._openAIAgentConsole());
+    }
+
+    _openAIAgentConsole() {
+        // Get selected graphs
+        const graphs = Array.from(this._selectedGraphs);
+        if (graphs.length === 0) {
+            this._showError('Select at least one graph before using AI Agent search.');
+            return;
+        }
+
+        // Check terminal manager availability
+        if (!window.terminalManager) {
+            this._showError('Console not available. Terminal manager is not loaded.');
+            return;
+        }
+
+        const tm = window.terminalManager;
+
+        // Expand console if collapsed
+        const terminalPanel = document.getElementById('terminal-panel');
+        if (terminalPanel && terminalPanel.classList.contains('collapsed')) {
+            const toggle = document.getElementById('terminal-toggle');
+            if (toggle) toggle.click();
+        }
+
+        // Find idle session or create new
+        const idle = tm.findIdleSession ? tm.findIdleSession() : null;
+        if (idle) {
+            if (tm.claimSessionForAction) tm.claimSessionForAction(idle.id);
+            if (tm.switchSession) tm.switchSession(idle.id);
+        } else if (tm.addSession) {
+            tm.addSession();
+        }
+
+        // Build and send command
+        const scopeStr = graphs.join(', ');
+        const command = `search the knowledge graph scoped to ${scopeStr} for: `;
+        if (tm.sendCopilotPromptCommandNoEnter) {
+            tm.sendCopilotPromptCommandNoEnter(command);
+        }
+    }
+
     // -----------------------------------------------------------------------
     // Graph Selection
     // -----------------------------------------------------------------------
@@ -301,6 +498,24 @@ class OntologyGraphViewer {
         if (item) item.classList.toggle('ogv-graph-item--selected', selected);
         this._updateStats();
         this._updateStatus('Connected');
+
+        // Re-run BFS search if there's an active query
+        if (this._lastSearchQuery) {
+            const data = await this._searchBFS(this._lastSearchQuery);
+            if (!data) return;
+            if (data.results && data.results.length > 0) {
+                this._renderDropdown(data.results);
+                this.canvas.highlightSubgraph(
+                    data.subgraph ? data.subgraph.nodes : [],
+                    data.results.map(r => r.node_id)
+                );
+                this._updateSearchStatus(data);
+            } else {
+                this._renderDropdown([]);
+                this.canvas.clearHighlight();
+                this._updateSearchStatus(data);
+            }
+        }
     }
 
     async _selectAll(selected) {
@@ -480,16 +695,39 @@ class OntologyGraphViewer {
             debounceTimer = setTimeout(async () => {
                 const query = input.value.trim();
                 if (!query) {
+                    this._clearDropdown();
                     this.canvas.clearHighlight();
+                    this._lastSearchQuery = '';
+                    this._updateSearchStatus(null);
                     return;
                 }
-                const results = await this._searchNodes(query);
-                if (results.length > 0) {
-                    this.canvas.focusNode(results[0].node_id);
+                this._lastSearchQuery = query;
+                const data = await this._searchBFS(query);
+                if (!data) return; // aborted
+                if (data.results && data.results.length > 0) {
+                    this._renderDropdown(data.results);
+                    this.canvas.highlightSubgraph(
+                        data.subgraph ? data.subgraph.nodes : [],
+                        data.results.map(r => r.node_id)
+                    );
+                    this._updateSearchStatus(data);
                 } else {
+                    this._renderDropdown([]);
                     this.canvas.clearHighlight();
+                    this._updateSearchStatus(data);
                 }
             }, 300);
+        });
+
+        input.addEventListener('keydown', (event) => {
+            this._handleDropdownKeyboard(event);
+        });
+
+        // Close dropdown on click outside
+        document.addEventListener('click', (e) => {
+            if (this.container && !this.container.querySelector('.ogv-sidebar-header')?.contains(e.target)) {
+                this._clearDropdown();
+            }
         });
     }
 
@@ -557,6 +795,29 @@ class OntologyGraphViewer {
         }
     }
 
+    _updateSearchStatus(data) {
+        if (!this.container) return;
+        let searchEl = this.container.querySelector('.ogv-status-search');
+        if (!data) {
+            if (searchEl) searchEl.remove();
+            return;
+        }
+        if (!searchEl) {
+            const statusBar = this.container.querySelector('.ogv-status-bar');
+            if (!statusBar) return;
+            const sep = document.createElement('span');
+            sep.className = 'ogv-status-sep ogv-status-search-sep';
+            sep.textContent = '·';
+            statusBar.appendChild(sep);
+            searchEl = document.createElement('span');
+            searchEl.className = 'ogv-status-search';
+            statusBar.appendChild(searchEl);
+        }
+        const matches = data.results ? data.results.length : 0;
+        const related = data.subgraph ? data.subgraph.nodes.length - matches : 0;
+        searchEl.textContent = `Search: ${matches} match${matches !== 1 ? 'es' : ''}${related > 0 ? ` · ${related} related` : ''}`;
+    }
+
     _updateStatus(text) {
         if (!this.container) return;
         const el = this.container.querySelector('.ogv-status-text');
@@ -596,6 +857,10 @@ class OntologyGraphViewer {
 
     destroy() {
         this._destroyed = true;
+        if (this._searchAbortController) {
+            this._searchAbortController.abort();
+            this._searchAbortController = null;
+        }
         if (this.canvas) {
             this.canvas.destroy();
             this.canvas = null;
@@ -606,6 +871,7 @@ class OntologyGraphViewer {
         }
         this._selectedGraphs.clear();
         this._graphIndex = [];
+        this._lastSearchQuery = '';
     }
 }
 

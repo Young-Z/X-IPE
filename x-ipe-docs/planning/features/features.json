@@ -1909,9 +1909,9 @@
       "dependencies": [
         "FEATURE-058-A"
       ],
-      "status": "Tested",
+      "status": "Completed",
       "created_at": "2026-04-08T09:29:23.964279+00:00",
-      "last_updated": "2026-04-09T03:35:37.306858+00:00"
+      "last_updated": "2026-04-09T03:46:13.283806+00:00"
     },
     {
       "feature_id": "FEATURE-058-F",
@@ -1923,9 +1923,9 @@
         "FEATURE-058-A",
         "FEATURE-058-E"
       ],
-      "status": "Planned",
+      "status": "Designed",
       "created_at": "2026-04-08T09:29:23.986027+00:00",
-      "last_updated": "2026-04-08T09:42:34.501529+00:00"
+      "last_updated": "2026-04-09T05:26:21.975959+00:00"
     }
   ]
 }

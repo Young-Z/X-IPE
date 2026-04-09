@@ -415,3 +415,209 @@ class TestEdgeCases:
         """Graph names with special chars should return 404 gracefully."""
         resp = client.get('/api/kb/ontology/graph/../../etc/passwd')
         assert resp.status_code == 404
+
+
+# ============================================================================
+# BFS SEARCH SERVICE TESTS (FEATURE-058-F)
+# ============================================================================
+
+# Mock response matching search.py's return format
+_MOCK_SEARCH_RESULT = {
+    'matches': [
+        {
+            'entity': {
+                'id': 'know_aaa',
+                'properties': {'label': 'Authentication', 'node_type': 'concept'},
+            },
+            'score': 0.95,
+            'provenance': 'jwt-authentication.jsonl',
+            'match_fields': ['label'],
+        },
+    ],
+    'subgraph': {
+        'nodes': ['know_aaa', 'know_bbb'],
+        'edges': [{'from': 'know_aaa', 'rel': 'RELATED_TO', 'to': 'know_bbb'}],
+    },
+    'total_count': 1,
+    'page': 1,
+    'page_size': 20,
+}
+
+_MOCK_EMPTY_RESULT = {
+    'matches': [],
+    'subgraph': {'nodes': [], 'edges': []},
+    'total_count': 0,
+    'page': 1,
+    'page_size': 20,
+}
+
+
+def _make_mock_search_module(return_value=None):
+    """Create a mock module with a search() function."""
+    from unittest.mock import MagicMock
+    mod = MagicMock()
+    mod.search = MagicMock(return_value=return_value or _MOCK_SEARCH_RESULT)
+    return mod
+
+
+class TestBFSSearchService:
+    """Test OntologyGraphService.search_bfs() method."""
+
+    @patch('x_ipe.services.ontology_graph_service._get_search_module')
+    def test_bfs_search_finds_match(self, mock_get, graph_service):
+        """BFS search returns results with correct structure."""
+        mock_get.return_value = _make_mock_search_module()
+        result = graph_service.search_bfs('Authentication')
+        assert len(result['results']) == 1
+        first = result['results'][0]
+        assert first['node_id'] == 'know_aaa'
+        assert first['label'] == 'Authentication'
+        assert first['node_type'] == 'concept'
+        assert first['graph'] == 'jwt-authentication'
+        assert first['relevance'] == 0.95
+        assert first['match_fields'] == ['label']
+
+    @patch('x_ipe.services.ontology_graph_service._get_search_module')
+    def test_bfs_search_returns_subgraph(self, mock_get, graph_service):
+        """BFS expands from match to include related nodes."""
+        mock_get.return_value = _make_mock_search_module()
+        result = graph_service.search_bfs('Authentication', depth=3)
+        subgraph = result['subgraph']
+        assert 'know_aaa' in subgraph['nodes']
+        assert 'know_bbb' in subgraph['nodes']
+        assert len(subgraph['edges']) == 1
+
+    @patch('x_ipe.services.ontology_graph_service._get_search_module')
+    def test_bfs_search_scoped_to_single_graph(self, mock_get, graph_service):
+        """BFS search with scope passes correct scope string."""
+        mock_get.return_value = _make_mock_search_module()
+        graph_service.search_bfs('Authentication', graph_names=['jwt-authentication'])
+        call_args = mock_get.return_value.search.call_args
+        assert call_args[1]['scope'] == 'jwt-authentication.jsonl'
+
+    def test_bfs_search_empty_query(self, graph_service):
+        """Empty query returns empty results without calling search module."""
+        result = graph_service.search_bfs('')
+        assert result['results'] == []
+        assert result['pagination']['total'] == 0
+
+    @patch('x_ipe.services.ontology_graph_service._get_search_module')
+    def test_bfs_search_no_match(self, mock_get, graph_service):
+        """Non-matching query returns empty results."""
+        mock_get.return_value = _make_mock_search_module(_MOCK_EMPTY_RESULT)
+        result = graph_service.search_bfs('zzz_nonexistent_xyz')
+        assert result['results'] == []
+        assert result['subgraph']['nodes'] == []
+
+    def test_bfs_search_no_ontology(self, graph_service_empty):
+        """BFS search when no ontology dir returns empty results."""
+        result = graph_service_empty.search_bfs('anything')
+        assert result['results'] == []
+
+    @patch('x_ipe.services.ontology_graph_service._get_search_module')
+    def test_bfs_search_depth_clamping(self, mock_get, graph_service):
+        """Depth parameter is clamped to [1, 5]."""
+        mock_get.return_value = _make_mock_search_module()
+        graph_service.search_bfs('Authentication', depth=0)
+        assert mock_get.return_value.search.call_args[1]['depth'] == 1
+        graph_service.search_bfs('Authentication', depth=100)
+        assert mock_get.return_value.search.call_args[1]['depth'] == 5
+
+    @patch('x_ipe.services.ontology_graph_service._get_search_module')
+    def test_bfs_search_pagination(self, mock_get, graph_service):
+        """Pagination fields are returned correctly."""
+        mock_get.return_value = _make_mock_search_module()
+        result = graph_service.search_bfs('Authentication', page=1, page_size=1)
+        pag = result['pagination']
+        assert pag['page'] == 1
+        assert pag['page_size'] == 1
+        assert pag['total'] == 1
+        assert pag['total_pages'] == 1
+
+    @patch('x_ipe.services.ontology_graph_service._get_search_module')
+    def test_bfs_search_scope_all(self, mock_get, graph_service):
+        """BFS with no graph_names uses scope 'all'."""
+        mock_get.return_value = _make_mock_search_module()
+        graph_service.search_bfs('Authentication')
+        assert mock_get.return_value.search.call_args[1]['scope'] == 'all'
+
+
+# ============================================================================
+# BFS SEARCH API TESTS (FEATURE-058-F)
+# ============================================================================
+
+class TestBFSSearchAPI:
+    """Test /api/kb/ontology/search/bfs endpoint."""
+
+    @patch('x_ipe.services.ontology_graph_service._get_search_module')
+    def test_bfs_search_endpoint(self, mock_get, client):
+        """BFS endpoint returns 200 with valid query."""
+        mock_get.return_value = _make_mock_search_module()
+        resp = client.get('/api/kb/ontology/search/bfs?q=Authentication')
+        assert resp.status_code == 200
+        data = resp.get_json()
+        assert 'results' in data
+        assert 'subgraph' in data
+        assert 'pagination' in data
+
+    def test_bfs_search_missing_query(self, client):
+        """BFS endpoint returns 400 when q is missing."""
+        resp = client.get('/api/kb/ontology/search/bfs')
+        assert resp.status_code == 400
+        data = resp.get_json()
+        assert data['error'] == 'MISSING_QUERY'
+
+    def test_bfs_search_empty_query(self, client):
+        """BFS endpoint returns 400 when q is empty string."""
+        resp = client.get('/api/kb/ontology/search/bfs?q=')
+        assert resp.status_code == 400
+
+    @patch('x_ipe.services.ontology_graph_service._get_search_module')
+    def test_bfs_search_with_scope(self, mock_get, client):
+        """BFS endpoint respects scope parameter."""
+        mock_get.return_value = _make_mock_search_module()
+        resp = client.get('/api/kb/ontology/search/bfs?q=Authentication&scope=jwt-authentication')
+        assert resp.status_code == 200
+
+    @patch('x_ipe.services.ontology_graph_service._get_search_module')
+    def test_bfs_search_with_depth(self, mock_get, client):
+        """BFS endpoint accepts depth parameter."""
+        mock_get.return_value = _make_mock_search_module()
+        resp = client.get('/api/kb/ontology/search/bfs?q=Authentication&depth=1')
+        assert resp.status_code == 200
+
+    @patch('x_ipe.services.ontology_graph_service._get_search_module')
+    def test_bfs_search_with_pagination(self, mock_get, client):
+        """BFS endpoint accepts page and page_size."""
+        mock_get.return_value = _make_mock_search_module()
+        resp = client.get('/api/kb/ontology/search/bfs?q=auth&page=1&page_size=5')
+        assert resp.status_code == 200
+        data = resp.get_json()
+        assert data['pagination']['page'] == 1
+        assert data['pagination']['page_size'] == 5
+
+    def test_bfs_search_no_ontology(self, client_no_ontology):
+        """BFS endpoint returns 404 when no ontology dir."""
+        resp = client_no_ontology.get('/api/kb/ontology/search/bfs?q=test')
+        assert resp.status_code == 404
+
+    @patch('x_ipe.services.ontology_graph_service._get_search_module')
+    def test_bfs_search_scope_all(self, mock_get, client):
+        """BFS endpoint with scope=all searches all graphs."""
+        mock_get.return_value = _make_mock_search_module()
+        resp = client.get('/api/kb/ontology/search/bfs?q=auth&scope=all')
+        assert resp.status_code == 200
+
+    @patch('x_ipe.services.ontology_graph_service._get_search_module')
+    def test_bfs_result_structure(self, mock_get, client):
+        """BFS results have correct field structure."""
+        mock_get.return_value = _make_mock_search_module()
+        resp = client.get('/api/kb/ontology/search/bfs?q=Authentication')
+        data = resp.get_json()
+        r = data['results'][0]
+        assert r['node_id'] == 'know_aaa'
+        assert r['label'] == 'Authentication'
+        assert r['node_type'] == 'concept'
+        assert r['graph'] == 'jwt-authentication'
+        assert r['relevance'] == 0.95
+        assert r['match_fields'] == ['label']

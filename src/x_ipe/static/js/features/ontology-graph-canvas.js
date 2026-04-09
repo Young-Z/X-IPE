@@ -147,7 +147,43 @@ class OntologyGraphCanvas {
 
     clearHighlight() {
         if (!this.cy) return;
-        this.cy.elements().removeClass('highlighted dimmed');
+        this.cy.elements().removeClass('highlighted dimmed direct-match bfs-neighbor');
+    }
+
+    highlightSubgraph(allNodeIds, directMatchIds) {
+        if (!this.cy) return;
+        const allSet = new Set(allNodeIds || []);
+        const directSet = new Set(directMatchIds || []);
+
+        if (allSet.size === 0) {
+            this.clearHighlight();
+            return;
+        }
+
+        this.cy.batch(() => {
+            // Reset all
+            this.cy.elements().removeClass('highlighted dimmed direct-match bfs-neighbor');
+            // Dim everything
+            this.cy.elements().addClass('dimmed');
+            // Un-dim subgraph nodes
+            allNodeIds.forEach(id => {
+                const node = this.cy.getElementById(id);
+                if (node && !node.empty()) {
+                    node.removeClass('dimmed');
+                    if (directSet.has(id)) {
+                        node.addClass('direct-match');
+                    } else {
+                        node.addClass('bfs-neighbor');
+                    }
+                }
+            });
+            // Un-dim edges where BOTH endpoints are in the subgraph
+            this.cy.edges().forEach(edge => {
+                if (allSet.has(edge.source().id()) && allSet.has(edge.target().id())) {
+                    edge.removeClass('dimmed').addClass('highlighted');
+                }
+            });
+        });
     }
 
     focusNode(nodeId) {
@@ -381,6 +417,25 @@ class OntologyGraphCanvas {
             {
                 selector: '.dimmed',
                 style: { 'opacity': 0.15 },
+            },
+            // BFS search: direct match nodes — strong emerald glow
+            {
+                selector: 'node.direct-match',
+                style: {
+                    'border-width': 5,
+                    'border-color': '#10b981',
+                    'border-opacity': 1,
+                    'z-index': 20,
+                },
+            },
+            // BFS search: neighbor nodes — subtle border
+            {
+                selector: 'node.bfs-neighbor',
+                style: {
+                    'border-width': 3,
+                    'border-color': '#94a3b8',
+                    'z-index': 10,
+                },
             },
 
             // Edge styles

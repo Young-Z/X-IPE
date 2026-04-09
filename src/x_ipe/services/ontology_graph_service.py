@@ -1,11 +1,14 @@
 """
-FEATURE-058-E: Ontology Graph Viewer — Service Layer
+FEATURE-058-E/F: Ontology Graph Viewer — Service Layer
 
 Reads ontology graph data from knowledge-base/.ontology/ directory,
 transforms JSONL event-sourced records to Cytoscape.js-compatible JSON,
-and provides text search across graph entities.
+provides text search and BFS graph traversal across entities.
 """
+import importlib.util
 import json
+import math
+import os
 from pathlib import Path
 from typing import Any
 
@@ -13,6 +16,43 @@ from x_ipe.tracing import x_ipe_tracing
 
 ONTOLOGY_DIR = '.ontology'
 GRAPH_INDEX_FILE = '.graph-index.json'
+
+
+def _import_ontology_search():
+    """Dynamically import search module from ontology tool skill."""
+    # __file__ = src/x_ipe/services/ontology_graph_service.py
+    # Need 4 dirname calls: services/ → x_ipe/ → src/ → project root
+    project_root = os.path.dirname(
+        os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    )
+    # ontology.py must be importable first (search.py depends on it)
+    ontology_path = os.path.join(
+        project_root, '.github', 'skills', 'x-ipe-tool-ontology', 'scripts', 'ontology.py'
+    )
+    ont_spec = importlib.util.spec_from_file_location('ontology', ontology_path)
+    ont_mod = importlib.util.module_from_spec(ont_spec)
+    import sys
+    sys.modules['ontology'] = ont_mod
+    ont_spec.loader.exec_module(ont_mod)
+
+    search_path = os.path.join(
+        project_root, '.github', 'skills', 'x-ipe-tool-ontology', 'scripts', 'search.py'
+    )
+    spec = importlib.util.spec_from_file_location('ontology_search', search_path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+# Cache the module at import time
+_search_module = None
+
+
+def _get_search_module():
+    global _search_module
+    if _search_module is None:
+        _search_module = _import_ontology_search()
+    return _search_module
 
 
 class OntologyGraphService:
@@ -108,6 +148,79 @@ class OntologyGraphService:
 
         results.sort(key=lambda r: r['relevance'], reverse=True)
         return results
+
+    @x_ipe_tracing()
+    def search_bfs(
+        self,
+        query: str,
+        graph_names: list[str] | None = None,
+        depth: int = 3,
+        page: int = 1,
+        page_size: int = 20,
+    ) -> dict:
+        """BFS graph search via ontology tool's search.py module.
+
+        Finds text matches then expands via BFS traversal to discover
+        the knowledge neighborhood. Returns results + subgraph + pagination.
+        """
+        if not self.has_ontology or not query:
+            return {
+                'results': [],
+                'subgraph': {'nodes': [], 'edges': []},
+                'pagination': {'page': page, 'page_size': page_size, 'total': 0, 'total_pages': 0},
+            }
+
+        # Clamp parameters
+        depth = max(1, min(5, depth))
+        page = max(1, page)
+        page_size = max(1, min(100, page_size))
+
+        # Build scope string for search.py
+        if graph_names:
+            scope = ','.join(f'{n}.jsonl' for n in graph_names)
+        else:
+            scope = 'all'
+
+        search_mod = _get_search_module()
+        raw = search_mod.search(
+            query=query,
+            scope=scope,
+            ontology_dir=str(self._ontology_dir),
+            depth=depth,
+            page_size=page_size,
+            page=page,
+        )
+
+        # Transform matches to API format
+        results = []
+        for m in raw.get('matches', []):
+            entity = m.get('entity', {})
+            props = entity.get('properties', {})
+            provenance = m.get('provenance', '')
+            graph_name = provenance.replace('.jsonl', '') if provenance else ''
+            results.append({
+                'node_id': entity.get('id', ''),
+                'label': props.get('label', ''),
+                'node_type': props.get('node_type', 'entity'),
+                'graph': graph_name,
+                'relevance': m.get('score', 0),
+                'match_fields': m.get('match_fields', []),
+            })
+
+        subgraph = raw.get('subgraph', {'nodes': [], 'edges': []})
+        total = raw.get('total_count', 0)
+        total_pages = max(1, math.ceil(total / page_size)) if total > 0 else 0
+
+        return {
+            'results': results,
+            'subgraph': subgraph,
+            'pagination': {
+                'page': page,
+                'page_size': page_size,
+                'total': total,
+                'total_pages': total_pages,
+            },
+        }
 
     # --- Private helpers ---
 

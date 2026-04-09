@@ -1,8 +1,9 @@
 """
-FEATURE-058-E: Ontology Graph Viewer — Flask Routes
+FEATURE-058-E/F: Ontology Graph Viewer — Flask Routes
 
 Blueprint exposing REST API endpoints under /api/kb/ontology/ for
-listing graphs, fetching graph data as Cytoscape.js JSON, and searching nodes.
+listing graphs, fetching graph data as Cytoscape.js JSON, searching nodes,
+and BFS graph traversal search.
 """
 from flask import Blueprint, jsonify, request, current_app
 
@@ -72,5 +73,43 @@ def search_nodes():
 
         results = svc.search(query, graph_names)
         return jsonify({'results': results})
+    except Exception as exc:
+        return _error('INTERNAL_ERROR', str(exc), 500)
+
+
+@ontology_graph_bp.route('/api/kb/ontology/search/bfs', methods=['GET'])
+@x_ipe_tracing()
+def search_bfs():
+    """GET /api/kb/ontology/search/bfs — BFS graph traversal search.
+
+    Query params:
+        q: Search query (required)
+        scope: Comma-separated graph names or "all" (default: "all")
+        depth: BFS traversal depth 1-5 (default: 3)
+        page: Page number, 1-based (default: 1)
+        page_size: Results per page, max 100 (default: 20)
+    """
+    svc = _get_service_or_abort()
+    try:
+        query = request.args.get('q', '').strip()
+        if not query:
+            return _error('MISSING_QUERY', 'Query parameter "q" is required', 400)
+
+        if not svc.has_ontology:
+            return _error('ONTOLOGY_NOT_FOUND', 'No .ontology/ directory found in knowledge base', 404)
+
+        scope_param = request.args.get('scope', 'all').strip()
+        graph_names = None
+        if scope_param and scope_param != 'all':
+            graph_names = [g.strip() for g in scope_param.split(',') if g.strip()]
+
+        depth = max(1, min(5, int(request.args.get('depth', 3))))
+        page = max(1, int(request.args.get('page', 1)))
+        page_size = max(1, min(100, int(request.args.get('page_size', 20))))
+
+        result = svc.search_bfs(query, graph_names, depth, page, page_size)
+        return jsonify(result)
+    except ValueError:
+        return _error('INVALID_PARAMS', 'Invalid numeric parameter', 400)
     except Exception as exc:
         return _error('INTERNAL_ERROR', str(exc), 500)
