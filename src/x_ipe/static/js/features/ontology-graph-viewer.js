@@ -799,40 +799,298 @@ class OntologyGraphViewer {
 
     _showSourceFilesModal(files, nodeData) {
         // Remove existing modal
-        const old = document.body.querySelector('.ogv-source-modal-overlay');
+        const old = document.body.querySelector('.folder-browser-backdrop.ogv-source-browser');
         if (old) old.remove();
 
-        const rows = files.map(f => {
-            const name = typeof f === 'string' ? f : (f.path || f.name || JSON.stringify(f));
-            return `<div class="ogv-source-modal-row">
-                <i class="bi bi-file-earmark-text"></i>
-                <span class="ogv-source-modal-path">${name}</span>
-            </div>`;
-        }).join('');
+        const label = nodeData.label || nodeData.id || 'Source Files';
+        const filePaths = files.map(f =>
+            typeof f === 'string' ? f : (f.path || f.name || String(f))
+        );
 
-        const overlay = document.createElement('div');
-        overlay.className = 'ogv-source-modal-overlay';
-        overlay.innerHTML = `
-            <div class="ogv-source-modal">
-                <div class="ogv-source-modal-header">
-                    <span class="ogv-source-modal-title">Source Files — ${nodeData.label || nodeData.id}</span>
-                    <button class="ogv-source-modal-close">✕</button>
-                </div>
-                <div class="ogv-source-modal-body">${rows || '<div class="ogv-source-modal-empty">No files available</div>'}</div>
-            </div>`;
+        // Build DOM using folder-browser CSS classes (same as FolderBrowserModal)
+        const backdrop = document.createElement('div');
+        backdrop.className = 'folder-browser-backdrop ogv-source-browser';
 
-        const close = () => {
-            overlay.classList.remove('active');
-            setTimeout(() => overlay.remove(), 200);
-        };
-        overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
-        overlay.querySelector('.ogv-source-modal-close').addEventListener('click', close);
-        document.addEventListener('keydown', function onEsc(e) {
-            if (e.key === 'Escape') { close(); document.removeEventListener('keydown', onEsc); }
+        const modal = document.createElement('div');
+        modal.className = 'folder-browser-modal';
+        modal.setAttribute('role', 'dialog');
+        modal.setAttribute('aria-modal', 'true');
+        modal.setAttribute('aria-labelledby', 'ogv-source-browser-title');
+
+        // Header
+        const header = document.createElement('div');
+        header.className = 'folder-browser-header';
+        const title = document.createElement('div');
+        title.className = 'folder-browser-title';
+        title.id = 'ogv-source-browser-title';
+        title.textContent = '📂 Source Files — ' + label;
+        header.appendChild(title);
+        const closeBtn = document.createElement('button');
+        closeBtn.className = 'folder-browser-close';
+        closeBtn.textContent = '✕';
+        closeBtn.setAttribute('aria-label', 'Close');
+        header.appendChild(closeBtn);
+        modal.appendChild(header);
+
+        // Breadcrumb
+        const breadcrumb = document.createElement('div');
+        breadcrumb.className = 'folder-browser-breadcrumb';
+        const bcItem = document.createElement('span');
+        bcItem.className = 'folder-browser-breadcrumb-item';
+        bcItem.textContent = label;
+        breadcrumb.appendChild(bcItem);
+        const bcSep = document.createElement('span');
+        bcSep.className = 'folder-browser-breadcrumb-sep';
+        bcSep.textContent = ' / ';
+        breadcrumb.appendChild(bcSep);
+        const bcFiles = document.createElement('span');
+        bcFiles.className = 'folder-browser-breadcrumb-item';
+        bcFiles.textContent = `${filePaths.length} file${filePaths.length !== 1 ? 's' : ''}`;
+        breadcrumb.appendChild(bcFiles);
+        modal.appendChild(breadcrumb);
+
+        // Body (two panels)
+        const body = document.createElement('div');
+        body.className = 'folder-browser-body';
+
+        // Left: tree panel
+        const treePanel = document.createElement('div');
+        treePanel.className = 'folder-browser-tree';
+        treePanel.setAttribute('tabindex', '0');
+
+        const searchWrap = document.createElement('div');
+        searchWrap.className = 'folder-browser-search';
+        const searchInput = document.createElement('input');
+        searchInput.type = 'text';
+        searchInput.placeholder = 'Filter files\u2026';
+        searchInput.className = 'folder-browser-search-input';
+        searchWrap.appendChild(searchInput);
+        treePanel.appendChild(searchWrap);
+
+        const treeContent = document.createElement('div');
+        treeContent.className = 'folder-browser-tree-content';
+        treePanel.appendChild(treeContent);
+        body.appendChild(treePanel);
+
+        // Right: preview panel
+        const previewPanel = document.createElement('div');
+        previewPanel.className = 'folder-browser-preview';
+        previewPanel.setAttribute('tabindex', '0');
+        const emptyMsg = document.createElement('div');
+        emptyMsg.className = 'folder-browser-preview-empty';
+        emptyMsg.textContent = 'Select a file to preview';
+        previewPanel.appendChild(emptyMsg);
+        body.appendChild(previewPanel);
+
+        modal.appendChild(body);
+        backdrop.appendChild(modal);
+
+        // Build tree from flat file paths
+        if (filePaths.length === 0) {
+            const emptyTree = document.createElement('div');
+            emptyTree.className = 'folder-browser-error';
+            emptyTree.textContent = 'No source files available';
+            treeContent.appendChild(emptyTree);
+        } else {
+            const tree = this._buildSourceFileTree(filePaths);
+            treeContent.appendChild(tree);
+            this._wireSourceTreeHandlers(tree, previewPanel);
+        }
+
+        // Search/filter
+        let searchTimeout;
+        searchInput.addEventListener('input', () => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                const query = searchInput.value.toLowerCase().trim();
+                const items = treeContent.querySelectorAll('.tree-item');
+                if (!query) {
+                    items.forEach(item => { item.style.display = ''; });
+                    return;
+                }
+                items.forEach(item => {
+                    const name = item.textContent.toLowerCase();
+                    item.style.display = name.includes(query) ? '' : 'none';
+                    // Show parent dirs of matching items
+                    if (name.includes(query)) {
+                        let parent = item.parentElement;
+                        while (parent && parent !== treeContent) {
+                            if (parent.tagName === 'LI') parent.style.display = '';
+                            parent = parent.parentElement;
+                        }
+                    }
+                });
+            }, 200);
         });
 
-        document.body.appendChild(overlay);
-        requestAnimationFrame(() => overlay.classList.add('active'));
+        // Keyboard navigation in tree
+        let focusedIdx = -1;
+        treePanel.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                const items = Array.from(treeContent.querySelectorAll('.tree-item:not([style*="display: none"])'));
+                if (!items.length) return;
+                if (e.key === 'ArrowDown') focusedIdx = Math.min(focusedIdx + 1, items.length - 1);
+                else focusedIdx = Math.max(focusedIdx - 1, 0);
+                items.forEach((it, i) => it.classList.toggle('keyboard-focus', i === focusedIdx));
+                items[focusedIdx]?.scrollIntoView?.({ block: 'nearest' });
+            } else if (e.key === 'Enter') {
+                const items = Array.from(treeContent.querySelectorAll('.tree-item:not([style*="display: none"])'));
+                if (focusedIdx >= 0 && focusedIdx < items.length) items[focusedIdx].click();
+            }
+        });
+
+        // Close handlers
+        const closeFn = () => {
+            backdrop.classList.remove('active');
+            setTimeout(() => backdrop.remove(), 200);
+            document.removeEventListener('keydown', onEsc);
+        };
+        const onEsc = (e) => { if (e.key === 'Escape') closeFn(); };
+        closeBtn.addEventListener('click', closeFn);
+        backdrop.addEventListener('click', (e) => { if (e.target === backdrop) closeFn(); });
+        document.addEventListener('keydown', onEsc);
+
+        document.body.appendChild(backdrop);
+        document.body.style.overflow = 'hidden';
+        requestAnimationFrame(() => backdrop.classList.add('active'));
+    }
+
+    /**
+     * Build a nested tree DOM from flat file paths (e.g., ["docs/auth.md", "src/api.py"]).
+     */
+    _buildSourceFileTree(filePaths) {
+        // Build a nested object: { dir: { subdir: { ... }, _files: [...] } }
+        const root = {};
+        for (const fp of filePaths) {
+            const parts = fp.split('/');
+            let node = root;
+            for (let i = 0; i < parts.length - 1; i++) {
+                if (!node[parts[i]]) node[parts[i]] = {};
+                node = node[parts[i]];
+            }
+            if (!node._files) node._files = [];
+            node._files.push({ name: parts[parts.length - 1], path: fp });
+        }
+
+        const FILE_ICONS = {
+            md: '📝', py: '💻', js: '💻', ts: '💻', css: '💻', html: '💻',
+            json: '💻', yaml: '💻', yml: '💻', sh: '💻',
+            png: '🖼️', jpg: '🖼️', jpeg: '🖼️', gif: '🖼️', svg: '🖼️',
+        };
+        const getIcon = (name) => {
+            const ext = name.split('.').pop()?.toLowerCase();
+            return FILE_ICONS[ext] || '📄';
+        };
+
+        const buildUl = (obj) => {
+            const ul = document.createElement('ul');
+            ul.className = 'file-tree';
+            ul.setAttribute('role', 'tree');
+
+            // Directories first (sorted)
+            const dirs = Object.keys(obj).filter(k => k !== '_files').sort();
+            for (const dir of dirs) {
+                const li = document.createElement('li');
+                li.className = 'tree-item dir-item';
+                li.setAttribute('role', 'treeitem');
+                li.textContent = '📁 ' + dir;
+                li.dataset.path = dir;
+                li.style.cursor = 'pointer';
+                const childUl = buildUl(obj[dir]);
+                childUl.style.display = '';
+                li.appendChild(childUl);
+                // Toggle on click
+                li.addEventListener('click', (e) => {
+                    if (e.target !== li) return;
+                    childUl.style.display = childUl.style.display === 'none' ? '' : 'none';
+                });
+                ul.appendChild(li);
+            }
+
+            // Files (sorted)
+            const fileList = obj._files || [];
+            for (const f of fileList.sort((a, b) => a.name.localeCompare(b.name))) {
+                const li = document.createElement('li');
+                li.className = 'tree-item file-item';
+                li.setAttribute('role', 'treeitem');
+                li.textContent = getIcon(f.name) + ' ' + f.name;
+                li.dataset.path = f.path;
+                li.style.cursor = 'pointer';
+                ul.appendChild(li);
+            }
+
+            return ul;
+        };
+
+        return buildUl(root);
+    }
+
+    /**
+     * Wire click handlers on tree file items to load file preview.
+     */
+    _wireSourceTreeHandlers(tree, previewPanel) {
+        tree.querySelectorAll('.file-item[data-path]').forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                // Mark selected
+                const prev = tree.querySelector('.tree-item.selected');
+                if (prev) prev.classList.remove('selected');
+                item.classList.add('selected');
+                this._loadSourceFilePreview(item.dataset.path, previewPanel);
+            });
+        });
+    }
+
+    /**
+     * Load and render file content in the preview panel.
+     */
+    async _loadSourceFilePreview(filePath, previewPanel) {
+        previewPanel.innerHTML = '';
+
+        // Preview header
+        const previewHeader = document.createElement('div');
+        previewHeader.className = 'folder-browser-preview-header';
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'folder-browser-preview-title';
+        nameSpan.textContent = filePath.split('/').pop();
+        previewHeader.appendChild(nameSpan);
+        previewPanel.appendChild(previewHeader);
+
+        const contentEl = document.createElement('div');
+        contentEl.className = 'folder-browser-preview-content';
+        previewPanel.appendChild(contentEl);
+
+        // Use FilePreviewRenderer if available (shared with FolderBrowserModal)
+        if (typeof FilePreviewRenderer !== 'undefined') {
+            const renderer = new FilePreviewRenderer({
+                apiEndpoint: '/api/ideas/file?path={path}',
+                endpointStyle: 'query',
+                downloadUrl: '/api/ideas/file?path={path}',
+                renderMode: 'auto',
+            });
+            await renderer.renderPreview(filePath, contentEl);
+            return;
+        }
+
+        // Fallback: fetch and render manually
+        try {
+            const resp = await fetch(`/api/ideas/file?path=${encodeURIComponent(filePath)}`);
+            if (!resp.ok) {
+                contentEl.textContent = resp.status === 404 ? 'File not found' : 'Failed to load preview';
+                return;
+            }
+            const content = await resp.text();
+            if (filePath.endsWith('.md') && typeof marked !== 'undefined' && marked.parse) {
+                contentEl.innerHTML = '<div class="markdown-body">' + marked.parse(content) + '</div>';
+            } else {
+                const pre = document.createElement('pre');
+                pre.textContent = content;
+                contentEl.appendChild(pre);
+            }
+        } catch (err) {
+            contentEl.textContent = 'Failed to load preview';
+        }
     }
 
     // -----------------------------------------------------------------------

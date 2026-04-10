@@ -1,106 +1,179 @@
 /**
- * TASK-4872: Source file modal must match FolderBrowserModal design pattern.
+ * TASK-4873: Source file modal must be a full two-panel browser
+ * matching FolderBrowserModal (tree view + file preview).
  *
- * Validates: fixed backdrop, blur, animated open/close, CSS variable theming,
- * Escape key handler, DM Sans font, close button hover background.
+ * Validates: DOM structure, tree building from flat paths, file selection,
+ * search/filter, breadcrumb, preview panel, keyboard a11y, close handlers.
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
+import vm from 'vm';
 
-const CSS_PATH = resolve(
-  import.meta.dirname, '..', '..',
-  'src/x_ipe/static/css/ontology-graph-viewer.css'
-);
+const JS_FEATURES = resolve(import.meta.dirname, '..', '..', 'src/x_ipe/static/js/features');
 
-function readCSS() {
-  return readFileSync(CSS_PATH, 'utf-8');
+function loadScript(filename) {
+  const code = readFileSync(resolve(JS_FEATURES, filename), 'utf-8');
+  vm.runInThisContext(code);
 }
 
-describe('TASK-4872: Source file modal matches FolderBrowserModal design', () => {
-  let css;
+describe('TASK-4873: Source file modal two-panel browser', () => {
+  let restoreFetch;
 
   beforeEach(() => {
-    css = readCSS();
+    document.body.innerHTML = '';
+
+    // Load only once per suite (class declarations are global)
+    if (!globalThis._ogvSourceModalLoaded) {
+      // Mock cytoscape before loading scripts that reference it
+      globalThis.cytoscape = vi.fn(() => ({
+        on: vi.fn(), style: vi.fn().mockReturnThis(), layout: vi.fn().mockReturnValue({ run: vi.fn() }),
+        nodes: vi.fn().mockReturnValue({ length: 0, on: vi.fn(), forEach: vi.fn() }),
+        edges: vi.fn().mockReturnValue({ length: 0, on: vi.fn(), forEach: vi.fn() }),
+        fit: vi.fn(), zoom: vi.fn(), pan: vi.fn(), resize: vi.fn(), png: vi.fn(() => ''),
+        destroy: vi.fn(), container: vi.fn(), getElementById: vi.fn(),
+      }));
+      loadScript('folder-browser-modal.js');
+      loadScript('ontology-graph-canvas.js');
+      loadScript('ontology-graph-viewer.js');
+      globalThis._ogvSourceModalLoaded = true;
+    }
+
+    // Mock fetch for file preview
+    const origFetch = globalThis.fetch;
+    globalThis.fetch = vi.fn(async () => ({
+      ok: true, text: async () => '# Hello', json: async () => ({}),
+    }));
+    restoreFetch = () => { globalThis.fetch = origFetch; };
   });
 
-  it('backdrop uses position:fixed (not absolute) like FolderBrowserModal', () => {
-    const overlayBlock = css.match(
-      /\.ogv-source-modal-overlay\s*\{[^}]+\}/
-    )?.[0];
-    expect(overlayBlock).toBeDefined();
-    expect(overlayBlock).toMatch(/position:\s*fixed/);
-    expect(overlayBlock).not.toMatch(/position:\s*absolute/);
+  afterEach(() => {
+    if (restoreFetch) restoreFetch();
+    document.body.innerHTML = '';
   });
 
-  it('backdrop has opacity/visibility transition for animated open', () => {
-    const overlayBlock = css.match(
-      /\.ogv-source-modal-overlay\s*\{[^}]+\}/
-    )?.[0];
-    expect(overlayBlock).toBeDefined();
-    expect(overlayBlock).toMatch(/opacity:\s*0/);
-    expect(overlayBlock).toMatch(/visibility:\s*hidden/);
-    expect(overlayBlock).toMatch(/transition/);
+  function callShowSourceFilesModal(files, nodeData) {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const viewer = new OntologyGraphViewer(container);
+    viewer._showSourceFilesModal(files, nodeData || { id: 'test', label: 'TestNode' });
+  }
+
+  it('creates a folder-browser-backdrop element (reuses FolderBrowserModal CSS)', () => {
+    callShowSourceFilesModal(['docs/auth.md', 'src/api/login.py']);
+    const backdrop = document.body.querySelector('.folder-browser-backdrop');
+    expect(backdrop).toBeTruthy();
   });
 
-  it('backdrop .active class sets opacity:1 and visibility:visible', () => {
-    expect(css).toMatch(
-      /\.ogv-source-modal-overlay\.active\s*\{[^}]*opacity:\s*1/
-    );
-    expect(css).toMatch(
-      /\.ogv-source-modal-overlay\.active\s*\{[^}]*visibility:\s*visible/
-    );
+  it('has two-panel layout: tree panel and preview panel', () => {
+    callShowSourceFilesModal(['docs/auth.md']);
+    const tree = document.body.querySelector('.folder-browser-tree');
+    const preview = document.body.querySelector('.folder-browser-preview');
+    expect(tree).toBeTruthy();
+    expect(preview).toBeTruthy();
   });
 
-  it('modal has transform scale transition like FolderBrowserModal', () => {
-    const modalBlock = css.match(
-      /\.ogv-source-modal\s*\{[^}]+\}/
-    )?.[0];
-    expect(modalBlock).toBeDefined();
-    expect(modalBlock).toMatch(/transform:\s*scale\(0\.95\)/);
-    expect(modalBlock).toMatch(/transition.*transform/);
+  it('builds a tree structure from flat file paths', () => {
+    callShowSourceFilesModal([
+      'docs/auth.md',
+      'docs/api.md',
+      'src/login.py',
+    ]);
+    const treeItems = document.body.querySelectorAll('.tree-item');
+    expect(treeItems.length).toBeGreaterThanOrEqual(3);
   });
 
-  it('active state scales modal to 1', () => {
-    expect(css).toMatch(
-      /\.ogv-source-modal-overlay\.active\s+\.ogv-source-modal[^{]*\{[^}]*transform:\s*scale\(1\)/
-    );
+  it('groups files into directory folders in the tree', () => {
+    callShowSourceFilesModal([
+      'docs/auth.md',
+      'docs/api.md',
+      'src/login.py',
+    ]);
+    const dirItems = document.body.querySelectorAll('.dir-item');
+    expect(dirItems.length).toBeGreaterThanOrEqual(2); // docs/ and src/
   });
 
-  it('uses CSS variable theming (--card-bg, --border-color) like FolderBrowserModal', () => {
-    expect(css).toMatch(/var\(--card-bg/);
-    expect(css).toMatch(/var\(--border-color/);
+  it('has a search/filter input in the tree panel', () => {
+    callShowSourceFilesModal(['docs/auth.md']);
+    const searchInput = document.body.querySelector('.folder-browser-search-input');
+    expect(searchInput).toBeTruthy();
+    expect(searchInput.placeholder).toContain('Filter');
   });
 
-  it('backdrop uses DM Sans font family', () => {
-    const overlayBlock = css.match(
-      /\.ogv-source-modal-overlay\s*\{[^}]+\}/
-    )?.[0];
-    expect(overlayBlock).toBeDefined();
-    expect(overlayBlock).toMatch(/font-family.*DM Sans/i);
+  it('has a breadcrumb showing the node label', () => {
+    callShowSourceFilesModal(['docs/auth.md'], { id: 'n1', label: 'Authentication' });
+    const breadcrumb = document.body.querySelector('.folder-browser-breadcrumb');
+    expect(breadcrumb).toBeTruthy();
+    expect(breadcrumb.textContent).toContain('Authentication');
   });
 
-  it('close button has hover background like FolderBrowserModal', () => {
-    expect(css).toMatch(
-      /\.ogv-source-modal-close:hover\s*\{[^}]*background/
-    );
+  it('shows "Select a file to preview" in preview panel initially', () => {
+    callShowSourceFilesModal(['docs/auth.md']);
+    const preview = document.body.querySelector('.folder-browser-preview');
+    expect(preview.textContent).toContain('Select a file to preview');
   });
 
-  it('uses z-index >= 1051 matching FolderBrowserModal', () => {
-    const overlayBlock = css.match(
-      /\.ogv-source-modal-overlay\s*\{[^}]+\}/
-    )?.[0];
-    expect(overlayBlock).toBeDefined();
-    const zMatch = overlayBlock.match(/z-index:\s*(\d+)/);
-    expect(zMatch).toBeTruthy();
-    expect(Number(zMatch[1])).toBeGreaterThanOrEqual(1051);
+  it('has a close button', () => {
+    callShowSourceFilesModal(['docs/auth.md']);
+    const closeBtn = document.body.querySelector('.folder-browser-close');
+    expect(closeBtn).toBeTruthy();
   });
 
-  it('backdrop uses blur(4px) like FolderBrowserModal', () => {
-    const overlayBlock = css.match(
-      /\.ogv-source-modal-overlay\s*\{[^}]+\}/
-    )?.[0];
-    expect(overlayBlock).toBeDefined();
-    expect(overlayBlock).toMatch(/backdrop-filter:\s*blur\(4px\)/);
+  it('closes on close button click', () => {
+    callShowSourceFilesModal(['docs/auth.md']);
+    const closeBtn = document.body.querySelector('.folder-browser-close');
+    closeBtn.click();
+    // Backdrop should have .active removed immediately
+    const backdrop = document.body.querySelector('.folder-browser-backdrop');
+    if (backdrop) {
+      expect(backdrop.classList.contains('active')).toBe(false);
+    }
+  });
+
+  it('closes on Escape key', () => {
+    callShowSourceFilesModal(['docs/auth.md']);
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    const backdrop = document.body.querySelector('.folder-browser-backdrop');
+    if (backdrop) {
+      expect(backdrop.classList.contains('active')).toBe(false);
+    }
+  });
+
+  it('file items have data-path attributes for preview fetch', () => {
+    callShowSourceFilesModal(['docs/auth.md', 'src/login.py']);
+    const fileItems = document.body.querySelectorAll('.file-item[data-path]');
+    expect(fileItems.length).toBeGreaterThanOrEqual(2);
+    const paths = Array.from(fileItems).map(el => el.dataset.path);
+    expect(paths).toContain('docs/auth.md');
+    expect(paths).toContain('src/login.py');
+  });
+
+  it('has a modal dialog with proper ARIA attributes', () => {
+    callShowSourceFilesModal(['docs/auth.md']);
+    const modal = document.body.querySelector('.folder-browser-modal');
+    expect(modal).toBeTruthy();
+    expect(modal.getAttribute('role')).toBe('dialog');
+    expect(modal.getAttribute('aria-modal')).toBe('true');
+  });
+
+  it('header title includes node label and source files icon', () => {
+    callShowSourceFilesModal(['docs/auth.md'], { id: 'n1', label: 'Auth Module' });
+    const title = document.body.querySelector('.folder-browser-title');
+    expect(title).toBeTruthy();
+    expect(title.textContent).toContain('Auth Module');
+  });
+
+  it('handles empty file list gracefully', () => {
+    callShowSourceFilesModal([], { id: 'n1', label: 'Empty' });
+    const treeContent = document.body.querySelector('.folder-browser-tree-content');
+    expect(treeContent).toBeTruthy();
+    expect(treeContent.textContent).toMatch(/no.*files|empty/i);
+  });
+
+  it('removes previous modal when opening a new one', () => {
+    callShowSourceFilesModal(['docs/a.md']);
+    callShowSourceFilesModal(['docs/b.md']);
+    const backdrops = document.body.querySelectorAll('.folder-browser-backdrop');
+    expect(backdrops.length).toBe(1);
   });
 });
