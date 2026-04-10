@@ -260,7 +260,7 @@ class OntologyGraphCanvas {
         if (!this.cy || !navContainer) return;
         this._navContainer = navContainer;
         // Build simple minimap using cy.png() instead of the buggy plugin
-        this._navContainer.innerHTML = '<img class="ogv-nav-thumb" alt="Graph navigator" /><div class="ogv-nav-viewport"></div>';
+        this._navContainer.innerHTML = '<img class="ogv-nav-thumb" alt="Graph navigator" style="visibility:hidden" /><div class="ogv-nav-viewport"></div>';
         this._navThumb = this._navContainer.querySelector('.ogv-nav-thumb');
         this._navViewport = this._navContainer.querySelector('.ogv-nav-viewport');
 
@@ -280,6 +280,7 @@ class OntologyGraphCanvas {
             const png = this.cy.png({ scale: 0.15, bg: 'transparent', full: true });
             if (png) {
                 this._navThumb.src = png;
+                this._navThumb.style.visibility = 'visible';
                 this._updateNavViewport();
             }
         } catch (_e) { /* ignore export errors */ }
