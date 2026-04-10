@@ -41,7 +41,8 @@
           "active"
         ],
         "domain": [
-          "frontend"
+          "frontend",
+          "backend"
         ]
       },
       "author": "AI Librarian",
@@ -57,7 +58,8 @@
           "active"
         ],
         "domain": [
-          "frontend"
+          "frontend",
+          "backend"
         ]
       },
       "author": "AI Librarian",
@@ -67,7 +69,7 @@
     },
     "feature04-knowledge-base-browser.md": {
       "title": "Knowledge Base Browser",
-      "description": "The Knowledge Base (KB) Browser — called the \"Knowledge Atelier\" — is a full-featured modal for browsing, searching, and managing KB articles. It provides grid/list views, filtering, and article detai",
+      "description": "The Knowledge Base (KB) Browser \u2014 called the \"Knowledge Atelier\" \u2014 is a full-featured modal for browsing, searching, and managing KB articles. It provides grid/list views, filtering, and article detai",
       "tags": {
         "lifecycle": [
           "active"
@@ -122,7 +124,8 @@
           "active"
         ],
         "domain": [
-          "frontend"
+          "frontend",
+          "backend"
         ]
       },
       "author": "AI Librarian",
@@ -154,7 +157,8 @@
           "active"
         ],
         "domain": [
-          "frontend"
+          "frontend",
+          "testing"
         ]
       },
       "author": "AI Librarian",
@@ -170,7 +174,7 @@
           "active"
         ],
         "domain": [
-          "frontend"
+          "backend"
         ]
       },
       "author": "AI Librarian",

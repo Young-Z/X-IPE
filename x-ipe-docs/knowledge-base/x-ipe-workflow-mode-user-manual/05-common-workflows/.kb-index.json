@@ -41,7 +41,8 @@
           "active"
         ],
         "domain": [
-          "frontend"
+          "frontend",
+          "design"
         ]
       },
       "author": "AI Librarian",
@@ -89,7 +90,8 @@
           "active"
         ],
         "domain": [
-          "frontend"
+          "frontend",
+          "backend"
         ]
       },
       "author": "AI Librarian",
@@ -115,7 +117,7 @@
     },
     "workflow07-browse-deliverables.md": {
       "title": "Browse Deliverables",
-      "description": "Every workflow action produces deliverables — files and folders that are tracked and viewable from the workflow card.",
+      "description": "Every workflow action produces deliverables \u2014 files and folders that are tracked and viewable from the workflow card.",
       "tags": {
         "lifecycle": [
           "active"

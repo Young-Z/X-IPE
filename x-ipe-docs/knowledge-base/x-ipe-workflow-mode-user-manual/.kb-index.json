@@ -2,14 +2,15 @@
   "version": "1.0",
   "entries": {
     "extraction_report.md": {
-      "title": "Extraction Report — x-ipe-workflow-mode-user-manual",
-      "description": "**Round 1 → Round 2 gaps (13 full gaps, 11 partial):**",
+      "title": "Extraction Report \u2014 x-ipe-workflow-mode-user-manual",
+      "description": "**Round 1 \u2192 Round 2 gaps (13 full gaps, 11 partial):**",
       "tags": {
         "lifecycle": [
           "active"
         ],
         "domain": [
-          "frontend"
+          "frontend",
+          "backend"
         ]
       },
       "author": "AI Librarian",
@@ -18,14 +19,15 @@
       "auto_generated": true
     },
     "index.md": {
-      "title": "X-IPE Workflow Mode — User Manual",
-      "description": "1. [Overview](section-01-overview.md) — What X-IPE is, target audience, key features, architecture",
+      "title": "X-IPE Workflow Mode \u2014 User Manual",
+      "description": "1. [Overview](section-01-overview.md) \u2014 What X-IPE is, target audience, key features, architecture",
       "tags": {
         "lifecycle": [
           "active"
         ],
         "domain": [
-          "frontend"
+          "frontend",
+          "backend"
         ]
       },
       "author": "AI Librarian",
@@ -41,7 +43,8 @@
           "active"
         ],
         "domain": [
-          "frontend"
+          "frontend",
+          "backend"
         ]
       },
       "author": "AI Librarian",
@@ -84,13 +87,14 @@
     },
     "section-06-configuration.md": {
       "title": "6. Configuration & Settings",
-      "description": "**URL:** `http://127.0.0.1:5858/settings` or click **\"⚙ Settings\"** in the header bar.",
+      "description": "**URL:** `http://127.0.0.1:5858/settings` or click **\"\u2699 Settings\"** in the header bar.",
       "tags": {
         "lifecycle": [
           "active"
         ],
         "domain": [
           "frontend",
+          "backend",
           "devops"
         ]
       },
@@ -107,7 +111,8 @@
           "active"
         ],
         "domain": [
-          "frontend"
+          "frontend",
+          "testing"
         ]
       },
       "author": "AI Librarian",
@@ -123,7 +128,8 @@
           "active"
         ],
         "domain": [
-          "frontend"
+          "frontend",
+          "backend"
         ]
       },
       "author": "AI Librarian",

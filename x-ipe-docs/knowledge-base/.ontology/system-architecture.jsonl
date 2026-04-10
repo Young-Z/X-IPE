@@ -1,3 +1,0 @@
-{"op": "create", "entity": {"id": "know_101", "properties": {"label": "Microservices", "node_type": "concept", "weight": 7, "description": "Microservice architecture patterns", "dimensions": {"technology": ["architecture"]}, "source_files": ["docs/micro.md"]}}, "timestamp": "2026-02-01T00:00:00Z"}
-{"op": "create", "entity": {"id": "know_102", "properties": {"label": "Event Bus", "node_type": "entity", "weight": 5, "description": "Message broker for event-driven communication", "dimensions": {"technology": ["messaging"]}, "source_files": ["docs/events.md"]}}, "timestamp": "2026-02-01T00:01:00Z"}
-{"op": "relate", "from": "know_101", "rel": "depends_on", "to": "know_102", "properties": {}, "timestamp": "2026-02-01T00:02:00Z"}

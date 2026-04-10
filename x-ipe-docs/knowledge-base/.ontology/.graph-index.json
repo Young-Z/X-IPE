@@ -1,32 +1,24 @@
 {
   "version": "1.0",
-  "generated_at": "2026-01-01T00:00:00Z",
-  "ontology_dir": "x-ipe-docs/knowledge-base/.ontology",
+  "generated_at": "2026-04-10T07:22:08.678738+00:00",
+  "ontology_dir": "x-ipe-docs/knowledge-base/.ontology/",
   "graphs": [
     {
-      "name": "security-architecture",
-      "file": "security-architecture.jsonl",
-      "description": "Security architecture concepts",
-      "entity_count": 5,
-      "relation_count": 5,
+      "name": "core-features-index",
+      "file": "core-features-index.jsonl",
+      "description": "Knowledge graph rooted at 'Core Features Index', covering: Workflow State Persistence, Extraction Report, X-IPE Workflow Mode User Manual — Index, Error Recovery, Feature Implementation Lifecycle",
+      "entity_count": 28,
+      "relation_count": 41,
       "dimensions": [
-        "security",
-        "identity"
-      ],
-      "root_entity_id": "know_001",
-      "root_label": "Authentication"
-    },
-    {
-      "name": "system-architecture",
-      "file": "system-architecture.jsonl",
-      "description": "System architecture patterns",
-      "entity_count": 2,
-      "relation_count": 1,
-      "dimensions": [
+        "abstraction",
+        "audience",
+        "content-type",
+        "domain",
+        "lifecycle",
         "technology"
       ],
-      "root_entity_id": "know_101",
-      "root_label": "Microservices"
+      "root_entity_id": "know_f0000001",
+      "root_label": "Core Features Index"
     }
   ]
 }
