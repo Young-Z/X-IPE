@@ -1,0 +1,16 @@
+{
+  "_version": "1.0",
+  "tasks": [
+    {
+      "task_id": "TASK-4872",
+      "task_type": "Bug Fix",
+      "description": "Source file modal in ontology graph viewer does not match FolderBrowserModal design pattern used in workflow deliverables",
+      "status": "in_progress",
+      "role": "Ember",
+      "output_links": [],
+      "next_task": "null",
+      "created_at": "2026-04-10T00:47:05.548951+00:00",
+      "last_updated": "2026-04-10T00:47:05.548951+00:00"
+    }
+  ]
+}

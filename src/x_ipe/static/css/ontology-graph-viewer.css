@@ -988,71 +988,104 @@
 /* ---------------------------------------------------------------------------
    Source Files Modal
    --------------------------------------------------------------------------- */
+/* Source Files Modal — aligned with FolderBrowserModal (FEATURE-039-A) design */
 .ogv-source-modal-overlay {
-    position: absolute;
+    position: fixed;
     inset: 0;
-    background: rgba(15, 23, 42, 0.4);
-    backdrop-filter: blur(2px);
-    z-index: 100;
+    background: rgba(0,0,0,0.4);
+    backdrop-filter: blur(4px);
+    z-index: 1051;
     display: flex;
     align-items: center;
     justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+    font-family: 'DM Sans', sans-serif;
+}
+.ogv-source-modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
 }
 
 .ogv-source-modal {
-    background: #fff;
+    background: var(--card-bg, #fff);
     border-radius: 12px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
-    width: 480px;
-    max-width: 90%;
-    max-height: 60vh;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    width: 520px;
+    max-width: 90vw;
+    max-height: 70vh;
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    transform: scale(0.95);
+    transition: transform 0.2s ease;
+}
+.ogv-source-modal-overlay.active .ogv-source-modal {
+    transform: scale(1);
 }
 
 .ogv-source-modal-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 16px 20px;
-    border-bottom: 1px solid #e2e8f0;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border-color, #e2e8f0);
+    flex-shrink: 0;
+}
+.ogv-source-modal-title {
     font-size: 14px;
     font-weight: 600;
-    color: #1e293b;
+    color: var(--text-primary, #1e293b);
 }
 
 .ogv-source-modal-close {
     background: none;
     border: none;
-    font-size: 20px;
+    font-size: 18px;
     cursor: pointer;
-    color: #94a3b8;
-    padding: 0 4px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    color: var(--text-muted, #94a3b8);
     line-height: 1;
+    transition: all 0.15s;
 }
-
-.ogv-source-modal-close:hover { color: #1e293b; }
+.ogv-source-modal-close:hover {
+    color: var(--text-primary, #1e293b);
+    background: rgba(0,0,0,0.06);
+}
 
 .ogv-source-modal-body {
     overflow-y: auto;
     padding: 8px 0;
+    flex: 1;
+    min-height: 0;
 }
 
 .ogv-source-modal-row {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 10px 20px;
+    padding: 8px 20px;
     font-size: 13px;
-    color: #334155;
+    color: var(--text-primary, #334155);
     cursor: default;
+    border-radius: 4px;
+    transition: background 0.1s;
 }
-
-.ogv-source-modal-row:hover { background: #f8fafc; }
-
-.ogv-source-modal-row i { color: #64748b; }
+.ogv-source-modal-row:hover {
+    background: rgba(0,0,0,0.04);
+}
+.ogv-source-modal-row i {
+    color: var(--text-muted, #64748b);
+}
 
 .ogv-source-modal-path {
     word-break: break-all;
+}
+
+.ogv-source-modal-empty {
+    padding: 16px 20px;
+    color: var(--text-muted, #94a3b8);
+    font-size: 13px;
 }

@@ -799,7 +799,7 @@ class OntologyGraphViewer {
 
     _showSourceFilesModal(files, nodeData) {
         // Remove existing modal
-        const old = this.container.querySelector('.ogv-source-modal-overlay');
+        const old = document.body.querySelector('.ogv-source-modal-overlay');
         if (old) old.remove();
 
         const rows = files.map(f => {
@@ -815,18 +815,24 @@ class OntologyGraphViewer {
         overlay.innerHTML = `
             <div class="ogv-source-modal">
                 <div class="ogv-source-modal-header">
-                    <span>Source Files — ${nodeData.label || nodeData.id}</span>
-                    <button class="ogv-source-modal-close">&times;</button>
+                    <span class="ogv-source-modal-title">Source Files — ${nodeData.label || nodeData.id}</span>
+                    <button class="ogv-source-modal-close">✕</button>
                 </div>
-                <div class="ogv-source-modal-body">${rows || '<div style="padding:16px;color:#94a3b8;">No files available</div>'}</div>
+                <div class="ogv-source-modal-body">${rows || '<div class="ogv-source-modal-empty">No files available</div>'}</div>
             </div>`;
 
-        overlay.addEventListener('click', (e) => {
-            if (e.target === overlay) overlay.remove();
+        const close = () => {
+            overlay.classList.remove('active');
+            setTimeout(() => overlay.remove(), 200);
+        };
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+        overlay.querySelector('.ogv-source-modal-close').addEventListener('click', close);
+        document.addEventListener('keydown', function onEsc(e) {
+            if (e.key === 'Escape') { close(); document.removeEventListener('keydown', onEsc); }
         });
-        overlay.querySelector('.ogv-source-modal-close').addEventListener('click', () => overlay.remove());
 
-        this.container.appendChild(overlay);
+        document.body.appendChild(overlay);
+        requestAnimationFrame(() => overlay.classList.add('active'));
     }
 
     // -----------------------------------------------------------------------

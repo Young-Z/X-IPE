@@ -182,12 +182,16 @@
       "task_id": "TASK-4871",
       "task_type": "Bug Fix",
       "description": "Fix regressions from layout restructure: (1) minimap/navigator not working, (2) source file modal not opening",
-      "status": "in_progress",
+      "status": "completed",
       "role": "Ember",
-      "output_links": [],
+      "output_links": [
+        "src/x_ipe/static/js/features/ontology-graph-canvas.js",
+        "src/x_ipe/static/js/features/ontology-graph-viewer.js",
+        "src/x_ipe/static/css/ontology-graph-viewer.css"
+      ],
       "next_task": "null",
       "created_at": "2026-04-09T08:16:38.856379+00:00",
-      "last_updated": "2026-04-09T08:16:38.856379+00:00"
+      "last_updated": "2026-04-09T09:38:22.762691+00:00"
     }
   ]
 }
