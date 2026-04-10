@@ -1,35 +1,100 @@
 {
-    "_version": "1.0",
-    "tasks": [
-        {
-            "task_id": "TASK-4872",
-            "task_type": "Bug Fix",
-            "description": "Source file modal in ontology graph viewer does not match FolderBrowserModal design pattern used in workflow deliverables",
-            "status": "completed",
-            "role": "Ember",
-            "output_links": [
-                "src/x_ipe/static/css/ontology-graph-viewer.css",
-                "src/x_ipe/static/js/features/ontology-graph-viewer.js",
-                "tests/frontend-js/ogv-source-modal.test.js"
-            ],
-            "next_task": "null",
-            "created_at": "2026-04-10T00:47:05.548951+00:00",
-            "last_updated": "2026-04-10T00:51:53.472609+00:00"
-        },
-        {
-            "task_id": "TASK-4873",
-            "task_type": "Bug Fix",
-            "description": "Source file modal needs full two-panel browser (tree+preview) matching FolderBrowserModal",
-            "status": "done",
-            "role": "Ember \ud83d\udd25",
-            "output_links": [
-                "src/x_ipe/static/js/features/ontology-graph-viewer.js",
-                "src/x_ipe/static/css/ontology-graph-viewer.css",
-                "tests/frontend-js/ogv-source-modal.test.js"
-            ],
-            "next_task": "",
-            "created_at": "2026-04-10T01:18:08.895904+00:00",
-            "last_updated": "2026-04-10T01:25:31.397061+00:00"
-        }
-    ]
+  "_version": "1.0",
+  "tasks": [
+    {
+      "task_id": "TASK-4872",
+      "task_type": "Bug Fix",
+      "description": "Source file modal in ontology graph viewer does not match FolderBrowserModal design pattern used in workflow deliverables",
+      "status": "completed",
+      "role": "Ember",
+      "output_links": [
+        "src/x_ipe/static/css/ontology-graph-viewer.css",
+        "src/x_ipe/static/js/features/ontology-graph-viewer.js",
+        "tests/frontend-js/ogv-source-modal.test.js"
+      ],
+      "next_task": "null",
+      "created_at": "2026-04-10T00:47:05.548951+00:00",
+      "last_updated": "2026-04-10T00:51:53.472609+00:00"
+    },
+    {
+      "task_id": "TASK-4873",
+      "task_type": "Bug Fix",
+      "description": "Source file modal needs full two-panel browser (tree+preview) matching FolderBrowserModal",
+      "status": "done",
+      "role": "Ember 🔥",
+      "output_links": [
+        "src/x_ipe/static/js/features/ontology-graph-viewer.js",
+        "src/x_ipe/static/css/ontology-graph-viewer.css",
+        "tests/frontend-js/ogv-source-modal.test.js"
+      ],
+      "next_task": "",
+      "created_at": "2026-04-10T01:18:08.895904+00:00",
+      "last_updated": "2026-04-10T01:25:31.397061+00:00"
+    },
+    {
+      "task_id": "TASK-4874",
+      "task_type": "Change Request",
+      "description": "CR: Replace mode toggle switch with two buttons in top menu (FEATURE-036-B). Assignee: Flux",
+      "role": "developer",
+      "status": "completed",
+      "output_links": [
+        "src/x_ipe/templates/index.html",
+        "src/x_ipe/static/css/base.css",
+        "src/x_ipe/static/js/init.js"
+      ],
+      "next_task": "",
+      "created_at": "2026-04-10T02:19:56.675151+00:00",
+      "last_updated": "2026-04-10T02:23:28.599007+00:00"
+    },
+    {
+      "task_id": "TASK-4875",
+      "task_type": "Maintenance",
+      "description": "Reconstruct tags in x-ipe-workflow-mode-user-manual KB entries using AI Librarian — re-analyze content and assign accurate lifecycle/domain tags",
+      "role": "Ember 🔥",
+      "status": "completed",
+      "output_links": [
+        "x-ipe-docs/knowledge-base/x-ipe-workflow-mode-user-manual/.kb-index.json",
+        "x-ipe-docs/knowledge-base/x-ipe-workflow-mode-user-manual/04-core-features/.kb-index.json",
+        "x-ipe-docs/knowledge-base/x-ipe-workflow-mode-user-manual/05-common-workflows/.kb-index.json"
+      ],
+      "next_task": "",
+      "created_at": "2026-04-10T07:07:00.232859+00:00",
+      "last_updated": "2026-04-10T07:14:04.344255+00:00"
+    },
+    {
+      "task_id": "TASK-4876",
+      "task_type": "Maintenance",
+      "description": "Redo: Reconstruct tags in x-ipe-workflow-mode-user-manual KB using full AI Librarian skill with ontology — re-tag .kb-index.json, create KnowledgeNode entities, register dimensions, build graph",
+      "role": "Ember 🔥",
+      "status": "completed",
+      "output_links": [
+        "x-ipe-docs/knowledge-base/.ontology/_entities.jsonl",
+        "x-ipe-docs/knowledge-base/.ontology/.dimension-registry.json",
+        "x-ipe-docs/knowledge-base/.ontology/.graph-index.json",
+        "x-ipe-docs/knowledge-base/.ontology/core-features-index.jsonl",
+        "x-ipe-docs/knowledge-base/x-ipe-workflow-mode-user-manual/.kb-index.json",
+        "x-ipe-docs/knowledge-base/x-ipe-workflow-mode-user-manual/04-core-features/.kb-index.json",
+        "x-ipe-docs/knowledge-base/x-ipe-workflow-mode-user-manual/05-common-workflows/.kb-index.json"
+      ],
+      "next_task": "",
+      "created_at": "2026-04-10T07:17:20.245587+00:00",
+      "last_updated": "2026-04-10T07:22:28.239204+00:00"
+    },
+    {
+      "task_id": "TASK-4877",
+      "task_type": "Bug Fix",
+      "description": "UIUX Feedback Feedback-20260410-153039: (1) Folder browser tree indentation too wide for sub-folders/files, (2) Image preview fails to find existing images in folder browser",
+      "role": "Ember 🔥",
+      "status": "completed",
+      "output_links": [
+        "src/x_ipe/static/css/features/folder-browser-modal.css",
+        "src/x_ipe/static/js/features/ontology-graph-canvas.js",
+        "tests/frontend-js/ogv-navigator-thumb.test.js",
+        "tests/frontend-js/folder-browser-tree-indent.test.js"
+      ],
+      "next_task": "",
+      "created_at": "2026-04-10T07:33:42.136013+00:00",
+      "last_updated": "2026-04-10T07:47:37.092724+00:00"
+    }
+  ]
 }
