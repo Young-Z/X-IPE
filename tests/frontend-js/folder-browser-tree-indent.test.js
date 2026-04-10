@@ -14,7 +14,7 @@ const CSS_PATH = resolve(
 );
 
 describe('Feedback-20260410-153039: folder-browser tree indentation', () => {
-  it('nested .file-tree padding-left should be 10px or less', () => {
+  it('nested .file-tree padding-left should be minimal (≤ 4px)', () => {
     const css = readFileSync(CSS_PATH, 'utf-8');
 
     // Find the rule for .folder-browser-tree .file-tree .file-tree
@@ -24,10 +24,10 @@ describe('Feedback-20260410-153039: folder-browser tree indentation', () => {
     expect(nestedRuleMatch).toBeTruthy();
 
     const ruleBody = nestedRuleMatch[1];
-    const paddingMatch = ruleBody.match(/padding-left\s*:\s*(\d+)px/);
+    const paddingMatch = ruleBody.match(/padding-left\s*:\s*(\d+)(?:px)?/);
     expect(paddingMatch).toBeTruthy();
 
     const paddingValue = parseInt(paddingMatch[1], 10);
-    expect(paddingValue).toBeLessThanOrEqual(12);
+    expect(paddingValue).toBeLessThanOrEqual(4);
   });
 });

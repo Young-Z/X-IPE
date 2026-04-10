@@ -56,7 +56,12 @@ class ContentRenderer {
                     !href.startsWith('http://') && !href.startsWith('https://') &&
                     !href.startsWith('data:') && !href.startsWith('/')) {
                     const dir = self.currentPath.substring(0, self.currentPath.lastIndexOf('/'));
-                    const resolvedPath = dir ? dir + '/' + href : href;
+                    let resolvedPath = dir ? dir + '/' + href : href;
+                    // Strip KB root prefix — the API expects paths relative to it
+                    const KB_PREFIX = 'x-ipe-docs/knowledge-base/';
+                    if (resolvedPath.startsWith(KB_PREFIX)) {
+                        resolvedPath = resolvedPath.substring(KB_PREFIX.length);
+                    }
                     const encodedPath = resolvedPath.split('/').map(encodeURIComponent).join('/');
                     const apiUrl = '/api/kb/files/' + encodedPath + '/raw';
                     const safeAlt = (text || '').replace(/"/g, '&quot;');

@@ -87,7 +87,7 @@
     margin: 0;
 }
 .folder-browser-tree .file-tree .file-tree {
-    padding-left: 10px;
+    padding-left: 0;
 }
 .folder-browser-tree .tree-item {
     padding: 4px 8px;
