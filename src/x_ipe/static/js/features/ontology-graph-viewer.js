@@ -872,6 +872,11 @@ class OntologyGraphViewer {
         treePanel.appendChild(treeContent);
         body.appendChild(treePanel);
 
+        // Draggable divider between tree and preview
+        const divider = document.createElement('div');
+        divider.className = 'folder-browser-divider';
+        body.appendChild(divider);
+
         // Right: preview panel
         const previewPanel = document.createElement('div');
         previewPanel.className = 'folder-browser-preview';
@@ -884,6 +889,30 @@ class OntologyGraphViewer {
 
         modal.appendChild(body);
         backdrop.appendChild(modal);
+
+        // Setup divider drag behavior
+        divider.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            const startX = e.clientX;
+            const startWidth = treePanel.getBoundingClientRect().width;
+            const onMove = (ev) => {
+                const delta = ev.clientX - startX;
+                const newWidth = Math.max(120, Math.min(startWidth + delta, body.clientWidth * 0.6));
+                treePanel.style.width = newWidth + 'px';
+            };
+            const onUp = () => {
+                document.removeEventListener('mousemove', onMove);
+                document.removeEventListener('mouseup', onUp);
+                document.body.style.userSelect = '';
+                document.body.style.cursor = '';
+                divider.classList.remove('dragging');
+            };
+            document.body.style.userSelect = 'none';
+            document.body.style.cursor = 'col-resize';
+            divider.classList.add('dragging');
+            document.addEventListener('mousemove', onMove);
+            document.addEventListener('mouseup', onUp);
+        });
 
         // Build tree from flat file paths
         if (filePaths.length === 0) {

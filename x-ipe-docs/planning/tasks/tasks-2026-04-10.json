@@ -83,7 +83,7 @@
     {
       "task_id": "TASK-4877",
       "task_type": "Bug Fix",
-      "description": "UIUX Feedback Feedback-20260410-153039: (1) Folder browser tree indentation too wide for sub-folders/files, (2) Image preview fails to find existing images in folder browser",
+      "description": "All 3 bugs fixed and verified via Chrome DevTools MCP: (1) tree indent reduced to 8px/level, (2) navigator minimap broken image hidden, (3) content preview image paths fixed by stripping KB prefix",
       "role": "Ember 🔥",
       "status": "completed",
       "output_links": [
@@ -94,7 +94,18 @@
       ],
       "next_task": "",
       "created_at": "2026-04-10T07:33:42.136013+00:00",
-      "last_updated": "2026-04-10T07:47:37.092724+00:00"
+      "last_updated": "2026-04-10T09:08:56.744101+00:00"
+    },
+    {
+      "task_id": "TASK-4878",
+      "task_type": "Bug Fix",
+      "description": "Source Files modal: (1) left/right panel divider should be draggable to resize, (2) left tree panel should be narrower by default",
+      "status": "in_progress",
+      "role": "Ember 🔥",
+      "output_links": [],
+      "next_task": "",
+      "created_at": "2026-04-10T09:47:46.739646+00:00",
+      "last_updated": "2026-04-10T09:47:46.739646+00:00"
     }
   ]
 }

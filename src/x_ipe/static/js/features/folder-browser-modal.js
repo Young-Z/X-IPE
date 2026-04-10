@@ -133,6 +133,12 @@ class FolderBrowserModal {
         this.treePanel.appendChild(this.treeContent);
         body.appendChild(this.treePanel);
 
+        // Draggable divider
+        this.divider = document.createElement('div');
+        this.divider.className = 'folder-browser-divider';
+        body.appendChild(this.divider);
+        this._setupDividerDrag(body);
+
         this.previewPanel = document.createElement('div');
         this.previewPanel.className = 'folder-browser-preview';
         this.previewPanel.setAttribute('tabindex', '0');
@@ -190,6 +196,32 @@ class FolderBrowserModal {
         this.searchInput.addEventListener('input', () => {
             clearTimeout(this._searchTimeout);
             this._searchTimeout = setTimeout(() => this._applyFilter(), 200);
+        });
+    }
+
+    _setupDividerDrag(body) {
+        let startX, startWidth;
+        const onMouseMove = (e) => {
+            const delta = e.clientX - startX;
+            const newWidth = Math.max(120, Math.min(startWidth + delta, body.clientWidth * 0.6));
+            this.treePanel.style.width = newWidth + 'px';
+        };
+        const onMouseUp = () => {
+            this.divider.classList.remove('dragging');
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+            document.body.style.userSelect = '';
+            document.body.style.cursor = '';
+        };
+        this.divider.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            startX = e.clientX;
+            startWidth = this.treePanel.offsetWidth;
+            this.divider.classList.add('dragging');
+            document.body.style.userSelect = 'none';
+            document.body.style.cursor = 'col-resize';
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
         });
     }
 

@@ -74,12 +74,27 @@
 
 /* Tree panel (left) */
 .folder-browser-tree {
-    width: 30%;
+    width: 20%;
+    min-width: 120px;
+    max-width: 60%;
     overflow-y: auto;
-    border-right: 1px solid var(--border-color, #e2e8f0);
+    border-right: none;
     padding: 0;
     display: flex;
     flex-direction: column;
+}
+
+/* Draggable divider between tree and preview */
+.folder-browser-divider {
+    width: 4px;
+    cursor: col-resize;
+    background: var(--border-color, #e2e8f0);
+    flex-shrink: 0;
+    transition: background 0.15s;
+}
+.folder-browser-divider:hover,
+.folder-browser-divider.dragging {
+    background: var(--accent, #6366f1);
 }
 .folder-browser-tree .file-tree {
     list-style: none;
@@ -108,7 +123,8 @@
 
 /* Preview panel (right) */
 .folder-browser-preview {
-    width: 70%;
+    flex: 1;
+    min-width: 0;
     display: flex;
     flex-direction: column;
     overflow: hidden;
