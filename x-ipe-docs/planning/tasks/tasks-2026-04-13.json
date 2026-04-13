@@ -109,6 +109,64 @@
       "next_task": "",
       "created_at": "2026-04-13T07:22:07.121181+00:00",
       "last_updated": "2026-04-13T07:22:30.023045+00:00"
+    },
+    {
+      "task_id": "TASK-4889",
+      "task_type": "skill-creation",
+      "description": "Create x-ipe-tool-knowledge-extraction-notes skill - general-purpose knowledge extractor producing structured markdown KBs with hierarchy, images, and overview.md",
+      "role": "Ember 🔥",
+      "status": "completed",
+      "output_links": [
+        ".github/skills/x-ipe-tool-knowledge-extraction-notes/SKILL.md",
+        "x-ipe-docs/skill-meta/x-ipe-tool-knowledge-extraction-notes/skill-meta.md"
+      ],
+      "next_task": "none",
+      "created_at": "2026-04-13T08:19:28.528953+00:00",
+      "last_updated": "2026-04-13T08:28:20.613194+00:00"
+    },
+    {
+      "task_id": "TASK-4890",
+      "task_type": "skill-update",
+      "description": "Update x-ipe-task-based-application-knowledge-extractor to support notes category, integrating x-ipe-tool-knowledge-extraction-notes tool skill",
+      "role": "Ember 🔥",
+      "status": "completed",
+      "output_links": [
+        ".github/skills/x-ipe-task-based-application-knowledge-extractor/SKILL.md",
+        ".github/skills/x-ipe-tool-knowledge-extraction-notes/SKILL.md"
+      ],
+      "next_task": "none",
+      "created_at": "2026-04-13T08:31:14.104966+00:00",
+      "last_updated": "2026-04-13T08:32:46.622555+00:00"
+    },
+    {
+      "task_id": "TASK-4891",
+      "task_type": "skill-update",
+      "description": "Add mandatory References footer section to x-ipe-tool-knowledge-extraction-notes — every markdown file must list original source URLs/data sources",
+      "role": "Ember 🔥",
+      "status": "completed",
+      "output_links": [
+        ".github/skills/x-ipe-tool-knowledge-extraction-notes/SKILL.md",
+        ".github/skills/x-ipe-tool-knowledge-extraction-notes/templates/general-template.md",
+        ".github/skills/x-ipe-tool-knowledge-extraction-notes/templates/overview-template.md"
+      ],
+      "next_task": "none",
+      "created_at": "2026-04-13T08:52:13.278601+00:00",
+      "last_updated": "2026-04-13T08:54:03.907505+00:00"
+    },
+    {
+      "task_id": "TASK-4892",
+      "task_type": "skill-creation",
+      "description": "Create x-ipe-task-based-knowledge-referencer, rename user-manual-referencer to reference-user-manual, rename ontology to reference-ontology",
+      "role": "Cipher",
+      "status": "completed",
+      "output_links": [
+        ".github/skills/x-ipe-task-based-knowledge-referencer/SKILL.md",
+        ".github/skills/x-ipe-tool-reference-user-manual/SKILL.md",
+        ".github/skills/x-ipe-tool-reference-ontology/SKILL.md"
+      ],
+      "next_task": "",
+      "created_at": "2026-04-13T16:13:46.478544+00:00",
+      "last_updated": "2026-04-13T16:42:15.356840+00:00"
     }
   ]
 }
