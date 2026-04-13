@@ -89,14 +89,28 @@ python3 graph_ops.py build \
 
 ### Operation C: Search
 
-Automated script for searching across ontology graphs:
+Search across ontology graphs and push results to the KB Graph Viewer UI.
+
+**IMPORTANT:** This operation has TWO mandatory steps. You MUST execute BOTH steps in sequence. Do NOT skip Step 2.
+
+**Step 1 — Run search and save output:**
 
 ```bash
 python3 search.py \
     --query "authentication" \
     --scope all \
-    --ontology-dir x-ipe-docs/knowledge-base/.ontology/
+    --ontology-dir x-ipe-docs/knowledge-base/.ontology/ \
+    > /tmp/ontology-search-result.json
 ```
+
+**Step 2 — Push results to KB Graph Viewer UI via callback API:**
+
+```bash
+python3 ui-callback.py \
+    --results-json /tmp/ontology-search-result.json
+```
+
+> **BLOCKING:** Step 2 MUST always be executed after Step 1. The `ui-callback.py` script POSTs search results to the internal callback API (`/api/internal/ontology/callback`), which broadcasts via SocketIO to the KB Graph Viewer frontend. Without Step 2, search results will NOT appear in the UI. The auth token is auto-detected from the running server's `instance/.internal_token` file — no `--token` flag needed. Port defaults to 5858 (from `.x-ipe.yaml`).
 
 ### Operation D: Retag (Re-tag Filed-Untagged Files)
 

@@ -13,23 +13,16 @@
             <span class="brand-subtitle">An AI native integrated project environment for end to end business value delivery</span>
         </div>
         <div class="menu-actions">
-            <!-- FEATURE-036-B: Workflow / Free mode toggle -->
-            <div class="mode-toggle" id="mode-toggle" title="Switch between Free mode and Workflow mode">
-                <span class="mode-label mode-label--free" id="mode-label-free">Free</span>
-                <button class="mode-toggle-track" id="mode-toggle-btn" role="switch" aria-checked="false" aria-label="Toggle workflow mode">
-                    <span class="mode-toggle-thumb"></span>
-                </button>
-                <span class="mode-label mode-label--workflow" id="mode-label-workflow">Workflow</span>
+            <!-- FEATURE-036-B / CR-001: Mode buttons (Free / KG / Workflow) -->
+            <div class="mode-btn-group" id="mode-btn-group">
+                <button class="mode-btn active" id="btn-mode-free" title="Free mode">Free</button>
+                <button class="mode-btn" id="btn-mode-kg" title="Knowledge Graph">KG</button>
+                <button class="mode-btn" id="btn-mode-workflow" title="Workflow mode">Workflow</button>
             </div>
             <!-- FEATURE-049-B / CR-002: KB Browse Modal Button -->
             <button class="menu-link" id="btn-kb-browse" title="Knowledge Base">
                 <i class="bi bi-book"></i>
                 <span>KB</span>
-            </button>
-            <!-- FEATURE-058-E: Ontology Graph Viewer Button -->
-            <button class="menu-link" id="btn-kg-viewer" title="Knowledge Graph">
-                <i class="bi bi-diagram-3"></i>
-                <span>KG</span>
             </button>
             <!-- FEATURE-011: Stage Toolbox Button -->
             <button class="menu-link" id="btn-stage-toolbox" title="Stage Toolbox - Manage development tools">

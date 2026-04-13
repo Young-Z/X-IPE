@@ -382,3 +382,77 @@
 |----|----------|-----|-------------|----------------|
 | ISS-01 | Minor | AC-058F-04c | AI Agent button not visually disabled when no graphs selected; shows error on click instead | Add `disabled` attribute and visual styling when `_selectedGraphs.size === 0` |
 | ISS-02 | Env | AC-058F-04b | Command pre-fill requires active terminal pty session | Normal in test environment; works with live terminal |
+
+---
+
+# CR-001: Socket Callback for AI Agent Search Results — Acceptance Tests
+
+**Tester:** Bolt (AI Agent)
+**Date:** 2026-04-13
+**Specification Version:** v1.2
+**Test Scope:** AC-058F-09, AC-058F-10, AC-058F-11 (CR-001 additions)
+
+## Summary
+
+| Metric | Value |
+|--------|-------|
+| Total Test Cases | 18 |
+| Passed | 18 |
+| Failed | 0 |
+| Blocked | 0 |
+| Pass Rate | **100%** |
+
+### Results by Type
+
+| Test Type | Passed | Failed | Blocked | Total |
+|-----------|--------|--------|---------|-------|
+| Backend-API | 6 | 0 | 0 | 6 |
+| Unit | 4 | 0 | 0 | 4 |
+| Integration | 2 | 0 | 0 | 2 |
+| Frontend-UI | 6 | 0 | 0 | 6 |
+
+---
+
+## Backend-API Tests (via pytest — `tests/test_ontology_callback.py`)
+
+| TC | AC | Description | Priority | Status | Notes |
+|----|-----|-------------|----------|--------|-------|
+| TC-001 | AC-058F-09a | Callback endpoint returns 200 on valid payload | P0 | ✅ PASS | `POST /api/internal/ontology/callback` returns `{"status":"emitted"}` |
+| TC-002 | AC-058F-09b | Missing/invalid auth token returns 401 | P0 | ✅ PASS | Tested: no header, empty bearer, wrong token |
+| TC-003 | AC-058F-09c | Invalid JSON payload returns 400 | P1 | ✅ PASS | Missing `results`, missing `subgraph`, `results` not array |
+| TC-004 | AC-058F-09d | SocketIO `ontology_search_result` event emitted | P0 | ✅ PASS | Mocked socketio.emit, verified namespace `/ontology` |
+| TC-005 | AC-058F-09f | Token sourced from env → yaml → auto-gen fallback | P1 | ✅ PASS | Tested all 3 fallback paths |
+| TC-006 | AC-058F-09a | Handler registration in `__init__.py` exports | P1 | ✅ PASS | `register_ontology_handlers` in `__all__` |
+
+## Unit Tests (via pytest — `tests/test_ontology_callback.py` + `tests/test_ui_callback.py`)
+
+| TC | AC | Description | Priority | Status | Notes |
+|----|-----|-------------|----------|--------|-------|
+| TC-007 | AC-058F-09a | Ontology namespace connect/disconnect handlers | P1 | ✅ PASS | `register_ontology_handlers(socketio)` registers both events |
+| TC-008 | AC-058F-11a | `ui-callback.py` POSTs results successfully | P0 | ✅ PASS | Mocked requests, verified JSON payload structure |
+| TC-009 | AC-058F-11b | `ui-callback.py` handles missing file gracefully | P1 | ✅ PASS | Returns exit code 1, logs error |
+| TC-011 | AC-058F-11d | `ui-callback.py` structured log format | P2 | ✅ PASS | Output contains `status`, `request_id`, timestamp |
+
+## Integration Tests (via pytest — `tests/test_ui_callback.py` + `tests/test_ontology_callback.py`)
+
+| TC | AC | Description | Priority | Status | Notes |
+|----|-----|-------------|----------|--------|-------|
+| TC-010 | AC-058F-11c | `ui-callback.py` retries once on failure | P1 | ✅ PASS | Mocked 500 → 200, verified 2 requests made |
+| TC-018 | AC-058F-10f | Socket reconnection config values | P1 | ✅ PASS | `reconnection=true, delay=1000, delayMax=5000, attempts=10` (Chrome DevTools) |
+
+## Frontend-UI Tests (via Chrome DevTools MCP)
+
+| TC | AC | Description | Priority | Status | Notes |
+|----|-----|-------------|----------|--------|-------|
+| TC-012 | AC-058F-10a | "Search with AI Agent" button triggers socket subscribe | P0 | ✅ PASS | `viewer._socket._subscribed === true`, type `OntologyGraphSocket` |
+| TC-013 | AC-058F-10b | POST callback → canvas receives result | P0 | ✅ PASS | curl POST → `_lastRequestId === 'tc-013-test'`, end-to-end verified |
+| TC-014 | AC-058F-09e | Malformed payload silently ignored | P1 | ✅ PASS | `{}`, `{results: 'string'}`, `null` — all no-throw |
+| TC-015 | AC-058F-10h | Duplicate request_id discarded | P1 | ✅ PASS | Same ID → canvas NOT called; new ID → canvas called |
+| TC-016 | AC-058F-10g | Progress indicator active after 3s timeout | P1 | ✅ PASS | `#ontology-agent-progress.active` after 3.5s delay |
+| TC-017 | AC-058F-10e | `viewer.destroy()` nullifies socket | P1 | ✅ PASS | `viewer._socket === null` after destroy |
+
+---
+
+## Issues Found (CR-001)
+
+_No issues found. All 18 test cases passed._

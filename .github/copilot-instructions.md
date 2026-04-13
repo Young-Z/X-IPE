@@ -131,6 +131,13 @@ Always follow:
 
 ---
 
+## Knowledge Search
+
+**When:** Agent needs to search the knowledge base or knowledge graph
+**Then:** Always use the **ontology search** (`x-ipe-tool-ontology` Operation C) as the first choice before any other search approach. The ontology search provides structured, graph-aware results with entity relationships and subgraph context.
+
+---
+
 ## Skill Management
 
 ### Creating, Updating, or Validating X-IPE Skills

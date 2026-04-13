@@ -100,12 +100,31 @@
       "task_id": "TASK-4878",
       "task_type": "Bug Fix",
       "description": "Source Files modal: (1) left/right panel divider should be draggable to resize, (2) left tree panel should be narrower by default",
-      "status": "in_progress",
+      "status": "completed",
       "role": "Ember 🔥",
-      "output_links": [],
+      "output_links": [
+        "src/x_ipe/static/css/features/folder-browser-modal.css",
+        "src/x_ipe/static/js/features/folder-browser-modal.js",
+        "src/x_ipe/static/js/features/ontology-graph-viewer.js",
+        "tests/frontend-js/folder-browser-divider.test.js"
+      ],
       "next_task": "",
       "created_at": "2026-04-10T09:47:46.739646+00:00",
-      "last_updated": "2026-04-10T09:47:46.739646+00:00"
+      "last_updated": "2026-04-10T10:02:55.237009+00:00"
+    },
+    {
+      "task_id": "TASK-4880",
+      "task_type": "General Purpose Execution",
+      "description": "[Zephyr] Search Xiaohongshu for Salomon trail shoes, find top 10 collected posts, extract comments, generate insight report with citations and screenshots. KB: xiaohongshu-user-manual",
+      "role": "Zephyr",
+      "status": "completed",
+      "output_links": [
+        "x-ipe-docs/red-note-reports/salomon-trail-shoes-insight-report.md",
+        "x-ipe-docs/red-note-reports/screenshots/"
+      ],
+      "next_task": "",
+      "created_at": "2026-04-10T12:35:32.800540+00:00",
+      "last_updated": "2026-04-10T12:45:08.118171+00:00"
     }
   ]
 }

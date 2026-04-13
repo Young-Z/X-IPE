@@ -1,0 +1,114 @@
+{
+  "_version": "1.0",
+  "tasks": [
+    {
+      "task_id": "TASK-4882",
+      "task_type": "Change Request",
+      "description": "CR: Add WebSocket callback from AI Agent ontology search to KB Graph UI. When Search with AI Agent completes, push results via socket to frontend for real-time graph rendering.",
+      "role": "Bolt",
+      "status": "completed",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-058/FEATURE-058-F/CR-001.md",
+        "x-ipe-docs/requirements/EPIC-058/FEATURE-058-F/specification.md"
+      ],
+      "next_task": "x-ipe-task-based-feature-refinement",
+      "created_at": "2026-04-13T03:33:07.052381+00:00",
+      "last_updated": "2026-04-13T03:49:25.823957+00:00"
+    },
+    {
+      "task_id": "TASK-4883",
+      "task_type": "Feature Refinement",
+      "description": "Refine FEATURE-058-F spec v1.1 after CR-001: validate new ACs (AC-058F-09/10/11), FRs (FR-6/FR-7), BR-6 for WebSocket callback.",
+      "status": "completed",
+      "role": "Bolt",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-058/FEATURE-058-F/specification.md"
+      ],
+      "next_task": "x-ipe-task-based-technical-design",
+      "created_at": "2026-04-13T03:52:16.604679+00:00",
+      "last_updated": "2026-04-13T05:15:20.094536+00:00"
+    },
+    {
+      "task_id": "TASK-4884",
+      "task_type": "Technical Design",
+      "description": "Update FEATURE-058-F technical design v2.0 for CR-001 socket callback: ontology_handlers.py, ui-callback.py, frontend socket listener, internal callback endpoint.",
+      "status": "completed",
+      "role": "Bolt",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-058/FEATURE-058-F/technical-design.md"
+      ],
+      "next_task": "x-ipe-task-based-code-implementation",
+      "created_at": "2026-04-13T05:33:44.176011+00:00",
+      "last_updated": "2026-04-13T05:42:16.574280+00:00"
+    },
+    {
+      "task_id": "TASK-4885",
+      "task_type": "Code Implementation",
+      "description": "Implement CR-001 socket callback for FEATURE-058-F: ontology_handlers.py, internal callback endpoint, ontology-graph-socket.js, ui-callback.py, app.py registration, viewer integration.",
+      "status": "completed",
+      "role": "Bolt",
+      "output_links": [
+        "src/x_ipe/handlers/ontology_handlers.py",
+        "src/x_ipe/routes/ontology_graph_routes.py",
+        "src/x_ipe/static/js/features/ontology-graph-socket.js",
+        ".github/skills/x-ipe-tool-ontology/scripts/ui-callback.py",
+        "tests/test_ontology_callback.py",
+        "tests/test_ui_callback.py"
+      ],
+      "next_task": "x-ipe-task-based-feature-acceptance-test",
+      "created_at": "2026-04-13T05:44:50.596413+00:00",
+      "last_updated": "2026-04-13T05:52:36.855434+00:00"
+    },
+    {
+      "task_id": "TASK-4886",
+      "task_type": "Feature Acceptance Test",
+      "description": "Acceptance testing for FEATURE-058-F CR-001 socket callback mechanism - verify all 18 ACs",
+      "status": "completed",
+      "role": "Bolt",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-058/FEATURE-058-F/acceptance-test-cases.md"
+      ],
+      "next_task": "x-ipe-task-based-feature-closing",
+      "created_at": "2026-04-13T06:01:35.380441+00:00",
+      "last_updated": "2026-04-13T06:13:06.828987+00:00"
+    },
+    {
+      "task_id": "TASK-KG-ZOOM",
+      "task_type": "bug_fix",
+      "description": "KG view zoom percentage display not updating when zooming in/out via buttons or mouse wheel",
+      "role": "developer",
+      "status": "completed",
+      "output_links": [],
+      "next_task": "",
+      "created_at": "2026-04-13T06:10:53.870496+00:00",
+      "last_updated": "2026-04-13T06:12:36.267840+00:00"
+    },
+    {
+      "task_id": "TASK-4887",
+      "task_type": "Bug Fix",
+      "description": "Fix 3 interconnected bugs in socket callback flow: (1) search.py does not auto-trigger ui-callback.py, (2) field name mismatches (matches vs results) and missing query/scope in search output, (3) subgraph node format mismatch causes empty highlighting in UI",
+      "status": "completed",
+      "role": "Bolt",
+      "output_links": [],
+      "next_task": "N/A",
+      "created_at": "2026-04-13T06:28:08.658726+00:00",
+      "last_updated": "2026-04-13T06:31:37.382239+00:00"
+    },
+    {
+      "task_id": "TASK-4888",
+      "task_type": "Change Request",
+      "description": "Update AI search prompt to include via ontology skill; Add ontology-first knowledge search rule to all instructions.md",
+      "status": "completed",
+      "role": "Bolt",
+      "output_links": [
+        "src/x_ipe/static/js/features/ontology-graph-viewer.js",
+        "src/x_ipe/resources/templates/instructions-template.md",
+        "src/x_ipe/resources/templates/instructions-template-no-dao.md",
+        ".github/copilot-instructions.md"
+      ],
+      "next_task": "",
+      "created_at": "2026-04-13T07:22:07.121181+00:00",
+      "last_updated": "2026-04-13T07:22:30.023045+00:00"
+    }
+  ]
+}

@@ -12,6 +12,7 @@ class OntologyGraphViewer {
         this.container = null;
         this.canvas = null;
         this.detailPanel = null;
+        this._socket = null;
         this._selectedGraphs = new Set();
         this._graphIndex = [];
         this._cdnLoaded = false;
@@ -106,6 +107,7 @@ class OntologyGraphViewer {
         this.canvas = new OntologyGraphCanvas(canvasContainer, {
             onNodeSelect: (nodeId) => this._onNodeSelect(nodeId),
             onNodeDeselect: () => this._onNodeDeselect(),
+            onZoomChange: () => this._updateStats(),
         });
         this.canvas.init();
 
@@ -181,6 +183,10 @@ class OntologyGraphViewer {
                     </svg>
                     <span>Search with AI Agent</span>
                 </button>
+                <div id="ontology-agent-progress" class="ontology-agent-progress">
+                    <div class="spinner"></div>
+                    <span>Agent search in progress…</span>
+                </div>
             </header>
 
             <!-- Canvas Area -->
@@ -453,6 +459,14 @@ class OntologyGraphViewer {
             return;
         }
 
+        // Subscribe to socket for live results (CR-001)
+        if (!this._socket && this.canvas) {
+            this._socket = new OntologyGraphSocket(this.canvas);
+        }
+        if (this._socket) {
+            this._socket.subscribe();
+        }
+
         const tm = window.terminalManager;
 
         // Expand console if collapsed
@@ -473,7 +487,7 @@ class OntologyGraphViewer {
 
         // Build and send command
         const scopeStr = graphs.join(', ');
-        const command = `search the knowledge graph scoped to ${scopeStr} for: `;
+        const command = `search the knowledge graph scoped to ${scopeStr} via ontology skill for: `;
         if (tm.sendCopilotPromptCommandNoEnter) {
             tm.sendCopilotPromptCommandNoEnter(command);
         }
@@ -1227,6 +1241,10 @@ class OntologyGraphViewer {
 
     destroy() {
         this._destroyed = true;
+        if (this._socket) {
+            this._socket.destroy();
+            this._socket = null;
+        }
         if (this._searchAbortController) {
             this._searchAbortController.abort();
             this._searchAbortController = null;

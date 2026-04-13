@@ -166,6 +166,29 @@ def _init_services(app):
     kb_root_path = str(Path(project_root) / KB_ROOT_DIR)
     app.config['ONTOLOGY_GRAPH_SERVICE'] = OntologyGraphService(kb_root_path)
 
+    # Internal auth token for ontology callback (CR-001)
+    internal_token = os.environ.get('X_IPE_INTERNAL_TOKEN', '')
+    if not internal_token:
+        x_ipe_config = app.config.get('X_IPE_CONFIG')
+        if x_ipe_config:
+            server_cfg = x_ipe_config.get('server', {}) if isinstance(x_ipe_config, dict) else {}
+            internal_token = server_cfg.get('internal_token', '')
+    if not internal_token:
+        import secrets
+        internal_token = secrets.token_urlsafe(32)
+    app.config['INTERNAL_AUTH_TOKEN'] = internal_token
+
+    # Write token to well-known file so CLI tools (e.g. ui-callback.py) can auto-read it
+    project_root_for_token = app.config.get('PROJECT_ROOT', '.')
+    token_dir = os.path.join(project_root_for_token, 'instance')
+    token_file = os.path.join(token_dir, '.internal_token')
+    try:
+        os.makedirs(token_dir, exist_ok=True)
+        with open(token_file, 'w') as f:
+            f.write(internal_token)
+    except OSError:
+        pass  # Best-effort; CLI tools can still use --token or $X_IPE_INTERNAL_TOKEN
+
     # Cleanup old UIUX feedback on startup (TASK-237)
     if not app.config.get('TESTING'):
         project_root = app.config.get('PROJECT_ROOT', '.')
@@ -231,10 +254,11 @@ def _register_blueprints(app):
 
 def _register_handlers():
     """Register all WebSocket handlers."""
-    from x_ipe.handlers import register_terminal_handlers, register_voice_handlers
+    from x_ipe.handlers import register_terminal_handlers, register_voice_handlers, register_ontology_handlers
     
     register_terminal_handlers(socketio)
     register_voice_handlers(socketio)
+    register_ontology_handlers(socketio)
 
 
 # Entry point for running directly

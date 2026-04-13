@@ -194,5 +194,53 @@
   "x-ipe-workflow-mode-user-manual/section-08-faq-reference.md": {
     "status": "filed",
     "destination": "x-ipe-docs/knowledge-base/x-ipe-workflow-mode-user-manual/section-08-faq-reference.md"
+  },
+  "xiaohongshu-user-manual/extraction_report.md": {
+    "status": "filed",
+    "destination": "x-ipe-docs/knowledge-base/xiaohongshu-user-manual/extraction_report.md"
+  },
+  "xiaohongshu-user-manual/screenshots/01-overview-explore-page.png": {
+    "status": "filed",
+    "destination": "x-ipe-docs/knowledge-base/xiaohongshu-user-manual/screenshots/01-overview-explore-page.png"
+  },
+  "xiaohongshu-user-manual/screenshots/04-note-detail-view.png": {
+    "status": "filed",
+    "destination": "x-ipe-docs/knowledge-base/xiaohongshu-user-manual/screenshots/04-note-detail-view.png"
+  },
+  "xiaohongshu-user-manual/screenshots/05-search-results-hoka.png": {
+    "status": "filed",
+    "destination": "x-ipe-docs/knowledge-base/xiaohongshu-user-manual/screenshots/05-search-results-hoka.png"
+  },
+  "xiaohongshu-user-manual/section-01-overview.md": {
+    "status": "filed",
+    "destination": "x-ipe-docs/knowledge-base/xiaohongshu-user-manual/section-01-overview.md"
+  },
+  "xiaohongshu-user-manual/section-02-installation-setup.md": {
+    "status": "filed",
+    "destination": "x-ipe-docs/knowledge-base/xiaohongshu-user-manual/section-02-installation-setup.md"
+  },
+  "xiaohongshu-user-manual/section-03-getting-started.md": {
+    "status": "filed",
+    "destination": "x-ipe-docs/knowledge-base/xiaohongshu-user-manual/section-03-getting-started.md"
+  },
+  "xiaohongshu-user-manual/section-04-core-features.md": {
+    "status": "filed",
+    "destination": "x-ipe-docs/knowledge-base/xiaohongshu-user-manual/section-04-core-features.md"
+  },
+  "xiaohongshu-user-manual/section-05-common-workflows.md": {
+    "status": "filed",
+    "destination": "x-ipe-docs/knowledge-base/xiaohongshu-user-manual/section-05-common-workflows.md"
+  },
+  "xiaohongshu-user-manual/section-06-configuration.md": {
+    "status": "filed",
+    "destination": "x-ipe-docs/knowledge-base/xiaohongshu-user-manual/section-06-configuration.md"
+  },
+  "xiaohongshu-user-manual/section-07-troubleshooting.md": {
+    "status": "filed",
+    "destination": "x-ipe-docs/knowledge-base/xiaohongshu-user-manual/section-07-troubleshooting.md"
+  },
+  "xiaohongshu-user-manual/section-08-faq-reference.md": {
+    "status": "filed",
+    "destination": "x-ipe-docs/knowledge-base/xiaohongshu-user-manual/section-08-faq-reference.md"
   }
 }

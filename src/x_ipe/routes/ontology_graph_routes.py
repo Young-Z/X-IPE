@@ -113,3 +113,52 @@ def search_bfs():
         return _error('INVALID_PARAMS', 'Invalid numeric parameter', 400)
     except Exception as exc:
         return _error('INTERNAL_ERROR', str(exc), 500)
+
+
+@ontology_graph_bp.route('/api/internal/ontology/callback', methods=['POST'])
+@x_ipe_tracing()
+def handle_ontology_callback():
+    """POST /api/internal/ontology/callback — Receive AI Agent search results and broadcast via SocketIO.
+
+    CR-001: Internal endpoint called by ui-callback.py to push search results
+    to all connected graph viewer clients via the /ontology SocketIO namespace.
+
+    Headers:
+        Authorization: Bearer <internal_token>
+
+    Body (JSON):
+        results: list of {node_id, label, node_type, graph, relevance}
+        subgraph: {nodes, edges}
+        query: str (optional)
+        scope: str (optional)
+        request_id: str (optional, UUID for dedup)
+    """
+    # Validate auth token (AC-058F-09f)
+    expected_token = current_app.config.get('INTERNAL_AUTH_TOKEN', '')
+    if not expected_token:
+        return _error('UNAUTHORIZED', 'Internal auth token not configured', 401)
+
+    auth_header = request.headers.get('Authorization', '')
+    if not auth_header.startswith('Bearer ') or auth_header[7:] != expected_token:
+        return _error('UNAUTHORIZED', 'Invalid internal token', 401)
+
+    # Parse and validate payload (AC-058F-09c)
+    data = request.get_json(silent=True)
+    if not data or not isinstance(data.get('results'), list) or data.get('subgraph') is None:
+        return _error('INVALID_PAYLOAD', 'Missing required fields: results (array), subgraph (object)', 400)
+
+    # Emit via SocketIO broadcast on /ontology namespace (AC-058F-09b, AC-058F-09d)
+    socketio = current_app.extensions.get('socketio')
+    if socketio:
+        socketio.emit('ontology_search_result', {
+            'results': data['results'],
+            'subgraph': data['subgraph'],
+            'query': data.get('query', ''),
+            'scope': data.get('scope', ''),
+            'request_id': data.get('request_id', ''),
+        }, namespace='/ontology')
+
+    return jsonify({
+        'status': 'emitted',
+        'request_id': data.get('request_id', ''),
+    })

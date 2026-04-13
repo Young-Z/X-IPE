@@ -167,110 +167,103 @@ function initializeApp() {
     // FEATURE-058-E: Ontology Graph Viewer
     if (typeof OntologyGraphViewer !== 'undefined') {
         window.ontologyGraphViewer = new OntologyGraphViewer();
-        let kgActive = false;
-        let kgPreviousMode = null; // 'free' or 'workflow'
-        const kgBtn = document.getElementById('btn-kg-viewer');
-        if (kgBtn) {
-            kgBtn.addEventListener('click', () => {
-                const container = document.getElementById('content-body');
-                const sidebar = document.getElementById('sidebar');
-                const resizeHandle = document.querySelector('.sidebar-resize-handle');
-                const contentHeader = document.querySelector('.content-header');
-                const middleSection = document.getElementById('middle-section');
+    }
 
-                if (!kgActive) {
-                    // Enter KG mode
-                    kgPreviousMode = modeToggleBtn && modeToggleBtn.getAttribute('aria-checked') === 'true' ? 'workflow' : 'free';
-                    kgActive = true;
-                    kgBtn.classList.add('active');
-                    if (sidebar) sidebar.style.display = 'none';
-                    if (resizeHandle) resizeHandle.style.display = 'none';
-                    if (contentHeader) contentHeader.style.display = 'none';
-                    if (container) {
-                        container.className = 'content-body';
-                        container.innerHTML = '';
-                        container.style.padding = '0';
-                        container.style.overflow = 'hidden';
-                        window.ontologyGraphViewer.render(container);
-                    }
-                } else {
-                    // Exit KG mode
-                    kgActive = false;
-                    kgBtn.classList.remove('active');
-                    window.ontologyGraphViewer.destroy();
-                    if (container) {
-                        container.style.padding = '';
-                        container.style.overflow = '';
-                    }
-                    if (sidebar) sidebar.style.display = '';
-                    if (resizeHandle) resizeHandle.style.display = '';
-                    if (contentHeader) contentHeader.style.display = '';
-                    // Restore homepage
-                    if (container && typeof window.HomepageInfinity !== 'undefined') {
-                        container.className = 'content-body';
-                        container.innerHTML = window.HomepageInfinity.getTemplate();
-                        window.HomepageInfinity.init(window.projectSidebar);
-                    } else if (container) {
-                        container.className = 'content-body';
-                        container.innerHTML = '';
-                    }
-                }
-            });
+    // FEATURE-036-B / CR-001: Unified mode switcher (Free / KG / Workflow)
+    const btnModeFree = document.getElementById('btn-mode-free');
+    const btnModeKg = document.getElementById('btn-mode-kg');
+    const btnModeWorkflow = document.getElementById('btn-mode-workflow');
+    let currentMode = 'free';
+
+    function _getLayout() {
+        return {
+            container: document.getElementById('content-body'),
+            sidebar: document.getElementById('sidebar'),
+            resizeHandle: document.querySelector('.sidebar-resize-handle'),
+            contentHeader: document.querySelector('.content-header'),
+        };
+    }
+
+    function _deactivateAll() {
+        if (btnModeFree) btnModeFree.classList.remove('active');
+        if (btnModeKg) btnModeKg.classList.remove('active');
+        if (btnModeWorkflow) btnModeWorkflow.classList.remove('active');
+    }
+
+    function _leaveCurrentMode(layout) {
+        if (currentMode === 'kg' && window.ontologyGraphViewer) {
+            window.ontologyGraphViewer.destroy();
+            if (layout.container) {
+                layout.container.style.padding = '';
+                layout.container.style.overflow = '';
+            }
+        }
+        if (currentMode === 'workflow' && typeof workflow !== 'undefined' && workflow._stopAllPolling) {
+            workflow._stopAllPolling();
         }
     }
 
-    // FEATURE-036-B: Engineering Workflow / Free mode toggle handler
-    const modeToggleBtn = document.getElementById('mode-toggle-btn');
-    const modeLabelFree = document.getElementById('mode-label-free');
-    const modeLabelWorkflow = document.getElementById('mode-label-workflow');
-    if (modeToggleBtn) {
-        // Initialize: free mode active
-        if (modeLabelFree) modeLabelFree.classList.add('active');
-
-        modeToggleBtn.addEventListener('click', () => {
-            const isWorkflow = modeToggleBtn.getAttribute('aria-checked') === 'true';
-            const container = document.getElementById('content-body');
-            const sidebar = document.getElementById('sidebar');
-            const resizeHandle = document.querySelector('.sidebar-resize-handle');
-            const contentHeader = document.querySelector('.content-header');
-
-            if (!isWorkflow) {
-                // Switch TO workflow mode
-                modeToggleBtn.setAttribute('aria-checked', 'true');
-                if (modeLabelFree) modeLabelFree.classList.remove('active');
-                if (modeLabelWorkflow) modeLabelWorkflow.classList.add('active');
-                if (sidebar) sidebar.style.display = 'none';
-                if (resizeHandle) resizeHandle.style.display = 'none';
-                if (contentHeader) contentHeader.style.display = 'none';
-                if (container && typeof workflow !== 'undefined') {
-                    workflow.render(container);
-                }
-            } else {
-                // Switch TO free mode — restore normal IDE view
-                modeToggleBtn.setAttribute('aria-checked', 'false');
-                if (modeLabelWorkflow) modeLabelWorkflow.classList.remove('active');
-                if (modeLabelFree) modeLabelFree.classList.add('active');
-                if (sidebar) sidebar.style.display = '';
-                if (resizeHandle) resizeHandle.style.display = '';
-                if (contentHeader) contentHeader.style.display = '';
-                // Stop any workflow polling
-                if (typeof workflow !== 'undefined' && workflow._stopAllPolling) {
-                    workflow._stopAllPolling();
-                }
-                // Restore homepage
-                if (container && typeof window.HomepageInfinity !== 'undefined') {
-                    container.className = 'content-body';
-                    container.innerHTML = window.HomepageInfinity.getTemplate();
-                    window.HomepageInfinity.init(window.projectSidebar);
-                } else if (container) {
-                    container.className = 'content-body';
-                    container.innerHTML = '';
-                }
-                const breadcrumb = document.getElementById('breadcrumb');
-                if (breadcrumb) breadcrumb.innerHTML = '<li class="breadcrumb-item active">Home</li>';
-            }
-        });
+    function switchToFree() {
+        if (currentMode === 'free') return;
+        const layout = _getLayout();
+        _leaveCurrentMode(layout);
+        _deactivateAll();
+        btnModeFree.classList.add('active');
+        currentMode = 'free';
+        if (layout.sidebar) layout.sidebar.style.display = '';
+        if (layout.resizeHandle) layout.resizeHandle.style.display = '';
+        if (layout.contentHeader) layout.contentHeader.style.display = '';
+        if (layout.container && typeof window.HomepageInfinity !== 'undefined') {
+            layout.container.className = 'content-body';
+            layout.container.innerHTML = window.HomepageInfinity.getTemplate();
+            window.HomepageInfinity.init(window.projectSidebar);
+        } else if (layout.container) {
+            layout.container.className = 'content-body';
+            layout.container.innerHTML = '';
+        }
+        const breadcrumb = document.getElementById('breadcrumb');
+        if (breadcrumb) breadcrumb.innerHTML = '<li class="breadcrumb-item active">Home</li>';
     }
+
+    function switchToKg() {
+        if (currentMode === 'kg') return;
+        const layout = _getLayout();
+        _leaveCurrentMode(layout);
+        _deactivateAll();
+        btnModeKg.classList.add('active');
+        currentMode = 'kg';
+        if (layout.sidebar) layout.sidebar.style.display = 'none';
+        if (layout.resizeHandle) layout.resizeHandle.style.display = 'none';
+        if (layout.contentHeader) layout.contentHeader.style.display = 'none';
+        if (layout.container) {
+            layout.container.className = 'content-body';
+            layout.container.innerHTML = '';
+            layout.container.style.padding = '0';
+            layout.container.style.overflow = 'hidden';
+            if (window.ontologyGraphViewer) {
+                window.ontologyGraphViewer.render(layout.container);
+            }
+        }
+    }
+
+    function switchToWorkflow() {
+        if (currentMode === 'workflow') return;
+        const layout = _getLayout();
+        _leaveCurrentMode(layout);
+        _deactivateAll();
+        btnModeWorkflow.classList.add('active');
+        currentMode = 'workflow';
+        if (layout.sidebar) layout.sidebar.style.display = 'none';
+        if (layout.resizeHandle) layout.resizeHandle.style.display = 'none';
+        if (layout.contentHeader) layout.contentHeader.style.display = 'none';
+        if (layout.container && typeof workflow !== 'undefined') {
+            workflow.render(layout.container);
+        }
+    }
+
+    if (btnModeFree) btnModeFree.addEventListener('click', switchToFree);
+    if (btnModeKg) btnModeKg.addEventListener('click', switchToKg);
+    if (btnModeWorkflow) btnModeWorkflow.addEventListener('click', switchToWorkflow);
 
     // Initialize terminal panel (FEATURE-005, FEATURE-029-A)
     if (typeof TerminalManager !== 'undefined') {

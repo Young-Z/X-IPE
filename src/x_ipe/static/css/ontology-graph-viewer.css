@@ -989,3 +989,37 @@
    Source Files Modal — reuses folder-browser-modal.css classes entirely.
    Only a marker class .ogv-source-browser is added to scope overrides if needed.
    --------------------------------------------------------------------------- */
+
+/* ---------------------------------------------------------------------------
+   Agent Search Progress Indicator (CR-001)
+   --------------------------------------------------------------------------- */
+
+.ontology-agent-progress {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 12px;
+    color: var(--ogv-text-secondary, #6b7280);
+    background: var(--ogv-bg-tertiary, #f3f4f6);
+    border-radius: 6px;
+    margin: 4px 8px;
+}
+
+.ontology-agent-progress.active {
+    display: flex;
+}
+
+.ontology-agent-progress .spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid var(--ogv-border, #d1d5db);
+    border-top-color: var(--ogv-primary, #2563eb);
+    border-radius: 50%;
+    animation: ogv-spin 0.8s linear infinite;
+}
+
+@keyframes ogv-spin {
+    to { transform: rotate(360deg); }
+}

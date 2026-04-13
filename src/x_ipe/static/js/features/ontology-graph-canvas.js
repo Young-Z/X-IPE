@@ -12,6 +12,7 @@ class OntologyGraphCanvas {
         this.container = containerEl;
         this.onNodeSelect = options.onNodeSelect || (() => {});
         this.onNodeDeselect = options.onNodeDeselect || (() => {});
+        this.onZoomChange = options.onZoomChange || (() => {});
         this.cy = null;
         this._navigator = null;
         this._tippyInstances = [];
@@ -143,6 +144,44 @@ class OntologyGraphCanvas {
         const neighborhood = node.neighborhood().add(node);
         neighborhood.addClass('highlighted');
         this.cy.elements().not(neighborhood).addClass('dimmed');
+    }
+
+    /**
+     * Highlight direct-match nodes and their immediate neighbors (like node click),
+     * dimming everything else. Direct-match nodes get green border, neighbors get
+     * subtle styling.
+     */
+    highlightSearchMatches(directMatchIds) {
+        if (!this.cy) return;
+        if (!directMatchIds || directMatchIds.length === 0) {
+            this.clearHighlight();
+            return;
+        }
+
+        this.cy.batch(() => {
+            this.cy.elements().removeClass('highlighted dimmed direct-match bfs-neighbor');
+            this.cy.elements().addClass('dimmed');
+
+            // Collect union of all matched nodes + their immediate neighborhoods
+            let visible = this.cy.collection();
+            directMatchIds.forEach(id => {
+                const node = this.cy.getElementById(id);
+                if (node && !node.empty()) {
+                    node.removeClass('dimmed').addClass('direct-match');
+                    const hood = node.neighborhood();
+                    hood.removeClass('dimmed');
+                    hood.nodes().addClass('bfs-neighbor');
+                    hood.edges().addClass('highlighted');
+                    visible = visible.union(node).union(hood);
+                }
+            });
+
+            // Remove bfs-neighbor class from nodes that are also direct matches
+            directMatchIds.forEach(id => {
+                const node = this.cy.getElementById(id);
+                if (node && !node.empty()) node.removeClass('bfs-neighbor');
+            });
+        });
     }
 
     clearHighlight() {
@@ -389,6 +428,10 @@ class OntologyGraphCanvas {
 
         this.cy.on('mouseout', 'node', () => {
             this._hideTooltips();
+        });
+
+        this.cy.on('zoom', () => {
+            this.onZoomChange();
         });
     }
 

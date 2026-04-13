@@ -59,16 +59,17 @@ input:
   operation: "get_artifacts | get_collection_template | validate_section | get_mixin | pack_section | score_quality | test_walkthrough"
   category: "user-manual"
   section_id: "string | null"       # Required for validate_section, pack_section, score_quality
-  content_path: "string | null"     # Path to extracted content file
+  content_path: "string | null"     # Path to extracted content file (e.g., .x-ipe-checkpoint/session-{ts}/content/section-{NN}-{slug}.md)
   app_type: "web | cli | mobile | null"  # Required for get_mixin
   app_url: "string | null"          # Optional URL for live walkthrough testing
   instruction_temperature: "strict | balanced | creative"  # Default: balanced
     # strict: Exact template adherence, verbatim labels, [PLACEHOLDER] markers, uniform phrasing.
     # balanced: Accuracy + natural flow. Representative examples. Moderate paraphrasing.
     # creative: High variability. Inventive scenarios. Exploration encouraged.
-  config:
-    web_search_enabled: false
-    max_files_per_section: 20
+    # Used by: get_collection_template, validate_section, pack_section, score_quality, test_walkthrough
+  config:                           # Passed through from extractor's config_overrides
+    web_search_enabled: false       # Extractor default: true — extractor value overrides
+    max_files_per_section: 20       # Shared default between extractor and tool skill
     max_iterations: 3
 ```
 
@@ -108,13 +109,13 @@ input:
     <steps>
       1. Must be one of: strict, balanced, creative
       2. IF null or omitted → default to "balanced"
-      3. Affects pack_section, score_quality, and get_collection_template operations
+      3. Affects validate_section, pack_section, score_quality, get_collection_template, and test_walkthrough operations
     </steps>
   </field>
-  <field name="config" source="Caller provides or uses defaults">
+  <field name="config" source="Passed through from extractor's config_overrides. Caller provides or uses defaults.">
     <steps>
-      1. web_search_enabled defaults to false
-      2. max_files_per_section defaults to 20
+      1. web_search_enabled defaults to false (extractor default is true — extractor value takes precedence)
+      2. max_files_per_section defaults to 20 (shared default with extractor)
       3. max_iterations defaults to 3
     </steps>
   </field>
@@ -207,19 +208,24 @@ input:
     4. Evaluate each criterion against the content:
        a. For each checkbox item, check if content satisfies the rule
        b. Mark as PASS or FAIL with brief feedback
-    5. IF any REQ criterion fails due to insufficient source material (not poor writing):
+    5. Apply instruction_temperature-aware evaluation thresholds:
+       - **strict:** Require exact template adherence. Content with paraphrasing → FAIL on structure criteria. Missing [PLACEHOLDER] markers → FAIL.
+       - **balanced:** Standard evaluation. Accept natural phrasing if factually correct.
+       - **creative:** Relax structural criteria. Accept stylistic variation. Do NOT fail for exploratory tone or added context.
+    6. IF any REQ criterion fails due to insufficient source material (not poor writing):
        a. Mark criterion as INCOMPLETE (distinct from FAIL)
        b. Add to `missing_info[]` with description of what content is needed
        c. The extractor should use `missing_info` to request more source material
-    6. Return validation result with per-criterion status
+    7. Return validation result with per-criterion status
   </action>
   <constraints>
     - BLOCKING: section_id and content_path are required
     - CRITICAL: ALL criteria must be evaluated — do not skip any
     - CRITICAL: Distinguish FAIL (content exists but is wrong) from INCOMPLETE (content is missing/thin)
+    - CRITICAL: instruction_temperature affects evaluation strictness — content valid under "creative" may fail under "strict"
   </constraints>
   <output>
-    validation_result: { section_id, passed: bool, criteria: [{id, status, feedback}], missing_info: [] }
+    validation_result: { section_id, passed: bool, criteria: [{id, status, feedback}], missing_info: [], instruction_temperature: string }
   </output>
 </operation>
 ```
@@ -363,19 +369,23 @@ input:
        - DISPATCH: send command to terminal (command + "press Enter" specified)
        - WAIT: wait for a state change (expected outcome specified)
        - VERIFY: check that UI state matches description
-    4. IF app_url is provided AND Chrome DevTools MCP is available:
+    4. Apply instruction_temperature-aware walkthrough strictness:
+       - **strict:** Every step MUST have explicit element name, action verb, and expected outcome. ANY ambiguity → FAIL.
+       - **balanced:** Standard walkthrough. Accept minor implicit knowledge if context is clear.
+       - **creative:** Relax element naming. Accept descriptive references ("the main button") if unambiguous in context.
+    5. IF app_url is provided AND Chrome DevTools MCP is available:
        a. Navigate to app_url
        b. For each step: take_snapshot → find matching element → perform action → take_snapshot → verify expected outcome
        c. Record step results: {step_number, action, expected, actual, passed: bool}
-    5. IF app_url is NOT available (offline validation):
+    6. IF app_url is NOT available (offline validation):
        a. For each step, verify:
           - Step specifies exact UI element or exact command
           - Step includes explicit user action verb (click, type, press Enter, wait)
           - Step includes expected outcome ("you should see...")
           - No implicit knowledge assumed between consecutive steps
        b. Record: {step_number, has_element: bool, has_action: bool, has_outcome: bool, has_gap: bool}
-    6. Compute followability_score = steps_passed / steps_total
-    7. Generate gap_report — for each failed step, classify the issue:
+    7. Compute followability_score = steps_passed / steps_total
+    8. Generate gap_report — for each failed step, classify the issue:
        - MISSING_ACTION: step doesn't specify what user should do (e.g., no "press Enter", no "click X")
        - MISSING_ELEMENT: step doesn't name the UI element or target
        - MISSING_OUTCOME: step doesn't describe expected result
@@ -386,9 +396,10 @@ input:
     - CRITICAL: Steps must be followed LITERALLY — do not infer intent
     - CRITICAL: If a step says "generate CLI command" but doesn't say "press Enter to execute" → mark as FAIL with issue_type MISSING_ACTION
     - BLOCKING: content_path is required
+    - CRITICAL: instruction_temperature adjusts evaluation strictness — "strict" is more rigorous than "creative"
   </constraints>
   <output>
-    walkthrough_result: { scenario_id, steps_total, steps_passed, steps_failed, followability_score, gap_report: [{step, issue_type, issue, suggestion}] }
+    walkthrough_result: { scenario_id, steps_total, steps_passed, steps_failed, followability_score, gap_report: [{step, issue_type, issue, suggestion}], instruction_temperature: string }
   </output>
 </operation>
 ```
@@ -420,6 +431,7 @@ operation_output:
       passed: true | false
       criteria: [{ id: "string", status: "pass | fail | incomplete", feedback: "string" }]
       missing_info: ["string"]  # content gaps requiring more extraction
+      instruction_temperature: "string"  # temperature used for evaluation thresholds
     # pack_section
     formatted_content: "string"
     # score_quality
@@ -434,6 +446,7 @@ operation_output:
         freshness: 0.0
       improvement_hints: ["string"]
       is_key_section: false  # true for sections 3, 4, and 5 (stricter evaluation)
+      instruction_temperature: "string"  # temperature used for scoring thresholds
     # test_walkthrough
     walkthrough_result:
       scenario_id: "{id}"
@@ -442,6 +455,7 @@ operation_output:
       steps_failed: 0
       followability_score: 0.0  # 0.0–1.0
       gap_report: [{ step: 0, issue: "string", suggestion: "string" }]
+      instruction_temperature: "string"  # temperature used for walkthrough strictness
   errors: []
 ```
 

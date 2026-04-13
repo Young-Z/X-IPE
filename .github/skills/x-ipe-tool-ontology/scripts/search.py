@@ -135,6 +135,8 @@ def search(
         for name in scope.split(","):
             name = name.strip()
             candidate = ont_path / name
+            if not candidate.exists() and not name.endswith(".jsonl"):
+                candidate = ont_path / f"{name}.jsonl"
             if candidate.exists():
                 graph_files.append(candidate)
 
@@ -179,6 +181,8 @@ def search(
         subgraph_nodes, subgraph_edges = set(), []
 
     return {
+        "query": query,
+        "scope": scope,
         "matches": page_matches,
         "subgraph": {
             "nodes": sorted(subgraph_nodes),

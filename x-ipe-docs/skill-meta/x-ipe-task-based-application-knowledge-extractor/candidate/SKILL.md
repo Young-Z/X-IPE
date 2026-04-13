@@ -61,6 +61,7 @@ input:
     max_retries: 3
     web_search_enabled: true
     timeout_seconds: 15
+    max_files_per_section: 20  # default matches tool skill default; override to increase
 
   # Behavior Context (optional — provided by x-ipe-tool-learning-behavior-tracker-for-web)
   behavior_context:
@@ -88,7 +89,7 @@ input:
   <field name="execution_mode" source="workflow or free-mode" />
   <field name="target" source="user-provided (path or URL)" />
   <field name="purpose" source="user-provided: 'user-manual' or 'application-reverse-engineering'" />
-  <field name="config_overrides" source="optional, defaults: max_retries=3, web_search_enabled=true, timeout_seconds=15, max_files_per_section=50, max_validation_iterations=3, coverage_target=0.8" />
+  <field name="config_overrides" source="optional, defaults: max_retries=3, web_search_enabled=true, timeout_seconds=15, max_files_per_section=20, max_validation_iterations=3, coverage_target=0.8. Config values are passed through to tool skill operations." />
   <field name="behavior_context.learning_folder" source="optional, from behavior tracker skill. Path to learning folder containing tracked events and screenshots." />
   <field name="deep_research.rounds" source="ask-user, default: 1, values: 1-10 or 'smart'" />
   <field name="instruction_temperature" source="ask-user, default: balanced, values: strict|balanced|creative. Only for purpose=user-manual." />
@@ -220,11 +221,21 @@ input:
       1. Glob .github/skills/x-ipe-tool-knowledge-extraction-*/SKILL.md, filter by category
       2. Parse frontmatter, extract artifact paths (playbook, collection template, acceptance criteria)
       3. Read any available app-type mixin paths as a label-keyed map, resolve mixins by exact `app_type` then ordered `source_metadata.detected_app_types`, proceed without a mixin if no label matches, and verify all artifact paths exist
+      4. Resolve detected app_type (from Step 1.1 InputAnalysis.app_type) to a mixin by calling tool skill `get_mixin` operation:
+         - Pass `app_type` from InputAnalysis (e.g., "web", "cli", "mobile" for user-manual; repo-type/language-type for reverse-engineering)
+         - Store returned mixin content in tool_skill_artifacts.resolved_mixin
+         - IF app_type is null or unrecognized → proceed without mixin (log warning)
+      5. Build tool_skill_config by merging extractor config_overrides into tool skill defaults:
+         - max_files_per_section: use config_overrides value (default: 20)
+         - web_search_enabled: use config_overrides value (default: true for extractor, false for tool skill — extractor value wins)
+         - max_iterations: use config_overrides.max_validation_iterations (default: 3)
+         - CRITICAL: tool_skill_config is passed to ALL subsequent tool skill operation calls
     </action>
     <constraints>
       - BLOCKING: 0 matching tool skills → halt with install instructions
+      - CRITICAL: config_overrides MUST be resolved and passed through — tool skill defaults are overridden by extractor config
     </constraints>
-    <output>loaded_tool_skill, tool_skill_artifacts {playbook_template, collection_template, acceptance_criteria, app_type_mixins}</output>
+    <output>loaded_tool_skill, tool_skill_artifacts {playbook_template, collection_template, acceptance_criteria, app_type_mixins, resolved_mixin}, tool_skill_config</output>
   </step_1_3>
 
   <step_1_4>
@@ -246,6 +257,7 @@ input:
   <step_2_1>
     <name>Extract Source Content</name>
     <action>
+      **Category: user-manual** (purpose == "user-manual"):
       1. Read collection template from Phase 1 artifacts, parse H2 sections with extraction prompts
       2. IF behavior_context.learning_folder is available from input:
          a. Read track/track-list.json to extract user workflow patterns and navigation sequences
@@ -266,13 +278,32 @@ input:
          d. Name: screenshots/{section_nn}-{step_nn}-{description}.png
          e. Reference in content: ![Step N: Description](screenshots/{filename})
       7. Write to checkpoint/content/section-{NN}-{slug}.md, update manifest per-section
-      8. Call tool skill validate_section operation on extracted content for early feedback
+         - CRITICAL: Content path contract — tool skill operations receive content_path as:
+           `.x-ipe-checkpoint/session-{timestamp}/content/section-{NN}-{slug}.md`
+           This exact path format is passed to validate_section, pack_section, and score_quality.
+      8. Call tool skill validate_section operation with:
+         - section_id, content_path (full path from step 7), instruction_temperature, config from tool_skill_config
+         - IF behavior_context.learning_folder is available → pass as additional context for coverage-aware validation
       9. IF validation result contains criteria with status `incomplete` AND `missing_info[]` is non-empty → use `missing_info` entries to form targeted re-extraction prompts for the specific content gaps
       10. IF tool skill feedback indicates gaps → adjust extraction prompts and re-extract before moving to next section
+
+      **Category: application-reverse-engineering** (purpose == "application-reverse-engineering"):
+      1. Call loaded tool skill (x-ipe-tool-knowledge-extraction-application-reverse-engineering) `orchestrate_phases` operation with:
+         - repo_path: input.target (must be a local directory)
+         - output_path: `.x-ipe-checkpoint/session-{timestamp}/content/` (extractor-managed checkpoint dir)
+         - config: tool_skill_config (merged from extractor config_overrides)
+      2. The orchestrator handles its own 3-phase execution (Scan → Tests → Deep) via sub-skills
+      3. Monitor orchestration progress; update extractor manifest as each phase completes
+      4. On orchestrator completion, collect all section outputs from output_path subdirectories
+      5. Map orchestrator section paths to extractor checkpoint structure:
+         - orchestrator writes: `{output_path}/section-{NN}-{slug}/`
+         - extractor references: `.x-ipe-checkpoint/session-{timestamp}/content/section-{NN}-{slug}/index.md`
+      6. Proceed to Phase 3 validation using orchestrator's per-section quality scores as initial baseline
     </action>
     <constraints>
       - BLOCKING: All content must go through file paths in checkpoint — no inline content
       - Extraction capability varies by input_type (local read vs Chrome DevTools)
+      - CRITICAL: Tool skill operations MUST receive tool_skill_config (from Phase 1.3) — not tool skill defaults
     </constraints>
     <output>Content files in checkpoint/content/, manifest sections[] updated with status per section</output>
   </step_2_1>
@@ -282,7 +313,9 @@ input:
   <step_3_1>
     <name>Validate & Coverage Loop</name>
     <action>
-      1. Call tool skill validate_section operation for each section (per-criterion pass/fail) — do NOT self-validate
+      1. Call tool skill validate_section operation for each section with:
+         - section_id, content_path, instruction_temperature, config from tool_skill_config
+         - CRITICAL: Pass instruction_temperature so validation thresholds match extraction tone
       2. Write feedback to checkpoint/feedback/, lock accepted sections
       3. Compute coverage_ratio, check exit conditions (all met / max iterations / plateau)
       4. IF any criteria has status `incomplete` with `missing_info[]` → treat as extractable gap (not content failure). Feed `missing_info` descriptions back to Phase 2 as targeted extraction prompts
@@ -308,6 +341,7 @@ input:
          - content_path: path to the scenario content file
          - app_url: the running app URL (from input.target)
          - mode: "live" (Chrome DevTools-based)
+         - instruction_temperature: from input (affects strictness of walkthrough evaluation)
       4. Process gap_report from test_walkthrough — for each failed step, classify:
          - MISSING_ACTION: step doesn't specify what to do (e.g., "press Enter")
          - MISSING_ELEMENT: step doesn't name the UI element
@@ -333,9 +367,21 @@ input:
     <name>Resume, Checkpoint & Error Handling</name>
     <action>
       1. Cross-cutting: scan .x-ipe-checkpoint/ for resumable sessions (paused/extracting)
-      2. Classify errors as transient (retry up to 3) or permanent (mark error, continue)
+      2. Classify errors using tool skill error code mapping:
+         **Transient errors** (retry up to config_overrides.max_retries):
+         - CONTENT_NOT_FOUND → checkpoint file not yet written; retry after re-extraction
+         - SCORING_FAILED → content unreadable; retry after re-write
+         - SUB_SKILL_EXTRACT_FAILED → sub-skill temporary failure; retry dispatch
+         **Permanent errors** (mark error, continue with remaining sections):
+         - INVALID_OPERATION → wrong operation name; fix and retry once
+         - MISSING_SECTION_ID → programming error in extractor; log and skip section
+         - MISSING_CONTENT_PATH → section was never extracted; mark as skipped
+         - INVALID_APP_TYPE → app_type detection failed; proceed without mixin
+         - TEMPLATE_NOT_FOUND → tool skill installation incomplete; halt extraction
+         - NO_SUB_SKILLS_FOUND → reverse-engineering sub-skills missing; halt
+         - BELOW_COMPLEXITY_GATE → codebase too small for reverse-engineering; skip with note
       3. Persist manifest after every section, enforce valid state machine transitions
-      4. Append to error_log[] with section_id, error_type, message, retry_count, timestamp
+      4. Append to error_log[] with section_id, error_code, error_type (transient/permanent), message, retry_count, timestamp
     </action>
     <constraints>
       - BLOCKING: Invalid state transitions rejected with warning
@@ -349,7 +395,9 @@ input:
   <step_5_1>
     <name>Quality Scoring (Tool Skill Delegated)</name>
     <action>
-      1. For each accepted section: call tool skill score_quality operation with section content and context
+      1. For each accepted section: call tool skill score_quality operation with:
+         - section_id, content_path, instruction_temperature, config from tool_skill_config
+         - CRITICAL: All parameters must be passed — tool skill uses instruction_temperature for threshold adjustment
       2. Tool skill returns 5 dimensions: completeness, structure, clarity, followability, freshness
       3. Aggregate per-section scores into overall_quality_score (arithmetic mean)
       4. Record `is_key_section` flag in manifest. When quality_label is 'low', prioritize re-extraction of sections where `is_key_section` is true. Use `improvement_hints[]` as re-extraction guidance.

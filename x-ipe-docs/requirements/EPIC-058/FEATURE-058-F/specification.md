@@ -1,15 +1,17 @@
 # Feature Specification: Graph Search & AI Agent Integration
 
 > Feature ID: FEATURE-058-F  
-> Version: v1.0  
+> Version: v1.2  
 > Status: Refined  
-> Last Updated: 04-09-2026
+> Last Updated: 04-13-2026
 
 ## Version History
 
 | Version | Date | Description |
 |---------|------|-------------|
 | v1.0 | 04-09-2026 | Initial specification |
+| v1.1 | 04-13-2026 | [CR-001](./CR-001.md): Added WebSocket callback from AI Agent search to graph viewer — new ACs AC-058F-09 (Socket Callback), AC-058F-10 (Frontend Listener), AC-058F-11 (Callback Script). Updated FR-4, added FR-6/FR-7. Added BR-6. |
+| v1.2 | 04-13-2026 | Refinement pass: Added AC-058F-09e/09f (payload validation, endpoint auth), AC-058F-10f/10g/10h (reconnection, loading indicator, dedup), AC-058F-11d (logging). Clarified socket scoping as per-port broadcast. |
 
 ## Linked Mockups
 
@@ -40,6 +42,8 @@
 **US-5:** As a developer, I want the AI agent to be able to run multiple rounds of BFS search with different depths and queries, so that complex knowledge exploration is handled automatically.
 
 **US-6:** As a knowledge worker, I want to click a result in the search dropdown to pan the canvas to that node and open its detail panel, so that I can inspect the result quickly.
+
+**US-7:** *(Added by [CR-001](./CR-001.md))* As a knowledge worker, I want the AI agent's search results to automatically appear on the graph canvas (highlighting matched and related nodes), so that I can see the visual context of what the agent found without manually re-searching.
 
 ## Acceptance Criteria
 
@@ -114,6 +118,39 @@
 | AC-058F-08a | GIVEN the mockup shows a "Search with AI Agent" button with violet gradient border and terminal icon WHEN the implementation renders the button THEN it visually matches the mockup styling (gradient background, violet color scheme, terminal SVG icon, 12px font) | UI |
 | AC-058F-08b | GIVEN the mockup shows the AI Agent button positioned after a vertical divider in the search/header area WHEN the implementation renders THEN the button is in the same position relative to the search bar (right side, separated by a divider) | UI |
 
+### AC-058F-09: AI Agent Socket Callback — Backend *(Added by [CR-001](./CR-001.md))*
+
+| AC ID | Criterion (Given/When/Then) | Test Type |
+|-------|-------------------------------|-----------|
+| AC-058F-09a | GIVEN the Flask-SocketIO server is running WHEN a client connects and joins a session room THEN the server accepts the connection and registers the client in the ontology search callback channel | Integration |
+| AC-058F-09b | GIVEN the AI Agent has completed a search via `search.py` WHEN `ui-callback.py` is invoked with the search results THEN the server emits an `ontology_search_result` SocketIO event to the session room containing `{ results, subgraph, query, scope }` | Integration |
+| AC-058F-09c | GIVEN the `ontology_search_result` event payload WHEN the frontend receives it THEN `results` contains an array of `{ node_id, label, node_type, graph, relevance }` AND `subgraph` contains `{ nodes: [ids], edges: [{ from, rel, to }] }` matching the BFS API response format | API |
+| AC-058F-09d | GIVEN no frontend client is listening on the ontology search channel WHEN `ui-callback.py` emits a search result THEN the event is silently dropped (no error, no blocking) | Integration |
+| AC-058F-09e | GIVEN the `ontology_search_result` event payload is malformed (missing `results` or `subgraph` fields, or either is null) WHEN the frontend receives it THEN it logs a debug warning and silently ignores the event (no exception, no partial UI render) | Unit |
+| AC-058F-09f | GIVEN the Flask server receives a POST request to `/api/internal/ontology/callback` WHEN the request lacks a valid internal authorization token THEN it returns HTTP 401 Unauthorized AND does not emit the SocketIO event | API |
+
+### AC-058F-10: AI Agent Socket Callback — Frontend Listener *(Added by [CR-001](./CR-001.md))*
+
+| AC ID | Criterion (Given/When/Then) | Test Type |
+|-------|-------------------------------|-----------|
+| AC-058F-10a | GIVEN the user clicks "Search with AI Agent" WHEN the console opens THEN the graph viewer subscribes to `ontology_search_result` SocketIO events for the current session | UI |
+| AC-058F-10b | GIVEN the graph viewer is subscribed AND an `ontology_search_result` event arrives WHEN the event contains valid search data THEN the canvas calls `highlightSubgraph(allNodeIds, directMatchIds)` to highlight the agent's results on the graph | UI |
+| AC-058F-10c | GIVEN the graph viewer is subscribed AND an `ontology_search_result` event arrives WHEN the subgraph contains nodes not currently loaded in the canvas THEN unmatched node IDs are silently ignored (only nodes already in the canvas are highlighted) | UI |
+| AC-058F-10d | GIVEN a previous agent search highlight is active on the canvas WHEN a new `ontology_search_result` event arrives THEN the previous highlighting is cleared and replaced with the new search results | UI |
+| AC-058F-10e | GIVEN the graph viewer is subscribed WHEN the viewer component is closed or destroyed THEN the socket listener is unsubscribed (no memory leaks or stale listeners) | UI |
+| AC-058F-10f | GIVEN the socket connection drops mid-session WHEN the Flask server remains reachable THEN the frontend automatically attempts to reconnect within 5 seconds AND if reconnection succeeds, subsequent agent search results are still received | Integration |
+| AC-058F-10g | GIVEN "Search with AI Agent" is clicked AND the socket listener is subscribed WHEN no `ontology_search_result` event arrives within 3 seconds THEN the canvas shows a subtle "Agent search in progress…" indicator (e.g., small spinner badge in the search bar area) AND the indicator is removed when results arrive or a socket error occurs | UI |
+| AC-058F-10h | GIVEN multiple agent searches are triggered rapidly (within 5 seconds of each other) AND `ontology_search_result` events arrive out-of-order WHEN rendering highlighting THEN only the event with the latest `request_id` timestamp is rendered AND prior out-of-order results are discarded | Integration |
+
+### AC-058F-11: AI Agent Callback Script *(Added by [CR-001](./CR-001.md))*
+
+| AC ID | Criterion (Given/When/Then) | Test Type |
+|-------|-------------------------------|-----------|
+| AC-058F-11a | GIVEN `ui-callback.py` exists in `.github/skills/x-ipe-tool-ontology/scripts/` WHEN invoked with `--session-id <sid> --results-json <path>` THEN it reads the search results file and emits the data via the SocketIO callback channel | Integration |
+| AC-058F-11b | GIVEN `ui-callback.py` is invoked without a valid `--session-id` WHEN it attempts to emit THEN it exits with a non-zero code and logs an error (does not crash silently) | Unit |
+| AC-058F-11c | GIVEN `ui-callback.py` is invoked AND the Flask server is not reachable WHEN it attempts to emit THEN it retries once, then exits with a warning log (does not block the AI agent session) | Integration |
+| AC-058F-11d | GIVEN `ui-callback.py` is invoked WHEN emission succeeds or fails THEN it logs: timestamp, session_id, query summary, result count, and emit status (success/retry/fail) to stdout | Unit |
+
 ## Functional Requirements
 
 **FR-1: BFS Search API Endpoint**  
@@ -131,9 +168,16 @@ The "Search with AI Agent" button uses the existing `window.terminalManager` API
 2. Find an idle session or create a new one
 3. Pre-fill a natural-language search command scoped to the selected graphs
 4. Place the cursor at the end (no auto-execute) — the user types their question and presses Enter
+5. *(CR-001)* Subscribe the graph viewer to `ontology_search_result` SocketIO events for the session, so agent search results are displayed on the canvas in real-time
 
 **FR-5: Search Re-run on Scope Change**  
 If a search query is active and the user changes graph scope (adds/removes graphs via sidebar checkboxes), the search automatically re-runs with the updated scope. This applies to both the dropdown results and canvas highlighting.
+
+**FR-6: Socket Callback Handler** *(Added by [CR-001](./CR-001.md))*  
+A new SocketIO handler module (`ontology_handlers.py`) registers the `ontology_search_result` event namespace. When `ui-callback.py` emits search results to a session room, the server relays them to all connected clients in that room. The handler follows the same `register_X_handlers(socketio)` pattern used by `terminal_handlers.py` and `voice_handlers.py`.
+
+**FR-7: UI Callback Script** *(Added by [CR-001](./CR-001.md))*  
+A new `ui-callback.py` script in `.github/skills/x-ipe-tool-ontology/scripts/` accepts search results (from `search.py`) and a session ID, then emits them to the Flask server's SocketIO channel. This script is called by the AI agent (or by `search.py` itself) after a search completes. It transforms the raw search output into the Cytoscape-compatible format expected by `highlightSubgraph()` and emits via HTTP POST to an internal callback endpoint or direct SocketIO client emission.
 
 ## Non-Functional Requirements
 
@@ -176,9 +220,11 @@ If a search query is active and the user changes graph scope (adds/removes graph
 - FEATURE-058-A (Ontology Tool Skill) — provides `search.py` BFS module
 - FEATURE-058-E (Ontology Graph Viewer UI) — provides the canvas, sidebar, status bar, search bar shell
 - X-IPE Console (`window.terminalManager`) — provides the terminal session API for AI Agent integration
+- Flask-SocketIO infrastructure (`app.py`, handler registration pattern) — provides the socket transport layer *(CR-001)*
 
 **External:**
 - Cytoscape.js (already loaded by FEATURE-058-E) — node highlighting/dimming via style manipulation
+- Flask-SocketIO (already in `pyproject.toml`: `flask-socketio>=5.6.0`) *(CR-001)*
 - No new external dependencies
 
 ## Business Rules
@@ -192,6 +238,8 @@ If a search query is active and the user changes graph scope (adds/removes graph
 **BR-4:** The "Search with AI Agent" command is pre-filled but never auto-executed — the user must press Enter to send it to the AI.
 
 **BR-5:** If a search is active and the user clears the search bar, all highlighting is removed and the dropdown closes immediately (no lingering state).
+
+**BR-6:** *(Added by [CR-001](./CR-001.md))* The socket callback delivers **search results** (read-only, from the same `.ontology/` data at rest) to the graph viewer — it does NOT inject new graph data or modify the ontology. This is distinct from real-time data sync (which remains out of scope per FEATURE-058-E BR-2).
 
 ## Edge Cases & Constraints
 
@@ -223,6 +271,12 @@ If a search query is active and the user changes graph scope (adds/removes graph
 - Canvas highlighting needs efficient Cytoscape.js batch operations (`cy.batch(() => {...})`) to avoid per-node render thrashing with large graphs.
 - The Console integration should reuse the established pattern from `action-execution-modal.js` — `window.terminalManager.findIdleSession()` → `sendCopilotPromptCommandNoEnter()`.
 - The dropdown should use absolute positioning relative to the search bar container and handle z-index correctly so it appears above the canvas but below modal overlays.
+- *(CR-001)* The `ontology_handlers.py` module should follow the `register_X_handlers(socketio)` pattern from `terminal_handlers.py` and `voice_handlers.py`. Register it in `app.py` alongside the existing handler registrations.
+- *(CR-001)* The `ui-callback.py` script should use the `python-socketio` client library (already in `pyproject.toml`) to connect to the Flask server and emit the `ontology_search_result` event. Alternatively, it can POST to an internal HTTP endpoint that triggers the emit server-side.
+- *(CR-001)* The frontend socket listener should be set up when "Search with AI Agent" is clicked and torn down when the viewer is closed, to avoid stale listeners.
+- *(CR-001, Refinement)* Socket scoping is **per-port broadcast**: `ui-callback.py` POSTs to `http://localhost:{port}/api/internal/ontology/callback` (port from `.x-ipe.yaml`, default 5858). The server emits `ontology_search_result` to all connected clients on that server instance. No room-based isolation — all graph viewer instances on the same server see the result.
+- *(CR-001, Refinement)* The internal callback endpoint (`/api/internal/ontology/callback`) must validate an internal authorization token to prevent unauthorized result injection. The token can be a shared secret configured in `.x-ipe.yaml` or an environment variable.
+- *(CR-001, Refinement)* Each `ontology_search_result` event payload should include a `request_id` (UUID) for deduplication. The frontend tracks the latest `request_id` and discards out-of-order arrivals from earlier searches.
 
 ## Open Questions
 
