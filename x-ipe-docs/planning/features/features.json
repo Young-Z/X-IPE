@@ -1947,9 +1947,35 @@
       "dependencies": [
         "FEATURE-059-A"
       ],
-      "status": "Designed",
+      "status": "Implemented",
       "created_at": "2026-04-15T16:27:37.891691+00:00",
-      "last_updated": "2026-04-16T00:44:17.106811+00:00"
+      "last_updated": "2026-04-16T02:52:05.364014+00:00"
+    },
+    {
+      "feature_id": "FEATURE-059-C",
+      "epic_id": "EPIC-059",
+      "title": "Layer 2 — Domain Skills (Constructors + Mimic + Ontology-Builder)",
+      "version": "v1.0",
+      "description": "Create 5 knowledge skills: constructor-user-manual, constructor-notes, constructor-app-reverse-engineering, mimic-web-behavior-tracker, ontology-builder. These transform raw extracted knowledge into structured representations and build the ontology graph.",
+      "dependencies": [
+        "FEATURE-059-B"
+      ],
+      "status": "Designed",
+      "created_at": "2026-04-16T02:54:42.426156+00:00",
+      "last_updated": "2026-04-16T03:16:44.492817+00:00"
+    },
+    {
+      "feature_id": "FEATURE-059-D",
+      "epic_id": "EPIC-059",
+      "title": "Layer 3 — Integration Skills (Ontology Synthesizer + Presenters)",
+      "version": "v1.0",
+      "description": "Build integration skills: ontology-synthesizer (cross-graph linking, vocabulary normalization), present-to-user (knowledge rendering), present-to-knowledge-graph (ontology visualization). Layer 3 sits on top of Layer 2 domain skills.",
+      "dependencies": [
+        "FEATURE-059-C"
+      ],
+      "status": "Planned",
+      "created_at": "2026-04-16T03:31:27.345880+00:00",
+      "last_updated": "2026-04-16T03:31:27.345880+00:00"
     }
   ]
 }

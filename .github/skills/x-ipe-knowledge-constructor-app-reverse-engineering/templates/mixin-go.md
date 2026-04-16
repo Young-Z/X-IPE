@@ -1,0 +1,81 @@
+# Application RE — Go Language Mixin
+
+> Apply this mixin when the target codebase contains Go source code.
+> Merge these overlays into the base playbook when language: go.
+> This is an additive overlay — it does NOT replace repo-type mixin content.
+
+---
+
+## Detection Signals
+
+| Signal | File/Pattern | Confidence |
+|--------|-------------|------------|
+| Go files | `*.go` files present | high |
+| go.mod | `go.mod` at root | high |
+| go.sum | `go.sum` at root | high |
+| Go directory layout | `cmd/`, `internal/`, `pkg/` directories | medium |
+| Go test files | `*_test.go` files | medium |
+
+---
+
+## Section Overlay Prompts
+
+### For Section 1 (Architecture Recovery)
+<!-- ADDITIONAL PROMPTS:
+- Identify Go standard project layout: cmd/, internal/, pkg/, api/
+- Map package dependency graph using import statements
+- Document init() functions and their side effects
+- Detect goroutine architecture patterns
+-->
+
+### For Section 2 (API Contract Extraction)
+<!-- ADDITIONAL PROMPTS:
+- Extract net/http handlers: http.HandleFunc, http.Handle
+- Extract Gin handlers: router.GET(), router.POST(), gin.Context
+- Extract Echo handlers: e.GET(), e.POST(), echo.Context
+- Extract Chi routes: r.Get(), r.Post(), r.Route()
+- Document exported function signatures (capitalized = public)
+- Parse struct tags for JSON/XML serialization contracts
+-->
+
+### For Section 3 (Business Logic Mapping)
+<!-- ADDITIONAL PROMPTS:
+- Detect Go-idiomatic patterns:
+  Interface satisfaction: implicit interfaces (no "implements" keyword)
+  Functional options: func WithX(val) Option pattern
+  Table-driven tests: []struct{name, input, want} test tables
+  Middleware: func(http.Handler) http.Handler chaining
+  Error wrapping: fmt.Errorf("%w", err) chains
+- Detect goroutine patterns: go func(), sync.WaitGroup, errgroup
+- Detect channel patterns: producer/consumer, fan-in/fan-out, select{}
+- Look for context.Context propagation patterns
+- Check for code generation: go:generate directives, generated files
+-->
+
+### For Section 5 (Dependency Analysis)
+<!-- ADDITIONAL PROMPTS:
+- Parse go.mod for module path and Go version
+- Parse go.sum for exact dependency versions
+- Identify HTTP framework: stdlib net/http, Gin, Echo, Chi, Fiber
+- Identify ORM/database: GORM, sqlx, ent, database/sql
+- Detect code generation tools: protoc, mockgen, wire, ent
+- Identify linting: golangci-lint configuration (.golangci.yml)
+-->
+
+### For Section 7 (Security & Auth Patterns)
+<!-- ADDITIONAL PROMPTS:
+- Check for JWT middleware (golang-jwt, dgrijalva/jwt-go)
+- Check for OAuth2 packages (golang.org/x/oauth2)
+- Detect crypto usage patterns
+- Look for context-based auth propagation
+-->
+
+### For Section 8 (Testing Strategy)
+<!-- ADDITIONAL PROMPTS:
+- Go tests are always *_test.go in same package
+- Detect testing framework: stdlib testing, testify, gomock, gomega
+- Identify table-driven test pattern usage
+- Check for test helpers: t.Helper(), testmain
+- Identify integration test build tags (//go:build integration)
+- Check for coverage: go test -cover output
+-->

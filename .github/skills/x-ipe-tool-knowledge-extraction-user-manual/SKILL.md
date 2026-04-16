@@ -6,6 +6,10 @@ categories:
   - "user-manual"
 ---
 
+> ⚠️ **DEPRECATED** — This skill is superseded by [`x-ipe-knowledge-constructor-user-manual`](.github/skills/x-ipe-knowledge-constructor-user-manual/SKILL.md).
+> Introduced in FEATURE-059-C. This skill will be removed in a future release.
+> **Do not use for new work.** Existing references should migrate to the replacement skill.
+
 # Knowledge Extraction — User Manual
 
 ## Purpose

@@ -3,6 +3,10 @@ name: x-ipe-tool-learning-behavior-tracker-for-web
 description: Record and analyze user behavior on any website for AI agent training. Injects tracker IIFE via Chrome DevTools, captures DOM events (click, dblclick, contextmenu, input, scroll, navigation, resize, focus, drag) with PII masking, and outputs structured behavior-recording JSON with flow narrative, key paths, pain points, and AI annotations. Triggers on "track behavior", "record user behavior", "learn from website".
 ---
 
+> ⚠️ **DEPRECATED** — This skill is superseded by [`x-ipe-knowledge-mimic-web-behavior-tracker`](.github/skills/x-ipe-knowledge-mimic-web-behavior-tracker/SKILL.md).
+> Introduced in FEATURE-059-C. This skill will be removed in a future release.
+> **Do not use for new work.** Existing references should migrate to the replacement skill.
+
 > **⚠️ CRITICAL RULE FOR AI AGENTS EXECUTING SUGGESTED SKILLS:**
 > Follow the steps EXACTLY in the skill to execute! Do NOT skip, reorder, or improvise.
 

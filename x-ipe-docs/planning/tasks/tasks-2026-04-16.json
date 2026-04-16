@@ -18,12 +18,78 @@
       "task_id": "TASK-1121",
       "task_type": "Change Request",
       "description": "CR: Add skill-meta-x-ipe-knowledge.md template. FEATURE-059-A deferred this as TBD. Adds missing skill-meta template for x-ipe-knowledge skill type.",
-      "status": "in_progress",
+      "status": "completed",
       "role": "Ember",
-      "output_links": [],
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-059/FEATURE-059-A/CR-001.md",
+        ".github/skills/x-ipe-meta-skill-creator/templates/skill-meta-x-ipe-knowledge.md"
+      ],
       "next_task": "",
       "created_at": "2026-04-16T02:23:40.461760+00:00",
-      "last_updated": "2026-04-16T02:23:40.461760+00:00"
+      "last_updated": "2026-04-16T02:30:11.127708+00:00"
+    },
+    {
+      "task_id": "TASK-1122",
+      "task_type": "Code Implementation",
+      "description": "Implement FEATURE-059-B Layer 1 Core Skills: keeper-memory, extractor-web, extractor-memory, ontology retirement. program_type=skills, delegate to x-ipe-meta-skill-creator.",
+      "status": "completed",
+      "role": "Spark",
+      "next_task": "x-ipe-task-based-feature-acceptance-test",
+      "output_links": [
+        ".github/skills/x-ipe-knowledge-keeper-memory/",
+        ".github/skills/x-ipe-knowledge-extractor-web/",
+        ".github/skills/x-ipe-knowledge-extractor-memory/",
+        ".github/skills/x-ipe-tool-ontology/SKILL.md",
+        ".github/copilot-instructions.md"
+      ],
+      "created_at": "2026-04-16T02:28:14.434083+00:00",
+      "last_updated": "2026-04-16T02:52:00.449338+00:00"
+    },
+    {
+      "task_id": "TASK-1123",
+      "task_type": "Feature Refinement",
+      "description": "Refine specification for FEATURE-059-C: Layer 2 Domain Skills — constructors (user-manual, notes, app-reverse-engineering), mimic (web-behavior-tracker), ontology-builder",
+      "status": "completed",
+      "role": "Spark",
+      "next_task": "x-ipe-task-based-technical-design",
+      "output_links": [],
+      "created_at": "2026-04-16T02:55:06.063085+00:00",
+      "last_updated": "2026-04-16T03:10:07.175037+00:00"
+    },
+    {
+      "task_id": "TASK-1124",
+      "task_type": "Technical Design",
+      "description": "Technical design for FEATURE-059-C: Layer 2 Domain Skills",
+      "status": "completed",
+      "role": "Spark",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-059/FEATURE-059-C/technical-design.md"
+      ],
+      "next_task": "Code Implementation",
+      "created_at": "2026-04-16T03:12:16.724937+00:00",
+      "last_updated": "2026-04-16T03:16:44.590516+00:00"
+    },
+    {
+      "task_id": "TASK-1125",
+      "task_type": "Code Implementation",
+      "description": "FEATURE-059-C: Implement 5 domain knowledge skills + 4 deprecation headers",
+      "status": "in_progress",
+      "role": "Spark",
+      "output_links": [],
+      "next_task": "x-ipe-task-based-feature-acceptance-test",
+      "created_at": "2026-04-16T03:24:50.298485+00:00",
+      "last_updated": "2026-04-16T03:24:50.298485+00:00"
+    },
+    {
+      "task_id": "TASK-1126",
+      "task_type": "Feature Refinement",
+      "description": "FEATURE-059-D: Refine specification for Layer 3 Integration Skills (Ontology Synthesizer + Presenters)",
+      "status": "in_progress",
+      "role": "Drift",
+      "output_links": [],
+      "next_task": "x-ipe-task-based-technical-design",
+      "created_at": "2026-04-16T03:32:02.724935+00:00",
+      "last_updated": "2026-04-16T03:32:02.724935+00:00"
     }
   ]
 }

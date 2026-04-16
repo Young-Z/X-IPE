@@ -9,6 +9,10 @@ description: >
   mixin templates (repo-type × language-type).
 ---
 
+> ⚠️ **DEPRECATED** — This skill is superseded by [`x-ipe-knowledge-constructor-app-reverse-engineering`](.github/skills/x-ipe-knowledge-constructor-app-reverse-engineering/SKILL.md).
+> Introduced in FEATURE-059-C. This skill will be removed in a future release.
+> **Do not use for new work.** Existing references should migrate to the replacement skill.
+
 # Knowledge Extraction — Application Reverse Engineering (Orchestrator)
 
 ## Purpose

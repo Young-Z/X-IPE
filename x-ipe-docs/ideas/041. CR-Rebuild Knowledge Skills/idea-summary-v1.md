@@ -2,10 +2,10 @@
 
 > Idea ID: IDEA-041
 > Folder: 041. CR-Rebuild Knowledge Skills
-> Version: v3
+> Version: v5
 > Created: 2026-04-14
 > Updated: 2026-04-16
-> Status: Refined (design decisions from 059-B technical design incorporated)
+> Status: Refined (v5: add synthesize_id and synthesize_message to ontology class meta and instance data)
 
 ## Overview
 
@@ -107,14 +107,10 @@ x-ipe-docs/memory/                          # root — replaces old "knowledge b
 │   │   └── class-registry.jsonl            #     Class definitions: meta + properties per class
 │   ├── instances/                          #   Data layer (what DOES exist)
 │   │   ├── _index.json                     #     Manifest of all instance files + stats
+│   │   ├── instance.001.jsonl              #     Entity instances (chunked, 5000 lines each)
+│   │   ├── instance.002.jsonl              #     Auto-created when previous chunk is full
 │   │   ├── _relations.001.jsonl            #     Object-property relations (chunked, 5000 lines each)
 │   │   ├── _relations.002.jsonl            #     Auto-created when previous chunk is full
-│   │   ├── document/                       #     Document-type instances
-│   │   │   ├── user-manual.jsonl
-│   │   │   └── notes.jsonl
-│   │   ├── concept/                        #     Concept-type instances
-│   │   │   ├── feature.jsonl
-│   │   │   └── pattern.jsonl
 │   │   └── _derived/                       #     Auto-generated named graph views (read-only)
 │   │       └── {named-graph}.jsonl
 │   └── vocabulary/                         #   Controlled terms (what we CALL things)
@@ -139,7 +135,8 @@ x-ipe-docs/memory/                          # root — replaces old "knowledge b
 >
 > **Scalability strategy:**
 > - **Relations** use chunked files (`_relations.001.jsonl`, `_relations.002.jsonl`, ...) — max **5000 records per chunk**. Write appends to the highest-numbered chunk; a new chunk is auto-created when the current one is full. Relations grow O(n²) with entities, so chunking is applied here proactively.
-> - **Schema and instance files** stay as single files (no chunking) — they are already partitioned by class and unlikely to exceed thousands of records. Chunking can be added later as a non-breaking change if needed.
+> - **Instances** use the same chunking pattern (`instance.001.jsonl`, `instance.002.jsonl`, ...) — max **5000 records per chunk**. Each JSONL line self-describes via its `"class"` field, so class routing is in the data, not the filesystem. The `_index.json` manifest tracks which instances are in which chunk.
+> - **Schema files** stay as single files (no chunking) — unlikely to exceed thousands of records. Chunking can be added later as a non-breaking change if needed.
 
 #### Ontology Model — Schema / Instances / Vocabulary
 
@@ -150,9 +147,9 @@ Each line defines one class. A class has two sections:
 - **`properties`** — domain-specific attributes discovered by the ontology-builder
 
 ```jsonl
-{"class":"KnowledgeArtifact","meta":{"parent":null,"abstract":true,"description":"Root class for all knowledge entities","source_files":["x-ipe-docs/memory/"],"synthesis_version":"1.0","synthesized_with":[],"created":"2026-04-10T07:00:00Z","updated":"2026-04-10T07:00:00Z"},"properties":{"label":{"kind":"datatype","range":"string","cardinality":"single","required":true},"description":{"kind":"datatype","range":"string","cardinality":"single"},"weight":{"kind":"datatype","range":"integer","cardinality":"single","constraints":{"min":1,"max":10,"default":5}},"source_files":{"kind":"datatype","range":"string","cardinality":"multi","required":true},"hasTechnology":{"kind":"vocabulary","range":"vocabulary:technology","cardinality":"multi"},"hasDomain":{"kind":"vocabulary","range":"vocabulary:domain","cardinality":"multi"},"hasAbstraction":{"kind":"vocabulary","range":"vocabulary:abstraction","cardinality":"single"},"hasAudience":{"kind":"vocabulary","range":"vocabulary:audience","cardinality":"multi"},"hasLifecycle":{"kind":"vocabulary","range":"vocabulary:lifecycle","cardinality":"single"},"hasContentType":{"kind":"vocabulary","range":"vocabulary:content-type","cardinality":"single"},"dependsOn":{"kind":"object","range":"KnowledgeArtifact","cardinality":"multi","constraints":{"acyclic":true}},"partOf":{"kind":"object","range":"KnowledgeArtifact","cardinality":"multi"},"relatedTo":{"kind":"object","range":"KnowledgeArtifact","cardinality":"multi"}}}
-{"class":"Document","meta":{"parent":"KnowledgeArtifact","abstract":false,"description":"Structured written knowledge","source_files":[],"synthesis_version":"1.0","synthesized_with":[],"created":"2026-04-10T07:00:00Z","updated":"2026-04-10T07:00:00Z"},"properties":{"format":{"kind":"datatype","range":"string","cardinality":"single"},"sections":{"kind":"datatype","range":"string","cardinality":"multi"}}}
-{"class":"UserManual","meta":{"parent":"Document","description":"Step-by-step user documentation","source_files":["x-ipe-docs/memory/procedural/"],"synthesis_version":"1.0","synthesized_with":[],"created":"2026-04-10T07:00:00Z","updated":"2026-04-10T07:00:00Z"},"properties":{"target_application":{"kind":"datatype","range":"string","cardinality":"single"},"version":{"kind":"datatype","range":"string","cardinality":"single"}}}
+{"class":"knowledge-artifact","meta":{"parent":null,"abstract":true,"description":"Root class for all knowledge entities","source_files":["x-ipe-docs/memory/"],"synthesis_version":"1.0","synthesize_id":"2026-04-10T07:00:00Z","synthesize_message":"Initial ontology build","synthesized_with":[],"created":"2026-04-10T07:00:00Z","updated":"2026-04-10T07:00:00Z"},"properties":{"label":{"kind":"datatype","range":"string","cardinality":"single","required":true},"description":{"kind":"datatype","range":"string","cardinality":"single"},"weight":{"kind":"datatype","range":"integer","cardinality":"single","constraints":{"min":1,"max":10,"default":5}},"source_files":{"kind":"datatype","range":"string","cardinality":"multi","required":true},"hasTechnology":{"kind":"vocabulary","range":"vocabulary:technology","cardinality":"multi"},"hasDomain":{"kind":"vocabulary","range":"vocabulary:domain","cardinality":"multi"},"hasAbstraction":{"kind":"vocabulary","range":"vocabulary:abstraction","cardinality":"single"},"hasAudience":{"kind":"vocabulary","range":"vocabulary:audience","cardinality":"multi"},"hasLifecycle":{"kind":"vocabulary","range":"vocabulary:lifecycle","cardinality":"single"},"hasContentType":{"kind":"vocabulary","range":"vocabulary:content-type","cardinality":"single"},"dependsOn":{"kind":"object","range":"knowledge-artifact","cardinality":"multi","constraints":{"acyclic":true}},"partOf":{"kind":"object","range":"knowledge-artifact","cardinality":"multi"},"relatedTo":{"kind":"object","range":"knowledge-artifact","cardinality":"multi"}}}
+{"class":"document","meta":{"parent":"knowledge-artifact","abstract":false,"description":"Structured written knowledge","source_files":[],"synthesis_version":"1.0","synthesize_id":"2026-04-10T07:00:00Z","synthesize_message":"Initial ontology build","synthesized_with":[],"created":"2026-04-10T07:00:00Z","updated":"2026-04-10T07:00:00Z"},"properties":{"format":{"kind":"datatype","range":"string","cardinality":"single"},"sections":{"kind":"datatype","range":"string","cardinality":"multi"}}}
+{"class":"user-manual","meta":{"parent":"document","description":"Step-by-step user documentation","source_files":["x-ipe-docs/memory/procedural/"],"synthesis_version":"1.0","synthesize_id":"2026-04-10T07:00:00Z","synthesize_message":"Initial ontology build","synthesized_with":[],"created":"2026-04-10T07:00:00Z","updated":"2026-04-10T07:00:00Z"},"properties":{"target_application":{"kind":"datatype","range":"string","cardinality":"single"},"version":{"kind":"datatype","range":"string","cardinality":"single"}}}
 ```
 
 > **Meta fields:**
@@ -161,23 +158,26 @@ Each line defines one class. A class has two sections:
 > - `description` — what this class represents
 > - `source_files` — which knowledge files informed this class definition
 > - `synthesis_version` — version counter, bumped each time ontology-synthesizer merges/links this class with others
+> - `synthesize_id` — ISO 8601 timestamp of when the ontology-synthesizer last ran on this class; used to determine whether a re-synthesis is needed (e.g., if source content changed after this timestamp)
+> - `synthesize_message` — human-readable description of the synthesis run's purpose (e.g., "Initial ontology build", "Cross-graph merge with Project-B auth domain", "Vocabulary normalization pass")
 > - `synthesized_with` — list of class names from other graphs this was synthesized with (audit trail)
 > - `created` / `updated` — timestamps
 >
 > **Properties** are the domain-specific attributes the ontology-builder discovers for each class. See "Builder Discovery Process" below for how these are generated.
 
-**Instances — Data Entities** (`instances/{root-class}/{class}.jsonl`)
+**Instances — Data Entities** (`instances/instance.NNN.jsonl`)
 
 Each line is one entity instance. Properties are flat (no nested `dimensions` bag):
 
 ```jsonl
-{"id":"know_001","class":"UserManual","label":"X-IPE Workflow Mode User Manual","description":"Complete user manual...","weight":8,"source_files":["x-ipe-docs/memory/procedural/x-ipe-workflow-mode/index.md"],"hasTechnology":["Flask","Python"],"hasDomain":["frontend","backend"],"hasAbstraction":"overview","hasAudience":["end-users","developers"],"hasLifecycle":"active","hasContentType":"reference","target_application":"X-IPE","version":"1.0","created":"2026-04-10T07:19:03Z","updated":"2026-04-10T07:19:03Z"}
+{"id":"know_001","class":"user-manual","label":"X-IPE Workflow Mode User Manual","description":"Complete user manual...","weight":8,"source_files":["x-ipe-docs/memory/procedural/x-ipe-workflow-mode/index.md"],"hasTechnology":["Flask","Python"],"hasDomain":["frontend","backend"],"hasAbstraction":"overview","hasAudience":["end-users","developers"],"hasLifecycle":"active","hasContentType":"reference","target_application":"X-IPE","version":"1.0","synthesize_id":"2026-04-10T07:19:03Z","synthesize_message":"Initial ontology build","created":"2026-04-10T07:19:03Z","updated":"2026-04-10T07:19:03Z"}
 ```
 
-> - Instances are filed by root parent class folder (`document/`, `concept/`) with one JSONL file per leaf class
+> - Instances use sequentially numbered chunk files (`instance.001.jsonl`, `instance.002.jsonl`, ...) — max **5000 records per chunk**, same pattern as relations. Each line self-describes via its `"class"` field, so class filtering is done at query time, not file organization time
 > - Object-property relations (dependsOn, partOf, relatedTo) live in chunked `_relations.NNN.jsonl` files (max 5000 records per chunk; append to highest-numbered chunk, auto-split when full)
 > - `_derived/` holds auto-generated named graph views (read-only, rebuilt by graph operations)
 > - Attributes can be `null` or omitted if not applicable for a particular instance (e.g., a Feature doesn't need `target_application`)
+> - `synthesize_id` and `synthesize_message` are present on each instance — same semantics as the class meta fields. When the synthesizer touches an instance (e.g., re-tagging, relinking), it updates these fields so the instance records when and why it was last synthesized
 
 **Vocabulary — Controlled Concept Schemes** (`vocabulary/{scheme}.json`)
 
@@ -229,7 +229,7 @@ Each file is one concept scheme with broader/narrower hierarchy (SKOS-inspired):
 >
 > **Separation of concerns:**
 > - `keeper-memory` / `memory_ops.py` — **file CRUD only** (write/read/move/delete content `.md` files). Uses meaningful slug filenames derived from title (e.g., `flask-jinja2-templating.md`), not IDs. No separate index file — metadata lives in ontology entities.
-> - `ontology-builder` — **registers entities** in `.ontology/_entities.jsonl` (KnowledgeNode per file with label, dimensions, source_files)
+> - `ontology-builder` — **registers entities** in `.ontology/instances/instance.NNN.jsonl` (entity per file with label, dimensions, source_files)
 > - `ontology-synthesizer` — **builds and maintains relationships** between entities across graphs
 
 **Present** — Output knowledge to endpoints
@@ -427,7 +427,7 @@ operation:
 | `wash_terms` | `graphs[]`, `overlap_candidates[]` | `canonical_vocabulary`, `normalization_map` | `.working/ontology/` | Normalize tags, terms, labels across graphs to a single canonical vocabulary |
 | `link_nodes` | `graphs[]`, `normalization_map`, `canonical_vocabulary` | `linked_graph`, `cross_references[]` | `.working/ontology/` | Connect matching nodes across graphs, establish cross-domain relationships |
 
-> **Synthesis versioning:** When the synthesizer merges or links classes across graphs, it bumps `synthesis_version` in the class meta and records which classes were synthesized in `synthesized_with`. This provides an audit trail: version 1.0 = original builder output, version 1.1 = synthesized with Project-B's matching class, etc.
+> **Synthesis versioning:** When the synthesizer merges or links classes across graphs, it bumps `synthesis_version` in the class meta and records which classes were synthesized in `synthesized_with`. It also sets `synthesize_id` to the current ISO 8601 timestamp and writes a `synthesize_message` describing the run's purpose. This provides a full audit trail: version 1.0 = original builder output, version 1.1 = synthesized with Project-B's matching class, etc. The `synthesize_id` timestamp enables staleness detection — if source content has changed since the last `synthesize_id`, the synthesizer knows a re-run is warranted. Both `synthesize_id` and `synthesize_message` appear on class meta and instance data, so each entity records when and why it was last touched by the synthesizer.
 
 ---
 
@@ -473,9 +473,9 @@ flowchart TD
         G --> FD["Step 2: Fill & Draft\nConstructor fills structure with\ngathered knowledge"]
         FD --> CR["Step 3: Critique\nSub-agent evaluates against rubric\nConstructive feedback on gaps"]
         CR -->|"Gaps found\n(max 3 iterations)"| F
-        CR -->|"Pass"| ON["Step 4: Ontology\nDAO calls ontology-builder (sub-agent)\nthen ontology-synthesizer (sub-agent)\nCritique sub-agent reviews ontology"]
-        ON --> H["Step 5: Store\nDAO calls keeper-memory to persist"]
-        H --> I["Step 6: Respond\nDAO calls present skill"]
+        CR -->|"Pass"| H["Step 4: Store\nDAO calls keeper-memory to persist"]
+        H --> ON["Step 5: Ontology\nDAO calls ontology-builder (sub-agent)\nthen ontology-synthesizer (sub-agent)\nCritique sub-agent reviews ontology"]
+        ON --> I["Step 6: Respond\nDAO calls present skill"]
     end
     
     I --> J["✅ Deliver to User"]
@@ -489,12 +489,12 @@ flowchart TD
 >
 > The **DAO** acts as the coordinator who fulfills these requests by dispatching extractors, managing sub-agents, and routing to keeper/present skills.
 
-> **Ontology phase (致知 Step 4):** After the main content passes critique, the DAO dispatches two sub-agents sequentially:
-> 1. `ontology-builder` sub-agent — iteratively builds ontology nodes from the constructed knowledge (breadth-first, node-by-node)
+> **Ontology phase (致知 Step 5):** After the main content is stored to persistent memory, the DAO dispatches two sub-agents sequentially:
+> 1. `ontology-builder` sub-agent — reads from persisted `semantic/` and `procedural/` folders, iteratively builds ontology nodes from the constructed knowledge (breadth-first, node-by-node)
 > 2. `ontology-synthesizer` sub-agent — discovers related existing graphs, normalizes vocabulary, links nodes
 > 3. A critique sub-agent reviews the ontology construction and synthesis — provides constructive feedback on node accuracy, link quality, and term consistency
 >
-> Only after ontology critique passes does the workflow proceed to Store.
+> Only after ontology critique passes does the workflow proceed to Respond.
 
 #### Workflow Examples
 
@@ -512,8 +512,8 @@ flowchart TD
 | 致知 | 6. Fill & Draft | `constructor-user-manual` | Constructor fills each section with gathered knowledge, produces complete draft | `.working/manual-draft/` |
 | 致知 | 7. Critique | Sub-agent | Evaluate draft against rubric — are all sections complete? code examples present? accuracy? | — |
 | | | *(if gaps)* | Loop back to Step 4: constructor requests missing knowledge → DAO extracts → constructor fills (max 3 iterations) | — |
-| 致知 | 8. Ontology | DAO → sub-agents | `ontology-builder` builds nodes (repo concepts, API entities, feature taxonomy); `ontology-synthesizer` links with existing project graphs; critique sub-agent reviews | `.working/ontology/` |
-| 致知 | 9. Store | DAO → `keeper-memory` | Persist manual to `procedural/` (file only) | `procedural/` |
+| 致知 | 8. Store | DAO → `keeper-memory` | Persist manual to `procedural/` (file only) | `procedural/` |
+| 致知 | 9. Ontology | DAO → sub-agents | `ontology-builder` reads from persisted content, builds nodes (repo concepts, API entities, feature taxonomy); `ontology-synthesizer` links with existing project graphs; critique sub-agent reviews | `.working/ontology/` |
 | 致知 | 10. Respond | DAO → `present-to-user` | Format and deliver the user manual | *(output)* |
 
 **Example B: "What do we know about authentication patterns?"**
@@ -529,8 +529,8 @@ flowchart TD
 | 致知 | 5. Execute | DAO → `extractor-web` | DAO browses OAuth 2.1 spec docs via Chrome DevTools MCP for the gap areas only | `.working/extracted/` |
 | 致知 | 6. Fill & Draft | `constructor-notes` | Merge memory results + web findings into structured notes per framework | `.working/auth-notes/` |
 | 致知 | 7. Critique | Sub-agent | Evaluate against rubric — all pattern types covered? sources cited? | — |
-| 致知 | 8. Ontology | DAO → sub-agents | `ontology-builder` creates auth concept nodes; `ontology-synthesizer` links to existing security/identity graphs; critique reviews | `.working/ontology/` |
-| 致知 | 9. Store | DAO → `keeper-memory` | Persist notes to `semantic/` (file only) | `semantic/` |
+| 致知 | 8. Store | DAO → `keeper-memory` | Persist notes to `semantic/` (file only) | `semantic/` |
+| 致知 | 9. Ontology | DAO → sub-agents | `ontology-builder` reads from persisted content, creates auth concept nodes; `ontology-synthesizer` links to existing security/identity graphs; critique reviews | `.working/ontology/` |
 | 致知 | 10. Respond | DAO → `present-to-user` | Deliver consolidated answer | *(output)* |
 
 **Example C: "Learn how the admin panel works by watching me use it"**
@@ -546,8 +546,8 @@ flowchart TD
 | 致知 | 5. Execute | DAO → `extractor-web` + `mimic` | DAO browses specific pages via Chrome DevTools MCP to fill gaps, mimic captures additional sessions if needed | `.working/extracted/` |
 | 致知 | 6. Fill & Draft | `constructor-user-manual` | Constructor fills manual with observed workflows + extracted details | `.working/admin-manual-draft/` |
 | 致知 | 7. Critique | Sub-agent | Are all observed workflows captured? Step descriptions complete? | — |
-| 致知 | 8. Ontology | DAO → sub-agents | `ontology-builder` builds admin panel concept nodes; `ontology-synthesizer` links to existing app graphs; critique reviews | `.working/ontology/` |
-| 致知 | 9. Store | DAO → `keeper-memory` | Manual to `procedural/`, raw observations to `episodic/` (file only) | `procedural/`, `episodic/` |
+| 致知 | 8. Store | DAO → `keeper-memory` | Manual to `procedural/`, raw observations to `episodic/` (file only) | `procedural/`, `episodic/` |
+| 致知 | 9. Ontology | DAO → sub-agents | `ontology-builder` reads from persisted content, builds admin panel concept nodes; `ontology-synthesizer` links to existing app graphs; critique reviews | `.working/ontology/` |
 | 致知 | 10. Respond | DAO → `present-to-user` | Deliver manual + knowledge graph link | *(output)* |
 
 **Example D: "Connect the knowledge from Project A and Project B"**
@@ -572,7 +572,7 @@ flowchart TD
 > - **Rubric is constructor-designed** — based on framework + overview + user context, not generic
 > - Plans always route through `.working/` — no skill writes directly to persistent folders
 > - `keeper-memory` is the file gatekeeper between `.working/` and persistent content storage; `ontology-builder` and `ontology-synthesizer` handle `.ontology/` writes separately
-> - **Ontology is always built after content passes critique** — builder registers entities → synthesizer links them → ontology critique, as a standard phase before Store
+> - **Store happens immediately after content passes critique** — keeper-memory persists to `semantic/`/`procedural/` first, then ontology-builder reads from persisted content to register entities → synthesizer links them → ontology critique, as a standard phase before Respond
 > - The Librarian can branch based on what's already in memory (Example B: skip web extraction if memory is sufficient)
 > - Multi-skill chains are valid — each reads the previous output from `.working/`
 > - Pure ontology operations (Example D) skip the constructor entirely — DAO drives directly
@@ -883,7 +883,7 @@ Skills are **self-bootstrapping** — each skill's `scripts/` folder includes id
 | Responsibility | Owned By | Script | What It Creates |
 |---|---|---|---|
 | Memory folder structure | `keeper-memory` | `scripts/init_memory.py` | `x-ipe-docs/memory/` tree: `.working/`, `episodic/`, `semantic/`, `procedural/` |
-| Ontology schema + vocabulary | `ontology-builder` | `scripts/init_ontology.py` | `.ontology/schema/class-registry.jsonl`, `.ontology/vocabulary/*.json`, `.ontology/instances/_index.json` |
+| Ontology schema + vocabulary | `ontology-builder` | `scripts/init_ontology.py` | `.ontology/schema/class-registry.jsonl`, `.ontology/vocabulary/*.json`, `.ontology/instances/_index.json`, `.ontology/instances/instance.001.jsonl` |
 | Ontology relation chunks | `ontology-synthesizer` | `scripts/init_relations.py` | `.ontology/instances/_relations.001.jsonl` |
 
 > **Idempotent init pattern:** Each script checks if folders/files exist before creating. Safe to call repeatedly — skips if already initialized. Every operation in the skill calls `ensure_initialized()` before executing.
