@@ -1,0 +1,75 @@
+{
+  "_version": "1.0",
+  "tasks": [
+    {
+      "task_id": "TASK-1115",
+      "task_type": "Feature Breakdown",
+      "description": "Break down FEATURE-059-A (Layer 0 — Prerequisites: skill-creator templates + custom instructions) into granular features for implementation.",
+      "status": "done",
+      "role": "Spark",
+      "output_links": [
+        "x-ipe-docs/requirements/requirement-details-part-25.md"
+      ],
+      "next_task": "Feature Refinement for FEATURE-059-A",
+      "created_at": "2026-04-15T15:43:00.000000+00:00",
+      "last_updated": "2026-04-15T15:50:00.000000+00:00"
+    },
+    {
+      "task_id": "TASK-1116",
+      "task_type": "Feature Refinement",
+      "description": "Refine FEATURE-059-A: Knowledge & Assistant Skill Type Infrastructure",
+      "status": "completed",
+      "role": "Spark",
+      "next_task": "Technical Design",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-059/FEATURE-059-A/specification.md"
+      ],
+      "created_at": "2026-04-15T15:52:54.879027+00:00",
+      "last_updated": "2026-04-15T16:04:41.881911+00:00"
+    },
+    {
+      "task_id": "TASK-1117",
+      "task_type": "Technical Design",
+      "description": "Technical design for FEATURE-059-A: Knowledge & Assistant Skill Type Infrastructure",
+      "status": "completed",
+      "role": "Spark",
+      "next_task": "Code Implementation",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-059/FEATURE-059-A/technical-design.md"
+      ],
+      "created_at": "2026-04-15T16:13:18.336326+00:00",
+      "last_updated": "2026-04-15T16:15:51.543874+00:00"
+    },
+    {
+      "task_id": "TASK-1118",
+      "task_type": "Code Implementation",
+      "description": "Implement FEATURE-059-A: Knowledge & Assistant Skill Type Infrastructure — create templates, update skill-creator, custom instructions, comparison doc, DAO deprecation",
+      "status": "completed",
+      "role": "Spark",
+      "next_task": "Feature Acceptance Test",
+      "output_links": [
+        ".github/skills/x-ipe-meta-skill-creator/templates/x-ipe-knowledge.md",
+        ".github/skills/x-ipe-meta-skill-creator/templates/x-ipe-assistant.md",
+        ".github/skills/x-ipe-meta-skill-creator/templates/skill-meta-x-ipe-assistant.md",
+        ".github/skills/x-ipe-meta-skill-creator/SKILL.md",
+        ".github/skills/x-ipe-meta-skill-creator/references/skill-type-comparison.md",
+        ".github/copilot-instructions.md"
+      ],
+      "created_at": "2026-04-15T16:18:24.666341+00:00",
+      "last_updated": "2026-04-15T16:26:18.594423+00:00"
+    },
+    {
+      "task_id": "TASK-1119",
+      "task_type": "Feature Refinement",
+      "description": "Refine FEATURE-059-B: Layer 1 Core Skills — keeper-memory, extractor-web, extractor-memory. Create detailed specification with GWT acceptance criteria.",
+      "status": "completed",
+      "role": "Spark",
+      "next_task": "Technical Design",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-059/FEATURE-059-B/specification.md"
+      ],
+      "created_at": "2026-04-15T16:27:52.681211+00:00",
+      "last_updated": "2026-04-15T16:39:04.033155+00:00"
+    }
+  ]
+}

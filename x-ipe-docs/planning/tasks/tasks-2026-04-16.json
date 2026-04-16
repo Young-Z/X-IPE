@@ -1,0 +1,29 @@
+{
+  "_version": "1.0",
+  "tasks": [
+    {
+      "task_id": "TASK-1120",
+      "task_type": "Technical Design",
+      "description": "Technical design for FEATURE-059-B: Layer 1 Core Skills — keeper-memory, extractor-web, extractor-memory. 3 knowledge skills + ontology retirement.",
+      "status": "completed",
+      "role": "Spark",
+      "next_task": "Code Implementation",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-059/FEATURE-059-B/technical-design.md"
+      ],
+      "created_at": "2026-04-16T00:41:43.671060+00:00",
+      "last_updated": "2026-04-16T00:44:17.057432+00:00"
+    },
+    {
+      "task_id": "TASK-1121",
+      "task_type": "Change Request",
+      "description": "CR: Add skill-meta-x-ipe-knowledge.md template. FEATURE-059-A deferred this as TBD. Adds missing skill-meta template for x-ipe-knowledge skill type.",
+      "status": "in_progress",
+      "role": "Ember",
+      "output_links": [],
+      "next_task": "",
+      "created_at": "2026-04-16T02:23:40.461760+00:00",
+      "last_updated": "2026-04-16T02:23:40.461760+00:00"
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "_version": "1.0",
+  "tasks": [
+    {
+      "task_id": "TASK-041",
+      "task_type": "Ideation",
+      "description": "Refine idea 041: Rebuild Knowledge Skills - reorganize knowledge skills into systematic namespace",
+      "status": "completed",
+      "role": "Spark",
+      "output_links": [
+        "x-ipe-docs/ideas/041. CR-Rebuild Knowledge Skills/idea-summary-v1.md"
+      ],
+      "next_task": "",
+      "created_at": "2026-04-14T06:21:21.219656+00:00",
+      "last_updated": "2026-04-14T08:05:35.245487+00:00"
+    },
+    {
+      "task_id": "TASK-041b",
+      "task_type": "Ideation",
+      "description": "Update idea-summary-v1: fix staging concept (temp working space, not promotion pipeline) and remove referencer skill",
+      "status": "completed",
+      "role": "Spark",
+      "output_links": [
+        "x-ipe-docs/ideas/041. CR-Rebuild Knowledge Skills/idea-summary-v1.md"
+      ],
+      "next_task": "",
+      "created_at": "2026-04-14T08:14:37.175234+00:00",
+      "last_updated": "2026-04-14T08:15:44.233364+00:00"
+    },
+    {
+      "task_id": "TASK-041c",
+      "task_type": "Ideation",
+      "description": "Resolve open questions and refine idea-summary-v1 for idea 041",
+      "status": "completed",
+      "role": "Spark",
+      "output_links": [
+        "x-ipe-docs/ideas/041. CR-Rebuild Knowledge Skills/idea-summary-v1.md"
+      ],
+      "next_task": "",
+      "created_at": "2026-04-14T08:34:33.870931+00:00",
+      "last_updated": "2026-04-14T08:36:48.220173+00:00"
+    },
+    {
+      "task_id": "TASK-041d",
+      "task_type": "Ideation",
+      "description": "Add rubric metrics step to 格物 and critique step to 致知 in Librarian workflow",
+      "status": "completed",
+      "role": "Spark",
+      "output_links": [
+        "x-ipe-docs/ideas/041. CR-Rebuild Knowledge Skills/idea-summary-v1.md"
+      ],
+      "next_task": "",
+      "created_at": "2026-04-14T09:09:16.852542+00:00",
+      "last_updated": "2026-04-14T09:09:58.236638+00:00"
+    },
+    {
+      "task_id": "TASK-1114",
+      "task_type": "Requirement Gathering",
+      "description": "Gather requirements for CR-Rebuild Knowledge Skills (IDEA-041). Create EPIC-059 with epics/features covering 13 new knowledge skills, ontology model, memory folder, web app updates, and migration.",
+      "status": "done",
+      "role": "Spark",
+      "output_links": [
+        "x-ipe-docs/requirements/requirement-details-part-25.md"
+      ],
+      "next_task": "Feature Breakdown for EPIC-059",
+      "created_at": "2026-04-14T10:00:00.000000+00:00",
+      "last_updated": "2026-04-15T15:32:00.000000+00:00"
+    }
+  ]
+}

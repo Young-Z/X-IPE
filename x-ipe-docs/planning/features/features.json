@@ -1926,6 +1926,30 @@
       "status": "Implemented",
       "created_at": "2026-04-08T09:29:23.986027+00:00",
       "last_updated": "2026-04-13T05:52:42.468956+00:00"
+    },
+    {
+      "feature_id": "FEATURE-059-A",
+      "epic_id": "EPIC-059",
+      "title": "Knowledge & Assistant Skill Type Infrastructure",
+      "version": "v1.0",
+      "description": "Add knowledge (Operations+Steps) and assistant templates to skill-creator, update custom instructions auto-discovery, document all 4 skill types",
+      "dependencies": [],
+      "status": "Implemented",
+      "created_at": "2026-04-15T15:43:00.000000+00:00",
+      "last_updated": "2026-04-15T16:26:18.634003+00:00"
+    },
+    {
+      "feature_id": "FEATURE-059-B",
+      "epic_id": "EPIC-059",
+      "title": "Layer 1 — Core Skills (Keeper + Extractors)",
+      "version": "v1.0",
+      "description": "Build foundational skills: keeper-memory (write gatekeeper), extractor-web (Chrome DevTools extraction), extractor-memory (knowledge retrieval). 3 skills with Operations+Steps pattern.",
+      "dependencies": [
+        "FEATURE-059-A"
+      ],
+      "status": "Designed",
+      "created_at": "2026-04-15T16:27:37.891691+00:00",
+      "last_updated": "2026-04-16T00:44:17.106811+00:00"
     }
   ]
 }
