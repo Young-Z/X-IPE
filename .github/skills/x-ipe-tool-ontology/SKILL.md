@@ -1,7 +1,13 @@
 ---
 name: x-ipe-tool-ontology
-description: Manage knowledge base ontology — entity CRUD, dimension registry, graph clustering, and search. Use for tagging KB content, building ontology graphs, searching knowledge nodes. Triggers on requests like "create entity", "tag content", "build graph", "search ontology", "register dimension".
+description: "⚠️ DEPRECATED — Search functionality migrated to x-ipe-knowledge-extractor-memory. Entity CRUD migrating to x-ipe-knowledge-ontology-builder (FEATURE-059-C). Relationship maintenance migrating to x-ipe-knowledge-ontology-synthesizer (FEATURE-059-D). Use the new knowledge skills instead."
 ---
+
+> **⚠️ DEPRECATED (FEATURE-059-B)**
+> - **Search** → Use `x-ipe-knowledge-extractor-memory` (scripts/search.py)
+> - **Entity CRUD** → Will migrate to `x-ipe-knowledge-ontology-builder` (FEATURE-059-C)
+> - **Relationships** → Will migrate to `x-ipe-knowledge-ontology-synthesizer` (FEATURE-059-D)
+> - This skill remains functional until all migrations complete.
 
 # KB Ontology Tool Skill
 

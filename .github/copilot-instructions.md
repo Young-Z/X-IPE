@@ -91,10 +91,12 @@ BLOCKING: Do NOT maintain a hardcoded registry. Skills are auto-discovered.
 
 **Discovery rule:**
 1. If the skills attachment is available in context, use it for matching (no filesystem scan needed)
-2. Otherwise, scan `.github/skills/x-ipe-task-based-*/SKILL.md`
+2. Otherwise, scan `.github/skills/x-ipe-task-based-*/SKILL.md` and `.github/skills/x-ipe-assistant-*/SKILL.md`
 3. Each skill's `description` contains trigger keywords for request matching
 
 **Request matching:** Match user request against trigger keywords in each skill's description (e.g., "fix bug" → `x-ipe-task-based-bug-fix`, "implement feature" → `x-ipe-task-based-code-implementation`).
+
+> **Note:** `x-ipe-knowledge-*` skills are NOT directly task-matched. They are coordinated by the Knowledge Librarian assistant (`x-ipe-assistant-knowledge-librarian-DAO`). Do not include them in auto-discovery scan patterns.
 
 > **Note:** When **Interaction Mode is DAO-based** (global or task-level), `require_human_review` is **skipped** regardless of the skill's default. The `process_preference.interaction_mode` enum (`interact-with-human | dao-represent-human-to-interact | dao-represent-human-to-interact-for-questions-in-skill`) controls this behavior.
 
@@ -134,7 +136,7 @@ Always follow:
 ## Knowledge Search
 
 **When:** Agent needs to search the knowledge base or knowledge graph
-**Then:** Always use the **ontology search** (`x-ipe-tool-ontology` Operation C) as the first choice before any other search approach. The ontology search provides structured, graph-aware results with entity relationships and subgraph context.
+**Then:** Always use the **memory search** (`x-ipe-knowledge-extractor-memory`) as the first choice before any other search approach. The memory search provides structured, graph-aware results with entity relationships and subgraph context. (Note: `x-ipe-tool-ontology` Operation C is deprecated; use `x-ipe-knowledge-extractor-memory` instead.)
 
 ---
 
