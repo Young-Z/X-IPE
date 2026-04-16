@@ -66,7 +66,7 @@ input:
   context:
     # discover_nodes:
     source_content: "string[]"        # Paths to memory files
-    depth_limit: "int"                # Max hierarchy depth (default: 3)
+    depth_limit: "1 | 3 | auto"       # 1=flat, 3=standard hierarchy, auto=rubric-driven (default: 3)
     # discover_properties:
     class_meta: "dict"                # {id, label, description, source_files[]}
     source_content: "string[]"        # Content to analyze
@@ -97,7 +97,7 @@ BLOCKING: All input fields with non-trivial initialization MUST be documented he
     <validation>Non-empty string array; each path must exist</validation>
   </field>
   <field name="context.depth_limit" source="Orchestrator or default" default="3">
-    <validation>Positive integer, max 10</validation>
+    <validation>Must be one of: 1, 3, "auto". When "auto", builder runs rubric evaluation loop until 100% coverage metrics achieved.</validation>
   </field>
   <field name="context.class_meta" source="Orchestrator provides class to enrich (discover_properties)">
     <validation>Must contain id, label, description, source_files</validation>
@@ -136,11 +136,11 @@ BLOCKING: All input fields with non-trivial initialization MUST be documented he
 ### Operation: discover_nodes
 
 > **Contract:**
-> - **Input:** source_content: string[], depth_limit: int (default: 3)
+> - **Input:** source_content: string[], depth_limit: 1 | 3 | "auto" (default: 3)
 > - **Output:** node_tree: object[] [{label, description, source_files[], parent?, children[]}], discovery_report: string
 > - **Writes To:** x-ipe-docs/memory/.ontology/schema/
 > - **Delegates To:** `scripts/ontology_ops.py register_class`
-> - **Constraints:** Breadth-first scan; depth-limited; class IDs are kebab-case slugs
+> - **Constraints:** Breadth-first scan; depth-limited; class IDs are kebab-case slugs; auto mode loops until 100% rubric metrics
 
 **When:** Orchestrator needs to discover domain classes/concepts from memory content.
 
@@ -150,41 +150,60 @@ BLOCKING: All input fields with non-trivial initialization MUST be documented he
   <phase_1 name="博学之 — Study Broadly">
     <action>
       1. READ source_content paths — load each memory file
-      2. DETERMINE depth_limit (default 3 if not specified)
+      2. RESOLVE depth_limit: accept 1, 3, or "auto" (default: 3)
       3. GATHER existing class-registry.jsonl to avoid duplicates
     </action>
-    <output>Source content loaded, existing classes known</output>
+    <output>Source content loaded, existing classes known, depth mode resolved</output>
   </phase_1>
 
   <phase_2 name="审问之 — Inquire Thoroughly">
     <action>
       1. VALIDATE source_content is non-empty string array
       2. VALIDATE each path exists and is readable
-      3. VALIDATE depth_limit is positive integer ≤ 10
+      3. VALIDATE depth_limit is one of: 1, 3, "auto"
     </action>
     <constraints>
       - BLOCKING: Empty source_content → return error INPUT_VALIDATION_FAILED
+      - BLOCKING: Invalid depth_limit → return error INPUT_VALIDATION_FAILED
     </constraints>
     <output>Input validated</output>
   </phase_2>
 
   <phase_3 name="慎思之 — Think Carefully">
     <action>
-      1. SCAN source content breadth-first: identify top-level domain nouns/concepts
-      2. For each concept, BUILD class node: {label, description, source_files, parent, children}
-      3. LIMIT hierarchy depth to depth_limit
-      4. For each class node, RUN:
-         `python3 scripts/ontology_ops.py register_class --label "{label}" --description "{desc}" --source-files '{json_paths}' --parent "{parent_id}" --ontology-dir x-ipe-docs/memory/.ontology`
-      5. COMPILE node_tree and discovery_report
+      IF depth_limit is 1 or 3 (fixed mode):
+        1. SCAN source content breadth-first: identify top-level domain nouns/concepts
+        2. For each concept, BUILD class node: {label, description, source_files, parent, children}
+        3. LIMIT hierarchy depth to depth_limit (1=flat classes only, 3=up to 3 levels)
+        4. For each class node, RUN:
+           `python3 scripts/ontology_ops.py register_class --label "{label}" --description "{desc}" --source-files '{json_paths}' --parent "{parent_id}" --ontology-dir x-ipe-docs/memory/.ontology`
+        5. COMPILE node_tree and discovery_report
+
+      IF depth_limit is "auto" (rubric-driven mode):
+        1. DEFINE discovery rubric metrics:
+           - concept_coverage: % of distinct domain concepts in source content that have a class
+           - hierarchy_coherence: % of classes with correct parent assignment
+           - source_traceability: % of classes with ≥1 source_file link
+           Target: ALL metrics = 100%
+        2. SET current_depth = 1
+        3. LOOP:
+           a. SCAN source content at current_depth: discover classes
+           b. Register discovered classes via ontology_ops.py
+           c. EVALUATE rubric metrics against node_tree so far
+           d. IF all metrics == 100% → BREAK (goal achieved)
+           e. IF current_depth >= 10 → BREAK (safety cap)
+           f. current_depth += 1
+        4. COMPILE node_tree and discovery_report (include rubric scores)
     </action>
-    <output>Classes registered, node_tree built</output>
+    <output>Classes registered, node_tree built, rubric metrics evaluated (if auto)</output>
   </phase_3>
 
   <phase_4 name="明辨之 — Discern Clearly">
     <action>
       1. VERIFY each class exists in class-registry.jsonl
       2. VERIFY node_tree entries have required fields (label, description, source_files)
-      3. IF verification fails → return error with details
+      3. IF depth_limit == "auto": VERIFY final rubric scores in discovery_report
+      4. IF verification fails → return error with details
     </action>
     <output>Output validated</output>
   </phase_4>
@@ -560,7 +579,7 @@ operation_output:
 | Anti-Pattern | Why Bad | Do Instead |
 |--------------|---------|------------|
 | Skip validation | Inconsistent ontology | Always critique_validate before declaring done |
-| Deep hierarchies | Over-engineering | Keep depth_limit <= 3 unless domain requires it |
+| Deep hierarchies | Over-engineering | Use depth_limit=3 or "auto" (auto stops when 100% metrics met) |
 | Manual ID assignment | ID collision risk | Let ontology_ops.py generate IDs automatically |
 
 ---
