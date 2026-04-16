@@ -10,6 +10,7 @@
 | Version | Date | Description |
 |---------|------|-------------|
 | v1.0 | 07-16-2025 | Initial specification |
+| v1.1 | 07-16-2025 | Redesign ontology-builder: collapse 5 operations into single `build_ontology` with iterative 6-step loop |
 
 ## Linked Mockups
 
@@ -39,7 +40,7 @@ Additionally, this feature deprecates 4 old tool skills by adding deprecation he
 
 3. **As** the Knowledge Librarian assistant, **I want** a mimic skill that observes user behavior on websites via Chrome DevTools, **so that** I can capture interaction patterns as training data for AI agents.
 
-4. **As** the Knowledge Librarian assistant, **I want** an ontology-builder that discovers classes and properties from constructed knowledge, **so that** the ontology graph stays current as new knowledge is added to memory.
+4. **As** the Knowledge Librarian assistant, **I want** an ontology-builder that builds an ontology graph from source knowledge through iterative discovery, **so that** the ontology graph stays current as new knowledge is added to memory.
 
 5. **As** a developer, **I want** old extraction tool skills deprecated with clear migration pointers, **so that** I know which new knowledge skill replaces each old tool.
 
@@ -113,42 +114,43 @@ Additionally, this feature deprecates 4 old tool skills by adding deprecation he
 | AC-059C-08a | GIVEN an active or completed tracking session WHEN `get_observations` is invoked with a `filter` THEN matching `observations[]` are returned filtered by criteria | Unit |
 | AC-059C-08b | GIVEN `get_observations` is invoked WHEN it completes THEN no files are written (read-only operation) | Unit |
 
-### AC-059C-09: Ontology-Builder — discover_nodes Operation
+### AC-059C-09: Ontology-Builder — build_ontology Content Learning (Step 1–2)
 
 | AC ID | Criterion (Given/When/Then) | Test Type |
 |-------|-------------------------------|-----------|
-| AC-059C-09a | GIVEN `source_content` from semantic or procedural memory WHEN `discover_nodes` is invoked THEN a breadth-first scan identifies top-level classes/concepts AND returns `node_tree[]` with class labels, descriptions, and source file references | Unit |
-| AC-059C-09b | GIVEN `depth_limit` is set to 2 WHEN `discover_nodes` is invoked THEN only 2 levels of class hierarchy are discovered (no deeper nesting) | Unit |
-| AC-059C-09c | GIVEN `discover_nodes` completes WHEN output is checked THEN `discovery_report` summarizes the scan AND results are written to `.ontology/` (not `.working/ontology/`) | Unit |
+| AC-059C-09a | GIVEN `source_content` paths from semantic or procedural memory WHEN `build_ontology` is invoked THEN the builder reads all source files and produces a content overview summarizing key domains, entities, and relationships | Unit |
+| AC-059C-09b | GIVEN the content overview WHEN the builder proposes an initial ontology graph THEN the proposal includes class candidates, instance candidates, and vocabulary term candidates — all derived from the source content | Unit |
+| AC-059C-09c | GIVEN `depth_limit` is set to 1 WHEN `build_ontology` is invoked THEN only a single-pass flat scan is performed (no iterative drill-down) | Unit |
 
-### AC-059C-10: Ontology-Builder — discover_properties Operation
-
-| AC ID | Criterion (Given/When/Then) | Test Type |
-|-------|-------------------------------|-----------|
-| AC-059C-10a | GIVEN a `class_meta` entry WHEN `discover_properties` is invoked THEN web search is performed for common attributes of the class type AND context-specific properties are derived from source content AND `proposed_properties[]` is returned with `kind`, `range`, `cardinality` | Integration |
-| AC-059C-10b | GIVEN `proposed_properties[]` output WHEN each property is inspected THEN vocabulary-linked properties reference the correct scheme in `.ontology/vocabulary/` | Unit |
-
-### AC-059C-11: Ontology-Builder — create_instances Operation
+### AC-059C-10: Ontology-Builder — Critique Sub-Agent (Step 3)
 
 | AC ID | Criterion (Given/When/Then) | Test Type |
 |-------|-------------------------------|-----------|
-| AC-059C-11a | GIVEN a `class_registry` and `property_schema` WHEN `create_instances` is invoked THEN instance entries are created in `.ontology/instances/` with all discovered properties filled (or `null` if N/A) | Unit |
-| AC-059C-11b | GIVEN an instance linked to `.working/` content WHEN it is created THEN the instance metadata includes `lifecycle: "Ephemeral"` to indicate the source may be transient | Unit |
-| AC-059C-11c | GIVEN an instance linked to persistent memory content WHEN it is created THEN the instance metadata includes `lifecycle: "Persistent"` | Unit |
+| AC-059C-10a | GIVEN a proposed ontology graph WHEN the critique step runs THEN a sub-agent evaluates existing `.ontology/` for reuse opportunities AND returns constructive feedback categorized as {reuse[], modify[], create_new[], skip[]} | Integration |
+| AC-059C-10b | GIVEN critique feedback WHEN the builder proceeds to implement THEN all reuse suggestions are incorporated before creating new entries (no duplicate classes or terms) | Unit |
 
-### AC-059C-12: Ontology-Builder — critique_validate Operation
-
-| AC ID | Criterion (Given/When/Then) | Test Type |
-|-------|-------------------------------|-----------|
-| AC-059C-12a | GIVEN a `class_registry` and `instances[]` WHEN `critique_validate` is invoked THEN a sub-agent reviews property accuracy, term consistency, and completeness AND returns a `critique_report` with constructive feedback | Unit |
-| AC-059C-12b | GIVEN instances with terms not in vocabulary WHEN `critique_validate` is invoked THEN `term_issues[]` flags each unknown term with a suggestion to register it via `register_vocabulary` | Unit |
-
-### AC-059C-13: Ontology-Builder — register_vocabulary Operation
+### AC-059C-11: Ontology-Builder — Iterative Implement & Drill-Down (Steps 4–6)
 
 | AC ID | Criterion (Given/When/Then) | Test Type |
 |-------|-------------------------------|-----------|
-| AC-059C-13a | GIVEN `new_terms[]` and a `target_scheme` WHEN `register_vocabulary` is invoked THEN new terms are added to the vocabulary scheme in `.ontology/vocabulary/` with `broader`/`narrower` hierarchy | Unit |
-| AC-059C-13b | GIVEN a term that already exists in the target scheme WHEN `register_vocabulary` is invoked THEN the existing term is not duplicated AND `added_terms[]` excludes it | Unit |
+| AC-059C-11a | GIVEN critique feedback with create_new items WHEN the builder implements THEN classes are registered via `ontology_ops.py register_class`, instances via `create_instance`, and vocabulary via `add_vocabulary` — all writing to `.ontology/` | Unit |
+| AC-059C-11b | GIVEN unprocessed nodes remain WHEN the builder selects the next node THEN it picks the node with the richest unexplored source content AND reads linked source_files in depth | Unit |
+| AC-059C-11c | GIVEN detailed content from a drill-down WHEN the builder discovers finer-grained classes/properties/instances THEN it loops back to critique (Step 3) before writing | Unit |
+
+### AC-059C-12: Ontology-Builder — Auto Mode Rubric (depth_limit="auto")
+
+| AC ID | Criterion (Given/When/Then) | Test Type |
+|-------|-------------------------------|-----------|
+| AC-059C-12a | GIVEN `depth_limit` is `"auto"` WHEN the builder runs THEN it evaluates rubric metrics (concept_coverage, instance_coverage, vocabulary_coverage, hierarchy_coherence) after each iteration | Unit |
+| AC-059C-12b | GIVEN all rubric metrics reach 100% WHEN the builder checks depth THEN it stops iterating and returns the build report with final rubric scores | Unit |
+| AC-059C-12c | GIVEN iteration count reaches 10 WHEN rubric metrics are not yet 100% THEN the builder stops (safety cap) and returns partial rubric scores with an explanation | Unit |
+
+### AC-059C-13: Ontology-Builder — Single Operation Interface
+
+| AC ID | Criterion (Given/When/Then) | Test Type |
+|-------|-------------------------------|-----------|
+| AC-059C-13a | GIVEN the ontology-builder skill WHEN its SKILL.md is inspected THEN it exposes exactly ONE operation (`build_ontology`) with input `source_content: string[]` + `depth_limit: 1 \| 3 \| "auto"` | Unit |
+| AC-059C-13b | GIVEN `build_ontology` completes WHEN the output is checked THEN `build_report` contains `ontology_summary` (classes_created, instances_created, vocabulary_terms_added, classes_reused) and `iterations_completed` | Unit |
 
 ### AC-059C-14: Ontology-Builder — Ephemeral Lifecycle Flag
 
@@ -220,35 +222,18 @@ Additionally, this feature deprecates 4 old tool skills by adding deprecation he
 - Output: `observations[]`
 - Read-only (no writes)
 
-**FR-8: Ontology-Builder — discover_nodes**
-- Input: `source_content` (from semantic/procedural), `depth_limit`
-- Process: Breadth-first scan → identify top-level classes → create class meta entries with description, source_files, parent hierarchy
-- Output: `node_tree[]`, `discovery_report`
-- Writes to: `.ontology/`
-
-**FR-9: Ontology-Builder — discover_properties**
-- Input: `class_meta`, `source_content`, `web_search_template`
-- Process: Web search for common attributes → analyze context for specific attributes → propose property schema with `kind`, `range`, `cardinality`
-- Output: `proposed_properties[]`, `search_results`
-- Writes to: `.ontology/`
-
-**FR-10: Ontology-Builder — create_instances**
-- Input: `class_registry`, `source_content`, `property_schema`
-- Process: For each entity in source → fill property values (null if N/A) → tag with `lifecycle` (Ephemeral for .working/ refs, Persistent for memory refs)
-- Output: `instances[]`
-- Writes to: `.ontology/instances/`
-
-**FR-11: Ontology-Builder — critique_validate**
-- Input: `class_registry`, `instances[]`, `vocabulary_index`
-- Process: Sub-agent validates property accuracy → check term consistency with vocabulary → flag unknown terms → provide constructive feedback
-- Output: `critique_report`, `term_issues[]`
-- Writes to: `.ontology/` (feedback file)
-
-**FR-12: Ontology-Builder — register_vocabulary**
-- Input: `new_terms[]`, `target_scheme`
-- Process: Check for duplicates → add new terms with broader/narrower relationships → update scheme file
-- Output: `updated_vocabulary`, `added_terms[]`
-- Writes to: `.ontology/vocabulary/`
+**FR-8: Ontology-Builder — build_ontology (Single Operation)**
+- Input: `source_content` (paths to memory files), `depth_limit` (1 | 3 | "auto", default: "auto")
+- Process: 6-step iterative workflow:
+  1. Learn source content → produce content overview
+  2. Suggest basic ontology graph (classes, instances, vocabulary)
+  3. Sub-agent critique → evaluate existing ontology reuse, give constructive feedback
+  4. Implement changes based on feedback (register classes, create instances, add vocabulary)
+  5. Broad search drill-down → select next unprocessed node
+  6. Learn details via source_files → loop back to step 3
+- Output: `build_report` {ontology_summary, rubric_scores (if auto), iterations_completed}
+- Writes to: `.ontology/` (schema/, instances/, vocabulary/)
+- Auto mode: rubric evaluation (concept_coverage, instance_coverage, vocabulary_coverage, hierarchy_coherence) targets 100%, safety cap at iteration 10
 
 ## Non-Functional Requirements
 
@@ -279,7 +264,7 @@ N/A — These are backend knowledge skills with no UI components.
 - Existing `.ontology/` folder structure (created by keeper-memory's `init_memory.py`) — Required by ontology-builder writes
 
 **External:**
-- Web search API — Used by ontology-builder's `discover_properties` operation for general attribute discovery
+- Web search API — Used internally by ontology-builder's critique sub-agent during the build_ontology iterative loop
 
 ## Business Rules
 
@@ -301,10 +286,10 @@ N/A — These are backend knowledge skills with no UI components.
 | `fill_structure` with partial knowledge | Draft produced with `[INCOMPLETE: reason]` markers on unfilled sections |
 | Mimic start on already-tracked page | IIFE guard prevents double injection, existing session ID returned |
 | Mimic stop with invalid session ID | Error returned with SESSION_NOT_FOUND, no side effects |
-| Ontology-builder discovers no classes | Empty `node_tree[]` returned with report explaining why |
-| Ontology-builder finds existing term in vocabulary | `register_vocabulary` skips duplicate, `added_terms[]` excludes it |
+| Ontology-builder discovers no classes in source | Empty build_report with classes_created=0; no writes to .ontology/ |
+| Ontology-builder finds existing class in .ontology/ | Critique sub-agent suggests reuse; builder references existing class instead of creating duplicate |
 | Entity references `.working/` path that was already cleaned up | Entity remains with `lifecycle: "Ephemeral"` — downstream consumers check source existence |
-| `discover_properties` web search returns no results | Falls back to context-only analysis, no error |
+| Auto mode rubric cannot reach 100% within 10 iterations | Safety cap stops iteration; build_report includes partial rubric_scores and explanation |
 
 ## Out of Scope
 
@@ -324,7 +309,7 @@ N/A — These are backend knowledge skills with no UI components.
 - Ontology-builder skill: SKILL.md + `scripts/` (ontology write utilities for JSONL files) + `references/`
 - All skills created via `x-ipe-meta-skill-creator` (candidate/ → validate → merge workflow)
 - Ontology-builder's `lifecycle` field should be added to entity JSONL records alongside existing fields
-- The `discover_properties` web search should use a configurable template pattern for flexibility
+- Ontology-builder exposes a single `build_ontology` operation with iterative critique-implement loop — the orchestrator does NOT call separate discover/create/validate steps
 - Constructor templates should be adapted (not copy-pasted) from old skills to fit the 4-operation interface
 
 ## Open Questions

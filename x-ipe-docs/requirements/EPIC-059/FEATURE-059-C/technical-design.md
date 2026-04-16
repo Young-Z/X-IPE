@@ -1,6 +1,6 @@
 # Technical Design: Layer 2 — Domain Skills (Constructors + Mimic + Ontology-Builder)
 
-> Feature ID: FEATURE-059-C | Version: v1.0 | Last Updated: 2026-04-16
+> Feature ID: FEATURE-059-C | Version: v1.1 | Last Updated: 2026-04-16
 
 ---
 
@@ -17,7 +17,7 @@
 | `x-ipe-knowledge-constructor-notes` | Domain expert for knowledge notes construction (same 4-op interface) | Absorbs `x-ipe-tool-knowledge-extraction-notes` | #knowledge #constructor #notes #domain-expert |
 | `x-ipe-knowledge-constructor-app-reverse-engineering` | Domain expert for RE reports (same 4-op interface, delegates to `x-ipe-tool-rev-eng-*`) | Absorbs `x-ipe-tool-knowledge-extraction-application-reverse-engineering` | #knowledge #constructor #reverse-engineering #domain-expert |
 | `x-ipe-knowledge-mimic-web-behavior-tracker` | Observe & record user behavior on websites via Chrome DevTools MCP | Absorbs `x-ipe-tool-learning-behavior-tracker-for-web`, writes to `x-ipe-docs/.mimicked/` | #knowledge #mimic #behavior-tracker #chrome-devtools |
-| `x-ipe-knowledge-ontology-builder` | Discover classes, properties, instances from knowledge; register in `.ontology/` | Absorbs build ops from retired `x-ipe-tool-ontology`, writes directly to `.ontology/` with `lifecycle` flag | #knowledge #ontology #builder #graph |
+| `x-ipe-knowledge-ontology-builder` | Build ontology graph (classes, instances, vocabulary) from source knowledge via iterative discover-critique-implement loop (single `build_ontology` op) | Absorbs build ops from retired `x-ipe-tool-ontology`, writes directly to `.ontology/` with `lifecycle` flag | #knowledge #ontology #builder #graph |
 | Deprecation headers (×4) | Add migration pointers to old tool skills | 4 old skills get deprecation banners | #deprecation #migration |
 
 ### Dependencies
@@ -51,11 +51,12 @@
 4. Librarian calls `get_observations(session_id, filter)` → read-only retrieval of observations
 
 **Ontology-Builder Workflow:**
-1. Librarian calls `discover_nodes(source_content, depth_limit)` → builder scans knowledge → returns `node_tree[]` → writes class meta to `.ontology/schema/`
-2. Librarian dispatches parallel sub-agents: each calls `discover_properties(class_meta, source_content)` → web search + context analysis → returns `proposed_properties[]` → writes to `.ontology/schema/`
-3. Librarian calls `create_instances(class_registry, source_content, property_schema)` → builder fills properties → writes instances to `.ontology/instances/` with `lifecycle` flag
-4. Librarian calls `critique_validate(class_registry, instances[], vocabulary_index)` → sub-agent reviews → returns `critique_report` + `term_issues[]`
-5. Librarian calls `register_vocabulary(new_terms[], target_scheme)` → builder adds terms to `.ontology/vocabulary/`
+1. Librarian calls `build_ontology(source_content, depth_limit)` → builder reads source content → produces content overview → proposes initial ontology graph (classes, instances, vocabulary)
+2. Builder launches critique sub-agent → evaluates existing `.ontology/` for reuse → returns constructive feedback {reuse, modify, create_new, skip}
+3. Builder implements changes based on feedback → writes classes to `schema/`, instances to `instances/`, vocabulary to `vocabulary/`
+4. Builder selects next unprocessed node → reads linked source_files in depth → discovers finer-grained classes/properties/instances → loops back to step 2
+5. Loop terminates when: depth_limit reached (1=flat, 3=standard) or rubric metrics hit 100% (auto mode, safety cap at 10 iterations)
+6. Builder returns `build_report` with ontology_summary, rubric_scores, iterations_completed
 
 ### Usage Example
 
@@ -83,15 +84,19 @@ context:
 #     - { target_section: "02", what_needed: "Setup instructions with prerequisites", suggested_extractor: "extractor-web" }
 #     - { target_section: "03", what_needed: "List of app features from source code", suggested_extractor: "extractor-memory" }
 
-# Librarian calling ontology-builder.create_instances
-operation: create_instances
+# Librarian calling ontology-builder.build_ontology
+operation: build_ontology
 context:
-  class_registry: [{ id: "web-framework", label: "WebFramework", ... }]
-  source_content: "x-ipe-docs/memory/semantic/flask-jinja2-templating.md"
-  property_schema: [{ name: "language", kind: "literal", range: "string" }, ...]
+  source_content:
+    - "x-ipe-docs/memory/semantic/flask-jinja2-templating.md"
+    - "x-ipe-docs/memory/semantic/python-web-frameworks.md"
+  depth_limit: "auto"
 # Returns:
-#   instances:
-#     - { id: "inst-001", class: "web-framework", label: "Flask", language: "Python", lifecycle: "Persistent", synthesize_id: null, synthesize_message: null }
+#   build_report:
+#     ontology_summary: { classes_created: 5, instances_created: 12, vocabulary_terms_added: 8, classes_reused: 2 }
+#     rubric_scores: { concept_coverage: 1.0, instance_coverage: 1.0, vocabulary_coverage: 1.0, hierarchy_coherence: 1.0 }
+#     iterations_completed: 3
+#     depth_reached: 3
 ```
 
 ---
@@ -117,7 +122,7 @@ context:
 | D4 | mimic-web-behavior-tracker SKILL.md | Knowledge Skill | `.github/skills/x-ipe-knowledge-mimic-web-behavior-tracker/SKILL.md` | AC-059C-06, 07, 08, 15 |
 | D4s | mimic scripts/ | Python + JS | `.github/skills/x-ipe-knowledge-mimic-web-behavior-tracker/scripts/` | AC-059C-06, 07, 15d |
 | D4r | mimic references/ | Examples | `.github/skills/x-ipe-knowledge-mimic-web-behavior-tracker/references/examples.md` | AC-059C-05d equivalent |
-| D5 | ontology-builder SKILL.md | Knowledge Skill | `.github/skills/x-ipe-knowledge-ontology-builder/SKILL.md` | AC-059C-09–14, 15 |
+| D5 | ontology-builder SKILL.md | Knowledge Skill | `.github/skills/x-ipe-knowledge-ontology-builder/SKILL.md` | AC-059C-09–13, 14, 15 |
 | D5s | ontology-builder scripts/ | Python | `.github/skills/x-ipe-knowledge-ontology-builder/scripts/` | AC-059C-09c, 11, 13, 14, 15e |
 | D5r | ontology-builder references/ | Examples | `.github/skills/x-ipe-knowledge-ontology-builder/references/examples.md` | AC-059C-05d equivalent |
 | D6 | Deprecation: knowledge-extraction-user-manual | Edit | `.github/skills/x-ipe-tool-knowledge-extraction-user-manual/SKILL.md` | AC-059C-16a |
@@ -170,10 +175,8 @@ sequenceDiagram
     KM-->>L: promoted_path
 
     Note over L: Phase 7: Ontology
-    L->>OB: discover_nodes(source_content)
-    OB-->>L: node_tree[]
-    L->>OB: create_instances(class_registry, source_content)
-    OB-->>L: instances[] (with lifecycle flag)
+    L->>OB: build_ontology(source_content, depth_limit="auto")
+    OB-->>L: build_report {ontology_summary, rubric_scores, iterations}
 ```
 
 ### Workflow Diagram — Mimic Tracking Session
@@ -213,36 +216,42 @@ sequenceDiagram
 sequenceDiagram
     participant L as Librarian
     participant OB as ontology-builder
-    participant WS as Web Search
+    participant C as Critique Sub-Agent
     participant O as .ontology/
 
-    Note over L: Step 1: Discover Classes
-    L->>OB: discover_nodes(source_content, depth_limit)
-    OB->>O: Write class meta to schema/
-    OB-->>L: node_tree[] + discovery_report
+    Note over L: Single call: build_ontology
+    L->>OB: build_ontology(source_content, depth_limit)
 
-    Note over L: Step 2: Discover Properties (parallel per class)
-    par For each discovered class
-        L->>OB: discover_properties(class_meta, source_content)
-        OB->>WS: "Common attributes of {class_label}?"
-        WS-->>OB: General properties
-        OB->>O: Write property schema
-        OB-->>L: proposed_properties[]
+    Note over OB: Step 1: Learn Content
+    OB->>OB: Read source_content → content overview
+    OB->>O: Load existing classes, instances, vocabulary
+
+    Note over OB: Step 2: Suggest Basic Ontology Graph
+    OB->>OB: Propose classes[], instances[], vocabulary[]
+
+    loop Iterative Refinement (Steps 3–6)
+        Note over OB: Step 3: Critique
+        OB->>C: Evaluate proposed graph vs existing .ontology/
+        C-->>OB: feedback {reuse[], modify[], create_new[], skip[]}
+
+        Note over OB: Step 4: Implement
+        OB->>O: register_class, create_instance, add_vocabulary
+        OB->>O: validate_terms (consistency check)
+
+        Note over OB: Depth Check
+        alt depth_limit reached OR rubric 100%
+            OB->>OB: Break loop
+        else More nodes to explore
+            Note over OB: Step 5: Select next node
+            OB->>OB: Pick node with richest unexplored content
+
+            Note over OB: Step 6: Learn details
+            OB->>OB: Read source_files for selected node
+            OB->>OB: Discover finer-grained classes/properties/instances
+        end
     end
 
-    Note over L: Step 3: Create Instances
-    L->>OB: create_instances(class_registry, source_content, property_schema)
-    OB->>O: Write to instances/ (lifecycle: Ephemeral|Persistent)
-    OB-->>L: instances[]
-
-    Note over L: Step 4: Critique
-    L->>OB: critique_validate(class_registry, instances[], vocabulary_index)
-    OB-->>L: critique_report + term_issues[]
-
-    Note over L: Step 5: Register Vocabulary
-    L->>OB: register_vocabulary(new_terms[], target_scheme)
-    OB->>O: Write to vocabulary/ (deduplicate)
-    OB-->>L: updated_vocabulary + added_terms[]
+    OB-->>L: build_report {ontology_summary, rubric_scores, iterations}
 ```
 
 ### Class Diagram — Skill Structure
@@ -295,11 +304,7 @@ classDiagram
 
     class OntologyBuilder {
         <<Knowledge Skill>>
-        +discover_nodes(source_content, depth_limit) NodeTree
-        +discover_properties(class_meta, source_content) Properties
-        +create_instances(class_registry, source_content, property_schema) Instances
-        +critique_validate(class_registry, instances[], vocabulary_index) CritiqueReport
-        +register_vocabulary(new_terms[], target_scheme) VocabularyUpdate
+        +build_ontology(source_content[], depth_limit) BuildReport
         scripts/ontology_ops.py
         references/examples.md
     }
@@ -569,16 +574,18 @@ constraints:
 **Folder structure:**
 ```
 .github/skills/x-ipe-knowledge-ontology-builder/
-├── SKILL.md                    # Knowledge skill template (5 operations)
+├── SKILL.md                    # Knowledge skill — single build_ontology operation
 ├── scripts/
 │   └── ontology_ops.py         # JSONL write utilities (entity, class, vocabulary)
 └── references/
-    └── examples.md             # Worked examples for each operation
+    └── examples.md             # Worked examples for build_ontology
 ```
 
-**ontology_ops.py — New script for ontology writes:**
+**Single operation design:** Unlike constructors (which expose 4 operations for the orchestrator to call sequentially), ontology-builder exposes a single `build_ontology` operation. The orchestrator calls it once with `source_content` + `depth_limit`, and the builder runs an internal iterative loop (Steps 1–6) that handles discovery, critique, implementation, and drill-down autonomously.
 
-This script provides low-level JSONL operations for the ontology-builder SKILL.md to delegate to. It draws patterns from the existing `x-ipe-tool-ontology/scripts/ontology.py` (825 lines) but is simplified to handle only the operations the builder needs.
+**ontology_ops.py — Low-level JSONL script:**
+
+This script provides low-level JSONL operations for the builder's internal loop to delegate to. It draws patterns from the existing `x-ipe-tool-ontology/scripts/ontology.py` (825 lines) but is simplified to handle only the operations the builder needs.
 
 | Command | Purpose | Target File |
 |---------|---------|-------------|
@@ -619,6 +626,16 @@ This script provides low-level JSONL operations for the ontology-builder SKILL.m
 5. **Chunk management** — `ontology_ops.py` handles instance chunk rotation. When `instance.NNN.jsonl` exceeds 5000 lines, the script creates `instance.{NNN+1}.jsonl` and updates `_index.json`.
 
 6. **Vocabulary deduplication** — `add_vocabulary` checks existing terms before adding. Uses `broader`/`narrower` hierarchy from SKOS-like structure.
+
+7. **Iterative critique-implement loop** — The builder's 6-step workflow runs inside the single `build_ontology` operation:
+   - **Step 1 (Learn):** Read source content, load existing `.ontology/` state, produce content overview
+   - **Step 2 (Suggest):** Propose initial ontology graph (classes, instances, vocabulary) from overview
+   - **Step 3 (Critique):** Sub-agent evaluates proposed graph against existing `.ontology/`, suggests reuse/modify/create_new/skip
+   - **Step 4 (Implement):** Write changes via ontology_ops.py commands
+   - **Step 5 (Drill-down):** Select next unprocessed node with richest unexplored source content
+   - **Step 6 (Learn details):** Read source_files for selected node, discover finer-grained graph elements, loop back to Step 3
+   
+   Loop termination: `depth_limit=1` → single pass; `depth_limit=3` → max 3 iterations; `depth_limit="auto"` → rubric-driven (concept_coverage, instance_coverage, vocabulary_coverage, hierarchy_coherence) targeting 100%, safety cap at 10 iterations.
 
 ---
 
@@ -668,91 +685,35 @@ This script provides low-level JSONL operations for the ontology-builder SKILL.m
 | `broader` | `string \| null` | ❌ | Builder | Parent term (SKOS hierarchy) |
 | `narrower` | `string[]` | ❌ | Builder | Child terms (SKOS hierarchy) |
 
-**Operation contracts:**
+**Operation contract:**
 
 ```yaml
-operation: discover_nodes
+operation: build_ontology
 input:
-  source_content: string[]       # Paths to semantic/procedural memory files
-  depth_limit: int               # Max hierarchy depth (default: 3)
+  source_content: string[]         # Paths to memory files to analyze
+  depth_limit: 1 | 3 | "auto"     # 1=flat, 3=standard, auto=rubric-driven (default: "auto")
 output:
-  node_tree: object[]            # [{label, description, source_files[], parent?, children[]}]
-  discovery_report: string       # Summary of what was found
-writes_to: x-ipe-docs/memory/.ontology/schema/
-delegates_to: scripts/ontology_ops.py register_class
+  build_report:
+    ontology_summary:
+      classes_created: int
+      instances_created: int
+      vocabulary_terms_added: int
+      classes_reused: int
+    rubric_scores:                   # Present when depth_limit == "auto"
+      concept_coverage: float (0-1)
+      instance_coverage: float (0-1)
+      vocabulary_coverage: float (0-1)
+      hierarchy_coherence: float (0-1)
+    iterations_completed: int
+    depth_reached: int
+writes_to: x-ipe-docs/memory/.ontology/ (schema/, instances/, vocabulary/)
+delegates_to: scripts/ontology_ops.py (register_class, add_properties, create_instance, add_vocabulary, validate_terms)
 constraints:
-  - Breadth-first scan of source content
-  - Identify top-level classes/concepts (nouns, domain terms)
-  - For each class, create meta entry via register_class
-  - Depth-limited to avoid over-fragmentation
-```
-
-```yaml
-operation: discover_properties
-input:
-  class_meta: dict               # {id, label, description, source_files[]}
-  source_content: string[]       # Content to analyze
-  web_search_template: string    # "What are common attributes of a {class_label}?"
-output:
-  proposed_properties: object[]  # [{name, kind, range, cardinality, vocabulary_scheme?}]
-  search_results: string         # Raw web search findings
-writes_to: x-ipe-docs/memory/.ontology/schema/
-delegates_to: scripts/ontology_ops.py add_properties
-constraints:
-  - Step 1: Web search for general attributes (configurable template)
-  - Step 2: Context-specific analysis from source content
-  - Step 3: Propose property schema
-  - Vocabulary-linked properties must reference existing scheme
-```
-
-```yaml
-operation: create_instances
-input:
-  class_registry: object[]       # [{id, label, properties[]}]
-  source_content: string[]       # Memory file paths
-  property_schema: object[]      # From discover_properties
-output:
-  instances: object[]            # [{id, class, label, props, lifecycle}]
-writes_to: x-ipe-docs/memory/.ontology/instances/
-delegates_to: scripts/ontology_ops.py create_instance
-constraints:
-  - For each entity found in source, create instance
-  - Fill all properties (null if N/A)
-  - Set lifecycle based on source_files paths (Ephemeral if .working/, else Persistent)
-  - Handle chunk rotation if instance file exceeds 5000 lines
-```
-
-```yaml
-operation: critique_validate
-input:
-  class_registry: object[]
-  instances: object[]
-  vocabulary_index: dict         # From .ontology/vocabulary/
-output:
-  critique_report: dict          # {accuracy_score, completeness_score, suggestions[]}
-  term_issues: object[]          # [{term, issue, suggestion}]
-writes_to: x-ipe-docs/memory/.ontology/  # Feedback file only
-constraints:
-  - Sub-agent reviews property accuracy
-  - Check term consistency with vocabulary
-  - Flag unknown terms → suggest register_vocabulary
-  - Provide constructive feedback (not just errors)
-```
-
-```yaml
-operation: register_vocabulary
-input:
-  new_terms: object[]            # [{label, broader?, narrower?[], scheme}]
-  target_scheme: string          # e.g., "technology", "domain-concepts"
-output:
-  updated_vocabulary: dict       # Updated scheme contents
-  added_terms: string[]          # Labels of newly added terms
-writes_to: x-ipe-docs/memory/.ontology/vocabulary/
-delegates_to: scripts/ontology_ops.py add_vocabulary
-constraints:
-  - Deduplicate: skip terms already in scheme
-  - Maintain broader/narrower hierarchy
-  - If scheme file doesn't exist, create it
+  - Single operation — orchestrator calls once, builder handles all steps internally
+  - Critique sub-agent runs before every write (never bypass)
+  - Lifecycle determined automatically from source_files paths
+  - synthesize_id and synthesize_message set to null on creation
+  - Auto mode: rubric evaluation targets 100% on all 4 metrics, safety cap at 10 iterations
 ```
 
 ---

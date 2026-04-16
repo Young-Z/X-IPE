@@ -1,25 +1,24 @@
 ---
 name: x-ipe-knowledge-ontology-builder
-description: Discovers classes, properties, and instances from constructed knowledge and registers them in `.ontology/` with lifecycle flags. Delegates JSONL I/O to scripts/ontology_ops.py. Triggers on operations like "discover_nodes", "discover_properties", "create_instances", "critique_validate", "register_vocabulary".
+description: Builds ontology graph (classes, instances, vocabulary) from source content through an iterative discover-critique-implement loop. Delegates JSONL I/O to scripts/ontology_ops.py. Triggers on operations like "build_ontology".
 ---
 
 # Ontology Builder — Knowledge Skill
 
 ## Purpose
 
-AI Agents follow this skill to perform ontology construction operations:
-1. Discover classes/concepts from memory content and register them in `.ontology/schema/`
-2. Discover properties for classes via web search and source analysis
-3. Create entity instances with lifecycle flags (`Ephemeral` / `Persistent`)
-4. Validate ontology entries against vocabulary for consistency
-5. Register new vocabulary terms with broader/narrower hierarchy
+AI Agents follow this skill to build and refine ontology graphs from source knowledge:
+1. Learn source content and produce an overview
+2. Suggest a basic ontology graph (classes, instances, vocabulary)
+3. Critique against existing ontology for reuse opportunities
+4. Implement changes based on constructive feedback
+5. Drill down into nodes for deeper discovery, then iterate
 
 ---
 
 ## Important Notes
 
-BLOCKING: Operations are stateless services — the assistant orchestrator passes full context per call. Do NOT maintain internal state across operations.
-CRITICAL: Each operation MUST define typed input/output contracts with a `writes_to` field.
+BLOCKING: This is a single-operation skill. The `build_ontology` operation runs an iterative loop internally — the orchestrator does NOT need to call separate discover/create/validate steps.
 CRITICAL: This skill is NOT directly task-matched. It is called by the Knowledge Librarian assistant (`x-ipe-assistant-knowledge-librarian-DAO`) or another assistant orchestrator.
 CRITICAL: This skill writes DIRECTLY to `.ontology/` (not `.working/ontology/`). Ontology data is the persistent structure — there is no staging area.
 CRITICAL: Every class meta and instance record MUST include `synthesize_id: null` and `synthesize_message: null` on creation. These fields are populated later by the ontology-synthesizer (FEATURE-059-D).
@@ -28,12 +27,13 @@ CRITICAL: Every class meta and instance record MUST include `synthesize_id: null
 
 ## About
 
-This skill serves as the ontology construction gateway. It discovers domain structure (classes, properties, vocabulary) from memory content and registers the results in `.ontology/`. It absorbs build capabilities from the retired `x-ipe-tool-ontology`.
+This skill serves as the ontology construction gateway. Given source knowledge files, it autonomously discovers domain structure (classes, properties, instances, vocabulary) and registers the results in `.ontology/`. It absorbs build capabilities from the retired `x-ipe-tool-ontology`.
 
 **Key Concepts:**
-- **Operation Contract** — Each operation declares its input types, output types, writes_to path, and constraints. The orchestrator uses this contract to plan execution.
-- **Stateless Service** — The skill receives all needed context from the orchestrator per call. No cross-operation memory.
-- **writes_to Discipline** — Every operation declares which `.ontology/` sub-path it writes to, enabling the orchestrator to predict side effects.
+- **Iterative Discovery** — The builder doesn't try to discover everything in one pass. It starts with a broad overview, then drills down node-by-node, refining the graph at each iteration.
+- **Critique-Driven** — A sub-agent evaluates each proposed graph change against existing ontology, suggesting reuse opportunities and catching inconsistencies before writes happen.
+- **Rubric Evaluation (auto mode)** — When `depth_limit` is `"auto"`, the builder defines coverage metrics and loops until 100% is achieved (with a safety cap at depth 10).
+- **writes_to Discipline** — All writes go to `.ontology/` sub-paths. The builder declares this in its contract so the orchestrator can predict side effects.
 - **Lifecycle Flag** — Instances referencing `.working/` content are `Ephemeral`; those referencing persistent memory are `Persistent`.
 - **JSONL Event Sourcing** — All schema and instance data uses append-only JSONL with `{op, type, id, ts, props}` envelope.
 
@@ -43,11 +43,9 @@ This skill serves as the ontology construction gateway. It discovers domain stru
 
 ```yaml
 triggers:
-  - "Discover classes/concepts from source content and build ontology schema"
-  - "Discover properties for a class using web search and source analysis"
-  - "Create entity instances from memory content with lifecycle flags"
-  - "Validate ontology consistency against vocabulary"
-  - "Register new vocabulary terms with SKOS hierarchy"
+  - "Build ontology graph from source content"
+  - "Discover classes, instances, and vocabulary from knowledge files"
+  - "Update ontology with new knowledge content"
 
 not_for:
   - "Relationship/edge creation between entities (use ontology-synthesizer in 059-D)"
@@ -62,26 +60,10 @@ not_for:
 
 ```yaml
 input:
-  operation: "discover_nodes | discover_properties | create_instances | critique_validate | register_vocabulary"
+  operation: "build_ontology"
   context:
-    # discover_nodes:
-    source_content: "string[]"        # Paths to memory files
-    depth_limit: "1 | 3 | auto"       # 1=flat, 3=standard hierarchy, auto=rubric-driven (default: 3)
-    # discover_properties:
-    class_meta: "dict"                # {id, label, description, source_files[]}
-    source_content: "string[]"        # Content to analyze
-    web_search_template: "string"     # Search template
-    # create_instances:
-    class_registry: "object[]"        # [{id, label, properties[]}]
-    source_content: "string[]"        # Memory file paths
-    property_schema: "object[]"       # From discover_properties
-    # critique_validate:
-    class_registry: "object[]"
-    instances: "object[]"
-    vocabulary_index: "dict"
-    # register_vocabulary:
-    new_terms: "object[]"             # [{label, broader?, narrower?[], scheme}]
-    target_scheme: "string"           # e.g., "technology"
+    source_content: "string[]"          # Paths to memory files to analyze
+    depth_limit: "1 | 3 | auto"        # 1=flat, 3=standard, auto=rubric-driven (default: "auto")
 ```
 
 ### Input Initialization
@@ -90,20 +72,14 @@ BLOCKING: All input fields with non-trivial initialization MUST be documented he
 
 ```xml
 <input_init>
-  <field name="operation" source="Assistant orchestrator specifies which operation to perform">
-    <validation>Must be one of: discover_nodes, discover_properties, create_instances, critique_validate, register_vocabulary</validation>
+  <field name="operation" source="Assistant orchestrator">
+    <validation>Must be "build_ontology"</validation>
   </field>
   <field name="context.source_content" source="Orchestrator provides paths to memory files">
     <validation>Non-empty string array; each path must exist</validation>
   </field>
-  <field name="context.depth_limit" source="Orchestrator or default" default="3">
-    <validation>Must be one of: 1, 3, "auto". When "auto", builder runs rubric evaluation loop until 100% coverage metrics achieved.</validation>
-  </field>
-  <field name="context.class_meta" source="Orchestrator provides class to enrich (discover_properties)">
-    <validation>Must contain id, label, description, source_files</validation>
-  </field>
-  <field name="context.target_scheme" source="Orchestrator specifies vocabulary scheme (register_vocabulary)">
-    <validation>Non-empty string, kebab-case</validation>
+  <field name="context.depth_limit" source="Orchestrator or default" default="auto">
+    <validation>Must be one of: 1, 3, "auto". When "auto", builder loops with rubric evaluation until 100% coverage metrics achieved.</validation>
   </field>
 </input_init>
 ```
@@ -115,12 +91,8 @@ BLOCKING: All input fields with non-trivial initialization MUST be documented he
 ```xml
 <definition_of_ready>
   <checkpoint required="true">
-    <name>Operation specified</name>
-    <verification>input.operation matches one of the 5 defined operation names</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Operation-specific context provided</name>
-    <verification>All required context fields for the specified operation are present</verification>
+    <name>Source content provided</name>
+    <verification>source_content is non-empty string array with existing paths</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>Ontology directory accessible</name>
@@ -133,370 +105,133 @@ BLOCKING: All input fields with non-trivial initialization MUST be documented he
 
 ## Operations
 
-### Operation: discover_nodes
+### Operation: build_ontology
 
 > **Contract:**
-> - **Input:** source_content: string[], depth_limit: 1 | 3 | "auto" (default: 3)
-> - **Output:** node_tree: object[] [{label, description, source_files[], parent?, children[]}], discovery_report: string
-> - **Writes To:** x-ipe-docs/memory/.ontology/schema/
-> - **Delegates To:** `scripts/ontology_ops.py register_class`
-> - **Constraints:** Breadth-first scan; depth-limited; class IDs are kebab-case slugs; auto mode loops until 100% rubric metrics
+> - **Input:** source_content: string[], depth_limit: 1 | 3 | "auto" (default: "auto")
+> - **Output:** build_report: dict {ontology_summary, rubric_scores, iterations_completed}, writes_to: string
+> - **Writes To:** x-ipe-docs/memory/.ontology/ (schema/, instances/, vocabulary/)
+> - **Delegates To:** `scripts/ontology_ops.py` (register_class, add_properties, create_instance, add_vocabulary, validate_terms)
+> - **Constraints:** Iterative loop; critique before every write; lifecycle flags; auto mode targets 100% rubric metrics
 
-**When:** Orchestrator needs to discover domain classes/concepts from memory content.
+**When:** Orchestrator needs to build or extend the ontology graph from source knowledge.
 
 ```xml
-<operation name="discover_nodes">
+<operation name="build_ontology">
 
-  <phase_1 name="博学之 — Study Broadly">
+  <phase_1 name="博学之 — Study Broadly (Step 1: Learn Content)">
     <action>
-      1. READ source_content paths — load each memory file
-      2. RESOLVE depth_limit: accept 1, 3, or "auto" (default: 3)
-      3. GATHER existing class-registry.jsonl to avoid duplicates
+      1. READ all source_content paths — load each memory file
+      2. BUILD content overview:
+         - Key domain concepts and entities mentioned
+         - Relationships hinted at (hierarchies, associations)
+         - Approximate complexity (number of distinct concepts)
+      3. LOAD existing .ontology/ state:
+         - Read class-registry.jsonl for existing classes
+         - Read instance chunks for existing instances
+         - Read vocabulary/ for existing schemes and terms
+      4. RESOLVE depth_limit (default: "auto")
     </action>
-    <output>Source content loaded, existing classes known, depth mode resolved</output>
+    <output>Content overview + existing ontology state loaded</output>
   </phase_1>
 
-  <phase_2 name="审问之 — Inquire Thoroughly">
+  <phase_2 name="审问之 — Inquire Thoroughly (Step 2: Suggest Basic Ontology Graph)">
     <action>
-      1. VALIDATE source_content is non-empty string array
-      2. VALIDATE each path exists and is readable
-      3. VALIDATE depth_limit is one of: 1, 3, "auto"
+      1. VALIDATE source_content is non-empty, all paths exist
+      2. VALIDATE depth_limit is one of: 1, 3, "auto"
+      3. PROPOSE initial ontology graph from the overview:
+         a. **Classes** — Top-level domain concepts as class candidates
+            - Each with: label, description, parent (if hierarchical), source_files[]
+         b. **Instances** — Concrete entities mentioned in source content
+            - Each with: label, class assignment, key properties, source_files[]
+         c. **Vocabulary** — Controlled terms that appear repeatedly
+            - Each with: label, scheme, broader/narrower if obvious
+      4. OUTPUT proposed_graph: {classes[], instances[], vocabulary[]}
     </action>
     <constraints>
       - BLOCKING: Empty source_content → return error INPUT_VALIDATION_FAILED
       - BLOCKING: Invalid depth_limit → return error INPUT_VALIDATION_FAILED
+      - Propose, do NOT write yet — critique comes first
     </constraints>
-    <output>Input validated</output>
+    <output>Proposed ontology graph ready for critique</output>
   </phase_2>
 
-  <phase_3 name="慎思之 — Think Carefully">
+  <phase_3 name="慎思之 — Think Carefully (Steps 3–6: Iterative Critique–Implement Loop)">
     <action>
-      IF depth_limit is 1 or 3 (fixed mode):
-        1. SCAN source content breadth-first: identify top-level domain nouns/concepts
-        2. For each concept, BUILD class node: {label, description, source_files, parent, children}
-        3. LIMIT hierarchy depth to depth_limit (1=flat classes only, 3=up to 3 levels)
-        4. For each class node, RUN:
-           `python3 scripts/ontology_ops.py register_class --label "{label}" --description "{desc}" --source-files '{json_paths}' --parent "{parent_id}" --ontology-dir x-ipe-docs/memory/.ontology`
-        5. COMPILE node_tree and discovery_report
+      IF depth_limit is "auto":
+        DEFINE rubric metrics:
+          - concept_coverage: % of distinct domain concepts in source that have a class
+          - instance_coverage: % of concrete entities in source that have an instance
+          - vocabulary_coverage: % of repeated controlled terms registered in vocabulary
+          - hierarchy_coherence: % of classes with correct parent assignment
+          Target: ALL metrics = 100%
 
-      IF depth_limit is "auto" (rubric-driven mode):
-        1. DEFINE discovery rubric metrics:
-           - concept_coverage: % of distinct domain concepts in source content that have a class
-           - hierarchy_coherence: % of classes with correct parent assignment
-           - source_traceability: % of classes with ≥1 source_file link
-           Target: ALL metrics = 100%
-        2. SET current_depth = 1
-        3. LOOP:
-           a. SCAN source content at current_depth: discover classes
-           b. Register discovered classes via ontology_ops.py
-           c. EVALUATE rubric metrics against node_tree so far
-           d. IF all metrics == 100% → BREAK (goal achieved)
-           e. IF current_depth >= 10 → BREAK (safety cap)
-           f. current_depth += 1
-        4. COMPILE node_tree and discovery_report (include rubric scores)
+      SET iteration = 0
+      SET unprocessed_nodes = [all nodes in proposed_graph]
+
+      LOOP:
+        --- Step 3: Critique ---
+        a. LAUNCH sub-agent to evaluate proposed changes:
+           - Can any existing class/instance/vocabulary be REUSED instead of creating new?
+           - Are there CONFLICTS with existing ontology entries?
+           - Is the proposed hierarchy COHERENT?
+           - Constructive feedback: {reuse: [], modify: [], create_new: [], skip: []}
+        b. INCORPORATE feedback — adjust proposed changes
+
+        --- Step 4: Implement ---
+        c. For each item in create_new + modify:
+           - Classes: `python3 scripts/ontology_ops.py register_class --label "{label}" --description "{desc}" --source-files '{json}' --parent "{parent_id}" --ontology-dir x-ipe-docs/memory/.ontology`
+           - Properties: `python3 scripts/ontology_ops.py add_properties --class-id "{id}" --properties '{json}' --ontology-dir x-ipe-docs/memory/.ontology`
+           - Instances: `python3 scripts/ontology_ops.py create_instance --class "{class_id}" --label "{label}" --source-files '{json}' --properties '{json}' --ontology-dir x-ipe-docs/memory/.ontology`
+             (lifecycle determined automatically: Ephemeral if .working/ in source_files, else Persistent)
+           - Vocabulary: `python3 scripts/ontology_ops.py add_vocabulary --scheme "{scheme}" --label "{label}" --broader "{b}" --narrower '{json}' --ontology-dir x-ipe-docs/memory/.ontology`
+        d. Validate writes via `python3 scripts/ontology_ops.py validate_terms` for term consistency
+
+        --- Depth Check ---
+        IF depth_limit is 1 → BREAK (flat mode, single pass)
+        IF depth_limit is 3 AND iteration >= 3 → BREAK
+        IF depth_limit is "auto":
+           EVALUATE rubric metrics
+           IF all metrics == 100% → BREAK (goal achieved)
+           IF iteration >= 10 → BREAK (safety cap)
+
+        --- Step 5: Drill Down — Select Next Node ---
+        e. From unprocessed_nodes, SELECT the node with richest unexplored source content
+        f. REMOVE selected node from unprocessed_nodes
+
+        --- Step 6: Learn Details ---
+        g. READ source_files linked to the selected node in depth
+        h. DISCOVER finer-grained classes, properties, instances from the detailed content
+        i. ADD new discoveries to proposed_graph
+        j. iteration += 1
+        k. GOTO Step 3
+
     </action>
-    <output>Classes registered, node_tree built, rubric metrics evaluated (if auto)</output>
+    <output>Ontology graph built through iterative refinement</output>
   </phase_3>
 
-  <phase_4 name="明辨之 — Discern Clearly">
+  <phase_4 name="明辨之 — Discern Clearly (Final Validation)">
     <action>
-      1. VERIFY each class exists in class-registry.jsonl
-      2. VERIFY node_tree entries have required fields (label, description, source_files)
-      3. IF depth_limit == "auto": VERIFY final rubric scores in discovery_report
-      4. IF verification fails → return error with details
+      1. VERIFY all registered classes exist in class-registry.jsonl
+      2. VERIFY all instances have required fields (label, class, source_files, lifecycle)
+      3. VERIFY synthesize_id and synthesize_message are null on all new records
+      4. VERIFY vocabulary terms are deduplicated and hierarchy is bidirectional
+      5. IF depth_limit == "auto": COMPILE final rubric scores
+      6. IF any verification fails → log warnings but do not rollback
     </action>
-    <output>Output validated</output>
+    <output>Final validation complete</output>
   </phase_4>
 
-  <phase_5 name="笃行之 — Practice Earnestly">
+  <phase_5 name="笃行之 — Practice Earnestly (Output Results)">
     <action>
-      1. RETURN operation_output:
-         - success: true
-         - operation: "discover_nodes"
-         - result: { node_tree, discovery_report }
-         - writes_to: "x-ipe-docs/memory/.ontology/schema/"
-         - errors: []
+      1. COMPILE build_report:
+         - ontology_summary: {classes_created, instances_created, vocabulary_terms_added, classes_reused}
+         - rubric_scores: {concept_coverage, instance_coverage, vocabulary_coverage, hierarchy_coherence} (if auto)
+         - iterations_completed: int
+         - depth_reached: int
+      2. RETURN operation_output
     </action>
-    <output>discover_nodes complete</output>
-  </phase_5>
-
-</operation>
-```
-
-### Operation: discover_properties
-
-> **Contract:**
-> - **Input:** class_meta: dict {id, label, description, source_files[]}, source_content: string[], web_search_template: string
-> - **Output:** proposed_properties: object[] [{name, kind, range, cardinality, vocabulary_scheme?}], search_results: string
-> - **Writes To:** x-ipe-docs/memory/.ontology/schema/
-> - **Delegates To:** `scripts/ontology_ops.py add_properties`
-> - **Constraints:** Web search first, then context analysis; vocabulary-linked properties must reference existing scheme
-
-**When:** Orchestrator needs to enrich a class with property definitions.
-
-```xml
-<operation name="discover_properties">
-
-  <phase_1 name="博学之 — Study Broadly">
-    <action>
-      1. READ class_meta: id, label, description, source_files
-      2. READ source_content files for domain context
-      3. PREPARE web_search_template (default: "What are common attributes of a {class_label}?")
-    </action>
-    <output>Class context and source content loaded</output>
-  </phase_1>
-
-  <phase_2 name="审问之 — Inquire Thoroughly">
-    <action>
-      1. VALIDATE class_meta has id, label, description, source_files
-      2. VALIDATE class_meta.id exists in class-registry.jsonl
-      3. VALIDATE source_content is non-empty
-    </action>
-    <constraints>
-      - BLOCKING: class_meta.id not in registry → return error CLASS_NOT_FOUND
-    </constraints>
-    <output>Input validated, class exists</output>
-  </phase_2>
-
-  <phase_3 name="慎思之 — Think Carefully">
-    <action>
-      1. WEB SEARCH using template with class label for general attributes
-      2. ANALYZE source_content for context-specific properties
-      3. PROPOSE property schema: [{name, kind, range, cardinality, vocabulary_scheme?}]
-         - kind: "datatype" | "vocabulary" | "object"
-         - range: data type or vocabulary scheme reference
-         - cardinality: "single" | "multi"
-      4. RUN `python3 scripts/ontology_ops.py add_properties --class-id "{id}" --properties '{json_props}' --ontology-dir x-ipe-docs/memory/.ontology`
-    </action>
-    <output>Properties proposed and registered</output>
-  </phase_3>
-
-  <phase_4 name="明辨之 — Discern Clearly">
-    <action>
-      1. VERIFY properties written to class-registry.jsonl
-      2. VERIFY vocabulary-linked properties reference existing schemes
-      3. IF issues found → include in output but don't fail
-    </action>
-    <output>Output validated</output>
-  </phase_4>
-
-  <phase_5 name="笃行之 — Practice Earnestly">
-    <action>
-      1. RETURN operation_output:
-         - success: true
-         - operation: "discover_properties"
-         - result: { proposed_properties, search_results }
-         - writes_to: "x-ipe-docs/memory/.ontology/schema/"
-         - errors: []
-    </action>
-    <output>discover_properties complete</output>
-  </phase_5>
-
-</operation>
-```
-
-### Operation: create_instances
-
-> **Contract:**
-> - **Input:** class_registry: object[], source_content: string[], property_schema: object[]
-> - **Output:** instances: object[] [{id, class, label, props, lifecycle}]
-> - **Writes To:** x-ipe-docs/memory/.ontology/instances/
-> - **Delegates To:** `scripts/ontology_ops.py create_instance`
-> - **Constraints:** Lifecycle from source_files; chunk rotation at 5000 lines; synthesize fields null
-
-**When:** Orchestrator needs to create entity instances from source content.
-
-```xml
-<operation name="create_instances">
-
-  <phase_1 name="博学之 — Study Broadly">
-    <action>
-      1. READ class_registry and property_schema
-      2. READ source_content files to identify entities
-      3. CHECK current instance chunk status (line count)
-    </action>
-    <output>Source content and schemas loaded</output>
-  </phase_1>
-
-  <phase_2 name="审问之 — Inquire Thoroughly">
-    <action>
-      1. VALIDATE class_registry is non-empty
-      2. VALIDATE source_content paths exist
-      3. VALIDATE property_schema matches class_registry classes
-    </action>
-    <constraints>
-      - BLOCKING: Empty class_registry → return error INPUT_VALIDATION_FAILED
-    </constraints>
-    <output>Input validated</output>
-  </phase_2>
-
-  <phase_3 name="慎思之 — Think Carefully">
-    <action>
-      1. For each entity in source_content:
-         a. DETERMINE class from class_registry
-         b. FILL properties from property_schema (null if N/A)
-         c. DETERMINE lifecycle: Ephemeral if any source_file contains ".working/", else Persistent
-         d. RUN `python3 scripts/ontology_ops.py create_instance --class "{class_id}" --label "{label}" --source-files '{json_paths}' --properties '{json_props}' --ontology-dir x-ipe-docs/memory/.ontology`
-      2. Script handles chunk rotation (new chunk at 5000 lines)
-    </action>
-    <output>Instances created with lifecycle flags</output>
-  </phase_3>
-
-  <phase_4 name="明辨之 — Discern Clearly">
-    <action>
-      1. VERIFY each instance exists in instance chunk files
-      2. VERIFY lifecycle flags are correct (Ephemeral for .working/, Persistent otherwise)
-      3. VERIFY synthesize_id and synthesize_message are null
-    </action>
-    <output>Output validated</output>
-  </phase_4>
-
-  <phase_5 name="笃行之 — Practice Earnestly">
-    <action>
-      1. RETURN operation_output:
-         - success: true
-         - operation: "create_instances"
-         - result: { instances }
-         - writes_to: "x-ipe-docs/memory/.ontology/instances/"
-         - errors: []
-    </action>
-    <output>create_instances complete</output>
-  </phase_5>
-
-</operation>
-```
-
-### Operation: critique_validate
-
-> **Contract:**
-> - **Input:** class_registry: object[], instances: object[], vocabulary_index: dict
-> - **Output:** critique_report: dict {accuracy_score, completeness_score, suggestions[]}, term_issues: object[]
-> - **Writes To:** x-ipe-docs/memory/.ontology/ (feedback file only)
-> - **Constraints:** Sub-agent reviews; constructive feedback; flags unknown vocabulary terms
-
-**When:** Orchestrator needs to validate ontology quality and term consistency.
-
-```xml
-<operation name="critique_validate">
-
-  <phase_1 name="博学之 — Study Broadly">
-    <action>
-      1. READ class_registry, instances, vocabulary_index
-      2. LOAD vocabulary schemes from .ontology/vocabulary/
-    </action>
-    <output>All ontology data loaded for review</output>
-  </phase_1>
-
-  <phase_2 name="审问之 — Inquire Thoroughly">
-    <action>
-      1. VALIDATE class_registry is non-empty
-      2. VALIDATE instances is non-empty
-      3. VALIDATE vocabulary_index is a dict
-    </action>
-    <constraints>
-      - BLOCKING: Empty class_registry or instances → return error INPUT_VALIDATION_FAILED
-    </constraints>
-    <output>Input validated</output>
-  </phase_2>
-
-  <phase_3 name="慎思之 — Think Carefully">
-    <action>
-      1. REVIEW property accuracy: do instance values match class property ranges?
-      2. CHECK term consistency: do vocabulary-linked values exist in their scheme?
-      3. RUN `python3 scripts/ontology_ops.py validate_terms --terms '{json_terms}' --ontology-dir x-ipe-docs/memory/.ontology` for batch term validation
-      4. SCORE accuracy (0–100) and completeness (0–100)
-      5. COMPILE suggestions[] and term_issues[]
-    </action>
-    <output>Critique report compiled</output>
-  </phase_3>
-
-  <phase_4 name="明辨之 — Discern Clearly">
-    <action>
-      1. VERIFY critique_report has accuracy_score, completeness_score, suggestions
-      2. VERIFY term_issues each have {term, issue, suggestion}
-    </action>
-    <output>Output validated</output>
-  </phase_4>
-
-  <phase_5 name="笃行之 — Practice Earnestly">
-    <action>
-      1. WRITE feedback summary to x-ipe-docs/memory/.ontology/_critique-feedback.md
-      2. RETURN operation_output:
-         - success: true
-         - operation: "critique_validate"
-         - result: { critique_report, term_issues }
-         - writes_to: "x-ipe-docs/memory/.ontology/"
-         - errors: []
-    </action>
-    <output>critique_validate complete</output>
-  </phase_5>
-
-</operation>
-```
-
-### Operation: register_vocabulary
-
-> **Contract:**
-> - **Input:** new_terms: object[] [{label, broader?, narrower?[], scheme}], target_scheme: string
-> - **Output:** updated_vocabulary: dict, added_terms: string[]
-> - **Writes To:** x-ipe-docs/memory/.ontology/vocabulary/
-> - **Delegates To:** `scripts/ontology_ops.py add_vocabulary`
-> - **Constraints:** Deduplicate before adding; maintain broader/narrower hierarchy; create scheme if missing
-
-**When:** Orchestrator needs to register new controlled vocabulary terms.
-
-```xml
-<operation name="register_vocabulary">
-
-  <phase_1 name="博学之 — Study Broadly">
-    <action>
-      1. READ new_terms and target_scheme
-      2. LOAD existing vocabulary scheme from .ontology/vocabulary/{target_scheme}.json (if exists)
-    </action>
-    <output>Terms and existing vocabulary loaded</output>
-  </phase_1>
-
-  <phase_2 name="审问之 — Inquire Thoroughly">
-    <action>
-      1. VALIDATE new_terms is non-empty array
-      2. VALIDATE each term has a label
-      3. VALIDATE target_scheme is non-empty kebab-case string
-    </action>
-    <constraints>
-      - BLOCKING: Empty new_terms → return error INPUT_VALIDATION_FAILED
-    </constraints>
-    <output>Input validated</output>
-  </phase_2>
-
-  <phase_3 name="慎思之 — Think Carefully">
-    <action>
-      1. DEDUPLICATE: filter out terms already in the scheme
-      2. For each new term, RUN:
-         `python3 scripts/ontology_ops.py add_vocabulary --scheme "{target_scheme}" --label "{label}" --broader "{broader}" --narrower '{json_narrower}' --ontology-dir x-ipe-docs/memory/.ontology`
-      3. Script handles hierarchy updates (broader's narrower list, etc.)
-    </action>
-    <output>Terms registered</output>
-  </phase_3>
-
-  <phase_4 name="明辨之 — Discern Clearly">
-    <action>
-      1. VERIFY scheme file exists at .ontology/vocabulary/{target_scheme}.json
-      2. VERIFY added terms appear in the scheme
-      3. VERIFY broader/narrower references are bidirectional
-    </action>
-    <output>Output validated</output>
-  </phase_4>
-
-  <phase_5 name="笃行之 — Practice Earnestly">
-    <action>
-      1. RETURN operation_output:
-         - success: true
-         - operation: "register_vocabulary"
-         - result: { updated_vocabulary, added_terms }
-         - writes_to: "x-ipe-docs/memory/.ontology/vocabulary/"
-         - errors: []
-    </action>
-    <output>register_vocabulary complete</output>
+    <output>build_ontology complete</output>
   </phase_5>
 
 </operation>
@@ -509,18 +244,22 @@ BLOCKING: All input fields with non-trivial initialization MUST be documented he
 ```yaml
 operation_output:
   success: true | false
-  operation: "discover_nodes | discover_properties | create_instances | critique_validate | register_vocabulary"
+  operation: "build_ontology"
   result:
-    node_tree: "object[]"              # discover_nodes
-    discovery_report: "string"         # discover_nodes
-    proposed_properties: "object[]"    # discover_properties
-    search_results: "string"           # discover_properties
-    instances: "object[]"              # create_instances
-    critique_report: "dict"            # critique_validate
-    term_issues: "object[]"            # critique_validate
-    updated_vocabulary: "dict"         # register_vocabulary
-    added_terms: "string[]"            # register_vocabulary
-    writes_to: "string"               # Actual path written
+    build_report:
+      ontology_summary:
+        classes_created: "int"
+        instances_created: "int"
+        vocabulary_terms_added: "int"
+        classes_reused: "int"
+      rubric_scores:                    # Present when depth_limit == "auto"
+        concept_coverage: "float (0-1)"
+        instance_coverage: "float (0-1)"
+        vocabulary_coverage: "float (0-1)"
+        hierarchy_coherence: "float (0-1)"
+      iterations_completed: "int"
+      depth_reached: "int"
+    writes_to: "x-ipe-docs/memory/.ontology/"
   errors: []
 ```
 
@@ -531,24 +270,28 @@ operation_output:
 ```xml
 <definition_of_done>
   <checkpoint required="true">
-    <name>Operation completed successfully</name>
+    <name>Build completed successfully</name>
     <verification>operation_output.success == true</verification>
   </checkpoint>
   <checkpoint required="true">
-    <name>Output written to declared path</name>
-    <verification>File exists at writes_to path with expected content</verification>
+    <name>Classes registered in schema</name>
+    <verification>New classes exist in .ontology/schema/class-registry.jsonl</verification>
   </checkpoint>
   <checkpoint required="true">
-    <name>Output matches contract types</name>
-    <verification>Returned data matches the operation's declared output types</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Lifecycle flags correct</name>
+    <name>Instances created with lifecycle flags</name>
     <verification>Instances with .working/ sources have Ephemeral; others have Persistent</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>Synthesize fields initialized</name>
     <verification>All new records have synthesize_id: null and synthesize_message: null</verification>
+  </checkpoint>
+  <checkpoint required="true">
+    <name>Critique sub-agent was invoked</name>
+    <verification>Build report shows at least 1 critique iteration ran</verification>
+  </checkpoint>
+  <checkpoint required="if_applicable">
+    <name>Rubric metrics at 100% (auto mode)</name>
+    <verification>If depth_limit == "auto", all rubric scores == 1.0 (or safety cap reached with explanation)</verification>
   </checkpoint>
 </definition_of_done>
 ```
@@ -559,12 +302,11 @@ operation_output:
 
 | Error | Cause | Resolution |
 |-------|-------|------------|
-| `INVALID_OPERATION` | Operation name not recognized | Return error listing valid operations |
-| `INPUT_VALIDATION_FAILED` | Required input missing or wrong type | Return error with specific field and expected type |
-| `CLASS_NOT_FOUND` | Class ID not in registry (discover_properties) | Return error; orchestrator should run discover_nodes first |
-| `WRITE_FAILED` | Cannot write to .ontology/ path | Return error; orchestrator decides retry |
-| `VOCABULARY_SCHEME_NOT_FOUND` | Referenced scheme doesn't exist (validation) | Flag in term_issues; suggest register_vocabulary |
-| `CHUNK_ROTATION_FAILED` | Cannot create next instance chunk | Return error with current chunk details |
+| `INPUT_VALIDATION_FAILED` | Missing/invalid source_content or depth_limit | Return error with field details |
+| `SOURCE_NOT_FOUND` | A source_content path does not exist | Skip missing file, log warning, continue |
+| `ONTOLOGY_DIR_ERROR` | Cannot create/write to .ontology/ | Return error with path details |
+| `CRITIQUE_TIMEOUT` | Sub-agent critique took too long | Accept current state, log warning, continue |
+| `SAFETY_CAP_REACHED` | Auto mode hit iteration 10 without 100% | Return success with partial rubric scores |
 
 ---
 
@@ -572,18 +314,20 @@ operation_output:
 
 | Pattern | When | Key Actions |
 |---------|------|-------------|
-| Top-down discovery | New domain | discover_nodes first, then properties, then instances |
-| Vocabulary-first | Controlled terms needed | register_vocabulary before create_instances |
-| Critique loop | Quality gate | Run critique_validate after each batch of instances |
+| Auto-discover | New domain, unknown depth | Use depth_limit="auto", let rubric drive iteration |
+| Flat scan | Quick overview needed | Use depth_limit=1 for single-pass class discovery |
+| Standard depth | Known moderate domain | Use depth_limit=3 for balanced coverage |
+| Critique loop | Quality gate | Sub-agent critique runs every iteration before writes |
 
 | Anti-Pattern | Why Bad | Do Instead |
 |--------------|---------|------------|
-| Skip validation | Inconsistent ontology | Always critique_validate before declaring done |
-| Deep hierarchies | Over-engineering | Use depth_limit=3 or "auto" (auto stops when 100% metrics met) |
+| Skip critique | Inconsistent ontology, missed reuse | Critique runs every iteration — never bypass |
 | Manual ID assignment | ID collision risk | Let ontology_ops.py generate IDs automatically |
+| Separate operation calls | Orchestrator complexity | Use single build_ontology — it handles all steps internally |
+| Ignore reuse suggestions | Duplicate classes/terms | Always incorporate critique feedback before writing |
 
 ---
 
 ## Examples
 
-See `references/examples.md` for worked examples of each operation.
+See `references/examples.md` for worked examples of the build_ontology operation.
