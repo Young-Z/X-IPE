@@ -448,7 +448,7 @@ Replace the "dao" skill type with "assistant" — uses the same DAO SKILL.md tem
 
 | Assistant | Purpose | Migrates From |
 |---|---|---|
-| **user-representative-Engineer (工程师)** | Represent human intent at decision points | `x-ipe-dao-end-user-representative` |
+| **user-representative-Engineer (工程师)** | Represent human intent at decision points | `x-ipe-assistant-user-representative-Engineer` |
 | **knowledge-librarian-DAO (道)** | Coordinate all knowledge operations using 格物致知 | *New* (not a replacement of `x-ipe-tool-kb-librarian`) |
 
 ### 3. Knowledge Librarian Workflow (格物致知)
@@ -593,7 +593,7 @@ flowchart LR
         A4["x-ipe-task-based-application-knowledge-extractor"]
         A5["x-ipe-tool-learning-behavior-tracker-for-web"]
         A6["x-ipe-tool-kb-librarian"]
-        A7["x-ipe-dao-end-user-representative"]
+        A7["x-ipe-assistant-user-representative-Engineer"]
         A8["x-ipe-task-based-knowledge-referencer"]
         A9["x-ipe-tool-reference-ontology"]
         A10["x-ipe-tool-ontology"]

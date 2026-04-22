@@ -99,7 +99,7 @@
 
 > **注意：** 当**交互模式为 DAO 模式**（全局或任务级别）时，无论技能的默认设置如何，`require_human_review` 都会被**跳过**。`process_preference.interaction_mode` 枚举值（`interact-with-human | dao-represent-human-to-interact | dao-represent-human-to-interact-for-questions-in-skill`）控制此行为。
 
-> **注意：** `interaction_mode` 控制技能*内部*决策点是通过 `x-ipe-dao-end-user-representative` 技能（作为人类代表）处理，还是直接询问人类。这是技能内部的关注点 — 当 `interaction_mode == "dao-represent-human-to-interact"` 时，技能在自己的决策点调用 DAO。
+> **注意：** `interaction_mode` 控制技能*内部*决策点是通过 `x-ipe-assistant-user-representative-Engineer` 技能（作为人类代表）处理，还是直接询问人类。这是技能内部的关注点 — 当 `interaction_mode == "dao-represent-human-to-interact"` 时，技能在自己的决策点调用 DAO。
 
 ### 🛑 停下来思考：预检清单
 

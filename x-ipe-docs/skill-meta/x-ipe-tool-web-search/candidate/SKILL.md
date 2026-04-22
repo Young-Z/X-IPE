@@ -51,7 +51,7 @@ triggers:
 
 not_for:
   - "Project-internal code or file questions — use repo search or explore instead"
-  - "Autonomous conflict or routing resolution — use x-ipe-dao-end-user-representative"
+  - "Autonomous conflict or routing resolution — use x-ipe-assistant-user-representative-Engineer"
 ```
 
 ---

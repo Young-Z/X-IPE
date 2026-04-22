@@ -21,7 +21,7 @@ BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skil
 
 **Note:** If Agent does not have skill capability, go to `.github/skills/` folder to learn skills. SKILL.md is the entry point.
 
-IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-interact"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
+IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-interact"`, NEVER stop to ask the human. Instead, call `x-ipe-assistant-user-representative-Engineer` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
 
 ---
 
@@ -145,7 +145,7 @@ BLOCKING: Step 3 cannot proceed if x-ipe-tool-git-version-control skill fails.
 
          Response source (based on interaction_mode):
          IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-           → Resolve via x-ipe-dao-end-user-representative (default: Python if unresolvable)
+           → Resolve via x-ipe-assistant-user-representative-Engineer (default: Python if unresolvable)
          ELSE (interact-with-human/dao-represent-human-to-interact-for-questions-in-skill):
            → Ask human for selection
       4. Default to Python if no preference given
@@ -242,7 +242,7 @@ BLOCKING: Step 3 cannot proceed if x-ipe-tool-git-version-control skill fails.
         Collect the full context and task_completion_output from this skill execution.
 
         IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-          → Invoke x-ipe-dao-end-user-representative with:
+          → Invoke x-ipe-assistant-user-representative-Engineer with:
             type: "routing"
             completed_skill_output: {full task_completion_output YAML from this skill}
             next_task_based_skill: "{from output}"

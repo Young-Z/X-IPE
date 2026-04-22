@@ -13,10 +13,10 @@
 
 **时机：** 收到任何用户消息时（命令、问题、反馈、批准）
 **操作：**
-1. **每条用户消息必须先经过 `x-ipe-dao-end-user-representative` 处理，然后再执行任何其他操作。**
+1. **每条用户消息必须先经过 `x-ipe-assistant-user-representative-Engineer` 处理，然后再执行任何其他操作。**
    - 这是通用网关。无论用户说什么 — 命令、问题、反馈、批准 — 消息都先经过人类代表技能。DAO 解读消息、选择处置方式，Agent 根据结构化输出采取行动。
 2. 模型要求
-   - 当 `x-ipe-dao-end-user-representative` 被委托给子Agent执行时（如通过 `task` 工具），**必须使用最强大的（premium）LLM 模型**（如 `model: "claude-opus-4.6"`）。七步骨架需要精细推理 — 权衡三方视角、分析得失、场景推演 — 快速/廉价模型无法可靠处理。如果在主Agent内联执行，则自动使用主Agent的模型。
+   - 当 `x-ipe-assistant-user-representative-Engineer` 被委托给子Agent执行时（如通过 `task` 工具），**必须使用最强大的（premium）LLM 模型**（如 `model: "claude-opus-4.6"`）。七步骨架需要精细推理 — 权衡三方视角、分析得失、场景推演 — 快速/廉价模型无法可靠处理。如果在主Agent内联执行，则自动使用主Agent的模型。
 3. 为什么 DAO优先 很重要
    - **一致的解读** — 每条消息都获得结构化分析，而非临时模式匹配
    - **上下文感知路由** — DAO 在解读时考虑当前任务、功能和工作流状态
@@ -132,7 +132,7 @@ for each group in execution_plan.groups (顺序执行):
 **在修改任何代码或做任何更改之前，问自己：**
 
 ```
-0. 我是否通过 DAO 处理了这条消息？ → 如果没有，停下来调用 x-ipe-dao-end-user-representative
+0. 我是否通过 DAO 处理了这条消息？ → 如果没有，停下来调用 x-ipe-assistant-user-representative-Engineer
 1. 这是什么任务技能？ → 扫描 `.github/skills/x-ipe-task-based-*/` 描述
 2. 我在任务看板上创建了任务吗？ → 如果没有，停下来创建
 3. 我加载了对应的技能吗？ → 如果没有，停下来加载

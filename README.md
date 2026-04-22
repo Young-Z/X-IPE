@@ -385,11 +385,12 @@ The skill will:
 Browse and explore your knowledge base as an interactive ontology graph:
 
 1. **Access:** Click the "Knowledge Base" tab in the Workplace sidebar, then open the Ontology Graph Viewer
-2. **Browse Graphs:** Select `.jsonl` graph files from the sidebar to visualize ontology relationships
-3. **Interactive Canvas:** Pan, zoom, and click nodes to explore concepts and their relationships
-4. **Graph Search:** Type in the search bar for BFS-based graph traversal — matching nodes and neighbors are highlighted
-5. **AI Agent Integration:** Click "Search with AI Agent" to send your search context to the AI terminal
-6. **Scope Awareness:** Toggle graphs on/off in the sidebar; search automatically re-runs within the active scope
+2. **Auto-Loaded Graphs:** All available `.jsonl` ontology graphs load automatically on open (no manual selection needed)
+3. **Cross-Graph Relations:** Synthesizer-generated `_relations.NNN.jsonl` edges link entities across graphs and render as dashed violet edges
+4. **Interactive Canvas:** Pan, zoom, and click nodes to explore concepts, relationships, and synthesizer metadata (`synthesize_id`, `synthesize_message`)
+5. **Graph Search:** Type in the search bar for BFS-based graph traversal — matching nodes and neighbors are highlighted
+6. **AI Agent Integration:** Click "Search with AI Agent" to send your search context to the AI terminal
+7. **Scope Pills:** Use the topbar scope pills to focus on specific graphs; the "+" pill restores the full multi-graph view
 
 ---
 

@@ -26,12 +26,12 @@
 | `x-ipe-dao.md` template | Define the canonical DAO skill structure, required sections, and 7-step backbone | New template under `.github/skills/x-ipe-meta-skill-creator/templates/` | #dao #template #skill-creator #foundation |
 | `skill-meta-x-ipe-dao.md` template | Define candidate metadata and review structure for DAO skill creation | New skill-meta template for DAO candidate workflow | #dao #skill-meta #candidate-workflow |
 | `x-ipe-meta-skill-creator/SKILL.md` updates | Add `x-ipe-dao` to skill-type selection and template routing | Central skill creation workflow and validation rules | #dao #routing #creator #workflow |
-| `x-ipe-dao-end-user-representative/SKILL.md` | Implement the first human representative skill with bounded dispositions | New runtime skill callable by future workflows and skills | #dao #human-representative #core-skill |
+| `x-ipe-assistant-user-representative-Engineer/SKILL.md` | Implement the first human representative skill with bounded dispositions | New runtime skill callable by future workflows and skills | #dao #human-representative #core-skill |
 | Human representative disposition contract | Standardize input (message_context), output, confidence, and fallback semantics | Shared interface used by callers and later variants | #contract #disposition #bounded-output |
 
 ### Scope & Boundaries
 
-- Covers DAO skill-type enablement, DAO template files, and the first concrete DAO skill: `x-ipe-dao-end-user-representative`.
+- Covers DAO skill-type enablement, DAO template files, and the first concrete DAO skill: `x-ipe-assistant-user-representative-Engineer`.
 - Preserves existing `process_preference.auto_proceed` semantics; the skill returns guidance on behalf of the human but does not redefine workflow policy.
 - Excludes semantic DAO logging, decision-log removal, existing call-site migration, and instruction-resource interception. Those remain in FEATURE-047-B and FEATURE-047-C.
 - Excludes reusable cross-task memory persistence; only extension hooks are defined in this feature.
@@ -50,13 +50,13 @@
 1. A maintainer selects `x-ipe-dao` in `x-ipe-meta-skill-creator`.
 2. Skill creator routes to DAO-specific `SKILL.md` and `skill-meta.md` templates.
 3. DAO template enforces human representative scope, 7-step backbone, bounded outputs, human-shadow fallback, and memory-extension placeholders.
-4. `x-ipe-dao-end-user-representative` receives human-origin context via `message_context`, applies disposition selection, and returns a bounded result.
+4. `x-ipe-assistant-user-representative-Engineer` receives human-origin context via `message_context`, applies disposition selection, and returns a bounded result.
 5. Calling workflows or skills decide how to use the result according to existing `process_preference.auto_proceed` policy.
 
 ### Usage Example
 
 ```yaml
-# Future caller-side invocation shape for x-ipe-dao-end-user-representative
+# Future caller-side invocation shape for x-ipe-assistant-user-representative-Engineer
 input:
   message_context:
     source: "human"
@@ -97,7 +97,7 @@ sequenceDiagram
     participant SC as Skill Creator
     participant MSC as x-ipe-meta-skill-creator
     participant DT as DAO Templates
-    participant DAO as x-ipe-dao-end-user-representative
+    participant DAO as x-ipe-assistant-user-representative-Engineer
     participant CS as Calling Skill/Workflow
 
     SC->>MSC: Create skill (type = x-ipe-dao)
@@ -178,8 +178,8 @@ classDiagram
 | `.github/skills/x-ipe-meta-skill-creator/SKILL.md` | **Modify** | Add `x-ipe-dao` as a skill type, update input validation, template selection logic, and template reference tables |
 | `.github/skills/x-ipe-meta-skill-creator/templates/x-ipe-dao.md` | **Create** | Define DAO skill template with required sections, 7-step backbone, bounded outputs, human-shadow, and memory hooks |
 | `.github/skills/x-ipe-meta-skill-creator/templates/skill-meta-x-ipe-dao.md` | **Create** | Define DAO candidate metadata template and validation checklist |
-| `.github/skills/x-ipe-dao-end-user-representative/SKILL.md` | **Create** | Implement the first DAO skill contract and execution flow |
-| `.github/skills/x-ipe-dao-end-user-representative/references/dao-disposition-guidelines.md` | **Create** | Capture disposition semantics, confidence guidance, and fallback rules |
+| `.github/skills/x-ipe-assistant-user-representative-Engineer/SKILL.md` | **Create** | Implement the first DAO skill contract and execution flow |
+| `.github/skills/x-ipe-assistant-user-representative-Engineer/references/dao-disposition-guidelines.md` | **Create** | Capture disposition semantics, confidence guidance, and fallback rules |
 
 ### Design Decisions
 
@@ -191,7 +191,7 @@ DAO is a first-class concept in the requirements, not just a special tool. Reusi
 
 #### 2. Keep DAO Output Bounded
 
-`x-ipe-dao-end-user-representative` returns one guidance result with a short rationale summary. It does not emit chain-of-thought, multi-step internal logs, or execution plans. This preserves auditability and reduces the risk of the skill becoming an unbounded implementation agent.
+`x-ipe-assistant-user-representative-Engineer` returns one guidance result with a short rationale summary. It does not emit chain-of-thought, multi-step internal logs, or execution plans. This preserves auditability and reduces the risk of the skill becoming an unbounded implementation agent.
 
 #### 3. Preserve Caller Ownership of Workflow Policy
 
@@ -231,7 +231,7 @@ The DAO template should follow the same high-level structural style as existing 
 - Semantic logging section is present as a placeholder/reference only in FEATURE-047-A.
 - Future memory hook section is reserved but non-operative.
 
-### `x-ipe-dao-end-user-representative` Input and Output Contract
+### `x-ipe-assistant-user-representative-Engineer` Input and Output Contract
 
 #### Input Contract
 
@@ -273,7 +273,7 @@ operation_output:
 - `fallback_required` can be true only when `human_shadow` is true and the skill's internal confidence is below its own threshold.
 - `preferred_dispositions` is a soft preference order; defaults to all supported dispositions if not provided.
 
-### `x-ipe-dao-end-user-representative` Execution Flow
+### `x-ipe-assistant-user-representative-Engineer` Execution Flow
 
 | Step | Name | Action | Result |
 |------|------|--------|--------|
@@ -285,7 +285,7 @@ operation_output:
 
 ### 7-Step Backbone Mapping
 
-| Step | Design Role in `x-ipe-dao-end-user-representative` |
+| Step | Design Role in `x-ipe-assistant-user-representative-Engineer` |
 |------|------------------------------------|
 | 静虑 | Pause and identify the real blocked human need |
 | 兼听 | Consider user wording, calling context, and alternative readings |
@@ -308,13 +308,13 @@ operation_output:
    - Reuse wording patterns from task/tool templates where possible, but keep DAO-specific sections minimal and explicit.
 
 3. **DAO end-user skill**
-   - Create `.github/skills/x-ipe-dao-end-user-representative/SKILL.md`.
+   - Create `.github/skills/x-ipe-assistant-user-representative-Engineer/SKILL.md`.
    - Define the `message_context` input and disposition output schemas for the `represent_human_intent` operation.
    - Add a concise reference file for disposition guidance.
 
 4. **Validation**
    - Ensure the new DAO creator flow can generate a DAO candidate without using tool-skill or task-based templates.
-   - Ensure `x-ipe-dao-end-user-representative` output stays within the bounded contract and does not mention logging or migration work.
+   - Ensure `x-ipe-assistant-user-representative-Engineer` output stays within the bounded contract and does not mention logging or migration work.
 
 ### Edge Cases & Error Handling
 
@@ -331,7 +331,7 @@ operation_output:
 
 - Validate creator routing with a DAO creation example.
 - Validate DAO template contains all required sections and 7-step backbone ordering.
-- Validate `x-ipe-dao-end-user-representative` input/output examples against the documented contract.
+- Validate `x-ipe-assistant-user-representative-Engineer` input/output examples against the documented contract.
 - Validate disposition selection stays within the allowed enum.
 - Validate no FEATURE-047-B responsibilities appear in the DAO core implementation.
 
@@ -339,4 +339,4 @@ operation_output:
 
 | Date | Phase | Change Summary |
 |------|-------|----------------|
-| 03-06-2026 | Initial Design | Created the initial design for DAO skill-type support and `x-ipe-dao-end-user-representative`, defining a dedicated DAO template pair, bounded guidance contract, and a minimal integration path that preserves existing workflow semantics without introducing logging or migration work. |
+| 03-06-2026 | Initial Design | Created the initial design for DAO skill-type support and `x-ipe-assistant-user-representative-Engineer`, defining a dedicated DAO template pair, bounded guidance contract, and a minimal integration path that preserves existing workflow semantics without introducing logging or migration work. |

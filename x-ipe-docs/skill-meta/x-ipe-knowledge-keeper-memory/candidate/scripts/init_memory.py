@@ -31,6 +31,7 @@ DIRECTORIES = [
 SEED_FILES: dict[str, str] = {
     ".ontology/schema/class-registry.jsonl": "",
     ".ontology/instances/_index.json": "{}",
+    ".ontology/instances/instance.001.jsonl": "",
     ".ontology/instances/_relations.001.jsonl": "",
     ".ontology/vocabulary/_index.json": "{}",
 }

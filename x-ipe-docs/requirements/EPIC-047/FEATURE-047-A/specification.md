@@ -22,7 +22,7 @@ No mockups — this feature defines skill contracts and behavior, not a UI surfa
 
 ## Overview
 
-FEATURE-047-A delivers the minimum runnable human representative capability for X-IPE. It introduces a new skill type (`x-ipe-dao`) in the skill-creator system and defines `x-ipe-dao-end-user-representative` as the first concrete human representative skill that can stand in for human-origin guidance without expanding downstream task scope.
+FEATURE-047-A delivers the minimum runnable human representative capability for X-IPE. It introduces a new skill type (`x-ipe-dao`) in the skill-creator system and defines `x-ipe-assistant-user-representative-Engineer` as the first concrete human representative skill that can stand in for human-origin guidance without expanding downstream task scope.
 
 The 道 (DAO) concept serves as the **internal CORE backbone** — a structured 7-step cognitive reasoning methodology rooted in Chinese philosophical tradition — that shapes how these skills evaluate context and select dispositions. Externally, the skills are described using universally understood language (e.g., "human representative", "guidance on behalf of the human") to avoid misinterpretation by users unfamiliar with Chinese cultural context.
 
@@ -33,7 +33,7 @@ The primary users are X-IPE maintainers creating human representative skills, ca
 ## User Stories
 
 - **US-1:** As a skill creator, I want a dedicated skill type (`x-ipe-dao`) so that I can create human representative skills using the standard X-IPE workflow instead of ad hoc conventions.
-- **US-2:** As a calling skill or workflow, I want `x-ipe-dao-end-user-representative` to return bounded human-like guidance so that blocked human-required touchpoints can continue without changing downstream task scope.
+- **US-2:** As a calling skill or workflow, I want `x-ipe-assistant-user-representative-Engineer` to return bounded human-like guidance so that blocked human-required touchpoints can continue without changing downstream task scope.
 - **US-3:** As a maintainer, I want human representative skills to preserve existing `manual`, `stop_for_question`, and `auto` workflow semantics so that introducing them does not break current execution policy.
 - **US-4:** As a human operator, I want optional human-shadow fallback for ambiguous cases so that the skill can escalate when confidence is low without becoming human-dependent by default.
 - **US-5:** As a future implementer, I want explicit extension points for reusable memory so that later versions can add experience support without redesigning the v1 contract.
@@ -55,13 +55,13 @@ The primary users are X-IPE maintainers creating human representative skills, ca
 - [ ] **AC-047-A.7:** Template guidance states that the skill returns guidance on behalf of the human only and must not expose full inner reasoning to the calling agent.
 - [ ] **AC-047-A.8:** Template guidance allows question-form, feedback-form, and instruction-form human-origin inputs without forcing all input into a declarative command shape.
 
-### AC Group 3: `x-ipe-dao-end-user-representative` Core Behavior
+### AC Group 3: `x-ipe-assistant-user-representative-Engineer` Core Behavior
 
-- [ ] **AC-047-A.9:** `.github/skills/x-ipe-dao-end-user-representative/SKILL.md` exists as the first concrete human representative skill.
-- [ ] **AC-047-A.10:** `x-ipe-dao-end-user-representative` accepts human-origin context and returns one bounded disposition from the supported set: direct answer, clarification, reframing, critique, instruction, approval-like guidance, or pass-through.
-- [ ] **AC-047-A.11:** `x-ipe-dao-end-user-representative` can pass the user's original question or intent through to the downstream AI agent when the skill determines that specialist handling is the most human-like response.
-- [ ] **AC-047-A.12:** `x-ipe-dao-end-user-representative` does not claim ownership of downstream implementation work after returning guidance.
-- [ ] **AC-047-A.13:** `x-ipe-dao-end-user-representative` treats the initial human message as valid input without requiring a separate pre-normalization step by the caller.
+- [ ] **AC-047-A.9:** `.github/skills/x-ipe-assistant-user-representative-Engineer/SKILL.md` exists as the first concrete human representative skill.
+- [ ] **AC-047-A.10:** `x-ipe-assistant-user-representative-Engineer` accepts human-origin context and returns one bounded disposition from the supported set: direct answer, clarification, reframing, critique, instruction, approval-like guidance, or pass-through.
+- [ ] **AC-047-A.11:** `x-ipe-assistant-user-representative-Engineer` can pass the user's original question or intent through to the downstream AI agent when the skill determines that specialist handling is the most human-like response.
+- [ ] **AC-047-A.12:** `x-ipe-assistant-user-representative-Engineer` does not claim ownership of downstream implementation work after returning guidance.
+- [ ] **AC-047-A.13:** `x-ipe-assistant-user-representative-Engineer` treats the initial human message as valid input without requiring a separate pre-normalization step by the caller.
 
 ### AC Group 4: Workflow Compatibility and Human-Shadow
 
@@ -108,9 +108,9 @@ The template must include the 7-step decision backbone as the normative internal
 - **Process:** Present the ordered backbone steps (静虑→兼听→审势→权衡→谋后而定→试错→断) and explain that the skill uses them to shape internal reasoning and rationale summaries.
 - **Output:** Artifacts that consistently encode the same 7-step pattern across future human representative skills.
 
-### FR-047-A.4: `x-ipe-dao-end-user-representative` Core Skill
+### FR-047-A.4: `x-ipe-assistant-user-representative-Engineer` Core Skill
 
-The system must create `x-ipe-dao-end-user-representative` as the first concrete human representative implementation.
+The system must create `x-ipe-assistant-user-representative-Engineer` as the first concrete human representative implementation.
 
 - **Input:** Human-origin message or human-required touchpoint context from a calling workflow or skill.
 - **Process:** Evaluate context using the 道 CORE backbone, choose an allowed disposition, and return only bounded guidance on behalf of the human.
@@ -118,7 +118,7 @@ The system must create `x-ipe-dao-end-user-representative` as the first concrete
 
 ### FR-047-A.5: Human Representative Disposition Support
 
-`x-ipe-dao-end-user-representative` must support multiple human representative dispositions.
+`x-ipe-assistant-user-representative-Engineer` must support multiple human representative dispositions.
 
 - **Input:** Human-origin message, calling context, and workflow policy context.
 - **Process:** Determine whether the most appropriate response is a direct answer, clarification, reframing, critique, instruction, approval-like guidance, or pass-through.
@@ -178,7 +178,7 @@ Not applicable — this feature defines skill contracts, behavior, and template 
 ### External Dependencies
 
 - **Existing X-IPE workflow semantics:** The skill must integrate with the established `process_preference.auto_proceed` model from earlier workflow work.
-- **Sub-agent execution capability:** `x-ipe-dao-end-user-representative` depends on the runtime's ability to invoke a bounded skill from calling workflows or skills.
+- **Sub-agent execution capability:** `x-ipe-assistant-user-representative-Engineer` depends on the runtime's ability to invoke a bounded skill from calling workflows or skills.
 
 ## Business Rules
 
@@ -213,7 +213,7 @@ Not applicable — this feature defines skill contracts, behavior, and template 
 
 - The feature should follow the repo's Epic-aware requirements structure and place the specification at `x-ipe-docs/requirements/EPIC-047/FEATURE-047-A/specification.md`.
 - Skill-type support should fit the existing skill-creator candidate-to-production workflow rather than inventing a parallel creation path.
-- `x-ipe-dao-end-user-representative` should expose a clear input/output contract that later technical design can map to concrete tool or skill invocations.
+- `x-ipe-assistant-user-representative-Engineer` should expose a clear input/output contract that later technical design can map to concrete tool or skill invocations.
 - Boundaries must remain explicit so later implementation work can separate core skill creation from logging rollout and migration work.
 - External-facing descriptions must be reviewed for universally understood language before shipping; any occurrence of "DAO" or "道" in caller-visible surfaces (frontmatter description, template titles, type-table descriptions) should use "human representative" or equivalent plain-language terms instead.
 

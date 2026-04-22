@@ -208,27 +208,27 @@
     {
       "task_id": "TASK-842",
       "task_type": "Skill Update",
-      "description": "Update x-ipe-dao-end-user-representative: add parallelism-awareness — when multiple independent instruction units identified, suggest parallel execution plan in output",
+      "description": "Update x-ipe-assistant-user-representative-Engineer: add parallelism-awareness — when multiple independent instruction units identified, suggest parallel execution plan in output",
       "role": "Spark ✨",
       "status": "completed",
       "created_at": "2026-03-11T13:50:00+00:00",
       "last_updated": "2026-03-11T13:50:00+00:00",
       "output_links": [
-        ".github/skills/x-ipe-dao-end-user-representative/SKILL.md",
-        ".github/skills/x-ipe-dao-end-user-representative/references/examples.md"
+        ".github/skills/x-ipe-assistant-user-representative-Engineer/SKILL.md",
+        ".github/skills/x-ipe-assistant-user-representative-Engineer/references/examples.md"
       ],
       "next_task": ""
     },
     {
       "task_id": "TASK-843",
       "task_type": "Skill Update",
-      "description": "Simplify x-ipe-dao-end-user-representative: remove step 1.3 (Direction/Timing/Environment) and step 2.3 (Validate) — absorbed by steps 1.2 and 2.2 respectively",
+      "description": "Simplify x-ipe-assistant-user-representative-Engineer: remove step 1.3 (Direction/Timing/Environment) and step 2.3 (Validate) — absorbed by steps 1.2 and 2.2 respectively",
       "role": "Spark ✨",
       "status": "completed",
       "created_at": "2026-03-11T13:55:00+00:00",
       "last_updated": "2026-03-11T13:55:00+00:00",
       "output_links": [
-        ".github/skills/x-ipe-dao-end-user-representative/SKILL.md"
+        ".github/skills/x-ipe-assistant-user-representative-Engineer/SKILL.md"
       ],
       "next_task": ""
     },
@@ -256,7 +256,7 @@
       "last_updated": "2026-03-11T11:53:00+00:00",
       "output_links": [
         ".github/skills/x-ipe-task-based-feature-acceptance-test/SKILL.md",
-        ".github/skills/x-ipe-dao-end-user-representative/references/engineering-workflow.md"
+        ".github/skills/x-ipe-assistant-user-representative-Engineer/references/engineering-workflow.md"
       ],
       "next_task": ""
     },
@@ -317,7 +317,7 @@
     {
       "task_id": "TASK-827",
       "task_type": "Skill Update",
-      "description": "Add engineering workflow reference to x-ipe-dao-end-user-representative: create references/engineering-workflow.md with full DAG, update Step 2.1 to consult workflow position",
+      "description": "Add engineering workflow reference to x-ipe-assistant-user-representative-Engineer: create references/engineering-workflow.md with full DAG, update Step 2.1 to consult workflow position",
       "role": "Cipher 🔐",
       "status": "completed",
       "created_at": "2026-03-11T10:57:00+00:00",
@@ -328,7 +328,7 @@
     {
       "task_id": "TASK-826",
       "task_type": "Skill Update",
-      "description": "Optimize x-ipe-dao-end-user-representative: (1) add yy-mm-dd date subfolders for DAO logs, update Phase 3 paths; (2) restore DoR/DoD/Input Init to mandatory XML format per skill creator template",
+      "description": "Optimize x-ipe-assistant-user-representative-Engineer: (1) add yy-mm-dd date subfolders for DAO logs, update Phase 3 paths; (2) restore DoR/DoD/Input Init to mandatory XML format per skill creator template",
       "role": "Cipher 🔐",
       "status": "completed",
       "created_at": "2026-03-11T03:21:00+00:00",
@@ -352,7 +352,7 @@
     {
       "task_id": "TASK-825",
       "task_type": "Skill Update",
-      "description": "Optimize x-ipe-dao-end-user-representative: compress execution procedure steps via reference extraction and concise rewrites, following x-ipe-meta-skill-creator process",
+      "description": "Optimize x-ipe-assistant-user-representative-Engineer: compress execution procedure steps via reference extraction and concise rewrites, following x-ipe-meta-skill-creator process",
       "role": "Cipher 🔐",
       "status": "completed",
       "created_at": "2026-03-11T03:08:00+00:00",

@@ -100,6 +100,74 @@ def _score_match(match_fields: list[str]) -> float:
     return min(score, 1.0)
 
 
+def _find_components(seed_ids: set[str], edges: list[dict]) -> list[set[str]]:
+    """Find connected components among seed_ids using the given edges.
+
+    Returns list of sets — each set is one connected component of seeds.
+    """
+    adj: dict[str, set[str]] = {}
+    seed_set = set(seed_ids)
+    for e in edges:
+        src, tgt = e["from"], e["to"]
+        if src in seed_set or tgt in seed_set:
+            adj.setdefault(src, set()).add(tgt)
+            adj.setdefault(tgt, set()).add(src)
+
+    visited: set[str] = set()
+    components: list[set[str]] = []
+
+    for sid in seed_ids:
+        if sid in visited:
+            continue
+        component: set[str] = set()
+        queue = [sid]
+        while queue:
+            node = queue.pop()
+            if node not in seed_set or node in visited:
+                continue
+            visited.add(node)
+            component.add(node)
+            for neighbor in adj.get(node, set()):
+                if neighbor in seed_set and neighbor not in visited:
+                    queue.append(neighbor)
+        if component:
+            components.append(component)
+
+    return components
+
+
+def _inject_search_hub(
+    query: str,
+    seed_ids: set[str],
+    subgraph_nodes: set[str],
+    subgraph_edges: list[dict],
+) -> tuple[set[str], list[dict], list[dict]]:
+    """Inject virtual hub node if direct matches form disconnected components.
+
+    Returns (nodes, edges, virtual_nodes) — virtual_nodes is [] if no hub needed.
+    """
+    if len(seed_ids) < 2:
+        return subgraph_nodes, subgraph_edges, []
+
+    components = _find_components(seed_ids, subgraph_edges)
+    if len(components) <= 1:
+        return subgraph_nodes, subgraph_edges, []
+
+    hub_id = f"__search_hub__{query}"
+    virtual_nodes = [{"id": hub_id, "label": query, "node_type": "search_hub"}]
+
+    hub_edges = [
+        {"from": hub_id, "rel": "search_match", "to": sid}
+        for sid in seed_ids
+    ]
+
+    return (
+        subgraph_nodes | {hub_id},
+        subgraph_edges + hub_edges,
+        virtual_nodes,
+    )
+
+
 def search(
     query: str,
     scope: str,
@@ -177,8 +245,12 @@ def search(
         subgraph_nodes, subgraph_edges = _bfs_subgraph(
             seed_ids, all_entities, all_relations, depth
         )
+        # CR-002: inject virtual hub if matches are disconnected
+        subgraph_nodes, subgraph_edges, virtual_nodes = _inject_search_hub(
+            query, seed_ids, subgraph_nodes, subgraph_edges
+        )
     else:
-        subgraph_nodes, subgraph_edges = set(), []
+        subgraph_nodes, subgraph_edges, virtual_nodes = set(), [], []
 
     return {
         "query": query,
@@ -187,6 +259,7 @@ def search(
         "subgraph": {
             "nodes": sorted(subgraph_nodes),
             "edges": subgraph_edges,
+            "virtual_nodes": virtual_nodes,
         },
         "total_count": total_count,
         "page": page,

@@ -25,7 +25,7 @@ BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skil
 
 MANDATORY: Every feature MUST have a feature ID in the format `FEATURE-{nnn}` (e.g., FEATURE-001, FEATURE-027). This applies regardless of the output language used.
 
-IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-interact"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
+IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-interact"`, NEVER stop to ask the human. Instead, call `x-ipe-assistant-user-representative-Engineer` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
 
 ---
 
@@ -73,7 +73,7 @@ input:
     <steps>
       1. IF previous task was "Feature Breakdown" → use previous task output's feature_ids field (iterate: one refinement task per feature_id)
       2. ELIF task board has feature_id in task data → use it
-      3. ELSE → IF interaction_mode == "dao-represent-human-to-interact": derive from workflow context or x-ipe-dao-end-user-representative; ELSE: ask human for feature_id
+      3. ELSE → IF interaction_mode == "dao-represent-human-to-interact": derive from workflow context or x-ipe-assistant-user-representative-Engineer; ELSE: ask human for feature_id
     </steps>
   </field>
   <field name="extra_context_reference" source="workflow context OR auto-detect">
@@ -247,7 +247,7 @@ BLOCKING (auto): Proceed automatically after DoD verification.
 
         Response source (based on interaction_mode):
         IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-          → Resolve via x-ipe-dao-end-user-representative
+          → Resolve via x-ipe-assistant-user-representative-Engineer
         ELSE (interact-with-human/dao-represent-human-to-interact-for-questions-in-skill):
           → Ask human for answers
         4. Document all answers and clarifications
@@ -305,7 +305,7 @@ BLOCKING (auto): Proceed automatically after DoD verification.
 
         Response source (based on interaction_mode):
         IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-          → Log via x-ipe-dao-end-user-representative
+          → Log via x-ipe-assistant-user-representative-Engineer
         ELSE (interact-with-human/dao-represent-human-to-interact-for-questions-in-skill):
           → Ask human to confirm scope
       </action>
@@ -386,7 +386,7 @@ BLOCKING (auto): Proceed automatically after DoD verification.
         Collect the full context and task_completion_output from this skill execution.
 
         IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-          → Invoke x-ipe-dao-end-user-representative with:
+          → Invoke x-ipe-assistant-user-representative-Engineer with:
             type: "routing"
             completed_skill_output: {full task_completion_output YAML from this skill}
             next_task_based_skill: "{from output}"

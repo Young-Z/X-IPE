@@ -1,0 +1,279 @@
+# ═══════════════════════════════════════════════════════════
+# TEST CASES — x-ipe-tool-knowledge-extraction-notes
+# Generated from: skill-meta.md acceptance criteria
+# ═══════════════════════════════════════════════════════════
+
+# ─────────────────────────────────────────────────────────────
+# STRUCTURE TESTS
+# ─────────────────────────────────────────────────────────────
+
+- id: TC-S01
+  ac_ref: AC-S01
+  name: "SKILL.md exists with valid frontmatter"
+  category: structure
+  priority: must
+  type: static
+  given: "Candidate SKILL.md at candidate/SKILL.md"
+  when: "Parse file for YAML frontmatter between --- delimiters"
+  then:
+    - "File exists and is readable"
+    - "Frontmatter contains 'name' field"
+    - "name starts with 'x-ipe-tool-'"
+    - "Frontmatter contains 'description' field"
+
+- id: TC-S02
+  ac_ref: AC-S02
+  name: "references/examples.md exists with examples"
+  category: structure
+  priority: must
+  type: static
+  given: "Candidate directory at candidate/"
+  when: "Check for candidate/references/examples.md"
+  then:
+    - "File exists"
+    - "Contains at least 1 ## Example heading"
+
+- id: TC-S03
+  ac_ref: AC-S03
+  name: "SKILL.md body under 600 lines"
+  category: structure
+  priority: must
+  type: static
+  given: "candidate/SKILL.md"
+  when: "Count total lines in file"
+  then:
+    - "Line count < 600"
+
+# ─────────────────────────────────────────────────────────────
+# CONTENT TESTS
+# ─────────────────────────────────────────────────────────────
+
+- id: TC-C01
+  ac_ref: AC-C01
+  name: "All required sections present in correct order"
+  category: content
+  priority: must
+  type: static
+  given: "candidate/SKILL.md"
+  when: "Parse H2 headings and verify presence and order"
+  then:
+    - "Sections appear in order: Purpose, Important Notes, About, When to Use, Input Parameters, Definition of Ready, Operations, Output Result, Definition of Done, Error Handling, Templates, Examples"
+    - "Input Initialization appears as H3 under Input Parameters"
+
+- id: TC-C02
+  ac_ref: AC-C02
+  name: "Operations use XML structure"
+  category: content
+  priority: must
+  type: static
+  given: "Operations section of candidate/SKILL.md"
+  when: "Scan for operation definitions"
+  then:
+    - "Each operation uses <operation name=\"...\"> XML tag"
+    - "Each operation contains <action>, <constraints> (optional), and <output> children"
+    - "At least 1 operation is defined"
+
+- id: TC-C03
+  ac_ref: AC-C03
+  name: "Error Handling table has correct columns"
+  category: content
+  priority: must
+  type: static
+  given: "Error Handling section of candidate/SKILL.md"
+  when: "Parse markdown table"
+  then:
+    - "Table header row contains columns: Error, Cause, Resolution"
+    - "At least 1 data row exists"
+
+- id: TC-C04
+  ac_ref: AC-C04
+  name: "When to Use includes explicit triggers"
+  category: content
+  priority: should
+  type: static
+  given: "When to Use section of candidate/SKILL.md"
+  when: "Parse YAML block for triggers"
+  then:
+    - "triggers list contains at least 1 entry"
+    - "not_for list contains at least 1 entry"
+
+- id: TC-C05
+  ac_ref: AC-C05
+  name: "About section contains Key Concepts"
+  category: content
+  priority: should
+  type: static
+  given: "About section of candidate/SKILL.md"
+  when: "Search for Key Concepts marker"
+  then:
+    - "Contains '**Key Concepts:**' bold heading"
+    - "At least 2 concept items defined"
+
+- id: TC-C06
+  ac_ref: AC-C06
+  name: "Input Initialization subsection with input_init XML"
+  category: content
+  priority: should
+  type: static
+  given: "Input Parameters section of candidate/SKILL.md"
+  when: "Check for ### Input Initialization and <input_init> block"
+  then:
+    - "### Input Initialization heading exists under ## Input Parameters"
+    - "<input_init> XML block is present"
+    - "All input parameters with non-trivial init have <field> entries"
+
+- id: TC-C07
+  ac_ref: AC-C07
+  name: "Templates directory contains at least one template"
+  category: content
+  priority: could
+  type: static
+  given: "candidate/templates/ directory"
+  when: "List files in templates/"
+  then:
+    - "Directory exists"
+    - "Contains at least 1 .md file"
+
+# ─────────────────────────────────────────────────────────────
+# BEHAVIOR TESTS
+# ─────────────────────────────────────────────────────────────
+
+- id: TC-B01
+  ac_ref: AC-B01
+  name: "init_knowledge_folder creates correct structure"
+  category: behavior
+  priority: must
+  type: execution
+  given:
+    - "knowledge_name='test-knowledge-base'"
+    - "output_dir='./test-output'"
+    - "operation='init_knowledge_folder'"
+  when: "Execute init_knowledge_folder operation"
+  then:
+    - "Directory ./test-output/test-knowledge-base/ is created"
+    - "File ./test-output/test-knowledge-base/overview.md exists and is non-empty"
+    - "Directory ./test-output/test-knowledge-base/.images/ exists"
+    - "operation_output.success == true"
+
+- id: TC-B02
+  ac_ref: AC-B02
+  name: "generate_overview produces linked content table"
+  category: behavior
+  priority: must
+  type: execution
+  given:
+    - "Knowledge folder exists with 3 section files: 01.intro.md, 02.details.md, 03.summary.md"
+    - "operation='generate_overview'"
+  when: "Execute generate_overview operation"
+  then:
+    - "overview.md is created/updated"
+    - "overview.md contains markdown links to all 3 section files"
+    - "Links use relative paths from overview.md location"
+    - "Sections are ordered by numeric prefix"
+
+- id: TC-B03
+  ac_ref: AC-B03
+  name: "Images stored in .images/ subfolder with numbered naming"
+  category: behavior
+  priority: must
+  type: execution
+  given:
+    - "Knowledge folder exists with .images/ directory"
+    - "A valid PNG image at a source path"
+    - "operation='embed_image', section_id='02', image_description='arch-diagram'"
+  when: "Execute embed_image operation"
+  then:
+    - "Image is copied to .images/02.arch-diagram.png"
+    - "No image files exist outside .images/"
+    - "Returned markdown reference is ![arch-diagram](.images/02.arch-diagram.png)"
+
+- id: TC-B04
+  ac_ref: AC-B04
+  name: "Hierarchical sub-sections create numbered sub-folders"
+  category: behavior
+  priority: should
+  type: execution
+  given:
+    - "Knowledge folder exists"
+    - "Source content with 3 distinct sub-topics"
+    - "operation='extract_section', section_id='03'"
+  when: "Execute extract_section with hierarchical content"
+  then:
+    - "Directory 03.{slug}/ is created inside knowledge folder"
+    - "Sub-files follow {NNMM}.{slug}.md pattern (e.g., 0301.sub-a.md, 0302.sub-b.md)"
+    - "No files created at root level for this section (only folder)"
+
+# ─────────────────────────────────────────────────────────────
+# ERROR / EDGE-CASE TESTS
+# ─────────────────────────────────────────────────────────────
+
+- id: TC-E01
+  ac_ref: AC-B01
+  name: "Invalid knowledge_name is rejected or sanitized"
+  category: error
+  priority: must
+  type: execution
+  given:
+    - "knowledge_name='My Research Notes!!'"
+    - "operation='init_knowledge_folder'"
+  when: "Execute init_knowledge_folder"
+  then:
+    - "Either: success=false with error INVALID_NAME"
+    - "Or: name sanitized to 'my-research-notes' and folder created"
+
+- id: TC-E02
+  ac_ref: AC-B01
+  name: "Duplicate folder creation prevented"
+  category: error
+  priority: must
+  type: execution
+  given:
+    - "Knowledge folder 'test-kb' already exists at output_dir"
+    - "operation='init_knowledge_folder', knowledge_name='test-kb'"
+  when: "Execute init_knowledge_folder"
+  then:
+    - "success=false"
+    - "Error FOLDER_EXISTS returned"
+    - "Existing folder is NOT overwritten"
+
+- id: TC-E03
+  ac_ref: AC-B03
+  name: "Missing source content for extract_section"
+  category: error
+  priority: must
+  type: execution
+  given:
+    - "source_content is null"
+    - "operation='extract_section', section_id='01'"
+  when: "Execute extract_section"
+  then:
+    - "success=false"
+    - "Error MISSING_SOURCE returned"
+
+- id: TC-E04
+  ac_ref: AC-B03
+  name: "Invalid image format rejected"
+  category: error
+  priority: must
+  type: execution
+  given:
+    - "image_path points to a .bmp file (unsupported format)"
+    - "operation='embed_image'"
+  when: "Execute embed_image"
+  then:
+    - "success=false"
+    - "Error INVALID_IMAGE returned"
+
+- id: TC-E05
+  ac_ref: AC-B02
+  name: "validate_structure detects broken links"
+  category: error
+  priority: should
+  type: execution
+  given:
+    - "Knowledge folder with overview.md referencing a deleted section file"
+    - "operation='validate_structure'"
+  when: "Execute validate_structure"
+  then:
+    - "validation_report.valid == false"
+    - "issues[] contains broken link description"

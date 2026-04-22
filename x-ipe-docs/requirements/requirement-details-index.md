@@ -1,6 +1,6 @@
 # Requirement Details Index
 
-> Last Updated: 04-08-2026
+> Last Updated: 04-15-2026
 
 > **Note:** Current requirement-details content uses legacy Feature-based headers. These will be migrated to Epic-based headers (`## EPIC-{nnn}:`) in FEATURE-035-E. The index below maps parts to their Epic coverage ranges.
 
@@ -32,3 +32,4 @@
 | 22 | [Part 22](x-ipe-docs/requirements/requirement-details-part-22.md) | **EPIC-053** (FEATURE-053-A), **EPIC-054** (FEATURE-054-A through F) | ~380 |
 | 23 | [Part 23](x-ipe-docs/requirements/requirement-details-part-23.md) | **EPIC-055** (FEATURE-055-A to C), **EPIC-056** (FEATURE-056-A to B), **EPIC-057** (FEATURE-057-A to E) | ~540 |
 | 24 | [Part 24](x-ipe-docs/requirements/requirement-details-part-24.md) | **EPIC-058** (FEATURE-058-A to FEATURE-058-F) | ~230 |
+| 25 | [Part 25](x-ipe-docs/requirements/requirement-details-part-25.md) | **EPIC-059** (FEATURE-059-A to FEATURE-059-F) | ~480 |

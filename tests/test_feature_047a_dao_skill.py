@@ -4,7 +4,7 @@ Tests for FEATURE-047-A: DAO Skill Foundation & End-User Core.
 These tests validate:
 - x-ipe-meta-skill-creator supports the new x-ipe-dao skill type
 - DAO-specific templates exist for skill creation
-- x-ipe-dao-end-user-representative exists as the first concrete human representative skill
+- x-ipe-assistant-user-representative-Engineer exists as the first concrete human representative skill
 - Skill structure, message_context contract, and bounded output are documented
 """
 
@@ -16,7 +16,7 @@ import pytest
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 SKILLS_DIR = PROJECT_ROOT / ".github" / "skills"
 META_CREATOR_DIR = SKILLS_DIR / "x-ipe-meta-skill-creator"
-DAO_SKILL_DIR = SKILLS_DIR / "x-ipe-dao-end-user-representative"
+DAO_SKILL_DIR = SKILLS_DIR / "x-ipe-assistant-user-representative-Engineer"
 
 
 @pytest.fixture
@@ -61,12 +61,12 @@ class TestDaoEndUserSkillStructure:
 
 class TestDaoEndUserSkillContent:
     def test_frontmatter_declares_name(self, dao_skill_content):
-        assert "name: x-ipe-dao-end-user-representative" in dao_skill_content
+        assert "name: x-ipe-assistant-user-representative-Engineer" in dao_skill_content
 
     def test_documents_message_context_contract(self, dao_skill_content):
         assert "message_context:" in dao_skill_content
         assert 'source: "human | ai"' in dao_skill_content
-        assert '<procedure name="end-user-representative">' in dao_skill_content
+        assert '<procedure name="user-representative-engineer">' in dao_skill_content
 
     def test_documents_supported_dispositions(self, dao_skill_content):
         for disposition in [

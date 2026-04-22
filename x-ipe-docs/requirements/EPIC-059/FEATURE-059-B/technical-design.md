@@ -226,6 +226,7 @@ x-ipe-docs/memory/
 │   │   └── class-registry.jsonl       (empty file if not exists)
 │   ├── instances/
 │   │   ├── _index.json                (empty {} if not exists)
+│   │   ├── instance.001.jsonl         (empty file if not exists)
 │   │   └── _relations.001.jsonl       (empty file if not exists)
 │   └── vocabulary/
 │       └── _index.json                (empty {} if not exists)
@@ -274,7 +275,7 @@ x-ipe-docs/memory/procedural/
 
 **Separation of concerns — file ops vs ontology:**
 - **memory_ops.py (this feature, 059-B):** Content file CRUD — write `.md` files, generate slugs, manage `.working/` staging
-- **ontology-builder (059-C):** Registers each memory file as a `KnowledgeNode` entity in `.ontology/_entities.jsonl` with dimensions, source_files, etc.
+- **ontology-builder (059-C):** Registers each memory file as a `KnowledgeNode` entity in `.ontology/instances/instance.NNN.jsonl` with dimensions, source_files, etc.
 - **ontology-synthesizer (059-D):** Builds and maintains relationships between entities
 
 This means after `memory_ops.py create` writes a file, the orchestrator (or DAO) will later invoke ontology-builder to register the entity. Until 059-C is built, files exist without ontology entries — which is acceptable since `extractor-memory` can still find them via glob/grep on the file system.
@@ -376,7 +377,7 @@ constraints:
 | Aspect | Old (x-ipe-tool-ontology) | New (extractor-memory) |
 |--------|---------------------------|------------------------|
 | Data location | `x-ipe-docs/knowledge-base/.ontology/` | `x-ipe-docs/memory/.ontology/` |
-| Entity file | `_entities.jsonl` | `instances/{class}/*.jsonl` |
+| Entity file | `_entities.jsonl` | `instances/instance.*.jsonl` (chunked, 5000 lines each) |
 | Relations | Single graph file | `instances/_relations.*.jsonl` (chunked) |
 | Entry point | `search.py --ontology-dir PATH` | `search.py --memory-dir PATH` |
 | Graph loading | `ontology.py load` | Standalone — no dependency on ontology.py |
@@ -385,6 +386,7 @@ constraints:
 - Text matching on entity labels, descriptions, dimensions/tags
 - BFS subgraph extraction from seed entities
 - Cross-file pagination
+- Chunked instance file traversal (iterate `instance.001.jsonl`, `instance.002.jsonl`, ...)
 - Chunked relation file traversal (iterate `_relations.001.jsonl`, `_relations.002.jsonl`, ...)
 
 **CLI interface:**
@@ -452,3 +454,4 @@ Update any reference to `x-ipe-tool-ontology` for knowledge search to point to `
 | 2026-04-16 | Initial Design | Initial technical design for FEATURE-059-B: 3 knowledge skills (keeper-memory, extractor-web, extractor-memory), 2 scripts (init_memory.py, search.py), ontology tool retirement. 7 deliverables total. |
 | 2026-04-16 | Technical Design | Added memory_ops.py (D2b) — full CRUD script for keeper-memory (create, read, update, delete, list, promote). References x-ipe-tool-kb-librarian CRUD patterns. File naming uses meaningful slugs from title instead of IDs. |
 | 2026-04-16 | Design Revision | Dropped `.memory-index.json` — ontology handles metadata. Further refined: `memory_ops.py` is file-only CRUD; ontology entity registration deferred to ontology-builder (059-C) and ontology-synthesizer (059-D). Clean separation of concerns. |
+| 2026-04-16 | IDEA-041 v4 Sync | Flattened instance file structure: `instances/{root-class}/{class}.jsonl` → `instances/instance.NNN.jsonl` (chunked, 5000 lines each). Bootstrap now creates empty `instance.001.jsonl`. search.py entity table updated. |

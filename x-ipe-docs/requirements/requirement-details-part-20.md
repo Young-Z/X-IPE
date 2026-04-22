@@ -288,7 +288,10 @@ All conflicts are classified as **expected** — they are natural consequences o
 
 ---
 
-## EPIC-049: Knowledge Base — Integrated Project Knowledge Management
+## [RETIRED by EPIC-059] EPIC-049: Knowledge Base — Integrated Project Knowledge Management
+
+> **⚠️ RETIRED:** This EPIC is superseded by **EPIC-059 (Rebuild Knowledge Skills)**. The "Knowledge Base" concept is replaced by "Memory" under `x-ipe-docs/memory/`. The `x-ipe-tool-kb-librarian` skill is replaced by `x-ipe-knowledge-keeper-memory` (file organization) and `x-ipe-assistant-knowledge-librarian-DAO` (validation/orchestration). Folder structure, `.intake/` pipeline, and 2D tagging are all replaced by the new Schema/Instances/Vocabulary ontology model. See [EPIC-059 requirements](x-ipe-docs/requirements/requirement-details-part-25.md) for the replacement.
+> Retired: 2026-04-14
 
 > **Supersedes:** EPIC-025 (Knowledge Base Infrastructure). EPIC-025 is retired — all KB requirements are consolidated here with enhanced scope.
 

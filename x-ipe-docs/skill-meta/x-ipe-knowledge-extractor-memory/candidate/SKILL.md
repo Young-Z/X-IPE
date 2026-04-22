@@ -86,7 +86,7 @@ input:
     <validation>Non-empty string</validation>
   </field>
   <field name="context.depth" source="Assistant orchestrator specifies search depth (extract_overview only)">
-    <validation>Must be one of: shallow, medium. Default: shallow</validation>
+    <validation>Must be one of: shallow, medium. Default: medium</validation>
   </field>
   <field name="context.knowledge_type" source="Optional filter for specific memory tier">
     <validation>If provided, must be one of: episodic, semantic, procedural</validation>
@@ -145,7 +145,7 @@ input:
   <phase_2 name="审问之 — Inquire Thoroughly">
     <action>
       1. VALIDATE target is non-empty
-      2. VALIDATE depth is "shallow" or "medium" (default: shallow)
+      2. VALIDATE depth is "shallow" or "medium" (default: medium)
       3. IF knowledge_type specified → VALIDATE it is episodic/semantic/procedural
       4. CHECK memory folder exists (if not → return empty results with message)
     </action>

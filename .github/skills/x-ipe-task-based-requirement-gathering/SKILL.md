@@ -31,7 +31,7 @@ MANDATORY: Every requirement MUST create an Epic with ID format `EPIC-{nnn}` (e.
 
 > **Transition Note:** During migration, both old (`FEATURE-{nnn}/`) and new (`EPIC-{nnn}/FEATURE-{nnn}-{X}/`) folder structures may coexist. Skills must handle both formats when scanning existing files.
 
-IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-interact"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
+IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-interact"`, NEVER stop to ask the human. Instead, call `x-ipe-assistant-user-representative-Engineer` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
 
 ---
 
@@ -137,7 +137,7 @@ input:
 | 继续执行 | 6.2 | Execute Next Action | Load skill, generate plan, execute | Execution started |
 
 BLOCKING: Continue asking in Phase 2 until ALL ambiguities are resolved.
-BLOCKING: Each conflict in step 2.2 MUST be decided before proceeding (manual/stop_for_question: human decides; auto: x-ipe-dao-end-user-representative decides).
+BLOCKING: Each conflict in step 2.2 MUST be decided before proceeding (manual/stop_for_question: human decides; auto: x-ipe-assistant-user-representative-Engineer decides).
 BLOCKING (manual/stop_for_question): Human MUST confirm requirements are complete before proceeding to Feature Breakdown.
 BLOCKING (auto): Proceed automatically after DoD verification.
 
@@ -222,14 +222,14 @@ BLOCKING (auto): Proceed automatically after DoD verification.
 
         Response source (based on interaction_mode):
         IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-          → Resolve ambiguities via x-ipe-dao-end-user-representative
+          → Resolve ambiguities via x-ipe-assistant-user-representative-Engineer
         ELSE (interact-with-human/dao-represent-human-to-interact-for-questions-in-skill):
           → Ask human for responses
       </action>
       <constraints>
         - BLOCKING: Do not proceed until ALL ambiguities are resolved
         - BLOCKING (manual/stop_for_question): Do not make assumptions - always ask
-        - BLOCKING (auto): Resolve ambiguities via x-ipe-dao-end-user-representative - never stop to ask human
+        - BLOCKING (auto): Resolve ambiguities via x-ipe-assistant-user-representative-Engineer - never stop to ask human
       </constraints>
       <output>Complete set of clarified requirements</output>
     </step_2_1>
@@ -251,13 +251,13 @@ BLOCKING (auto): Proceed automatically after DoD verification.
 
              Response source (based on interaction_mode):
              IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-               → Resolve via x-ipe-dao-end-user-representative
+               → Resolve via x-ipe-assistant-user-representative-Engineer
              ELSE (interact-with-human/dao-represent-human-to-interact-for-questions-in-skill):
                → Ask human for decision
         6. Record decisions for each conflict
       </action>
       <constraints>
-        - BLOCKING: Do not proceed until EVERY conflict is decided (manual/stop_for_question: human decides; auto: x-ipe-dao-end-user-representative decides)
+        - BLOCKING: Do not proceed until EVERY conflict is decided (manual/stop_for_question: human decides; auto: x-ipe-assistant-user-representative-Engineer decides)
         - CRITICAL: Scan ALL requirement-details parts, not just the latest
       </constraints>
       <output>Conflict review result with human decisions</output>
@@ -317,7 +317,7 @@ BLOCKING (auto): Proceed automatically after DoD verification.
 
         Response source (based on interaction_mode):
         IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-          → Resolve via x-ipe-dao-end-user-representative, log rationale
+          → Resolve via x-ipe-assistant-user-representative-Engineer, log rationale
         ELSE (interact-with-human/dao-represent-human-to-interact-for-questions-in-skill):
           → Ask human for confirmation
         4. Document final scope boundaries
@@ -385,7 +385,7 @@ BLOCKING (auto): Proceed automatically after DoD verification.
         Collect the full context and task_completion_output from this skill execution.
 
         IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-          → Invoke x-ipe-dao-end-user-representative with:
+          → Invoke x-ipe-assistant-user-representative-Engineer with:
             type: "routing"
             completed_skill_output: {full task_completion_output YAML from this skill}
             next_task_based_skill: "{from output}"

@@ -42,6 +42,25 @@ def get_graphs():
         return _error('INTERNAL_ERROR', str(exc), 500)
 
 
+@ontology_graph_bp.route('/api/kb/ontology/graphs/all', methods=['GET'])
+@x_ipe_tracing()
+def get_all_graphs():
+    """GET /api/kb/ontology/graphs/all — Merged Cytoscape elements from all graphs.
+
+    FEATURE-059-F: Returns merged nodes + edges from all graphs plus cross-graph
+    relations from .ontology/relations/_relations.NNN.jsonl. Used by the viewer
+    for auto-load-all behavior after sidebar removal.
+    """
+    svc = _get_service_or_abort()
+    try:
+        if not svc.has_ontology:
+            return _error('ONTOLOGY_NOT_FOUND', 'No .ontology/ directory found in knowledge base', 404)
+        result = svc.get_all_graphs()
+        return jsonify(result)
+    except Exception as exc:
+        return _error('INTERNAL_ERROR', str(exc), 500)
+
+
 @ontology_graph_bp.route('/api/kb/ontology/graph/<name>', methods=['GET'])
 @x_ipe_tracing()
 def get_graph(name):

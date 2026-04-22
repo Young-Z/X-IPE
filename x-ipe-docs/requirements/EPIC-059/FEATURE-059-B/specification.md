@@ -60,7 +60,7 @@ Each skill ships with a `SKILL.md` (following the knowledge template), plus `scr
 
 | AC ID | Criterion (Given/When/Then) | Test Type |
 |-------|-------------------------------|-----------|
-| AC-059B-03a | GIVEN `x-ipe-docs/memory/` does not exist WHEN `scripts/init_memory.py` is executed THEN all 5 top-level folders are created (`.working/`, `.ontology/`, `episodic/`, `semantic/`, `procedural/`) AND `.ontology/` sub-structure is created (`schema/`, `instances/`, `vocabulary/`) with empty index files | Unit |
+| AC-059B-03a | GIVEN `x-ipe-docs/memory/` does not exist WHEN `scripts/init_memory.py` is executed THEN all 5 top-level folders are created (`.working/`, `.ontology/`, `episodic/`, `semantic/`, `procedural/`) AND `.ontology/` sub-structure is created (`schema/`, `instances/`, `vocabulary/`) with empty index files and empty `instance.001.jsonl` | Unit |
 | AC-059B-03b | GIVEN `x-ipe-docs/memory/` already exists with all folders WHEN `scripts/init_memory.py` is executed THEN no folders are modified or overwritten (idempotent) | Unit |
 | AC-059B-03c | GIVEN `x-ipe-docs/memory/` partially exists (e.g., missing `.ontology/instances/`) WHEN `scripts/init_memory.py` is executed THEN only missing folders/files are created AND existing content is preserved | Unit |
 
@@ -155,7 +155,7 @@ Each skill ships with a `SKILL.md` (following the knowledge template), plus `scr
 
 **FR-8: Ontology Search Script**
 - Input: Query string, optional class filter, optional relation type filter
-- Process: Search `.ontology/instances/` JSONL files and `_relations.*.jsonl` chunks → rank results
+- Process: Search `.ontology/instances/instance.*.jsonl` files and `_relations.*.jsonl` chunks → rank results
 - Output: Matching entities with relationships and metadata
 
 **FR-9: x-ipe-tool-ontology Retirement**

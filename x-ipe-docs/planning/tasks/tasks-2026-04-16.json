@@ -103,12 +103,89 @@
       "task_id": "TASK-1127",
       "task_type": "Change Request",
       "description": "Update ontology-builder depth_limit to support auto mode with rubric evaluation loop targeting 100% metrics",
-      "status": "in_progress",
+      "status": "completed",
       "role": "developer",
-      "output_links": [],
+      "output_links": [
+        ".github/skills/x-ipe-knowledge-ontology-builder/SKILL.md"
+      ],
       "next_task": "N/A",
       "created_at": "2026-04-16T03:55:26.773638+00:00",
-      "last_updated": "2026-04-16T03:55:26.773638+00:00"
+      "last_updated": "2026-04-16T03:56:20.928058+00:00"
+    },
+    {
+      "task_id": "TASK-1128",
+      "task_type": "Technical Design",
+      "description": "Technical design for FEATURE-059-D Layer 3 Integration Skills (Ontology Synthesizer + Presenters)",
+      "status": "completed",
+      "role": "Drift",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-059/FEATURE-059-D/technical-design.md"
+      ],
+      "next_task": "x-ipe-task-based-code-implementation",
+      "created_at": "2026-04-16T03:57:14.074821+00:00",
+      "last_updated": "2026-04-16T04:01:59.263823+00:00"
+    },
+    {
+      "task_id": "TASK-1129",
+      "task_type": "Change Request",
+      "description": "Redesign ontology-builder: collapse 5 ops into single iterative build_ontology with 6-step loop. Update SKILL.md + technical-design.md + specification.md",
+      "status": "completed",
+      "role": "developer",
+      "output_links": [
+        ".github/skills/x-ipe-knowledge-ontology-builder/SKILL.md",
+        "x-ipe-docs/requirements/EPIC-059/FEATURE-059-C/specification.md",
+        "x-ipe-docs/requirements/EPIC-059/FEATURE-059-C/technical-design.md"
+      ],
+      "next_task": "N/A",
+      "created_at": "2026-04-16T04:05:46.863236+00:00",
+      "last_updated": "2026-04-16T04:13:25.016619+00:00"
+    },
+    {
+      "task_id": "TASK-1130",
+      "task_type": "Code Implementation",
+      "description": "Implement FEATURE-059-D: ontology-synthesizer, present-to-user, present-to-knowledge-graph via x-ipe-meta-skill-creator",
+      "status": "completed",
+      "role": "Drift",
+      "output_links": [
+        ".github/skills/x-ipe-knowledge-ontology-synthesizer/SKILL.md",
+        ".github/skills/x-ipe-knowledge-present-to-user/SKILL.md",
+        ".github/skills/x-ipe-knowledge-present-to-knowledge-graph/SKILL.md"
+      ],
+      "next_task": "x-ipe-task-based-feature-acceptance-test",
+      "created_at": "2026-04-16T04:15:04.019794+00:00",
+      "last_updated": "2026-04-16T07:54:55.676818+00:00"
+    },
+    {
+      "task_id": "TASK-1131",
+      "task_type": "Change Request",
+      "description": "CR: Synthesize search-context graph with virtual hub node when BFS search returns disconnected results from different graph files",
+      "status": "completed",
+      "role": "Drift",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-058/FEATURE-058-F/CR-002.md",
+        "x-ipe-docs/requirements/EPIC-058/FEATURE-058-F/specification.md"
+      ],
+      "next_task": "x-ipe-task-based-feature-refinement",
+      "created_at": "2026-04-16T05:59:11.943420+00:00",
+      "last_updated": "2026-04-16T06:06:42.908031+00:00"
+    },
+    {
+      "task_id": "TASK-1132",
+      "task_type": "Code Implementation",
+      "description": "Implement CR-002: Search-context graph synthesis — virtual hub node with star topology in search.py, canvas rendering in ontology-graph-canvas.js, socket handler updates in ontology-graph-socket.js",
+      "status": "completed",
+      "role": "Drift",
+      "output_links": [
+        ".github/skills/x-ipe-tool-ontology/scripts/search.py",
+        "src/x_ipe/static/js/features/ontology-graph-canvas.js",
+        "src/x_ipe/static/js/features/ontology-graph-socket.js",
+        "src/x_ipe/static/js/features/ontology-graph-viewer.js",
+        "x-ipe-docs/requirements/EPIC-058/FEATURE-058-F/CR-002.md",
+        "x-ipe-docs/requirements/EPIC-058/FEATURE-058-F/specification.md"
+      ],
+      "next_task": "x-ipe-task-based-feature-acceptance-test",
+      "created_at": "2026-04-16T06:39:29.169689+00:00",
+      "last_updated": "2026-04-16T06:42:57.588507+00:00"
     }
   ]
 }

@@ -42,7 +42,7 @@ BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skil
 
 See [references/implementation-guidelines.md](.github/skills/x-ipe-task-based-code-implementation/references/implementation-guidelines.md) for detailed principles, coding standards, AAA format specification, and error handling patterns.
 
-IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-interact"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
+IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-interact"`, NEVER stop to ask the human. Instead, call `x-ipe-assistant-user-representative-Engineer` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
 
 ---
 
@@ -352,7 +352,7 @@ BLOCKING: Step 3.1 special-case delegations run BEFORE semantic routing.
         Collect the full context and task_completion_output from this skill execution.
 
         IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-          → Invoke x-ipe-dao-end-user-representative with:
+          → Invoke x-ipe-assistant-user-representative-Engineer with:
             type: "routing"
             completed_skill_output: {full task_completion_output YAML from this skill}
             next_task_based_skill: "{from output}"

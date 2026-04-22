@@ -97,8 +97,8 @@
       "created_at": "2026-03-12T10:55:00+00:00",
       "last_updated": "2026-03-12T10:55:00+00:00",
       "output_links": [
-        ".github/skills/x-ipe-dao-end-user-representative/SKILL.md",
-        ".github/skills/x-ipe-dao-end-user-representative/references/dao-phases-and-output-format.md"
+        ".github/skills/x-ipe-assistant-user-representative-Engineer/SKILL.md",
+        ".github/skills/x-ipe-assistant-user-representative-Engineer/references/dao-phases-and-output-format.md"
       ],
       "next_task": "DAO-060"
     }

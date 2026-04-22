@@ -622,3 +622,227 @@ class TestBFSSearchAPI:
         assert r['graph'] == 'jwt-authentication'
         assert r['relevance'] == 0.95
         assert r['match_fields'] == ['label']
+
+
+# ==========================================================================
+# FEATURE-059-F: Cross-Graph Relations & Unified Endpoint
+# ==========================================================================
+
+@pytest.fixture
+def kb_root_with_relations(tmp_path):
+    """KB root with .ontology/ + .ontology/relations/ chunks (059-D format)."""
+    ontology_dir = tmp_path / ".ontology"
+    ontology_dir.mkdir()
+
+    # Two graphs sharing entity references via cross-graph relations
+    g1_data = [
+        {"op": "create", "entity": {"id": "ent_a", "properties": {
+            "label": "Alpha", "node_type": "concept", "weight": 5,
+            "description": "first", "dimensions": {}, "source_files": [],
+            "synthesize_id": "2026-04-22T01:00:00Z",
+            "synthesize_message": "Cross-domain linking: alpha ↔ beta",
+        }}, "timestamp": "2026-04-22T00:00:00Z"},
+    ]
+    (ontology_dir / "graph-a.jsonl").write_text("\n".join(json.dumps(r) for r in g1_data))
+
+    g2_data = [
+        {"op": "create", "entity": {"id": "ent_b", "properties": {
+            "label": "Beta", "node_type": "entity", "weight": 3,
+            "description": "second", "dimensions": {}, "source_files": [],
+        }}, "timestamp": "2026-04-22T00:00:01Z"},
+    ]
+    (ontology_dir / "graph-b.jsonl").write_text("\n".join(json.dumps(r) for r in g2_data))
+
+    # graph-index
+    index = {
+        "version": "1.0", "ontology_dir": str(ontology_dir),
+        "graphs": [
+            {"name": "graph-a", "file": "graph-a.jsonl", "entity_count": 1, "relation_count": 0,
+             "dimensions": [], "root_entity_id": "ent_a", "root_label": "Alpha"},
+            {"name": "graph-b", "file": "graph-b.jsonl", "entity_count": 1, "relation_count": 0,
+             "dimensions": [], "root_entity_id": "ent_b", "root_label": "Beta"},
+        ],
+    }
+    (ontology_dir / ".graph-index.json").write_text(json.dumps(index))
+
+    # relations/ with two chunks
+    relations_dir = ontology_dir / "relations"
+    relations_dir.mkdir()
+    chunk1 = [
+        {"op": "create", "type": "relation", "id": "rel-001", "ts": "2026-04-22T01:00:00Z",
+         "props": {"from_id": "ent_a", "to_id": "ent_b", "relation_type": "related_to",
+                   "synthesis_version": "v1", "synthesized_with": "graph-a ↔ graph-b"}},
+        {"op": "link", "type": "relation", "id": "rel-002", "ts": "2026-04-22T01:00:01Z",
+         "props": {"from_id": "ent_b", "to_id": "ent_a", "relation_type": "supports",
+                   "synthesis_version": "v1"}},
+    ]
+    (relations_dir / "_relations.001.jsonl").write_text(
+        "\n".join(json.dumps(r) for r in chunk1) + "\n\nmalformed-line\n"
+    )
+    chunk2 = [
+        {"op": "create", "type": "relation", "id": "rel-003", "ts": "2026-04-22T01:00:02Z",
+         "props": {"from_id": "ent_a", "to_id": "ent_b", "relation_type": "extends",
+                   "synthesis_version": "v2"}},
+    ]
+    (relations_dir / "_relations.002.jsonl").write_text(
+        "\n".join(json.dumps(r) for r in chunk2)
+    )
+
+    return tmp_path
+
+
+@pytest.fixture
+def graph_service_relations(kb_root_with_relations):
+    from x_ipe.services.ontology_graph_service import OntologyGraphService
+    return OntologyGraphService(str(kb_root_with_relations))
+
+
+@pytest.fixture
+def app_with_relations(kb_root_with_relations):
+    from x_ipe.app import create_app
+    app = create_app()
+    app.config['TESTING'] = True
+    from x_ipe.services.ontology_graph_service import OntologyGraphService
+    app.config['ONTOLOGY_GRAPH_SERVICE'] = OntologyGraphService(str(kb_root_with_relations))
+    return app
+
+
+@pytest.fixture
+def client_relations(app_with_relations):
+    return app_with_relations.test_client()
+
+
+class TestSynthesizerMetadataInNodes:
+    """AC-059F-08b: Nodes include synthesize_id and synthesize_message."""
+
+    def test_entity_to_cytoscape_node_includes_synthesize_id(self, graph_service_relations):
+        result = graph_service_relations.get_graph('graph-a')
+        node = result['elements']['nodes'][0]
+        assert 'synthesize_id' in node['data']
+        assert node['data']['synthesize_id'] == '2026-04-22T01:00:00Z'
+
+    def test_entity_to_cytoscape_node_includes_synthesize_message(self, graph_service_relations):
+        result = graph_service_relations.get_graph('graph-a')
+        node = result['elements']['nodes'][0]
+        assert 'synthesize_message' in node['data']
+        assert 'Cross-domain' in node['data']['synthesize_message']
+
+    def test_entity_without_synthesize_fields_defaults_to_empty_string(self, graph_service_relations):
+        result = graph_service_relations.get_graph('graph-b')
+        node = result['elements']['nodes'][0]
+        assert node['data']['synthesize_id'] == ''
+        assert node['data']['synthesize_message'] == ''
+
+
+class TestCrossGraphRelations:
+    """AC-059F-07b, 07c: Cross-graph relations from _relations.NNN.jsonl."""
+
+    def test_load_cross_graph_relations_returns_edges(self, graph_service_relations):
+        edges = graph_service_relations._load_cross_graph_relations()
+        # 2 from chunk1 (malformed line skipped) + 1 from chunk2 = 3
+        assert len(edges) == 3
+
+    def test_cross_graph_edge_has_xr_prefix(self, graph_service_relations):
+        edges = graph_service_relations._load_cross_graph_relations()
+        for e in edges:
+            assert e['data']['id'].startswith('xr_')
+
+    def test_cross_graph_edge_format(self, graph_service_relations):
+        edges = graph_service_relations._load_cross_graph_relations()
+        e = edges[0]
+        assert e['data']['source'] == 'ent_a'
+        assert e['data']['target'] == 'ent_b'
+        assert e['data']['relation_type'] == 'related_to'
+        assert e['data']['label'] == 'related_to'
+        assert e['data']['cross_graph'] is True
+        assert e['data']['synthesis_version'] == 'v1'
+
+    def test_cross_graph_relations_handles_link_op(self, graph_service_relations):
+        edges = graph_service_relations._load_cross_graph_relations()
+        # Find the 'supports' edge (op=link)
+        supports = [e for e in edges if e['data']['relation_type'] == 'supports']
+        assert len(supports) == 1
+
+    def test_cross_graph_relations_multiple_chunks_merged(self, graph_service_relations):
+        edges = graph_service_relations._load_cross_graph_relations()
+        rel_types = [e['data']['relation_type'] for e in edges]
+        assert 'related_to' in rel_types  # from chunk1
+        assert 'extends' in rel_types  # from chunk2
+
+    def test_cross_graph_relations_skips_malformed_lines(self, graph_service_relations):
+        # chunk1 has a malformed line that should be skipped, not error
+        edges = graph_service_relations._load_cross_graph_relations()
+        assert len(edges) == 3  # malformed line excluded
+
+    def test_cross_graph_relations_no_relations_dir(self, graph_service):
+        # graph_service fixture has no relations/ dir
+        edges = graph_service._load_cross_graph_relations()
+        assert edges == []
+
+    def test_get_graph_includes_cross_graph_edges(self, graph_service_relations):
+        # AC-059F-07a: graph endpoint includes cross-graph relations touching it
+        result = graph_service_relations.get_graph('graph-a')
+        edges = result['elements']['edges']
+        # All 3 cross-graph edges touch ent_a, so all included
+        cross = [e for e in edges if e['data'].get('cross_graph')]
+        assert len(cross) == 3
+
+
+class TestGetAllGraphs:
+    """AC-059F-08a, 08c: Unified /graphs/all endpoint."""
+
+    def test_get_all_graphs_returns_merged_elements(self, graph_service_relations):
+        result = graph_service_relations.get_all_graphs()
+        assert 'elements' in result
+        assert 'graph_names' in result
+        assert len(result['elements']['nodes']) == 2  # ent_a + ent_b
+        # 0 intra + 3 cross-graph
+        assert len(result['elements']['edges']) == 3
+
+    def test_get_all_graphs_lists_graph_names(self, graph_service_relations):
+        result = graph_service_relations.get_all_graphs()
+        assert 'graph-a' in result['graph_names']
+        assert 'graph-b' in result['graph_names']
+
+    def test_get_all_graphs_tags_nodes_with_graph(self, graph_service_relations):
+        result = graph_service_relations.get_all_graphs()
+        for node in result['elements']['nodes']:
+            assert '_graph' in node['data']
+            assert node['data']['_graph'] in ('graph-a', 'graph-b')
+
+    def test_get_all_graphs_includes_cross_graph_edges(self, graph_service_relations):
+        result = graph_service_relations.get_all_graphs()
+        cross = [e for e in result['elements']['edges'] if e['data'].get('cross_graph')]
+        assert len(cross) == 3
+
+    def test_get_all_graphs_empty_ontology(self, graph_service_empty):
+        result = graph_service_empty.get_all_graphs()
+        assert result == {'elements': {'nodes': [], 'edges': []}, 'graph_names': []}
+
+
+class TestGetAllGraphsAPI:
+    """AC-059F-08a: GET /api/kb/ontology/graphs/all endpoint."""
+
+    def test_api_get_all_graphs_200(self, client_relations):
+        resp = client_relations.get('/api/kb/ontology/graphs/all')
+        assert resp.status_code == 200
+        data = resp.get_json()
+        assert 'elements' in data
+        assert 'graph_names' in data
+
+    def test_api_get_all_graphs_includes_cross_edges(self, client_relations):
+        resp = client_relations.get('/api/kb/ontology/graphs/all')
+        data = resp.get_json()
+        cross = [e for e in data['elements']['edges'] if e['data'].get('cross_graph')]
+        assert len(cross) == 3
+
+    def test_api_get_all_graphs_no_ontology_404(self, client_no_ontology):
+        resp = client_no_ontology.get('/api/kb/ontology/graphs/all')
+        assert resp.status_code == 404
+        data = resp.get_json()
+        assert data['error'] == 'ONTOLOGY_NOT_FOUND'
+
+    def test_api_get_all_graphs_route_does_not_collide_with_graph_name(self, client_relations):
+        # 'all' must hit /graphs/all, not /graph/<name='all'>
+        resp = client_relations.get('/api/kb/ontology/graphs/all')
+        assert resp.status_code == 200  # not 404

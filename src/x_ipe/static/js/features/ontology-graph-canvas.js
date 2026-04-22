@@ -186,10 +186,12 @@ class OntologyGraphCanvas {
 
     clearHighlight() {
         if (!this.cy) return;
+        // CR-002: remove virtual hub nodes/edges before clearing classes
+        this.cy.elements('[?virtual]').remove();
         this.cy.elements().removeClass('highlighted dimmed direct-match bfs-neighbor');
     }
 
-    highlightSubgraph(allNodeIds, directMatchIds) {
+    highlightSubgraph(allNodeIds, directMatchIds, virtualNodes) {
         if (!this.cy) return;
         const allSet = new Set(allNodeIds || []);
         const directSet = new Set(directMatchIds || []);
@@ -200,6 +202,49 @@ class OntologyGraphCanvas {
         }
 
         this.cy.batch(() => {
+            // CR-002: remove stale virtual elements from previous search
+            this.cy.elements('[?virtual]').remove();
+
+            // CR-002: add virtual hub nodes and edges
+            if (Array.isArray(virtualNodes)) {
+                for (const vn of virtualNodes) {
+                    // Compute centroid of direct-match nodes for hub position
+                    let cx = 0, cy = 0, count = 0;
+                    directMatchIds.forEach(id => {
+                        const n = this.cy.getElementById(id);
+                        if (n && !n.empty()) {
+                            cx += n.position('x');
+                            cy += n.position('y');
+                            count++;
+                        }
+                    });
+                    if (count > 0) { cx /= count; cy /= count; }
+
+                    this.cy.add({
+                        group: 'nodes',
+                        data: { id: vn.id, label: vn.label, node_type: vn.node_type, virtual: true },
+                        position: { x: cx, y: cy },
+                    });
+                }
+                // Add virtual edges (hub → each direct match)
+                for (const vn of virtualNodes) {
+                    for (const did of directMatchIds) {
+                        if (this.cy.getElementById(did) && !this.cy.getElementById(did).empty()) {
+                            this.cy.add({
+                                group: 'edges',
+                                data: {
+                                    id: `${vn.id}__${did}`,
+                                    source: vn.id,
+                                    target: did,
+                                    label: 'search_match',
+                                    virtual: true,
+                                },
+                            });
+                        }
+                    }
+                }
+            }
+
             // Reset all
             this.cy.elements().removeClass('highlighted dimmed direct-match bfs-neighbor');
             // Dim everything
@@ -216,9 +261,13 @@ class OntologyGraphCanvas {
                     }
                 }
             });
-            // Un-dim edges where BOTH endpoints are in the subgraph
+            // Un-dim virtual nodes
+            this.cy.nodes('[?virtual]').removeClass('dimmed');
+            // Un-dim edges where BOTH endpoints are in the subgraph (+ virtual edges)
             this.cy.edges().forEach(edge => {
-                if (allSet.has(edge.source().id()) && allSet.has(edge.target().id())) {
+                const srcInSubgraph = allSet.has(edge.source().id()) || edge.source().data('virtual');
+                const tgtInSubgraph = allSet.has(edge.target().id()) || edge.target().data('virtual');
+                if (srcInSubgraph && tgtInSubgraph) {
                     edge.removeClass('dimmed').addClass('highlighted');
                 }
             });
@@ -567,6 +616,46 @@ class OntologyGraphCanvas {
                     'z-index': 10,
                 },
             },
+            // CR-002: virtual search hub node — dashed border, distinct color
+            {
+                selector: 'node[?virtual]',
+                style: {
+                    'background-color': '#e879f9',
+                    'border-width': 3,
+                    'border-color': '#a855f7',
+                    'border-style': 'dashed',
+                    'shape': 'diamond',
+                    'width': 48,
+                    'height': 48,
+                    'font-weight': 700,
+                    'z-index': 25,
+                },
+            },
+            // CR-002: virtual edges — dashed lines
+            {
+                selector: 'edge[?virtual]',
+                style: {
+                    'line-style': 'dashed',
+                    'line-color': '#c084fc',
+                    'target-arrow-color': '#c084fc',
+                    'target-arrow-shape': 'triangle',
+                    'width': 1.5,
+                    'z-index': 5,
+                },
+            },
+            // FEATURE-059-F: cross-graph synthesis edges — dashed violet
+            {
+                selector: 'edge[?cross_graph]',
+                style: {
+                    'line-style': 'dashed',
+                    'line-dash-pattern': [6, 3],
+                    'line-color': '#8b5cf6',
+                    'target-arrow-color': '#8b5cf6',
+                    'target-arrow-shape': 'triangle',
+                    'width': 2,
+                    'z-index': 6,
+                },
+            },
         ];
     }
 
@@ -660,6 +749,24 @@ class OntologyDetailPanel {
             </div>`;
         }
 
+        // FEATURE-059-F: surface synthesizer metadata (from 059-D)
+        const synthId = nodeData.synthesize_id || '';
+        const synthMsg = nodeData.synthesize_message || '';
+        let synthesisHtml = '';
+        if (synthId || synthMsg) {
+            synthesisHtml = `<div class="ogv-detail-section">
+                <div class="ogv-detail-section-title">Synthesis</div>
+                ${synthId ? `<div class="ogv-metadata-item">
+                    <div class="ogv-metadata-label">Synthesize ID</div>
+                    <div class="ogv-metadata-value" data-field="synthesize_id">${synthId}</div>
+                </div>` : ''}
+                ${synthMsg ? `<div class="ogv-metadata-item">
+                    <div class="ogv-metadata-label">Synthesize Message</div>
+                    <div class="ogv-metadata-value" data-field="synthesize_message">${synthMsg}</div>
+                </div>` : ''}
+            </div>`;
+        }
+
         inner.innerHTML = `
             <div class="ogv-detail-header">
                 <div class="ogv-detail-header-info">
@@ -681,6 +788,7 @@ class OntologyDetailPanel {
             </div>
             ${dimsHtml ? `<div class="ogv-detail-section"><div class="ogv-detail-section-title">Dimensions</div>${dimsHtml}</div>` : ''}
             ${sourceHtml}
+            ${synthesisHtml}
             ${relatedHtml ? `<div class="ogv-detail-section"><div class="ogv-detail-section-title">Related Nodes</div>${relatedHtml}</div>` : ''}
             <div class="ogv-detail-section">
                 <div class="ogv-detail-section-title">Metadata</div>

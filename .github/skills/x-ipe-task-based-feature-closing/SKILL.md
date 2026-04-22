@@ -25,7 +25,7 @@ BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skil
 
 **BLOCKING: Single Feature Only.** This skill operates on exactly ONE feature at a time. Do NOT batch or combine multiple features in a single execution. If multiple features need processing, run this skill separately for each feature.
 
-IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-interact"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
+IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-interact"`, NEVER stop to ask the human. Instead, call `x-ipe-assistant-user-representative-Engineer` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
 
 ---
 
@@ -86,7 +86,7 @@ input:
       1. IF previous task was "Feature Acceptance Test" → use previous task output's feature_id field
       2. ELIF previous task was "Code Refactor" → use previous task output's feature_id field
       3. ELIF task board has feature_id in task data → use it
-      4. ELSE → IF interaction_mode == "dao-represent-human-to-interact": derive from workflow context or x-ipe-dao-end-user-representative; ELSE: ask human for feature_id
+      4. ELSE → IF interaction_mode == "dao-represent-human-to-interact": derive from workflow context or x-ipe-assistant-user-representative-Engineer; ELSE: ask human for feature_id
     </steps>
   </field>
   <field name="feature_title" source="feature specification OR features.json">
@@ -216,12 +216,12 @@ BLOCKING: Phase 1 to Phase 2 is BLOCKED if any acceptance criterion is not met. 
         - BLOCKING: If ANY criterion is not met, present options: (a) address gap, (b) modify criterion, (c) defer
           Response source (based on interaction_mode):
           IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-            → Resolve via x-ipe-dao-end-user-representative
+            → Resolve via x-ipe-assistant-user-representative-Engineer
           ELSE (interact-with-human/dao-represent-human-to-interact-for-questions-in-skill):
             → Ask human for decision
         - BLOCKING: Do NOT proceed to step_2_1 until all criteria are verified
         - CRITICAL (manual/stop_for_question): Present unmet criteria to human with options
-        - CRITICAL (auto): Resolve unmet criteria via x-ipe-dao-end-user-representative
+        - CRITICAL (auto): Resolve unmet criteria via x-ipe-assistant-user-representative-Engineer
       </constraints>
       <output>Acceptance criteria verification table with status and evidence</output>
     </step_1_1>
@@ -357,7 +357,7 @@ BLOCKING: Phase 1 to Phase 2 is BLOCKED if any acceptance criterion is not met. 
 
           Completion gate (based on interaction_mode):
           IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-            → Auto-proceed after DoD verification, log refactoring recommendation via x-ipe-dao-end-user-representative
+            → Auto-proceed after DoD verification, log refactoring recommendation via x-ipe-assistant-user-representative-Engineer
           ELSE (interact-with-human/dao-represent-human-to-interact-for-questions-in-skill):
             → Ask human to acknowledge summary
       </action>
@@ -387,7 +387,7 @@ BLOCKING: Phase 1 to Phase 2 is BLOCKED if any acceptance criterion is not met. 
         Collect the full context and task_completion_output from this skill execution.
 
         IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-          → Invoke x-ipe-dao-end-user-representative with:
+          → Invoke x-ipe-assistant-user-representative-Engineer with:
             type: "routing"
             completed_skill_output: {full task_completion_output YAML from this skill}
             next_task_based_skill: "{from output}"

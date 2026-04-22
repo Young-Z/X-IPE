@@ -6,6 +6,8 @@
 
 ## EPIC-047: DAO End-User Human Proxy Layer
 
+> **📋 CR from EPIC-059:** The "dao" skill type introduced by this EPIC will be renamed to "assistant" in EPIC-059 (Rebuild Knowledge Skills). The `x-ipe-assistant-user-representative-Engineer` skill becomes `x-ipe-assistant-user-representative-Engineer`. Functionality is preserved; only the namespace/type changes. See [EPIC-059 requirements](x-ipe-docs/requirements/requirement-details-part-25.md).
+
 ### Project Overview
 
 Create a new standalone Epic that supersedes the decision-making-specific parts of EPIC-044 by introducing a new **DAO (`道`) skill type** and its first concrete skill, **`x-ipe-dao-end-user`**. DAO is a digital-human proxy layer: it stands in for human-origin guidance at points where X-IPE currently requires a human, while preserving the existing `process_preference.auto_proceed` workflow semantics.

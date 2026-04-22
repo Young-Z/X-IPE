@@ -22,7 +22,7 @@ BLOCKING: Learn `x-ipe-workflow-task-execution` and `x-ipe+all+task-board-manage
 
 **Note:** If Agent does not have skill capability, go to `.github/skills/` folder to learn skills. SKILL.md is the entry point.
 
-IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-interact"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
+IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-interact"`, NEVER stop to ask the human. Instead, call `x-ipe-assistant-user-representative-Engineer` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
 
 ---
 
@@ -120,7 +120,7 @@ input:
 | 继续执行 | 6.1 | Decide Next Action | DAO-assisted next task decision | Next action decided |
 | 继续执行 | 6.2 | Execute Next Action | Load skill, generate plan, execute | Execution started |
 
-BLOCKING: Step 2.1 requires confirmation of target format(s) (manual/stop_for_question: human confirms; auto: DAO confirms via x-ipe-dao-end-user-representative).
+BLOCKING: Step 2.1 requires confirmation of target format(s) (manual/stop_for_question: human confirms; auto: DAO confirms via x-ipe-assistant-user-representative-Engineer).
 BLOCKING: Step 5.3 fails if any output file is empty or missing.
 
 ---
@@ -198,13 +198,13 @@ BLOCKING: Step 5.3 fails if any output file is empty or missing.
 
         Response source (based on interaction_mode):
         IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-          → Resolve via x-ipe-dao-end-user-representative (default: pptx if unresolvable)
+          → Resolve via x-ipe-assistant-user-representative-Engineer (default: pptx if unresolvable)
         ELSE (interact-with-human/dao-represent-human-to-interact-for-questions-in-skill):
           → Ask human to confirm format(s)
       </action>
       <constraints>
         - BLOCKING (manual/stop_for_question): Do not proceed until human confirms format(s)
-        - BLOCKING (auto): Format confirmed by x-ipe-dao-end-user-representative (default: pptx if unresolvable)
+        - BLOCKING (auto): Format confirmed by x-ipe-assistant-user-representative-Engineer (default: pptx if unresolvable)
       </constraints>
       <output>List of confirmed target formats</output>
     </step_2_1>
@@ -292,7 +292,7 @@ BLOCKING: Step 5.3 fails if any output file is empty or missing.
         Collect the full context and task_completion_output from this skill execution.
 
         IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-          → Invoke x-ipe-dao-end-user-representative with:
+          → Invoke x-ipe-assistant-user-representative-Engineer with:
             type: "routing"
             completed_skill_output: {full task_completion_output YAML from this skill}
             next_task_based_skill: "{from output}"

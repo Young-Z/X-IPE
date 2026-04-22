@@ -40,8 +40,8 @@ This feature:
 
 **Acceptance Criteria:**
 
-- [ ] AC-047-C.1: `.github/copilot-instructions.md` describes DAO (`x-ipe-dao-end-user-representative`) as the human representative interception layer for `auto` mode decision points.
-- [ ] AC-047-C.2: The instruction explains that in `auto` mode, when a skill hits a human-required touchpoint, it calls `x-ipe-dao-end-user-representative` instead of asking the human.
+- [ ] AC-047-C.1: `.github/copilot-instructions.md` describes DAO (`x-ipe-assistant-user-representative-Engineer`) as the human representative interception layer for `auto` mode decision points.
+- [ ] AC-047-C.2: The instruction explains that in `auto` mode, when a skill hits a human-required touchpoint, it calls `x-ipe-assistant-user-representative-Engineer` instead of asking the human.
 - [ ] AC-047-C.3: The instruction clarifies that `manual` and `stop_for_question` modes still ask the human directly — DAO is NOT invoked.
 - [ ] AC-047-C.4: The instruction states DAO is bounded — it represents human intent but does not execute tasks or make architectural decisions.
 
@@ -67,7 +67,7 @@ This feature:
 - **FR-047-C.2:** (FR-047.27) Packaged instruction resources MUST be consistent with repo-local.
 - **FR-047-C.3:** (FR-047.28) DAO interception MUST be described as bounded — mediates human-origin meaning only.
 - **FR-047-C.4:** The DAO section in instructions MUST NOT mention internal backbone (道/7-step) — keep it external-facing.
-- **FR-047-C.5:** Instructions MUST reference `x-ipe-dao-end-user-representative` by name for auto-mode resolution.
+- **FR-047-C.5:** Instructions MUST reference `x-ipe-assistant-user-representative-Engineer` by name for auto-mode resolution.
 
 ---
 

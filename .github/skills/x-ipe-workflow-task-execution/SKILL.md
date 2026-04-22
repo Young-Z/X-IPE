@@ -28,7 +28,7 @@ MANDATORY: NEVER use `manage_todo_list` (VS Code internal) as substitute for the
 
 **Note:** If Agent does not have skill capability, go to `.github/skills/` folder to learn skills. SKILL.md is the entry point for each skill.
 
-IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-interact"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue. When `manual` or `stop_for_question`, always wait for human feedback before proceeding to the next task.
+IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-interact"`, NEVER stop to ask the human. Instead, call `x-ipe-assistant-user-representative-Engineer` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue. When `manual` or `stop_for_question`, always wait for human feedback before proceeding to the next task.
 
 ---
 
@@ -400,7 +400,7 @@ BLOCKING: Step 4 → Step 5: task board must be updated via x-ipe-tool-task-boar
     <actions>
       NOTE: Each task-based skill now includes its own &lt;routing&gt; phase at the end.
       The task-based skill's routing phase passes the full task_completion_output to
-      x-ipe-dao-end-user-representative for context-rich routing decisions.
+      x-ipe-assistant-user-representative-Engineer for context-rich routing decisions.
 
       This step acts as a fallback/coordinator:
 
@@ -412,16 +412,16 @@ BLOCKING: Step 4 → Step 5: task board must be updated via x-ipe-tool-task-boar
       ELSE IF routing was not handled by the task-based skill:
         IF next_task_based_skill EXISTS:
           IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-            → Invoke x-ipe-dao-end-user-representative with:
+            → Invoke x-ipe-assistant-user-representative-Engineer with:
               type: "routing"
               completed_skill_output: {full task_completion_output YAML}
               next_task_based_skill: "{from output}"
               context: "Skill completed. Study the full output to decide best next action."
             → IF multiple next_actions_suggested (workflow-mode):
-                invoke x-ipe-dao-end-user-representative (type: routing) to choose
+                invoke x-ipe-assistant-user-representative-Engineer (type: routing) to choose
             → Start execution from Step 1 (Planning — to create/verify task on board)
           ELIF process_preference.interaction_mode == "dao-represent-human-to-interact-for-questions-in-skill":
-            → Invoke x-ipe-dao-end-user-representative with same context
+            → Invoke x-ipe-assistant-user-representative-Engineer with same context
             → Present DAO's recommendation to human and wait for confirmation
           ELSE (interact-with-human):
             → Present next task suggestion to human using the skill-specific hint template
@@ -434,7 +434,7 @@ BLOCKING: Step 4 → Step 5: task board must be updated via x-ipe-tool-task-boar
     </actions>
     <constraints>
       - BLOCKING (manual/stop_for_question): Human MUST confirm or redirect before routing to next task
-      - BLOCKING (auto): Proceed automatically; resolve routing ambiguity via x-ipe-dao-end-user-representative
+      - BLOCKING (auto): Proceed automatically; resolve routing ambiguity via x-ipe-assistant-user-representative-Engineer
       - DAO receives full task_completion_output for context-aware routing decisions
     </constraints>
     <gate>Continue Execute decision made</gate>

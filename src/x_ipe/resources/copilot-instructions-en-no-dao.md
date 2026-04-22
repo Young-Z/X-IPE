@@ -98,7 +98,7 @@ BLOCKING: Do NOT maintain a hardcoded registry. Skills are auto-discovered.
 
 > **Note:** When **Interaction Mode is DAO-based** (global or task-level), `require_human_review` is **skipped** regardless of the skill's default. The `process_preference.interaction_mode` enum (`interact-with-human | dao-represent-human-to-interact | dao-represent-human-to-interact-for-questions-in-skill`) controls this behavior.
 
-> **Note:** The `interaction_mode` controls whether *within-skill* decision points go through the `x-ipe-dao-end-user-representative` skill (acting as a human representative) or ask the human directly. This is a within-skill concern — skills call DAO at their own decision points when `interaction_mode == "dao-represent-human-to-interact"`.
+> **Note:** The `interaction_mode` controls whether *within-skill* decision points go through the `x-ipe-assistant-user-representative-Engineer` skill (acting as a human representative) or ask the human directly. This is a within-skill concern — skills call DAO at their own decision points when `interaction_mode == "dao-represent-human-to-interact"`.
 
 ### 🛑 STOP AND THINK: Pre-Flight Checklist
 

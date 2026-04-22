@@ -282,4 +282,4 @@ class TestOrchestratorUpdate:
 
     def test_references_dao_representative_skill(self):
         content = self._read_orchestrator()
-        assert "x-ipe-dao-end-user-representative" in content
+        assert "x-ipe-assistant-user-representative-Engineer" in content

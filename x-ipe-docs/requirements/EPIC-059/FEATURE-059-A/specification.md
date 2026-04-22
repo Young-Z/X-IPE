@@ -11,6 +11,7 @@
 | Version | Date | Description |
 |---------|------|-------------|
 | v1.0 | 04-15-2026 | Initial specification |
+| v1.1 | 04-16-2026 | CR-001: Add `skill-meta-x-ipe-knowledge.md` template (moved from Out of Scope to in-scope) |
 
 ## Linked Mockups
 
@@ -219,7 +220,7 @@ _Not applicable — this feature involves only Markdown templates and documentat
 - Ontology model schema/data files — Layer 2 (FEATURE-059-C)
 - Migration of existing `x-ipe-dao-*` skills to `x-ipe-assistant-*` namespace — Layer 5 (FEATURE-059-F)
 - Web application changes — Layer 5 (FEATURE-059-F)
-- Skill-meta template for knowledge type (`skill-meta-x-ipe-knowledge.md`) — if needed, add in a follow-up
+- Skill-meta template for knowledge type (`skill-meta-x-ipe-knowledge.md`) — ~~if needed, add in a follow-up~~ Added via [CR-001](./CR-001.md)
 
 ## Technical Considerations
 

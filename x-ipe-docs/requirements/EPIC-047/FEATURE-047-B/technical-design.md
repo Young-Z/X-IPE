@@ -29,16 +29,16 @@
 
 | Component | Purpose | Location |
 |-----------|---------|----------|
-| DAO Logging Steps | Add logging procedure to DAO skill after 断 (Commit) step | `.github/skills/x-ipe-dao-end-user-representative/SKILL.md` |
-| DAO Log Template | Markdown template for semantic log files | `.github/skills/x-ipe-dao-end-user-representative/templates/dao-log-template.md` |
+| DAO Logging Steps | Add logging procedure to DAO skill after 断 (Commit) step | `.github/skills/x-ipe-assistant-user-representative-Engineer/SKILL.md` |
+| DAO Log Template | Markdown template for semantic log files | `.github/skills/x-ipe-assistant-user-representative-Engineer/templates/dao-log-template.md` |
 | Call Site Migration | Replace decision-making invocations with DAO in 14 files | `.github/skills/x-ipe-task-based-*/SKILL.md` + templates |
 | Skill Deletion | Remove old decision-making skill | `.github/skills/x-ipe-tool-decision-making/` |
 
 ## Change Summary
 
 ```
-MODIFY  .github/skills/x-ipe-dao-end-user-representative/SKILL.md    # Add logging steps
-CREATE  .github/skills/x-ipe-dao-end-user-representative/templates/dao-log-template.md
+MODIFY  .github/skills/x-ipe-assistant-user-representative-Engineer/SKILL.md    # Add logging steps
+CREATE  .github/skills/x-ipe-assistant-user-representative-Engineer/templates/dao-log-template.md
 MODIFY  .github/skills/x-ipe-task-based-bug-fix/SKILL.md              # Migrate call site
 MODIFY  .github/skills/x-ipe-task-based-code-implementation/SKILL.md  # Migrate 3 call sites
 MODIFY  .github/skills/x-ipe-task-based-code-refactor/SKILL.md        # Migrate 3 call sites
@@ -132,7 +132,7 @@ Also remove the line that says "CRITICAL: The skill MUST NOT write semantic logs
 
 ### 1.4 Log Template
 
-Create `.github/skills/x-ipe-dao-end-user-representative/templates/dao-log-template.md`:
+Create `.github/skills/x-ipe-assistant-user-representative-Engineer/templates/dao-log-template.md`:
 
 ```markdown
 # DAO Decisions: {Semantic Task Type}
@@ -166,7 +166,7 @@ IF process_preference.auto_proceed == "auto":
 **After:**
 ```
 IF process_preference.auto_proceed == "auto":
-  → CALL x-ipe-dao-end-user-representative with:
+  → CALL x-ipe-assistant-user-representative-Engineer with:
     message_context:
       source: "ai"
       calling_skill: "{name}"
@@ -216,7 +216,7 @@ For `feature-closing` specifically: replace the `decision_made_by_ai.md` referen
 
 #### 2.3.2 Workflow Executor (1 file)
 
-`x-ipe-workflow-task-execution/SKILL.md` — update the reference to decision-making as the auto-mode resolution mechanism. Replace mention of `x-ipe-tool-decision-making` with `x-ipe-dao-end-user-representative`.
+`x-ipe-workflow-task-execution/SKILL.md` — update the reference to decision-making as the auto-mode resolution mechanism. Replace mention of `x-ipe-tool-decision-making` with `x-ipe-assistant-user-representative-Engineer`.
 
 #### 2.3.3 Template & Guidelines (2 files)
 
@@ -260,7 +260,7 @@ Step 5: Run tests
 ```mermaid
 sequenceDiagram
     participant S as Task-Based Skill
-    participant DAO as x-ipe-dao-end-user-representative
+    participant DAO as x-ipe-assistant-user-representative-Engineer
     participant FS as File System
 
     Note over S: auto_proceed == "auto"<br/>Decision point reached

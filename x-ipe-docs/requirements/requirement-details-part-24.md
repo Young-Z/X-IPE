@@ -5,7 +5,10 @@
 
 ---
 
-## EPIC-058: Feature-Ontology for Knowledgebase
+## [RETIRED by EPIC-059] EPIC-058: Feature-Ontology for Knowledgebase
+
+> **⚠️ RETIRED:** This EPIC is superseded by **EPIC-059 (Rebuild Knowledge Skills)**. The `x-ipe-tool-ontology` skill is replaced by `x-ipe-knowledge-ontology-builder` (5-step discovery process) and `x-ipe-knowledge-ontology-synthesizer` (cross-graph integration). The ontology data model is redesigned from flat JSONL to Schema/Instances/Vocabulary 3-layer model. See [EPIC-059 requirements](x-ipe-docs/requirements/requirement-details-part-25.md).
+> Retired: 2026-04-14
 
 > Version: 1.0
 > Source Idea: [IDEA-040 — Feature-Ontology for Knowledgebase](x-ipe-docs/ideas/40.%20Feature-Ontology%20For%20Knowledgebase/refined-idea/idea-summary-v2.md)

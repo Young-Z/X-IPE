@@ -1960,9 +1960,9 @@
       "dependencies": [
         "FEATURE-059-B"
       ],
-      "status": "Designed",
+      "status": "Implemented",
       "created_at": "2026-04-16T02:54:42.426156+00:00",
-      "last_updated": "2026-04-16T03:16:44.492817+00:00"
+      "last_updated": "2026-04-16T03:47:21.262103+00:00"
     },
     {
       "feature_id": "FEATURE-059-D",
@@ -1973,9 +1973,39 @@
       "dependencies": [
         "FEATURE-059-C"
       ],
-      "status": "Planned",
+      "status": "Tested",
       "created_at": "2026-04-16T03:31:27.345880+00:00",
-      "last_updated": "2026-04-16T03:31:27.345880+00:00"
+      "last_updated": "2026-04-20T03:43:26.442907+00:00"
+    },
+    {
+      "feature_id": "FEATURE-059-E",
+      "epic_id": "EPIC-059",
+      "title": "Layer 4 — Orchestrator (Knowledge Librarian + User Representative Migration)",
+      "version": "v1.0",
+      "description": "Build Knowledge Librarian DAO (x-ipe-assistant-knowledge-librarian-DAO) using 格物致知 workflow for coordinating knowledge operations. Migrate x-ipe-assistant-user-representative-Engineer to x-ipe-assistant-user-representative-Engineer under assistant namespace.",
+      "dependencies": [
+        "FEATURE-059-D"
+      ],
+      "status": "Tested",
+      "created_at": "2026-04-20T06:59:56.257990+00:00",
+      "last_updated": "2026-04-20T07:58:27.114647+00:00"
+    },
+    {
+      "feature_id": "FEATURE-059-F",
+      "title": "Layer 5 — Integration, Migration & Deprecation",
+      "version": "v1.0",
+      "description": "Deprecate old DAO skill, update references, migrate knowledge content, web app UI integration.",
+      "status": "Tested",
+      "epic_id": "EPIC-059",
+      "dependencies": [
+        "FEATURE-059-A",
+        "FEATURE-059-B",
+        "FEATURE-059-C",
+        "FEATURE-059-D",
+        "FEATURE-059-E"
+      ],
+      "created_at": "2026-04-20T08:04:51.674697+00:00",
+      "last_updated": "2026-04-22T03:30:45.416618+00:00"
     }
   ]
 }

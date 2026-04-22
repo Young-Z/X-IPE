@@ -9,11 +9,11 @@
 
 ## Overview
 
-Rename the existing `auto_proceed` mode system to **Interaction Mode** — explicitly surfacing that the three modes control *who represents the human* at decision points: the DAO skill (`x-ipe-dao-end-user-representative`), DAO for inner-skill feedback only, or the human directly. This CR updates terminology, enum values, UI labels, backend validation, skill templates, CLI execution flags, and copilot instructions to align the naming with the DAO-first architecture established in IDEA-033.
+Rename the existing `auto_proceed` mode system to **Interaction Mode** — explicitly surfacing that the three modes control *who represents the human* at decision points: the DAO skill (`x-ipe-assistant-user-representative-Engineer`), DAO for inner-skill feedback only, or the human directly. This CR updates terminology, enum values, UI labels, backend validation, skill templates, CLI execution flags, and copilot instructions to align the naming with the DAO-first architecture established in IDEA-033.
 
 ## Problem Statement
 
-The current naming (`auto_proceed` with values `auto | stop_for_question | manual`) was designed before the DAO skill existed. Now that `x-ipe-dao-end-user-representative` is the actual mechanism behind "auto" mode, the terminology is misleading:
+The current naming (`auto_proceed` with values `auto | stop_for_question | manual`) was designed before the DAO skill existed. Now that `x-ipe-assistant-user-representative-Engineer` is the actual mechanism behind "auto" mode, the terminology is misleading:
 
 1. **"Auto" suggests automation** — but the real behavior is *DAO representing the human*, not generic automation.
 2. **"Stop for Question" is vague** — it doesn't clarify that DAO still handles inner-skill feedback; only cross-skill routing questions go to the human.
@@ -127,7 +127,7 @@ process_preference:
 Before:
 ```
 IF process_preference.auto_proceed == "auto":
-  → Resolve via x-ipe-dao-end-user-representative
+  → Resolve via x-ipe-assistant-user-representative-Engineer
 ELSE (manual/stop_for_question):
   → Ask human for decision
 ```
@@ -135,7 +135,7 @@ ELSE (manual/stop_for_question):
 After:
 ```
 IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-  → Resolve via x-ipe-dao-end-user-representative
+  → Resolve via x-ipe-assistant-user-representative-Engineer
 ELIF process_preference.interaction_mode == "dao-represent-human-to-interact-for-questions-in-skill":
   → Inner-skill feedback via DAO; cross-skill routing via human
 ELSE (interact-with-human):
@@ -210,7 +210,7 @@ flowchart TD
 2. **Skill template bulk update** — 19+ files need identical find-and-replace; use scripted approach to avoid human error
 3. **Test coverage** — existing tests in `action-execution-modal-cr001.test.js`, `workflow-panel-actions.test.js`, and `test_workflow_settings.py` all reference old values and need updating
 4. **PyPI package** — the copilot instructions are also packed in the `x-ipe` PyPI package; the package must be rebuilt after changes
-5. **DAO skill itself** — `x-ipe-dao-end-user-representative` SKILL.md references `auto_proceed` in its execution_strategy output; update to `interaction_mode`
+5. **DAO skill itself** — `x-ipe-assistant-user-representative-Engineer` SKILL.md references `auto_proceed` in its execution_strategy output; update to `interaction_mode`
 
 ## Brainstorming Notes
 
@@ -234,7 +234,7 @@ flowchart TD
 | `src/x_ipe/services/workflow_manager_service.py` | Backend | Validation, migration map, key rename |
 | `src/x_ipe/routes/workflow_routes.py` | Backend | Possibly minor (settings route delegates to service) |
 | `.github/skills/x-ipe-task-based-*/SKILL.md` | Skills (×19) | `auto_proceed` → `interaction_mode` references |
-| `.github/skills/x-ipe-dao-end-user-representative/SKILL.md` | Skill | execution_strategy output key |
+| `.github/skills/x-ipe-assistant-user-representative-Engineer/SKILL.md` | Skill | execution_strategy output key |
 | `.github/copilot-instructions.md` | Instructions | All `auto_proceed` references |
 | `tests/frontend-js/action-execution-modal-cr001.test.js` | Tests | Update test values and flag assertions |
 | `tests/frontend-js/workflow-panel-actions.test.js` | Tests | Update dropdown option assertions |

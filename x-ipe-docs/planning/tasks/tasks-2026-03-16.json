@@ -240,7 +240,7 @@
       "last_updated": "2026-03-16T06:00:00+00:00",
       "output_links": [
         ".github/skills/x-ipe-task-based-human-playground/SKILL.md",
-        ".github/skills/x-ipe-dao-end-user-representative/references/engineering-workflow.md"
+        ".github/skills/x-ipe-assistant-user-representative-Engineer/references/engineering-workflow.md"
       ],
       "next_task": "x-ipe-task-based-code-refactor"
     },

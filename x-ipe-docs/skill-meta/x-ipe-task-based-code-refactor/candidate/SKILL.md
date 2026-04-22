@@ -28,7 +28,7 @@ This skill is the **single entry point** for all refactoring work. It orchestrat
 
 BLOCKING: If user requests "refactor", "analyze for refactoring", or "assess code quality" — this skill handles it. Do NOT redirect to separate analysis skills.
 
-IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-interact"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
+IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-interact"`, NEVER stop to ask the human. Instead, call `x-ipe-assistant-user-representative-Engineer` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
 
 ---
 
@@ -86,7 +86,7 @@ input:
       1. IF caller provides scope_level → use provided value
       2. IF feature_id is provided → default to "feature"
       3. IF files[] is provided → default to "custom"
-      4. ELSE → IF interaction_mode == "dao-represent-human-to-interact": ASK x-ipe-dao-end-user-representative for scope; ELSE: ASK human for scope
+      4. ELSE → IF interaction_mode == "dao-represent-human-to-interact": ASK x-ipe-assistant-user-representative-Engineer for scope; ELSE: ASK human for scope
     </steps>
   </field>
 
@@ -94,7 +94,7 @@ input:
     <steps>
       1. IF caller provides → use provided value
       2. IF human describes intent → derive from description
-      3. ELSE → IF interaction_mode == "dao-represent-human-to-interact": ASK x-ipe-dao-end-user-representative; ELSE: ASK human: "What is the purpose of this refactoring?"
+      3. ELSE → IF interaction_mode == "dao-represent-human-to-interact": ASK x-ipe-assistant-user-representative-Engineer; ELSE: ASK human: "What is the purpose of this refactoring?"
     </steps>
   </field>
 
@@ -183,7 +183,7 @@ BLOCKING: Phase 4 halts if any test fails (must fix or revert).
         5. IF unresolved_questions is EMPTY → analysis validated, proceed
         6. IF unresolved_questions is NON-EMPTY:
            IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-             → Invoke x-ipe-dao-end-user-representative with specific questions list
+             → Invoke x-ipe-assistant-user-representative-Engineer with specific questions list
            ELSE:
              → Present ONLY the specific questions to human
            → Incorporate answers, update analysis
@@ -241,7 +241,7 @@ BLOCKING: Phase 4 halts if any test fails (must fix or revert).
         6. IF unresolved_questions is EMPTY → plan validated, proceed
         7. IF unresolved_questions is NON-EMPTY:
            IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-             → Invoke x-ipe-dao-end-user-representative with specific trade-off questions
+             → Invoke x-ipe-assistant-user-representative-Engineer with specific trade-off questions
            ELSE:
              → Present ONLY the specific trade-offs to human
            → Incorporate answers, update plan
@@ -312,7 +312,7 @@ BLOCKING: Phase 4 halts if any test fails (must fix or revert).
 
             Response source (based on interaction_mode):
             IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-              → Resolve open questions via x-ipe-dao-end-user-representative
+              → Resolve open questions via x-ipe-assistant-user-representative-Engineer
             ELSE (interact-with-human/dao-represent-human-to-interact-for-questions-in-skill):
               → Ask human for answers
         11. CREATE final commit
@@ -334,7 +334,7 @@ BLOCKING: Phase 4 halts if any test fails (must fix or revert).
         Collect the full context and task_completion_output from this skill execution.
 
         IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-          → Invoke x-ipe-dao-end-user-representative with:
+          → Invoke x-ipe-assistant-user-representative-Engineer with:
             type: "routing"
             completed_skill_output: {full task_completion_output YAML from this skill}
             next_task_based_skill: "{from output}"

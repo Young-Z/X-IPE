@@ -20,7 +20,7 @@ ROOT = Path(__file__).resolve().parent.parent
 class TestDaoLoggingSteps:
     """AC-047-B.1 through AC-047-B.8: DAO skill has logging procedure."""
 
-    SKILL_PATH = ROOT / ".github" / "skills" / "x-ipe-dao-end-user-representative" / "SKILL.md"
+    SKILL_PATH = ROOT / ".github" / "skills" / "x-ipe-assistant-user-representative-Engineer" / "SKILL.md"
 
     def _read_skill(self):
         return self.SKILL_PATH.read_text(encoding="utf-8")
@@ -77,7 +77,7 @@ class TestDaoLoggingSteps:
 class TestDaoLogTemplate:
     """AC-047-B.3, AC-047-B.8: Log template exists with proper structure."""
 
-    TEMPLATE_PATH = ROOT / ".github" / "skills" / "x-ipe-dao-end-user-representative" / "templates" / "dao-log-template.md"
+    TEMPLATE_PATH = ROOT / ".github" / "skills" / "x-ipe-assistant-user-representative-Engineer" / "templates" / "dao-log-template.md"
 
     def test_template_exists(self):
         """Log template file exists."""
@@ -144,20 +144,20 @@ class TestCallSiteMigration:
         if not fpath.exists():
             pytest.skip(f"File not found: {rel_path}")
         content = fpath.read_text(encoding="utf-8")
-        assert "message_context" in content or "x-ipe-dao-end-user-representative" in content, \
+        assert "message_context" in content or "x-ipe-assistant-user-representative-Engineer" in content, \
             f"{rel_path} missing DAO reference or message_context contract"
 
     def test_template_uses_dao(self):
         """AC-047-B.19: Task-based template references DAO."""
         fpath = self.SKILLS_DIR / "x-ipe-meta-skill-creator" / "templates" / "x-ipe-task-based.md"
         content = fpath.read_text(encoding="utf-8")
-        assert "x-ipe-dao-end-user-representative" in content
+        assert "x-ipe-assistant-user-representative-Engineer" in content
 
     def test_guidelines_use_dao(self):
         """AC-047-B.20: Guidelines reference DAO."""
         fpath = self.SKILLS_DIR / "x-ipe-meta-skill-creator" / "references" / "skill-general-guidelines-v2.md"
         content = fpath.read_text(encoding="utf-8")
-        assert "x-ipe-dao-end-user-representative" in content
+        assert "x-ipe-assistant-user-representative-Engineer" in content
 
 
 class TestOldSkillDeletion:

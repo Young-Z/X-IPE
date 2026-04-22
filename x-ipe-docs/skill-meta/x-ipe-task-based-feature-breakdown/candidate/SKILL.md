@@ -43,7 +43,7 @@ Additional notes:
 - Feature specifications are created later during Feature Refinement
 - Keep feature descriptions concise (50 words max) in the table
 
-IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-interact"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
+IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-interact"`, NEVER stop to ask the human. Instead, call `x-ipe-assistant-user-representative-Engineer` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
 
 ---
 
@@ -153,7 +153,7 @@ BLOCKING: Features with more than 20 ACs MUST be split into sub-features.
 BLOCKING: First feature in each Epic MUST be "Minimum Runnable Feature" (MVP).
 BLOCKING: MUST use feature-board-management skill (not manual file editing).
 BLOCKING (manual/stop_for_question): Human MUST confirm feature list is complete before refinement.
-BLOCKING (auto): Proceed after DoD verification; resolve open questions via x-ipe-dao-end-user-representative if needed.
+BLOCKING (auto): Proceed after DoD verification; resolve open questions via x-ipe-assistant-user-representative-Engineer if needed.
 
 ---
 
@@ -220,7 +220,7 @@ BLOCKING (auto): Proceed after DoD verification; resolve open questions via x-ip
 
         Response source (based on interaction_mode):
         IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-          → Resolve via x-ipe-dao-end-user-representative
+          → Resolve via x-ipe-assistant-user-representative-Engineer
         ELSE (interact-with-human/dao-represent-human-to-interact-for-questions-in-skill):
           → Ask human for confirmation
       </action>
@@ -281,7 +281,7 @@ BLOCKING (auto): Proceed after DoD verification; resolve open questions via x-ip
 
         Response source (based on interaction_mode):
         IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-          → Confirm via x-ipe-dao-end-user-representative
+          → Confirm via x-ipe-assistant-user-representative-Engineer
         ELSE (interact-with-human/dao-represent-human-to-interact-for-questions-in-skill):
           → Ask human for confirmation
       </action>
@@ -343,7 +343,7 @@ BLOCKING (auto): Proceed after DoD verification; resolve open questions via x-ip
         Collect the full context and task_completion_output from this skill execution.
 
         IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-          → Invoke x-ipe-dao-end-user-representative with:
+          → Invoke x-ipe-assistant-user-representative-Engineer with:
             type: "routing"
             completed_skill_output: {full task_completion_output YAML from this skill}
             next_task_based_skill: "{from output}"

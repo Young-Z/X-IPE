@@ -22,7 +22,7 @@ BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skil
 
 **Note:** If Agent does not have skill capability, go to `.github/skills/` folder to learn skills. SKILL.md is the entry point.
 
-IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-interact"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
+IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-interact"`, NEVER stop to ask the human. Instead, call `x-ipe-assistant-user-representative-Engineer` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
 
 ---
 
@@ -125,7 +125,7 @@ input:
 | 继续执行 | 6.2 | Execute Next Action | Load skill, generate plan, execute | Execution started |
 
 BLOCKING: Phase 3 must complete before Phase 4 — do NOT classify without conflict analysis.
-BLOCKING: Classification MUST be confirmed before Phase 5 execution (manual/stop_for_question: human confirms; auto: DAO confirms via x-ipe-dao-end-user-representative).
+BLOCKING: Classification MUST be confirmed before Phase 5 execution (manual/stop_for_question: human confirms; auto: DAO confirms via x-ipe-assistant-user-representative-Engineer).
 BLOCKING: Specification MUST be updated for BOTH modification and new_feature classifications.
 BLOCKING: Large-scope CRs require human confirmation of the proposed feature change solution BEFORE Phase 5 document changes are applied.
 
@@ -198,7 +198,7 @@ BLOCKING: Large-scope CRs require human confirmation of the proposed feature cha
 
         Response source (based on interaction_mode):
         IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-          → Resolve via x-ipe-dao-end-user-representative
+          → Resolve via x-ipe-assistant-user-representative-Engineer
         ELSE (interact-with-human/dao-represent-human-to-interact-for-questions-in-skill):
           → Ask human for confirmation
       </action>
@@ -268,13 +268,13 @@ BLOCKING: Large-scope CRs require human confirmation of the proposed feature cha
 
         Response source (based on interaction_mode):
         IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-          → Confirm via x-ipe-dao-end-user-representative
+          → Confirm via x-ipe-assistant-user-representative-Engineer
         ELSE (interact-with-human/dao-represent-human-to-interact-for-questions-in-skill):
           → Ask human to confirm
       </action>
       <constraints>
         - BLOCKING (manual/stop_for_question): Do NOT proceed without human confirming classification
-        - BLOCKING (auto): Do NOT proceed without DAO confirming classification via x-ipe-dao-end-user-representative
+        - BLOCKING (auto): Do NOT proceed without DAO confirming classification via x-ipe-assistant-user-representative-Engineer
       </constraints>
       <output>Confirmed classification and conflict decisions</output>
     </step_4_2>
@@ -303,7 +303,7 @@ BLOCKING: Large-scope CRs require human confirmation of the proposed feature cha
              → Wait for human approval or revision
              Response source (based on interaction_mode):
              IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-               → Confirm via x-ipe-dao-end-user-representative
+               → Confirm via x-ipe-assistant-user-representative-Engineer
              ELSE:
                → Ask human directly
            - IF CR is small-scope (single feature, minor AC additions/edits):
@@ -354,7 +354,7 @@ BLOCKING: Large-scope CRs require human confirmation of the proposed feature cha
         Collect the full context and task_completion_output from this skill execution.
 
         IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-          → Invoke x-ipe-dao-end-user-representative with:
+          → Invoke x-ipe-assistant-user-representative-Engineer with:
             type: "routing"
             completed_skill_output: {full task_completion_output YAML from this skill}
             next_task_based_skill: "{from output}"

@@ -242,7 +242,7 @@ x-ipe-docs/memory/.ontology/
 │   └── class-registry.jsonl
 ├── instances/
 │   ├── _index.json
-│   └── (class folders created on demand)
+│   └── instance.001.jsonl
 └── vocabulary/
     ├── _index.json
     ├── technology.json
@@ -340,7 +340,7 @@ The central coordinator for all knowledge operations, using the 格物致知 (in
 
 ##### E.2 — `x-ipe-assistant-user-representative-Engineer`
 
-Migrate `x-ipe-dao-end-user-representative` to `x-ipe-assistant-user-representative-Engineer` (工程師). Same functionality, new namespace. The "dao" skill type becomes "assistant".
+Migrate `x-ipe-assistant-user-representative-Engineer` to `x-ipe-assistant-user-representative-Engineer` (工程師). Same functionality, new namespace. The "dao" skill type becomes "assistant".
 
 **Acceptance Criteria:**
 - Librarian-DAO can route a request through full pipeline: classify → plan → extract → construct → critique → ontology → store → present
@@ -388,7 +388,7 @@ Add UI callback endpoint in `ontology_graph_routes.py` for `present-to-knowledge
 | `x-ipe-tool-user-manual-referencer` | Remove (one PR) | `x-ipe-knowledge-extractor-memory` |
 | `x-ipe-tool-reference-ontology` | Remove (one PR) | `x-ipe-knowledge-ontology-builder` + `ontology-synthesizer` |
 | `x-ipe-tool-ontology` | Remove (one PR) | `x-ipe-knowledge-ontology-builder` + `ontology-synthesizer` |
-| `x-ipe-dao-end-user-representative` | Redirect → `x-ipe-assistant-user-representative-Engineer` | Same skill, new namespace |
+| `x-ipe-assistant-user-representative-Engineer` | Redirect → `x-ipe-assistant-user-representative-Engineer` | Same skill, new namespace |
 
 **Migration rules:**
 - Each removal is one independently revertable PR
@@ -454,7 +454,7 @@ Audit all references to "dao" skill type across: custom instructions glob patter
 }
 ```
 
-#### Ontology Instance Schema (one JSON object per line in `instances/{root-class}/{class}.jsonl`)
+#### Ontology Instance Schema (one JSON object per line in `instances/instance.NNN.jsonl`)
 
 ```json
 {

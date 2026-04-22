@@ -5,7 +5,10 @@
 
 ---
 
-## EPIC-053: Application Reverse Engineering Knowledge Extraction Tool Skill
+## [RETIRED by EPIC-059] EPIC-053: Application Reverse Engineering Knowledge Extraction Tool Skill
+
+> **⚠️ RETIRED:** This EPIC is superseded by **EPIC-059 (Rebuild Knowledge Skills)**. The `x-ipe-tool-knowledge-extraction-application-reverse-engineering` is replaced by `x-ipe-knowledge-constructor-app-reverse-engineering`. The 8 `x-ipe-tool-rev-eng-*` tool skills it depends on remain unchanged. See [EPIC-059 requirements](x-ipe-docs/requirements/requirement-details-part-25.md).
+> Retired: 2026-04-14
 
 > Version: 1.0
 > Source Idea: [IDEA-037 — Application Reverse Engineering](x-ipe-docs/ideas/037.%20Feature-Application%20Reverse%20Engineering/refined-idea/idea-summary-v1.md)
@@ -109,7 +112,10 @@ N/A
 
 ---
 
-## EPIC-054: Web Behavior Learning & Tracking Module
+## [RETIRED by EPIC-059] EPIC-054: Web Behavior Learning & Tracking Module
+
+> **⚠️ RETIRED:** This EPIC is superseded by **EPIC-059 (Rebuild Knowledge Skills)**. The `x-ipe-learning-behavior-tracker-for-web` is replaced by `x-ipe-knowledge-mimic-web-behavior-tracker` under the new knowledge namespace with Operations + Steps pattern (start_tracking, stop_tracking, get_observations). See [EPIC-059 requirements](x-ipe-docs/requirements/requirement-details-part-25.md).
+> Retired: 2026-04-14
 
 > Version: 1.0
 > Source Idea: [IDEA-038 — Feature-Learn Module](x-ipe-docs/ideas/038.%20Feature-Learn%20module/refined-idea/idea-summary-v1.md)

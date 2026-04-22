@@ -28,7 +28,7 @@ triggers:
 
 ### ⚠️ BLOCKING Rules
 
-1. **v1 Scope:** Only "user-manual" and "application-reverse-engineering" extraction categories are supported. Requests for other categories (API-reference, runbook, configuration) will halt with error listing supported categories.
+1. **v1 Scope:** Only "user-manual", "application-reverse-engineering", and "notes" extraction categories are supported. Requests for other categories (API-reference, runbook, configuration) will halt with error listing supported categories.
 2. **Tool Skill Required:** Extraction cannot proceed without a matching tool skill (e.g., `x-ipe-tool-knowledge-extraction-user-manual`). If no tool skill is found, the skill halts with error.
 3. **File-Based Handoff:** All knowledge exchange between extractor and tool skills MUST use `.x-ipe-checkpoint/` folder. Inline text exchange is prohibited.
 4. **Checkpoint Location:** `.x-ipe-checkpoint/` is created in CWD (project root), NEVER inside target directory. For URL-only targets, CWD is used.
@@ -54,7 +54,7 @@ input:
   
   # Required inputs
   target: "{path or URL to application/documentation}"
-  purpose: "user-manual | application-reverse-engineering"  # supported categories
+  purpose: "user-manual | application-reverse-engineering | notes"  # supported categories
   
   # Optional
   config_overrides:
@@ -88,7 +88,7 @@ input:
   <field name="task_id" source="auto-generated" />
   <field name="execution_mode" source="workflow or free-mode" />
   <field name="target" source="user-provided (path or URL)" />
-  <field name="purpose" source="user-provided: 'user-manual' or 'application-reverse-engineering'" />
+  <field name="purpose" source="user-provided: 'user-manual', 'application-reverse-engineering', or 'notes'" />
   <field name="config_overrides" source="optional, defaults: max_retries=3, web_search_enabled=true, timeout_seconds=15, max_files_per_section=20, max_validation_iterations=3, coverage_target=0.8. Config values are passed through to tool skill operations." />
   <field name="behavior_context.learning_folder" source="optional, from behavior tracker skill. Path to learning folder containing tracked events and screenshots." />
   <field name="deep_research.rounds" source="ask-user, default: 1, values: 1-10 or 'smart'" />
@@ -97,7 +97,7 @@ input:
 ```
 
 **Validation Gates:**
-- IF `target` missing → halt; IF `purpose` not in ["user-manual", "application-reverse-engineering"] → halt
+- IF `target` missing → halt; IF `purpose` not in ["user-manual", "application-reverse-engineering", "notes"] → halt
 - IF target path missing or URL unreachable → halt
 - IF CWD not writable → halt
 - Set defaults for unspecified config_overrides
@@ -206,11 +206,11 @@ input:
     <name>Select Category</name>
     <action>
       1. Read purpose parameter from input
-      2. Validate against supported categories: "user-manual", "application-reverse-engineering"
+      2. Validate against supported categories: "user-manual", "application-reverse-engineering", "notes"
       3. Halt with error if unsupported or unknown category
     </action>
     <constraints>
-      - BLOCKING: purpose not in ["user-manual", "application-reverse-engineering"] → halt listing supported categories
+      - BLOCKING: purpose not in ["user-manual", "application-reverse-engineering", "notes"] → halt listing supported categories
     </constraints>
     <output>selected_category = "{purpose}"</output>
   </step_1_2>
@@ -299,6 +299,24 @@ input:
          - orchestrator writes: `{output_path}/section-{NN}-{slug}/`
          - extractor references: `.x-ipe-checkpoint/session-{timestamp}/content/section-{NN}-{slug}/index.md`
       6. Proceed to Phase 3 validation using orchestrator's per-section quality scores as initial baseline
+
+      **Category: notes** (purpose == "notes"):
+      1. Call loaded tool skill (x-ipe-tool-knowledge-extraction-notes) `init_knowledge_folder` operation with:
+         - knowledge_name: derived from input.target (sanitized slug)
+         - output_dir: `.x-ipe-checkpoint/session-{timestamp}/content/`
+         - template_type: inferred from source content or default "general"
+      2. Call `get_template` to retrieve section layout for the chosen template_type
+      3. For each template section: call `extract_section` with:
+         - source_content from input.target (file, URL, or text)
+         - section_id matching template numbering
+         - knowledge_name and output_dir from step 1
+      4. For any images/screenshots captured during extraction: call `embed_image` with:
+         - image_path, section_id, image_description
+      5. After all sections extracted: call `generate_overview` to produce linked table of contents
+      6. Call `validate_structure` to verify folder integrity, fix any broken links
+      7. Map notes folder to extractor checkpoint structure:
+         - tool skill writes: `{output_dir}/{knowledge_name}/`
+         - extractor references: `.x-ipe-checkpoint/session-{timestamp}/content/{knowledge_name}/overview.md`
     </action>
     <constraints>
       - BLOCKING: All content must go through file paths in checkpoint — no inline content

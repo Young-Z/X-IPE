@@ -13,10 +13,10 @@
 
 **When:** Receiving ANY user message (command, question, feedback, approval)
 **Then:**
-1. **EVERY user message MUST be processed through `x-ipe-dao-end-user-representative` before any other action.**
+1. **EVERY user message MUST be processed through `x-ipe-assistant-user-representative-Engineer` before any other action.**
    - This is the universal gateway. No matter what the user says — a command, a question, feedback, approval — the message flows through the human representative skill first. The DAO interprets the message, selects a disposition, and the agent acts on that structured output.
 2. Model Requirement
-   - When `x-ipe-dao-end-user-representative` is delegated to a sub-agent (e.g., via the `task` tool), **use the most capable (premium) LLM model available** (e.g., `model: "claude-opus-4.6"`). The 7-step backbone requires nuanced reasoning — weighing three perspectives, analyzing gains/losses, scenario planning — that fast/cheap models cannot reliably handle. If running inline (not as a sub-agent), the main agent's model is used automatically.
+   - When `x-ipe-assistant-user-representative-Engineer` is delegated to a sub-agent (e.g., via the `task` tool), **use the most capable (premium) LLM model available** (e.g., `model: "claude-opus-4.6"`). The 7-step backbone requires nuanced reasoning — weighing three perspectives, analyzing gains/losses, scenario planning — that fast/cheap models cannot reliably handle. If running inline (not as a sub-agent), the main agent's model is used automatically.
 3. Why DAO-First Matters
    - **Consistent interpretation** — Every message gets structured analysis, not ad-hoc pattern matching
    - **Context-aware routing** — DAO considers the current task, feature, and workflow state when interpreting
@@ -131,7 +131,7 @@ BLOCKING: Do NOT maintain a hardcoded registry. Skills are auto-discovered.
 **Before touching ANY code or making ANY changes, ask yourself:**
 
 ```
-0. Did I process this message through DAO? → If NO, STOP and call x-ipe-dao-end-user-representative
+0. Did I process this message through DAO? → If NO, STOP and call x-ipe-assistant-user-representative-Engineer
 1. What task-based skill is this? → Scan `.github/skills/x-ipe-task-based-*/` descriptions
 2. Did I create a task on the task board? → If NO, STOP and create it
 3. Did I load the corresponding skill? → If NO, STOP and load it

@@ -1,4 +1,7 @@
-## EPIC-050: Application Knowledge Extraction
+## [RETIRED by EPIC-059] EPIC-050: Application Knowledge Extraction
+
+> **⚠️ RETIRED:** This EPIC is superseded by **EPIC-059 (Rebuild Knowledge Skills)**. The `x-ipe-task-based-application-knowledge-extractor` is replaced by `x-ipe-knowledge-extractor-web` (browser-based extraction) and the constructor-driven workflow. The old extraction-tool namespace (`x-ipe-tool-knowledge-extraction-*`) is replaced by `x-ipe-knowledge-constructor-*`. See [EPIC-059 requirements](x-ipe-docs/requirements/requirement-details-part-25.md).
+> Retired: 2026-04-14
 
 > Version: 1.0
 > Source Idea: [IDEA-008 — Knowledge Extraction](x-ipe-docs/ideas/wf-008-knowledge-extraction/refined-idea/idea-summary-v1.md)
@@ -214,7 +217,10 @@ Create a two-tier AI skill system for structured knowledge extraction from appli
 
 ---
 
-## EPIC-051: User Manual Knowledge Extraction Tool Skill
+## [RETIRED by EPIC-059] EPIC-051: User Manual Knowledge Extraction Tool Skill
+
+> **⚠️ RETIRED:** This EPIC is superseded by **EPIC-059 (Rebuild Knowledge Skills)**. The `x-ipe-tool-knowledge-extraction-user-manual` tool skill is replaced by `x-ipe-knowledge-constructor-user-manual`, which uses the Operations + Steps pattern (provide_framework, design_rubric, request_knowledge, fill_structure) instead of the old playbook/template approach. See [EPIC-059 requirements](x-ipe-docs/requirements/requirement-details-part-25.md).
+> Retired: 2026-04-14
 
 > Version: 1.0
 > Source: EPIC-050 external dependency — the extractor skill requires this tool skill for "user-manual" category extraction

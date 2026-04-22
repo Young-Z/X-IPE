@@ -97,9 +97,12 @@ class OntologyGraphSocket {
             typeof r === 'string' ? r : (r.node_id || r.entity?.id)
         ).filter(Boolean);
 
+        // CR-002: extract virtual nodes metadata for hub rendering
+        const virtualNodes = data.subgraph.virtual_nodes || [];
+
         // Delegate to canvas: highlight direct matches + their immediate neighbors
         if (this._canvas && directMatchIds.length > 0) {
-            this._canvas.highlightSearchMatches(directMatchIds);
+            this._canvas.highlightSubgraph(allNodeIds, directMatchIds, virtualNodes);
         }
     }
 

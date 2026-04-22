@@ -22,7 +22,7 @@ BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skil
 
 **Note:** If Agent does not have skill capability, go to `.github/skills/` folder to learn skills. SKILL.md is the entry point.
 
-IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-interact"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
+IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-interact"`, NEVER stop to ask the human. Instead, call `x-ipe-assistant-user-representative-Engineer` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
 
 ---
 
@@ -209,7 +209,7 @@ BLOCKING: Step 5.1 must complete before Step 5.2 — do NOT report until all ste
            → IF referencer returns clarity_score &lt; clarity_threshold:
              Response source (based on interaction_mode):
              IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-               → Resolve via x-ipe-dao-end-user-representative
+               → Resolve via x-ipe-assistant-user-representative-Engineer
              ELSE:
                → Ask human: "The manual says '{instruction_text}' but it's unclear.
                  Can you clarify how to: {step description}?"
@@ -271,7 +271,7 @@ BLOCKING: Step 5.1 must complete before Step 5.2 — do NOT report until all ste
              ELSE:
                Response source (based on interaction_mode):
                IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-                 → Resolve via x-ipe-dao-end-user-representative
+                 → Resolve via x-ipe-assistant-user-representative-Engineer
                ELSE:
                  → Ask human for guidance
         5. Log step result:
@@ -321,7 +321,7 @@ BLOCKING: Step 5.1 must complete before Step 5.2 — do NOT report until all ste
         Collect the full context and task_completion_output from this skill execution.
 
         IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-          → Invoke x-ipe-dao-end-user-representative with:
+          → Invoke x-ipe-assistant-user-representative-Engineer with:
             type: "routing"
             completed_skill_output: {full task_completion_output YAML from this skill}
             next_task_based_skill: "{from output}"

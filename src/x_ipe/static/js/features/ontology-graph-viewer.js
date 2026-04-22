@@ -128,8 +128,8 @@ class OntologyGraphViewer {
         this._wireAIAgentButton();
         this._wireScopeBar();
 
-        // Load graph index
-        await this._loadGraphIndex();
+        // FEATURE-059-F: Auto-load all graphs (sidebar removed)
+        await this._autoLoadAll();
     }
 
     // -----------------------------------------------------------------------
@@ -141,30 +141,6 @@ class OntologyGraphViewer {
         wrapper.className = 'ontology-graph-viewer';
 
         wrapper.innerHTML = `
-            <!-- Sidebar -->
-            <div class="ogv-sidebar">
-                <div class="ogv-sidebar-header">
-                    <div class="ogv-sidebar-title">
-                        <span class="ogv-sidebar-icon">◈</span> ONTOLOGY
-                    </div>
-                </div>
-                <div class="ogv-section-header">GRAPH COLLECTIONS</div>
-                <div class="ogv-select-all">
-                    <label><input type="checkbox" class="ogv-select-all-cb" /> Select All</label>
-                    <span class="ogv-graph-count"></span>
-                </div>
-                <div class="ogv-graph-list"></div>
-                <div class="ogv-legend">
-                    <div class="ogv-section-header ogv-section-header--legend">NODE TYPES</div>
-                    <div class="ogv-legend-items">
-                        <div class="ogv-legend-item"><span class="ogv-type-badge ogv-type-badge--concept"></span>Concept</div>
-                        <div class="ogv-legend-item"><span class="ogv-type-badge ogv-type-badge--document"></span>Document</div>
-                        <div class="ogv-legend-item"><span class="ogv-type-badge ogv-type-badge--entity"></span>Entity</div>
-                        <div class="ogv-legend-item"><span class="ogv-type-badge ogv-type-badge--dimension"></span>Dimension</div>
-                    </div>
-                </div>
-            </div>
-
             <!-- Topbar (Scope + Search + AI Agent) -->
             <header class="ogv-topbar">
                 <div class="ogv-scope-bar">
@@ -216,6 +192,16 @@ class OntologyGraphViewer {
                     <button class="ogv-zoom-btn" data-action="out" title="Zoom Out">−</button>
                     <button class="ogv-zoom-btn" data-action="fit" title="Fit All">⊡</button>
                 </div>
+
+                <!-- FEATURE-059-F: Legend overlay (was in sidebar, now floating on canvas) -->
+                <div class="ogv-legend-overlay">
+                    <div class="ogv-legend-items">
+                        <div class="ogv-legend-item"><span class="ogv-type-badge ogv-type-badge--concept"></span>Concept</div>
+                        <div class="ogv-legend-item"><span class="ogv-type-badge ogv-type-badge--document"></span>Document</div>
+                        <div class="ogv-legend-item"><span class="ogv-type-badge ogv-type-badge--entity"></span>Entity</div>
+                        <div class="ogv-legend-item"><span class="ogv-type-badge ogv-type-badge--dimension"></span>Dimension</div>
+                    </div>
+                </div>
             </div>
 
             <!-- Status Bar -->
@@ -245,10 +231,12 @@ class OntologyGraphViewer {
     // API Calls
     // -----------------------------------------------------------------------
 
-    async _loadGraphIndex() {
+    async _autoLoadAll() {
+        // FEATURE-059-F: Replaces sidebar checkbox-driven loading.
+        // Fetches /api/kb/ontology/graphs/all and loads all elements at once.
         this._updateStatus('Loading graphs…');
         try {
-            const resp = await fetch('/api/kb/ontology/graphs');
+            const resp = await fetch('/api/kb/ontology/graphs/all');
             if (!resp.ok) {
                 if (resp.status === 404) {
                     this._showEmptyState('No Ontology Found', 'Run ontology extraction on your knowledge base to generate graph data.');
@@ -258,8 +246,28 @@ class OntologyGraphViewer {
                 throw new Error(`HTTP ${resp.status}`);
             }
             const data = await resp.json();
-            this._graphIndex = data.graphs || [];
-            this._renderGraphList();
+            const elements = data.elements || { nodes: [], edges: [] };
+            const graphNames = data.graph_names || [];
+
+            // Populate state with all graphs marked as selected
+            this._graphIndex = graphNames.map(n => ({ name: n }));
+            this._selectedGraphs = new Set(graphNames);
+
+            // Build flat array for Cytoscape
+            const flat = [];
+            (elements.nodes || []).forEach(n => flat.push({ group: 'nodes', data: { ...n.data } }));
+            (elements.edges || []).forEach(e => flat.push({ group: 'edges', data: { ...e.data } }));
+
+            if (flat.length === 0) {
+                this._showEmptyState('No Graph Data', 'The ontology contains no entities or relations to display.');
+                this._updateStatus('Empty ontology');
+                return;
+            }
+
+            this.canvas.setElements(flat);
+            this._renderScopePills();
+            this._updateStats();
+            this._refreshNav();
             this._updateStatus('Connected');
         } catch (err) {
             this._showError(`Failed to load graphs: ${err.message}`);
@@ -498,6 +506,9 @@ class OntologyGraphViewer {
     // -----------------------------------------------------------------------
 
     async _toggleGraph(name, selected) {
+        // FEATURE-059-F: After sidebar removal, this is invoked only by scope-pill ✕ (deselect)
+        // and the scope "+" button (re-add). For deselect we hide the graph; for re-add we
+        // re-fetch via the per-graph endpoint.
         if (selected) {
             this._selectedGraphs.add(name);
             this._updateStatus(`Loading ${name}…`);
@@ -510,9 +521,6 @@ class OntologyGraphViewer {
             this.canvas.removeGraphElements(name);
             this._removeScopePill(name);
         }
-        // Update selected styling on graph items
-        const item = this.container.querySelector(`.ogv-graph-item[data-graph="${name}"]`);
-        if (item) item.classList.toggle('ogv-graph-item--selected', selected);
         this._updateStats();
         this._refreshNav();
         this._updateStatus('Connected');
@@ -523,7 +531,8 @@ class OntologyGraphViewer {
                 this._renderDropdown(data.results);
                 this.canvas.highlightSubgraph(
                     data.subgraph ? data.subgraph.nodes : [],
-                    data.results.map(r => r.node_id)
+                    data.results.map(r => r.node_id),
+                    data.subgraph ? data.subgraph.virtual_nodes : []
                 );
                 this._updateSearchStatus(data);
             } else {
@@ -535,85 +544,17 @@ class OntologyGraphViewer {
     }
 
     async _selectAll(selected) {
+        // FEATURE-059-F: Invoked by the scope "+" button to restore all graphs after deselection.
         if (selected) {
-            this._updateStatus('Loading all graphs…');
-            const allElements = [];
-            for (const g of this._graphIndex) {
-                this._selectedGraphs.add(g.name);
-                const elements = await this._loadGraph(g.name);
-                allElements.push(...elements);
-            }
-            if (this._destroyed) return;
-            this.canvas.setElements(allElements);
-            this._renderScopePills();
+            // Re-fetch unified payload for clean state
+            await this._autoLoadAll();
         } else {
             this._selectedGraphs.clear();
             this.canvas.setElements([]);
             this._renderScopePills();
-        }
-        this._updateGraphListCheckboxes();
-        this._updateStats();
-        this._refreshNav();
-        this._updateStatus('Connected');
-    }
-
-    // -----------------------------------------------------------------------
-    // Sidebar Graph List
-    // -----------------------------------------------------------------------
-
-    _renderGraphList() {
-        const listEl = this.container.querySelector('.ogv-graph-list');
-        const countEl = this.container.querySelector('.ogv-graph-count');
-
-        if (!this._graphIndex || this._graphIndex.length === 0) {
-            listEl.innerHTML = '<div style="padding:16px;text-align:center;color:#94a3b8;font-size:13px;">No graphs available</div>';
-            countEl.textContent = '0 graphs';
-            return;
-        }
-
-        countEl.textContent = `${this._graphIndex.length} graph${this._graphIndex.length !== 1 ? 's' : ''}`;
-
-        listEl.innerHTML = this._graphIndex.map(g => {
-            const checked = this._selectedGraphs.has(g.name) ? 'checked' : '';
-            const nodeCount = g.node_count || 0;
-            const edgeCount = g.edge_count || 0;
-            const dominantType = g.dominant_type || 'concept';
-            const badgeLabel = dominantType + '-heavy';
-            return `<div class="ogv-graph-item ${checked ? 'ogv-graph-item--selected' : ''}" data-graph="${g.name}">
-                <input type="checkbox" ${checked} />
-                <div class="ogv-graph-info">
-                    <div class="ogv-graph-name" title="${g.name}">${g.name}</div>
-                    <div class="ogv-graph-meta">${nodeCount} nodes · ${edgeCount} edges</div>
-                    <span class="ogv-dominant-badge ogv-dominant-badge--${dominantType}">${badgeLabel}</span>
-                </div>
-            </div>`;
-        }).join('');
-
-        // Bind checkbox events
-        listEl.querySelectorAll('.ogv-graph-item').forEach(item => {
-            const cb = item.querySelector('input[type="checkbox"]');
-            const graphName = item.dataset.graph;
-
-            item.addEventListener('click', (e) => {
-                if (e.target !== cb) {
-                    cb.checked = !cb.checked;
-                }
-                this._toggleGraph(graphName, cb.checked);
-            });
-        });
-    }
-
-    _updateGraphListCheckboxes() {
-        const items = this.container.querySelectorAll('.ogv-graph-item');
-        items.forEach(item => {
-            const cb = item.querySelector('input[type="checkbox"]');
-            const isSelected = this._selectedGraphs.has(item.dataset.graph);
-            cb.checked = isSelected;
-            item.classList.toggle('ogv-graph-item--selected', isSelected);
-        });
-        const selectAllCb = this.container.querySelector('.ogv-select-all-cb');
-        if (selectAllCb) {
-            selectAllCb.checked = this._selectedGraphs.size === this._graphIndex.length && this._graphIndex.length > 0;
+            this._updateStats();
+            this._refreshNav();
+            this._updateStatus('Connected');
         }
     }
 
@@ -647,7 +588,6 @@ class OntologyGraphViewer {
         pill.querySelector('.ogv-scope-pill-close').addEventListener('click', (e) => {
             e.stopPropagation();
             this._toggleGraph(name, false);
-            this._updateGraphListCheckboxes();
         });
 
         bar.appendChild(pill);
@@ -658,31 +598,31 @@ class OntologyGraphViewer {
         if (!bar) return;
         const pill = bar.querySelector(`[data-scope="${name}"]`);
         if (pill) pill.remove();
+        // FEATURE-059-F: ensure "+" restore button appears when graphs become available
+        this._appendScopeAddBtn(bar);
     }
 
     _appendScopeAddBtn(bar) {
         if (bar.querySelector('.ogv-scope-add-btn')) return;
+        // Only show "+" if there are deselected graphs available to re-add
+        const allSelected = this._graphIndex
+            && this._graphIndex.length > 0
+            && this._selectedGraphs.size === this._graphIndex.length;
+        if (allSelected) return;
+
         const btn = document.createElement('div');
         btn.className = 'ogv-scope-add-btn';
-        btn.title = 'Add graph to scope';
+        btn.title = 'Restore all graphs to scope';
         btn.textContent = '+';
         btn.addEventListener('click', () => {
-            const selectAllCb = this.container.querySelector('.ogv-select-all-cb');
-            if (selectAllCb && !selectAllCb.checked) {
-                selectAllCb.checked = true;
-                this._selectAll(true);
-            }
+            this._selectAll(true);
         });
         bar.appendChild(btn);
     }
 
     _wireScopeBar() {
-        const selectAllCb = this.container.querySelector('.ogv-select-all-cb');
-        if (selectAllCb) {
-            selectAllCb.addEventListener('change', () => {
-                this._selectAll(selectAllCb.checked);
-            });
-        }
+        // FEATURE-059-F: select-all checkbox removed with sidebar; scope bar interactions
+        // are wired per-pill in _addScopePillToBar() and _appendScopeAddBtn().
     }
 
     // -----------------------------------------------------------------------
@@ -742,7 +682,8 @@ class OntologyGraphViewer {
                     this._renderDropdown(data.results);
                     this.canvas.highlightSubgraph(
                         data.subgraph ? data.subgraph.nodes : [],
-                        data.results.map(r => r.node_id)
+                        data.results.map(r => r.node_id),
+                        data.subgraph ? data.subgraph.virtual_nodes : []
                     );
                     this._updateSearchStatus(data);
                 } else {

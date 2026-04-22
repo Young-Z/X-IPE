@@ -101,6 +101,9 @@ class OntologyGraphService:
 
         Returns dict with 'name' and 'elements' (nodes + edges),
         or None if the graph doesn't exist.
+
+        FEATURE-059-F: Also includes cross-graph relations from
+        .ontology/relations/_relations.NNN.jsonl that touch entities in this graph.
         """
         graph_path = self._ontology_dir / f'{name}.jsonl'
         if not graph_path.is_file():
@@ -111,6 +114,15 @@ class OntologyGraphService:
         nodes = [self._entity_to_cytoscape_node(e) for e in entities]
         edges = [self._relation_to_cytoscape_edge(r) for r in relations]
 
+        # Include cross-graph relations that touch entities in this graph
+        entity_ids = {e.get('id', '') for e in entities}
+        cross_edges = self._load_cross_graph_relations()
+        for edge in cross_edges:
+            src = edge['data']['source']
+            tgt = edge['data']['target']
+            if src in entity_ids or tgt in entity_ids:
+                edges.append(edge)
+
         return {
             'name': name,
             'elements': {
@@ -118,6 +130,99 @@ class OntologyGraphService:
                 'edges': edges,
             },
         }
+
+    @x_ipe_tracing()
+    def get_all_graphs(self) -> dict:
+        """Get merged Cytoscape elements from all graphs + cross-graph relations.
+
+        FEATURE-059-F: Unified endpoint for auto-load-all viewer behavior.
+        Returns dict with 'elements' (nodes + edges) and 'graph_names' list.
+        Each node/edge is tagged with '_graph' attribute identifying source graph.
+        """
+        if not self.has_ontology:
+            return {'elements': {'nodes': [], 'edges': []}, 'graph_names': []}
+
+        index = self._read_graph_index()
+        all_nodes: list[dict] = []
+        all_edges: list[dict] = []
+        graph_names: list[str] = []
+
+        for g in index.get('graphs', []):
+            name = g.get('name', '')
+            if not name:
+                continue
+            graph_names.append(name)
+            graph_path = self._ontology_dir / f'{name}.jsonl'
+            if not graph_path.is_file():
+                continue
+            entities, relations = self._parse_graph_jsonl(graph_path)
+            for e in entities:
+                node = self._entity_to_cytoscape_node(e)
+                node['data']['_graph'] = name
+                all_nodes.append(node)
+            for r in relations:
+                edge = self._relation_to_cytoscape_edge(r)
+                edge['data']['_graph'] = name
+                all_edges.append(edge)
+
+        # Append cross-graph relations from _relations.NNN.jsonl chunks
+        all_edges.extend(self._load_cross_graph_relations())
+
+        return {
+            'elements': {
+                'nodes': all_nodes,
+                'edges': all_edges,
+            },
+            'graph_names': graph_names,
+        }
+
+    def _load_cross_graph_relations(self) -> list[dict]:
+        """Read all _relations.NNN.jsonl chunks from .ontology/relations/.
+
+        FEATURE-059-F: Returns list of Cytoscape edge dicts representing
+        cross-graph relations created by the ontology-synthesizer (059-D).
+        """
+        relations_dir = self._ontology_dir / 'relations'
+        if not relations_dir.is_dir():
+            return []
+
+        edges: list[dict] = []
+        # Sort by chunk number to maintain append order
+        chunks = sorted(relations_dir.glob('_relations.*.jsonl'))
+        for chunk_path in chunks:
+            try:
+                with open(chunk_path) as f:
+                    for line in f:
+                        line = line.strip()
+                        if not line:
+                            continue
+                        try:
+                            record = json.loads(line)
+                        except json.JSONDecodeError:
+                            continue
+                        # 059-D event envelope: {op, type, id, ts, props}
+                        if record.get('op') not in ('create', 'link'):
+                            continue
+                        props = record.get('props', {})
+                        from_id = props.get('from_id', '')
+                        to_id = props.get('to_id', '')
+                        if not from_id or not to_id:
+                            continue
+                        rel_type = props.get('relation_type', 'related_to')
+                        edges.append({
+                            'data': {
+                                'id': f'xr_{from_id}_{to_id}',
+                                'source': from_id,
+                                'target': to_id,
+                                'relation_type': rel_type,
+                                'label': rel_type,
+                                'cross_graph': True,
+                                'synthesis_version': props.get('synthesis_version', ''),
+                            }
+                        })
+            except OSError:
+                continue
+        return edges
 
     @x_ipe_tracing()
     def search(self, query: str, graph_names: list[str] | None = None) -> list[dict]:
@@ -285,6 +390,8 @@ class OntologyGraphService:
                 'description': props.get('description', ''),
                 'dimensions': props.get('dimensions', {}),
                 'source_files': props.get('source_files', []),
+                'synthesize_id': props.get('synthesize_id', ''),
+                'synthesize_message': props.get('synthesize_message', ''),
                 'metadata': {
                     'connections': 0,  # Will be set by frontend from edge count
                     'created': entity.get('created', ''),

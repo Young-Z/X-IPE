@@ -223,7 +223,7 @@ Same approach for `skill-meta-x-ipe-assistant.md` from `skill-meta-x-ipe-dao.md`
 
 | Type | Purpose | Naming Convention | SKILL.md Template | skill-meta.md Template |
 |------|---------|-------------------|-------------------|------------------------|
-| x-ipe-knowledge | Knowledge pipeline services (Operations + Steps) | `x-ipe-knowledge-{sub-category}-{name}` | x-ipe-knowledge.md | _(TBD in follow-up)_ |
+| x-ipe-knowledge | Knowledge pipeline services (Operations + Steps) | `x-ipe-knowledge-{sub-category}-{name}` | x-ipe-knowledge.md | skill-meta-x-ipe-knowledge.md |
 | x-ipe-assistant | Assistant/orchestrator skills (replaces x-ipe-dao) | `x-ipe-assistant-{name}` | x-ipe-assistant.md | skill-meta-x-ipe-assistant.md |
 
 2. **Type enum** (line ~68) — Add to enum:
@@ -235,7 +235,7 @@ skill_type: ... | x-ipe-knowledge | x-ipe-assistant
 ```
 10. IF Knowledge pipeline service (Operations + Steps, called by assistant) → x-ipe-knowledge:
     - SKILL.md: templates/x-ipe-knowledge.md
-    - skill-meta.md: N/A (no dedicated skill-meta template yet)
+    - skill-meta.md: templates/skill-meta-x-ipe-knowledge.md
 11. IF Assistant/orchestrator skill (格物致知 backbone) → x-ipe-assistant:
     - SKILL.md: templates/x-ipe-assistant.md
     - skill-meta.md: templates/skill-meta-x-ipe-assistant.md
@@ -335,7 +335,7 @@ Each section includes: structural overview, invocation model, state management, 
 | Agent selects "dao" type | Warning displayed, redirected to "assistant" template |
 | Knowledge skill with no operations | Template includes comment: "At least one operation required" |
 | Existing `x-ipe-dao-*` skills scanned | Still discovered via backward-compatible pattern |
-| skill-meta template missing for knowledge | SKILL.md notes "N/A" — skill-meta for knowledge deferred to follow-up |
+| skill-meta template for knowledge | SKILL.md references skill-meta-x-ipe-knowledge.md template (added via CR-001) |
 
 ### AC-to-Component Traceability
 
@@ -356,3 +356,4 @@ Each section includes: structural overview, invocation model, state management, 
 | Date | Phase | Change Summary |
 |------|-------|----------------|
 | 2026-04-15 | Initial Design | Initial technical design created for FEATURE-059-A. 6 deliverables: knowledge template, assistant template, skill-creator update, custom instructions update, comparison doc, DAO deprecation. Program type: skills. |
+| 2026-04-16 | CR-001 | Added skill-meta-x-ipe-knowledge.md template. Updated D3 type table (N/A → template path), selection logic, and edge cases. |

@@ -1,7 +1,7 @@
 # [RETIRED by EPIC-047] Technical Design: Decision Making Tool Skill
 
 > Feature ID: FEATURE-044-A | Version: v1.0 | Last Updated: 03-06-2026
-> Status: **RETIRED** — Superseded by EPIC-047 (`x-ipe-dao-end-user-representative`)
+> Status: **RETIRED** — Superseded by EPIC-047 (`x-ipe-assistant-user-representative-Engineer`)
 
 > ⚠️ **RETIRED:** This technical design is superseded by EPIC-047 (DAO End-User Human Proxy Layer).
 > See: [FEATURE-047-A technical-design](x-ipe-docs/requirements/EPIC-047/FEATURE-047-A/technical-design.md)

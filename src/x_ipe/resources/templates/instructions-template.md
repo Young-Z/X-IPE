@@ -6,10 +6,10 @@
 
 **When:** Receiving ANY user message (command, question, feedback, approval)
 **Then:**
-1. **EVERY user message MUST be processed through `x-ipe-dao-end-user-representative` before any other action.**
+1. **EVERY user message MUST be processed through `x-ipe-assistant-user-representative-Engineer` before any other action.**
    - This is the universal gateway. No matter what the user says — a command, a question, feedback, approval — the message flows through the human representative skill first. The DAO interprets the message, selects a disposition, and the agent acts on that structured output.
 2. Model Requirement
-   - When `x-ipe-dao-end-user-representative` is delegated to a sub-agent (e.g., via the `task` tool), **use the most capable (premium) LLM model available** (e.g., `model: "claude-opus-4.6"`). The 7-step backbone requires nuanced reasoning — weighing three perspectives, analyzing gains/losses, scenario planning — that fast/cheap models cannot reliably handle. If running inline (not as a sub-agent), the main agent's model is used automatically.
+   - When `x-ipe-assistant-user-representative-Engineer` is delegated to a sub-agent (e.g., via the `task` tool), **use the most capable (premium) LLM model available** (e.g., `model: "claude-opus-4.6"`). The 7-step backbone requires nuanced reasoning — weighing three perspectives, analyzing gains/losses, scenario planning — that fast/cheap models cannot reliably handle. If running inline (not as a sub-agent), the main agent's model is used automatically.
 3. Why DAO-First Matters
    - **Consistent interpretation** — Every message gets structured analysis, not ad-hoc pattern matching
    - **Context-aware routing** — DAO considers the current task, feature, and workflow state when interpreting
@@ -39,7 +39,7 @@
 ### 🚫 HARD GATE: No `edit` / `create` Tool Calls Without a Loaded Skill
 
 Before calling **any** file-editing tool (`edit`, `create`, or writing code via `bash`), you MUST have:
-1. ✅ Processed the message through `x-ipe-dao-end-user-representative` (disposition = `instruction`)
+1. ✅ Processed the message through `x-ipe-assistant-user-representative-Engineer` (disposition = `instruction`)
 2. ✅ Classified the request into a task-based skill
 3. ✅ Created a task via `x-ipe-tool-task-board-manager`
 4. ✅ Loaded the corresponding skill (via `skill` tool or by reading its `SKILL.md`)
@@ -92,7 +92,7 @@ If ANY of these are missing → **STOP. Do not touch code.**
 
 **Before doing ANY work**, the agent MUST:
 
-1. **Process message through DAO** — call `x-ipe-dao-end-user-representative` to interpret user intent
+1. **Process message through DAO** — call `x-ipe-assistant-user-representative-Engineer` to interpret user intent
 2. **Classify the work** into a task-based skill using auto-discovery (scan `.github/skills/x-ipe-task-based-*/`)
 3. **Create task via x-ipe-tool-task-board-manager** via `x-ipe-tool-task-board-manager` skill ← **BLOCKING**
 4. **Load the corresponding skill** from `.github/skills/` folder
@@ -122,7 +122,7 @@ BLOCKING: Do NOT maintain a hardcoded registry. Skills are auto-discovered.
 **Before touching ANY code or making ANY changes, ask yourself:**
 
 ```
-0. Did I process this message through DAO? → If NO, STOP and call x-ipe-dao-end-user-representative
+0. Did I process this message through DAO? → If NO, STOP and call x-ipe-assistant-user-representative-Engineer
 1. What task-based skill is this? → Scan `.github/skills/x-ipe-task-based-*/` descriptions
 2. Did I create a task on the task board? → If NO, STOP and create it
 3. Did I load the corresponding skill? → If NO, STOP and load it
@@ -151,7 +151,7 @@ BLOCKING: Do NOT maintain a hardcoded registry. Skills are auto-discovered.
 - ❌ Refactoring code without using `x-ipe-task-based-code-refactor` skill
 
 **Required Actions:**
-- ✅ Always process user messages through `x-ipe-dao-end-user-representative` FIRST
+- ✅ Always process user messages through `x-ipe-assistant-user-representative-Engineer` FIRST
 - ✅ Always create task via x-ipe-tool-task-board-manager BEFORE starting work
 - ✅ Always identify task-based skill first
 - ✅ Always load and follow the corresponding skill

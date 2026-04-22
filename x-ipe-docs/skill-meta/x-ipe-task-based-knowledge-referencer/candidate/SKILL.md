@@ -26,7 +26,7 @@ BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skil
 - `x-ipe-tool-reference-user-manual` is **OPTIONAL** — only called when a user manual KB exists AND the query is about how-to/instructions
 - Results are ranked by cross-method hit count: files found by more search methods rank higher
 
-IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-interact"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer.
+IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-interact"`, NEVER stop to ask the human. Instead, call `x-ipe-assistant-user-representative-Engineer` to get the answer.
 
 ---
 
@@ -229,7 +229,7 @@ BLOCKING: Step 5.4 must not run until steps 5.1, 5.2, and 5.3 (if applicable) ar
         Collect the full context and task_completion_output from this skill execution.
 
         IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-          → Invoke x-ipe-dao-end-user-representative with:
+          → Invoke x-ipe-assistant-user-representative-Engineer with:
             type: "routing"
             completed_skill_output: {full task_completion_output YAML from this skill}
             next_task_based_skill: "{from output}"

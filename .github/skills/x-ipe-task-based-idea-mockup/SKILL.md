@@ -26,7 +26,7 @@ CRITICAL: Focus ONLY on UI/UX presentation -- ignore all tech stack mentions. Se
 
 **Workflow Mode:** When `execution_mode == "workflow-mode"`, the completion step MUST run the workflow update script via bash: `python3 .github/skills/x-ipe-tool-x-ipe-app-interactor/scripts/workflow_update_action.py` with `workflow_name` from `workflow.name` input, `action` from `workflow.action` input, `status: "done"`, and a `deliverables` keyed dict using ONLY the extract tags defined in `workflow-template.json` for this action (format: `{"tag-name": "path/to/file"}`). Do NOT pass a flat list of file paths. Verify the script exits with code 0 before marking the task complete.
 
-IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-interact"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
+IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-interact"`, NEVER stop to ask the human. Instead, call `x-ipe-assistant-user-representative-Engineer` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
 
 ---
 
@@ -197,7 +197,7 @@ BLOCKING: Step 5.1 halts if no tools available AND human declines manual mode.
 
            Response source (based on interaction_mode):
            IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-             → Resolve via x-ipe-dao-end-user-representative
+             → Resolve via x-ipe-assistant-user-representative-Engineer
            ELSE (interact-with-human/dao-represent-human-to-interact-for-questions-in-skill):
              → Ask human for selection
         2. Validate folder exists on disk
@@ -382,7 +382,7 @@ BLOCKING: Step 5.1 halts if no tools available AND human declines manual mode.
   <phase_6 name="继续执行（Continue Execute）">
     <step_6_1>
       <name>Decide Next Action</name>
-      <action>Collect task_completion_output. IF interaction_mode == "dao-represent-human-to-interact": invoke x-ipe-dao-end-user-representative with type: "routing", completed_skill_output, next_task_based_skill. ELSE: present next task suggestion to human.</action>
+      <action>Collect task_completion_output. IF interaction_mode == "dao-represent-human-to-interact": invoke x-ipe-assistant-user-representative-Engineer with type: "routing", completed_skill_output, next_task_based_skill. ELSE: present next task suggestion to human.</action>
       <constraints>
         - BLOCKING (manual): Human MUST confirm or redirect
         - BLOCKING (auto): Auto-select next task via DAO after DoD verification

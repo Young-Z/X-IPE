@@ -28,9 +28,9 @@
 
 FEATURE-047-B delivers two workstreams:
 
-1. **Semantic DAO Logging** — Add logging steps to the `x-ipe-dao-end-user-representative` skill so every DAO interaction is recorded as a semantic log entry under `x-ipe-docs/dao/`. Log files are grouped by semantic task type (e.g., `decisions_made_feature_refinement.md`) with DAO deciding whether to merge into an existing file or create a new one.
+1. **Semantic DAO Logging** — Add logging steps to the `x-ipe-assistant-user-representative-Engineer` skill so every DAO interaction is recorded as a semantic log entry under `x-ipe-docs/dao/`. Log files are grouped by semantic task type (e.g., `decisions_made_feature_refinement.md`) with DAO deciding whether to merge into an existing file or create a new one.
 
-2. **Workflow Migration** — Replace all call sites that currently invoke `x-ipe-tool-decision-making` with calls to `x-ipe-dao-end-user-representative` using the new `message_context` input contract. After migration, delete the old `x-ipe-tool-decision-making` skill entirely and remove the legacy `x-ipe-docs/decision_made_by_ai.md` log file from the active design.
+2. **Workflow Migration** — Replace all call sites that currently invoke `x-ipe-tool-decision-making` with calls to `x-ipe-assistant-user-representative-Engineer` using the new `message_context` input contract. After migration, delete the old `x-ipe-tool-decision-making` skill entirely and remove the legacy `x-ipe-docs/decision_made_by_ai.md` log file from the active design.
 
 Both workstreams preserve the existing `process_preference.auto_proceed` 3-mode behavior (manual / stop_for_question / auto).
 
@@ -61,7 +61,7 @@ Both workstreams preserve the existing `process_preference.auto_proceed` 3-mode 
 **Acceptance Criteria:**
 
 - [ ] AC-047-B.9: The `x-ipe-tool-decision-making` skill folder (`.github/skills/x-ipe-tool-decision-making/`) is deleted entirely.
-- [ ] AC-047-B.10: All references to `x-ipe-tool-decision-making` in task-based skills, workflow executor, templates, and guidelines are replaced with `x-ipe-dao-end-user-representative`.
+- [ ] AC-047-B.10: All references to `x-ipe-tool-decision-making` in task-based skills, workflow executor, templates, and guidelines are replaced with `x-ipe-assistant-user-representative-Engineer`.
 - [ ] AC-047-B.11: The call pattern in each migrated skill uses the `message_context` input contract (with `source`, `messages`, `calling_skill`, `task_id`, etc.) instead of the old `decision_context` + `problems` pattern.
 - [ ] AC-047-B.12: References to `decision_made_by_ai.md` in skill files are replaced with DAO semantic logging references.
 - [ ] AC-047-B.13: The `x-ipe-docs/decision_made_by_ai.md` file reference is removed from the active design (skills, templates, guidelines).
@@ -72,7 +72,7 @@ Both workstreams preserve the existing `process_preference.auto_proceed` 3-mode 
 
 - [ ] AC-047-B.14: In `manual` mode, skills continue to ask the human directly (no DAO call) — behavior unchanged.
 - [ ] AC-047-B.15: In `stop_for_question` mode, skills continue to ask the human directly — behavior unchanged.
-- [ ] AC-047-B.16: In `auto` mode, skills call `x-ipe-dao-end-user-representative` instead of `x-ipe-tool-decision-making` — the DAO response drives the same branching logic.
+- [ ] AC-047-B.16: In `auto` mode, skills call `x-ipe-assistant-user-representative-Engineer` instead of `x-ipe-tool-decision-making` — the DAO response drives the same branching logic.
 - [ ] AC-047-B.17: The DAO disposition (`answer`, `clarification`, `reframe`, `critique`, `instruction`, `approval`, `pass_through`) maps correctly to the skill's branching (proceed / revise / escalate).
 - [ ] AC-047-B.18: No task-based skill changes behavior in `manual` or `stop_for_question` modes after migration.
 
@@ -80,8 +80,8 @@ Both workstreams preserve the existing `process_preference.auto_proceed` 3-mode 
 
 **Acceptance Criteria:**
 
-- [ ] AC-047-B.19: The `x-ipe-task-based.md` template references `x-ipe-dao-end-user-representative` instead of `x-ipe-tool-decision-making`.
-- [ ] AC-047-B.20: The `skill-general-guidelines-v2.md` references `x-ipe-dao-end-user-representative` instead of `x-ipe-tool-decision-making`.
+- [ ] AC-047-B.19: The `x-ipe-task-based.md` template references `x-ipe-assistant-user-representative-Engineer` instead of `x-ipe-tool-decision-making`.
+- [ ] AC-047-B.20: The `skill-general-guidelines-v2.md` references `x-ipe-assistant-user-representative-Engineer` instead of `x-ipe-tool-decision-making`.
 - [ ] AC-047-B.21: The template's auto-proceed call example uses the `message_context` input contract.
 
 ---
@@ -100,7 +100,7 @@ Both workstreams preserve the existing `process_preference.auto_proceed` 3-mode 
 
 ### Migration
 
-- **FR-047-B.8:** (FR-047.21) All call sites invoking `x-ipe-tool-decision-making` MUST migrate to `x-ipe-dao-end-user-representative`.
+- **FR-047-B.8:** (FR-047.21) All call sites invoking `x-ipe-tool-decision-making` MUST migrate to `x-ipe-assistant-user-representative-Engineer`.
 - **FR-047-B.9:** (FR-047.22) Within-task human-required touchpoints in `auto` mode MUST use DAO.
 - **FR-047-B.10:** (FR-047.23) Inter-task routing remains governed by `process_preference.auto_proceed` — DAO replaces only the decision-oriented human substitution mechanism.
 - **FR-047-B.11:** (FR-047.24) All task-based skills MUST preserve current manual / stop_for_question / auto behavior contracts after migration.
@@ -163,9 +163,9 @@ CALL x-ipe-tool-decision-making with decision_context:
       options: ["option A", "option B"]
 ```
 
-**New pattern (x-ipe-dao-end-user-representative):**
+**New pattern (x-ipe-assistant-user-representative-Engineer):**
 ```yaml
-CALL x-ipe-dao-end-user-representative with:
+CALL x-ipe-assistant-user-representative-Engineer with:
   message_context:
     source: "ai"
     calling_skill: "{skill-name}"

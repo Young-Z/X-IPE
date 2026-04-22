@@ -24,8 +24,8 @@ class TestRepoLocalInstructions:
         return self.INSTRUCTIONS_PATH.read_text(encoding="utf-8")
 
     def test_mentions_dao_skill(self):
-        """Instructions still reference x-ipe-dao-end-user-representative for within-skill use."""
-        assert "x-ipe-dao-end-user-representative" in self._read()
+        """Instructions still reference x-ipe-assistant-user-representative-Engineer for within-skill use."""
+        assert "x-ipe-assistant-user-representative-Engineer" in self._read()
 
     def test_no_dao_first_mandate(self):
         """Default (dao_intercept=false): no DAO-first interception mandate."""
@@ -68,7 +68,7 @@ class TestPackagedEnglishInstructions:
 
     def test_mentions_dao_skill(self):
         """AC-047-C.5: Packaged EN instructions reference DAO."""
-        assert "x-ipe-dao-end-user-representative" in self._read()
+        assert "x-ipe-assistant-user-representative-Engineer" in self._read()
 
     def test_uses_process_preference(self):
         """AC-047-C.7: Uses process_preference.interaction_mode, not require_human_review."""
@@ -80,8 +80,8 @@ class TestPackagedEnglishInstructions:
         repo_local = (ROOT / ".github" / "copilot-instructions.md").read_text(encoding="utf-8")
         packaged = self._read()
         # Both reference DAO skill (within-skill use)
-        assert "x-ipe-dao-end-user-representative" in repo_local
-        assert "x-ipe-dao-end-user-representative" in packaged
+        assert "x-ipe-assistant-user-representative-Engineer" in repo_local
+        assert "x-ipe-assistant-user-representative-Engineer" in packaged
         # But only the DAO variant has the interception mandate
         assert "DAO-First" in packaged
         assert "DAO-First" not in repo_local
@@ -97,7 +97,7 @@ class TestPackagedChineseInstructions:
 
     def test_mentions_dao_skill(self):
         """AC-047-C.6: Packaged ZH instructions reference DAO."""
-        assert "x-ipe-dao-end-user-representative" in self._read()
+        assert "x-ipe-assistant-user-representative-Engineer" in self._read()
 
     def test_has_auto_mode_guidance(self):
         """AC-047-C.6: ZH instructions have auto mode DAO guidance."""
@@ -144,7 +144,7 @@ class TestNoDaoEnglishInstructions:
     def test_mentions_dao_for_within_skill(self):
         """No-DAO variant still mentions DAO in within-skill context."""
         content = self._read()
-        assert "x-ipe-dao-end-user-representative" in content
+        assert "x-ipe-assistant-user-representative-Engineer" in content
 
     def test_no_internal_backbone_exposed(self):
         """No 7-step backbone in no-DAO instructions."""

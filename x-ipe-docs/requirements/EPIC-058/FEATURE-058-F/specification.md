@@ -1,9 +1,9 @@
 # Feature Specification: Graph Search & AI Agent Integration
 
 > Feature ID: FEATURE-058-F  
-> Version: v1.2  
+> Version: v1.3  
 > Status: Refined  
-> Last Updated: 04-13-2026
+> Last Updated: 04-17-2026
 
 ## Version History
 
@@ -12,6 +12,7 @@
 | v1.0 | 04-09-2026 | Initial specification |
 | v1.1 | 04-13-2026 | [CR-001](./CR-001.md): Added WebSocket callback from AI Agent search to graph viewer — new ACs AC-058F-09 (Socket Callback), AC-058F-10 (Frontend Listener), AC-058F-11 (Callback Script). Updated FR-4, added FR-6/FR-7. Added BR-6. |
 | v1.2 | 04-13-2026 | Refinement pass: Added AC-058F-09e/09f (payload validation, endpoint auth), AC-058F-10f/10g/10h (reconnection, loading indicator, dedup), AC-058F-11d (logging). Clarified socket scoping as per-port broadcast. |
+| v1.3 | 04-17-2026 | [CR-002](./CR-002.md): Added search-context graph synthesis — virtual hub node with star topology when BFS results span disconnected graph files. New ACs AC-058F-12 (Search-Context Graph Synthesis), updated AC-058F-10c (virtual node exception). Added US-8, FR-8, BR-7. Updated edge case table. |
 
 ## Linked Mockups
 
@@ -44,6 +45,8 @@
 **US-6:** As a knowledge worker, I want to click a result in the search dropdown to pan the canvas to that node and open its detail panel, so that I can inspect the result quickly.
 
 **US-7:** *(Added by [CR-001](./CR-001.md))* As a knowledge worker, I want the AI agent's search results to automatically appear on the graph canvas (highlighting matched and related nodes), so that I can see the visual context of what the agent found without manually re-searching.
+
+**US-8:** *(Added by [CR-002](./CR-002.md))* As a developer, I want search results that span multiple disconnected graph files to be connected by a virtual hub node on the canvas, so that I can see at a glance that these entities are all related through my search term — even when no pre-existing relations link them.
 
 ## Acceptance Criteria
 
@@ -135,7 +138,7 @@
 |-------|-------------------------------|-----------|
 | AC-058F-10a | GIVEN the user clicks "Search with AI Agent" WHEN the console opens THEN the graph viewer subscribes to `ontology_search_result` SocketIO events for the current session | UI |
 | AC-058F-10b | GIVEN the graph viewer is subscribed AND an `ontology_search_result` event arrives WHEN the event contains valid search data THEN the canvas calls `highlightSubgraph(allNodeIds, directMatchIds)` to highlight the agent's results on the graph | UI |
-| AC-058F-10c | GIVEN the graph viewer is subscribed AND an `ontology_search_result` event arrives WHEN the subgraph contains nodes not currently loaded in the canvas THEN unmatched node IDs are silently ignored (only nodes already in the canvas are highlighted) | UI |
+| AC-058F-10c | GIVEN the graph viewer is subscribed AND an `ontology_search_result` event arrives WHEN the subgraph contains entity node IDs not currently loaded in the canvas THEN unmatched entity node IDs are silently ignored (only nodes already in the canvas are highlighted) — EXCEPT virtual nodes (IDs prefixed `__search_hub__`) which are dynamically added to the canvas via `cy.add()` *(Updated by [CR-002](./CR-002.md))* | UI |
 | AC-058F-10d | GIVEN a previous agent search highlight is active on the canvas WHEN a new `ontology_search_result` event arrives THEN the previous highlighting is cleared and replaced with the new search results | UI |
 | AC-058F-10e | GIVEN the graph viewer is subscribed WHEN the viewer component is closed or destroyed THEN the socket listener is unsubscribed (no memory leaks or stale listeners) | UI |
 | AC-058F-10f | GIVEN the socket connection drops mid-session WHEN the Flask server remains reachable THEN the frontend automatically attempts to reconnect within 5 seconds AND if reconnection succeeds, subsequent agent search results are still received | Integration |
@@ -150,6 +153,17 @@
 | AC-058F-11b | GIVEN `ui-callback.py` is invoked without a valid `--session-id` WHEN it attempts to emit THEN it exits with a non-zero code and logs an error (does not crash silently) | Unit |
 | AC-058F-11c | GIVEN `ui-callback.py` is invoked AND the Flask server is not reachable WHEN it attempts to emit THEN it retries once, then exits with a warning log (does not block the AI agent session) | Integration |
 | AC-058F-11d | GIVEN `ui-callback.py` is invoked WHEN emission succeeds or fails THEN it logs: timestamp, session_id, query summary, result count, and emit status (success/retry/fail) to stdout | Unit |
+
+### AC-058F-12: Search-Context Graph Synthesis *(Added by [CR-002](./CR-002.md))*
+
+| AC ID | Criterion (Given/When/Then) | Test Type |
+|-------|-------------------------------|-----------|
+| AC-058F-12a | GIVEN a BFS search matches entities from multiple graph files WHEN those matched entities have no pre-existing edges connecting them (disconnected components in the subgraph) THEN a virtual hub node is injected into the subgraph with ID `__search_hub__{query}`, label set to the search query, and `node_type` set to `search_hub` | API |
+| AC-058F-12b | GIVEN a virtual hub node is created WHEN the subgraph is returned THEN virtual edges with relation `search_match` connect the hub to each direct-match entity node (star topology) AND these edges are included in `subgraph.edges` | API |
+| AC-058F-12c | GIVEN a BFS search matches entities that are already connected (single connected component in the subgraph) WHEN the subgraph is returned THEN no virtual hub node or edges are injected (subgraph is returned as-is) | API |
+| AC-058F-12d | GIVEN the subgraph contains a virtual hub node WHEN the frontend receives the subgraph THEN the canvas renders the hub node at the centroid of matched nodes with a distinct visual style (dashed border, search icon, `search-hub` CSS class) AND virtual edges are rendered as dashed lines | UI |
+| AC-058F-12e | GIVEN a search highlight with a virtual hub is active WHEN the user clears the search or starts a new search THEN all virtual nodes and edges are removed from the Cytoscape canvas (no leftover virtual elements) | UI |
+| AC-058F-12f | GIVEN the subgraph response WHEN it contains virtual nodes THEN the `virtual_nodes` field is an array of objects `[{ id, label, node_type: "search_hub" }]` providing metadata for the frontend to render virtual elements | API |
 
 ## Functional Requirements
 
@@ -178,6 +192,9 @@ A new SocketIO handler module (`ontology_handlers.py`) registers the `ontology_s
 
 **FR-7: UI Callback Script** *(Added by [CR-001](./CR-001.md))*  
 A new `ui-callback.py` script in `.github/skills/x-ipe-tool-ontology/scripts/` accepts search results (from `search.py`) and a session ID, then emits them to the Flask server's SocketIO channel. This script is called by the AI agent (or by `search.py` itself) after a search completes. It transforms the raw search output into the Cytoscape-compatible format expected by `highlightSubgraph()` and emits via HTTP POST to an internal callback endpoint or direct SocketIO client emission.
+
+**FR-8: Search-Context Graph Synthesis** *(Added by [CR-002](./CR-002.md))*  
+After BFS search completes and the subgraph is assembled, a connectivity check determines whether direct-match entities form a single connected component or multiple disconnected components. If disconnected, a virtual hub node (ID: `__search_hub__{query}`, node_type: `search_hub`) is created and connected to each direct-match entity via virtual `search_match` edges (star topology). The virtual hub and edges are injected into the `subgraph` response alongside a `virtual_nodes` metadata array. The frontend detects virtual nodes by ID prefix (`__search_hub__`), adds them to the Cytoscape canvas via `cy.add()` with a distinct dashed-border style, and removes them on `clearHighlight()`.
 
 ## Non-Functional Requirements
 
@@ -241,12 +258,14 @@ A new `ui-callback.py` script in `.github/skills/x-ipe-tool-ontology/scripts/` a
 
 **BR-6:** *(Added by [CR-001](./CR-001.md))* The socket callback delivers **search results** (read-only, from the same `.ontology/` data at rest) to the graph viewer — it does NOT inject new graph data or modify the ontology. This is distinct from real-time data sync (which remains out of scope per FEATURE-058-E BR-2).
 
+**BR-7:** *(Added by [CR-002](./CR-002.md))* Virtual hub nodes are ephemeral canvas elements — they exist ONLY during an active search highlight and are removed when the search is cleared. They are NOT persisted to the ontology graph data, do NOT appear in entity counts, and do NOT affect BFS traversal of subsequent searches.
+
 ## Edge Cases & Constraints
 
 | Scenario | Expected Behavior |
 |----------|-------------------|
 | Search with no graphs selected | Empty results; search bar shows subtle hint "Select graphs to search" |
-| BFS search on disconnected graph | BFS expansion stays within the connected component; disconnected nodes are not reached |
+| BFS search on disconnected graph | BFS expansion stays within the connected component; disconnected nodes are not reached. *(CR-002)* If direct-match entities span disconnected components, a virtual hub node connects them via star topology. |
 | Search while graph data is still loading | Show loading spinner in dropdown; debounce prevents premature API call |
 | Very long search query (>200 chars) | No client-side truncation; API handles gracefully |
 | AI Agent button clicked but Console not available | Show toast notification "Console not available" |
@@ -277,6 +296,9 @@ A new `ui-callback.py` script in `.github/skills/x-ipe-tool-ontology/scripts/` a
 - *(CR-001, Refinement)* Socket scoping is **per-port broadcast**: `ui-callback.py` POSTs to `http://localhost:{port}/api/internal/ontology/callback` (port from `.x-ipe.yaml`, default 5858). The server emits `ontology_search_result` to all connected clients on that server instance. No room-based isolation — all graph viewer instances on the same server see the result.
 - *(CR-001, Refinement)* The internal callback endpoint (`/api/internal/ontology/callback`) must validate an internal authorization token to prevent unauthorized result injection. The token can be a shared secret configured in `.x-ipe.yaml` or an environment variable.
 - *(CR-001, Refinement)* Each `ontology_search_result` event payload should include a `request_id` (UUID) for deduplication. The frontend tracks the latest `request_id` and discards out-of-order arrivals from earlier searches.
+- *(CR-002)* Disconnected-component detection in `search.py` should use a simple union-find or BFS reachability check on the subgraph's direct-match nodes. Only direct-match nodes are checked — BFS-neighbor connectivity is not relevant for hub injection.
+- *(CR-002)* Virtual hub node ID format is `__search_hub__{query}` (double-underscore prefix/suffix) to avoid collision with real entity IDs. The `virtual_nodes` array in the subgraph response provides metadata (label, node_type) for the frontend to render without additional lookups.
+- *(CR-002)* The frontend should use `cy.add()` to inject virtual hub nodes/edges and `cy.remove()` on `clearHighlight()`. Virtual elements should have a `virtual: true` data flag for easy batch removal.
 
 ## Open Questions
 

@@ -45,7 +45,7 @@ When `mockup_list` input is needed, resolve in this order:
 
 MANDATORY: When mockup_list is provided AND scope includes [Frontend] or [Full Stack], the agent MUST open, analyze, extract UI requirements, and reference mockups in Part 2.
 
-IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-interact"`, NEVER stop to ask the human. Instead, call `x-ipe-dao-end-user-representative` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
+IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-interact"`, NEVER stop to ask the human. Instead, call `x-ipe-assistant-user-representative-Engineer` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
 
 ---
 
@@ -298,7 +298,7 @@ BLOCKING (auto): Proceed automatically after DoD verification.
         3. IF unresolved_questions is EMPTY → design is validated, proceed
         4. IF unresolved_questions is NON-EMPTY:
            IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-             → Invoke x-ipe-dao-end-user-representative with specific questions list
+             → Invoke x-ipe-assistant-user-representative-Engineer with specific questions list
            ELSE:
              → Present ONLY the specific questions to human (not "review the whole design")
            → Incorporate answers, revise affected sections
@@ -344,7 +344,7 @@ BLOCKING (auto): Proceed automatically after DoD verification.
         Collect the full context and task_completion_output from this skill execution.
 
         IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-          → Invoke x-ipe-dao-end-user-representative with:
+          → Invoke x-ipe-assistant-user-representative-Engineer with:
             type: "routing"
             completed_skill_output: {full task_completion_output YAML from this skill}
             next_task_based_skill: "{from output}"
