@@ -421,11 +421,11 @@ BLOCKING: All input fields with non-trivial initialization MUST be documented he
 
 ### Operation: start_active_tracking
 
-> **Contract (CR-001):**
+> **Contract (CR-002):**
 > - **Input:** target_app: string (URL), session_config (same as start_tracking), active_config: { polling_interval_s: int (default 5), auto_screenshot: bool (default true), auto_reinject: bool (default true) }
-> - **Output:** tracking_session_id: string, polling_started: true, sub_op_contract: { name: "poll_tick", interval_s: int, until: "stop_tracking called for tracking_session_id" }
+> - **Output:** tracking_session_id: string, observation_payload: dict, analysis_triggered: true when toolbar Analysis is clicked
 > - **Writes To:** x-ipe-docs/.mimicked/{session_id}/ (session.json + track-list.json + screenshots/)
-> - **Constraints:** Reuses start_tracking's injection; persists active_config to session.json so poll_tick can read it; seeds navigation_history with target_app; returns control to agent — does NOT block or spawn subprocess; agent owns the 5s loop timing.
+> - **Constraints:** Reuses start_tracking's injection; persists active_config to session.json; seeds navigation_history with target_app; this operation owns the 5s polling loop until toolbar Analysis is clicked; does NOT spawn subprocesses; returns final observations to the Knowledge Librarian DAO.
 
 **When:** Orchestrator needs continuous capture with auto-reinject + auto-screenshot for sessions longer than the in-page buffer can hold, or where URL changes are expected.
 
@@ -437,6 +437,7 @@ BLOCKING: All input fields with non-trivial initialization MUST be documented he
       1. READ input context: target_app, session_config, active_config
       2. APPLY defaults: polling_interval_s → 5, auto_screenshot → true, auto_reinject → true
       3. DELEGATE to start_tracking phases 1-3 to: validate input, navigate, inject IIFE, generate session_id, start recording
+      4. LOAD PostProcessor from scripts/post_processor.py for final consolidation after Analysis
     </action>
     <output>Session created and IIFE injected (start_tracking semantics)</output>
   </phase_1>
@@ -457,17 +458,33 @@ BLOCKING: All input fields with non-trivial initialization MUST be documented he
     <action>
       1. CALL `scripts/active_tracking.py::init_session` with active_config to:
          - Create/update session.json with active_config + navigation_history seeded with target_app
-      2. PREPARE poll_tick contract for the agent (interval_s, helper script paths)
+      2. INITIALIZE tick_n = 1 and last_event_count = 0 from session.json
+      3. ENTER mimic-owned polling loop:
+         a. Wait active_config.polling_interval_s seconds between ticks (default 5)
+         b. Invoke internal sub-operation poll_tick(tracking_session_id, tick_n)
+         c. Store returned event_count as last_event_count for the next tick
+         d. IF poll_tick returns analysis_requested=true OR session.json::analysis_requested=true → BREAK loop
+         e. ELSE increment tick_n and continue polling
     </action>
-    <output>session.json updated with active_config + navigation_history; poll_tick contract ready</output>
+    <constraints>
+      - CRITICAL: Polling MUST continue until toolbar Analysis is clicked, unless an unrecoverable error is returned.
+      - CRITICAL: Knowledge Librarian DAO does NOT own or drive per-tick polling; it only delegates to start_active_tracking and receives the final payload.
+    </constraints>
+    <output>session.json updated; mimic-owned polling loop runs until Analysis request detected</output>
   </phase_3>
 
   <phase_4 name="明辨之 — Discern Clearly">
     <action>
-      1. VERIFY session.json contains active_config and navigation_history
-      2. VERIFY IIFE guard is set on page (window.__xipeBehaviorTrackerInjected === true)
+      1. WHEN Analysis request is detected:
+         a. evaluate_script(active_tracking.build_stop_script()) to stop tracking and collect final in-page buffer
+         b. merge final events into track-list.json
+         c. Run PostProcessor.process(events, session_meta) to create observation_summary
+         d. Build final payload with active_tracking.build_observation_payload(track_list_path, observation_summary)
+         e. Mark handoff consumed with active_tracking.consume_analysis_request(session_dir)
+         f. evaluate_script(active_tracking.build_reset_analysis_ui_script())
+      2. VERIFY track-list.json exists and final payload contains event_count, observation_summary, observations, raw_events, and writes_to
     </action>
-    <output>Active session setup verified</output>
+    <output>Analysis requested, tracker stopped, events consolidated, final DAO payload built</output>
   </phase_4>
 
   <phase_5 name="笃行之 — Practice Earnestly">
@@ -477,18 +494,21 @@ BLOCKING: All input fields with non-trivial initialization MUST be documented he
          - operation: "start_active_tracking"
          - result: {
              tracking_session_id,
-             polling_started: true,
-             sub_op_contract: {
-               name: "poll_tick",
-               interval_s: active_config.polling_interval_s,
-               until: "stop_tracking called for tracking_session_id"
+             analysis_triggered: true,
+             observation_payload: {
+               tracking_session_id,
+               event_count,
+               observation_summary,
+               observations,
+               raw_events,
+               writes_to
              }
            }
-         - writes_to: "x-ipe-docs/.mimicked/{tracking_session_id}/"
-         - errors: []
-      2. AGENT INSTRUCTION: Begin polling loop — every interval_s seconds, call poll_tick(tracking_session_id, tick_n) where tick_n is monotonic from 1. Continue until stop_tracking returns successfully OR poll_tick returns error TRACKER_LOST with auto_reinject=false.
+          - writes_to: "x-ipe-docs/.mimicked/{tracking_session_id}/"
+          - errors: []
+       2. RETURN this operation_output to the caller (typically x-ipe-assistant-knowledge-librarian-DAO) for downstream knowledge processing.
     </action>
-    <output>Active tracking ready; agent owns the 5s timing loop</output>
+    <output>Active tracking complete; final observations returned to DAO caller</output>
   </phase_5>
 
 </operation>
@@ -496,13 +516,13 @@ BLOCKING: All input fields with non-trivial initialization MUST be documented he
 
 ### Operation: poll_tick
 
-> **Contract (CR-001):**
+> **Contract (CR-002):**
 > - **Input:** tracking_session_id: string, tick_n: int (monotonic counter from agent, starts at 1)
-> - **Output:** event_count: int, new_events: bool, url_changed: bool, screenshot_path: string?, reinjected: bool
+> - **Output:** event_count: int, new_events: bool, url_changed: bool, screenshot_path: string?, reinjected: bool, analysis_requested: bool
 > - **Writes To:** x-ipe-docs/.mimicked/{session_id}/ (track-list.json + screenshots/tick-{n}.png + session.json::navigation_history)
-> - **Constraints:** Single accumulating track-list.json (NO per-tick JSON files); screenshots only on new events; URL-change reinject if active_config.auto_reinject=true; if IIFE not injected AND auto_reinject=false → error TRACKER_LOST.
+> - **Constraints:** Internal sub-operation for start_active_tracking; single accumulating track-list.json (NO per-tick JSON files); screenshots only on new events; URL-change reinject if active_config.auto_reinject=true; if IIFE not injected AND auto_reinject=false → error TRACKER_LOST; Analysis requests are sticky in session.json until consumed by start_active_tracking.
 
-**When:** Invoked by orchestrating agent on each polling tick (every active_config.polling_interval_s seconds) after start_active_tracking returned `polling_started: true`.
+**When:** Invoked only by start_active_tracking on each internal polling tick (every active_config.polling_interval_s seconds) after the active tracking session starts.
 
 ```xml
 <operation name="poll_tick">
@@ -519,10 +539,12 @@ BLOCKING: All input fields with non-trivial initialization MUST be documented he
 
   <phase_2 name="审问之 — Inquire Thoroughly">
     <action>
-      1. evaluate_script(active_tracking.build_poll_script()) → get {events, eventCount, url, error?}
+      1. evaluate_script(active_tracking.build_poll_script()) → get {events, eventCount, url, analysisRequested, status, error?}
       2. IF error == "not_injected":
          - IF active_config.auto_reinject == false → return error TRACKER_LOST
          - ELSE → mark reinject_needed = true (handled in phase 3)
+      3. IF analysisRequested == true:
+         - active_tracking.mark_analysis_requested(session_dir)
     </action>
     <output>In-page poll completed; events + url collected (or reinject flagged)</output>
   </phase_2>
@@ -531,9 +553,9 @@ BLOCKING: All input fields with non-trivial initialization MUST be documented he
     <action>
       1. URL CHANGE HANDLING:
          IF active_config.auto_reinject AND active_tracking.detect_url_change(session_dir, current_url):
-           a. evaluate_script(active_tracking.build_clear_guard_script())
-           b. RE-INJECT IIFE (delegate to start_tracking's phase 3 injection logic)
-           c. active_tracking.record_navigation(session_dir, current_url)
+            a. evaluate_script(active_tracking.build_clear_guard_script())
+            b. RE-INJECT IIFE (delegate to start_tracking's phase 3 injection logic)
+            c. active_tracking.record_navigation(session_dir, current_url)
            d. SET reinjected = true
            e. SET url_changed = true
       2. EVENT MERGE:
@@ -577,12 +599,13 @@ BLOCKING: All input fields with non-trivial initialization MUST be documented he
              new_events: new_events_flag,
              url_changed: url_changed,
              reinjected: reinjected,
-             screenshot_path: screenshot_path_result
+             screenshot_path: screenshot_path_result,
+             analysis_requested: active_tracking.is_analysis_requested(session_dir)
            }
          - writes_to: "x-ipe-docs/.mimicked/{tracking_session_id}/"
          - errors: []
     </action>
-    <output>Tick complete; agent uses result.event_count as last_event_count for next tick</output>
+    <output>Tick complete; start_active_tracking uses result.event_count and result.analysis_requested to continue or consolidate</output>
   </phase_5>
 
 </operation>

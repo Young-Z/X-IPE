@@ -1,6 +1,6 @@
 # Technical Design: Layer 2 — Domain Skills (Constructors + Mimic + Ontology-Builder)
 
-> Feature ID: FEATURE-059-C | Version: v1.3 | Last Updated: 2026-04-27
+> Feature ID: FEATURE-059-C | Version: v1.4 | Last Updated: 2026-04-27
 
 ---
 
@@ -16,7 +16,8 @@
 | `x-ipe-knowledge-constructor-user-manual` | Domain expert for user manual construction (4 ops: framework, rubric, request_knowledge, fill_structure) | Absorbs `x-ipe-tool-knowledge-extraction-user-manual` | #knowledge #constructor #user-manual #domain-expert |
 | `x-ipe-knowledge-constructor-notes` | Domain expert for knowledge notes construction (same 4-op interface) | Absorbs `x-ipe-tool-knowledge-extraction-notes` | #knowledge #constructor #notes #domain-expert |
 | `x-ipe-knowledge-constructor-app-reverse-engineering` | Domain expert for RE reports (same 4-op interface, delegates to `x-ipe-tool-rev-eng-*`) | Absorbs `x-ipe-tool-knowledge-extraction-application-reverse-engineering` | #knowledge #constructor #reverse-engineering #domain-expert |
-| `x-ipe-knowledge-mimic-web-behavior-tracker` | Observe & record user behavior on websites via Chrome DevTools MCP. **CR-001:** adds `start_active_tracking` + `poll_tick` for agent-driven 5s polling, URL-change reinject, screenshot on new events. | Absorbs `x-ipe-tool-learning-behavior-tracker-for-web`, writes to `x-ipe-docs/.mimicked/` | #knowledge #mimic #behavior-tracker #chrome-devtools |
+| `x-ipe-knowledge-mimic-web-behavior-tracker` | Observe & record user behavior on websites via Chrome DevTools MCP. **CR-001:** adds active polling/reinject/screenshot support. **CR-002:** `start_active_tracking` owns polling until toolbar Analysis, consolidates observations, then returns payload to DAO. | Absorbs `x-ipe-tool-learning-behavior-tracker-for-web`, writes to `x-ipe-docs/.mimicked/` | #knowledge #mimic #behavior-tracker #chrome-devtools |
+| `x-ipe-assistant-knowledge-librarian-DAO` | Central knowledge pipeline router. **CR-002:** classifies behavior-learning requests as mimic tasks, delegates to mimic `start_active_tracking`, and consumes returned observations as gathered knowledge. | Integrates mimic observations into pipeline state | #assistant #dao #librarian #mimic-routing |
 | `x-ipe-knowledge-ontology-builder` | Build ontology graph (classes, instances, vocabulary) from source knowledge via iterative discover-critique-implement loop (single `build_ontology` op) | Absorbs build ops from retired `x-ipe-tool-ontology`, writes directly to `.ontology/` with `lifecycle` flag | #knowledge #ontology #builder #graph |
 | Deprecation/retirement | Add migration pointers to old extraction tools; retire redundant behavior tracker tool after CR-001 parity | Old extraction tools keep deprecation banners; behavior tracker tool removed | #deprecation #migration |
 
@@ -603,7 +604,7 @@ output:
   sub_op_contract:                  # Hands the agent the poll_tick contract
     name: poll_tick
     interval_s: 5
-    until: "stop_tracking called for tracking_session_id"
+    until: "stop_tracking called for tracking_session_id"  # Superseded by CR-002 for DAO-routed learning flows
 writes_to: x-ipe-docs/.mimicked/{session_id}/
 constraints:
   - Reuses start_tracking's injection logic (DRY)
@@ -638,7 +639,7 @@ constraints:
   - If IIFE not injected AND auto_reinject=false → error: TRACKER_LOST
 ```
 
-**stop_tracking interaction:** No changes. The existing op's stop sub-op terminates the in-page IIFE, which is the natural loop-exit signal — once the agent's next `poll_tick` returns `error: not_injected`, the agent exits its loop and post-processes the accumulated `track-list.json`.
+**[RETIRED by CR-002] stop_tracking interaction:** CR-001 treated `stop_tracking` / `TRACKER_LOST` as loop-exit signals. For DAO-routed behavior learning, this is superseded: `start_active_tracking` owns polling until the tracker toolbar **Analysis** button is clicked, then stops tracking, consolidates observations, and returns them to the Knowledge Librarian DAO. Direct/degraded callers may still use `stop_tracking`, but the supported learning flow is Analysis-button termination through `start_active_tracking`.
 
 **Session directory layout (active session):**
 ```
@@ -656,6 +657,227 @@ x-ipe-docs/.mimicked/{session_id}/
 - **Why poll_tick as separate sub-op?** Keeps `start_active_tracking` idempotent (single setup call) while making the per-tick contract explicit and testable in isolation.
 - **Why single `track-list.json` not per-tick files?** Matches old skill's proven format; downstream `post_processor.py` already consumes this shape; avoids file-count explosion in long sessions.
 - **Why screenshots only on new events?** Direct port of old skill's `if new_events: take_screenshot` line. Empty ticks would produce identical images (no visual change without DOM events).
+
+---
+
+#### D4-CR2: DAO-routed, mimic-owned active learning + Analysis handoff (CR-002 v1.5)
+
+**Purpose:** Make the Knowledge Librarian DAO the entry point/router for behavior learning while `x-ipe-knowledge-mimic-web-behavior-tracker.start_active_tracking` owns active polling and consolidation. The user controls completion by clicking **Analysis** in the tracker toolbar; `start_active_tracking` detects this through `poll_tick`, stops tracking, consolidates observations, and returns them to DAO.
+
+**Supersedes:** CR-001 loop ownership and termination semantics:
+- CR-001: generic agent owns loop; stop condition is `stop_tracking` or `TRACKER_LOST`.
+- CR-002: Knowledge Librarian DAO classifies and delegates; `start_active_tracking` owns the loop; stop condition is `analysis_requested=true` from the toolbar Analysis button.
+
+**DAO orchestration contract:**
+
+```yaml
+dao_flow: active_behavior_learning
+entrypoint: x-ipe-assistant-knowledge-librarian-DAO
+loop_owner: x-ipe-knowledge-mimic-web-behavior-tracker.start_active_tracking
+steps:
+  - classify request as behavior learning
+  - call x-ipe-knowledge-mimic-web-behavior-tracker.start_active_tracking
+  - start_active_tracking loops every polling_interval_s:
+      internally call poll_tick(tracking_session_id, tick_n)
+      continue while analysis_requested == false
+  - start_active_tracking detects analysis_requested == true:
+      stop tracking
+      consolidate collected info
+      return observation_summary / observations to DAO
+  - DAO consumes returned mimic observations as gathered knowledge
+```
+
+**Updated `start_active_tracking` contract (target state):**
+
+```yaml
+output:
+  tracking_session_id: string
+  polling_started: true
+  loop_owner: x-ipe-knowledge-mimic-web-behavior-tracker.start_active_tracking
+  sub_op_contract:
+    name: poll_tick
+    interval_s: 5
+    until: "tracker toolbar Analysis button clicked"
+  final_result:
+    returned_to: x-ipe-assistant-knowledge-librarian-DAO
+    fields: [tracking_session_id, event_count, observation_summary, observations]
+constraints:
+  - Supported behavior-learning path MUST enter through Knowledge Librarian DAO
+  - DAO delegates once and waits for start_active_tracking final result
+  - start_active_tracking owns tick scheduling and consolidation
+  - Direct invocation remains degraded-mode only
+```
+
+**Updated internal `poll_tick` contract (target state):**
+
+```yaml
+output:
+  event_count: int
+  new_events: bool
+  url_changed: bool
+  screenshot_path: string?
+  reinjected: bool
+  analysis_requested: bool
+  analysis_payload_ready: bool       # true only when analysis_requested=true and latest events are merged
+constraints:
+  - Always merge latest events before returning Analysis signal to start_active_tracking
+  - Analysis request must survive URL-change reinjection until start_active_tracking consumes it
+  - poll_tick returns signal/event state to start_active_tracking, not directly to DAO
+  - Empty ticks still do not create screenshots unless Analysis finalization explicitly needs a final-state screenshot
+```
+
+**Implementation considerations for later phases:**
+- `build_poll_script()` should include the toolbar Analysis flag in the returned JSON (`analysisRequested`).
+- `poll_tick` should surface `analysis_requested`; `start_active_tracking` performs stop/consolidation and prepares the final DAO return payload.
+- Sticky Analysis state may be stored in `session.json` or preserved through browser storage so reinjection does not drop the user request.
+- `start_active_tracking` should reset the toolbar Analysis UI only after the final observation payload is prepared for DAO.
+
+**Component changes:**
+
+| Component | Change | Reason | AC |
+|-----------|--------|--------|----|
+| `x-ipe-assistant-knowledge-librarian-DAO/SKILL.md` | Add request classification branch for behavior-learning/mimic tasks; delegate to mimic `start_active_tracking`; receive final mimic payload as `gathered_knowledge[]` input | User requests enter DAO first; DAO routes but does not own polling | AC-059C-18a |
+| `x-ipe-knowledge-mimic-web-behavior-tracker/SKILL.md` | Rewrite `start_active_tracking` as the owner of the active loop; it internally invokes `poll_tick` until Analysis, then consolidates and returns to DAO | Matches corrected CR-002 flow | AC-059C-18b/c |
+| `x-ipe-knowledge-mimic-web-behavior-tracker/SKILL.md` | Redefine `poll_tick` as an internal sub-operation returning tick state to `start_active_tracking`, not directly to DAO | Keeps public DAO handoff at one boundary: `start_active_tracking` final output | AC-059C-18c |
+| `scripts/active_tracking.py` | Add helpers for Analysis flag handling and final payload preparation | Keeps SKILL.md steps simple and testable | AC-059C-18c/d |
+| `references/tracker-toolbar.js` + `.mini.js` | Make Analysis request sticky until consumed; expose reset/consume semantics safely | Prevents Analysis click from being lost across reinject/navigation | AC-059C-18d |
+| Tests | Add structural + helper tests for DAO classification text, mimic loop ownership, Analysis sticky handoff, final payload shape | Acceptance coverage for CR-002 | AC-059C-18a-d |
+
+**Corrected ownership sequence:**
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant DAO as Knowledge Librarian DAO
+    participant M as Mimic start_active_tracking
+    participant T as poll_tick
+    participant B as Browser Toolbar
+
+    U->>DAO: "learn behavior from <target>"
+    DAO->>DAO: classify as mimic behavior-learning task
+    DAO->>M: start_active_tracking(target_app, purpose, active_config)
+    M->>B: inject tracker IIFE and toolbar
+    loop every polling_interval_s until Analysis
+        M->>T: poll_tick(tracking_session_id, tick_n)
+        T->>B: collect events + url + analysisRequested
+        T-->>M: tick_state(analysis_requested=false, events, url)
+        M->>M: merge events, reinject if URL changed, screenshot if new events
+    end
+    U->>B: click Analysis
+    M->>T: next poll_tick(...)
+    T-->>M: tick_state(analysis_requested=true, latest events)
+    M->>M: stop tracking + consolidate via post_processor
+    M-->>DAO: mimic_observations payload
+    DAO->>DAO: use observations as gathered knowledge
+```
+
+**Target `start_active_tracking` procedure:**
+
+```xml
+<operation name="start_active_tracking">
+  <phase_1>
+    <action>
+      1. Validate target_app, session_config, active_config.
+      2. Navigate and inject tracker IIFE using existing start_tracking injection steps.
+      3. Initialize session.json with active_config, navigation_history, last_event_count=0, analysis_requested=false.
+    </action>
+  </phase_1>
+  <phase_2>
+    <action>
+      1. LOOP with tick_n starting at 1:
+         a. Invoke internal poll_tick(tracking_session_id, tick_n).
+         b. Merge events and update last_event_count.
+         c. If URL changed, clear guard, reinject, and preserve sticky Analysis state.
+         d. If new events, take screenshot and record it.
+         e. If analysis_requested=false, wait polling_interval_s and continue.
+         f. If analysis_requested=true, break loop.
+    </action>
+  </phase_2>
+  <phase_3>
+    <action>
+      1. Stop in-page tracker via existing stop script semantics.
+      2. Run post_processor on accumulated track-list.json.
+      3. Write observation-summary.json/raw-events.json as existing stop_tracking does.
+      4. Mark Analysis handoff consumed and reset toolbar UI.
+    </action>
+  </phase_3>
+  <phase_4>
+    <action>
+      1. Return final operation_output to DAO:
+         result: {
+           tracking_session_id,
+           analysis_requested: true,
+           event_count,
+           observation_summary,
+           observations,
+           writes_to
+         }
+    </action>
+  </phase_4>
+</operation>
+```
+
+**Target helper additions (`scripts/active_tracking.py`):**
+
+| Helper | Signature | Behavior |
+|--------|-----------|----------|
+| `mark_analysis_requested` | `(session_dir: Path) -> dict` | Sets `session.json::analysis_requested = true` and timestamp. Idempotent. |
+| `consume_analysis_request` | `(session_dir: Path) -> dict` | Sets `analysis_handoff_consumed = true` after final payload is prepared. |
+| `build_reset_analysis_ui_script` | `() -> str` | JS that calls `window.__xipeBehaviorTracker.resetAnalysisUI()` if available. |
+| `build_stop_script` | `() -> str` | JS that stops the in-page tracker and returns final collected events. |
+| `build_observation_payload` | `(track_list_path: Path, observation_summary: dict) -> dict` | Builds final DAO return payload from accumulated events + post-processor output. |
+
+**Target `build_poll_script()` response shape:**
+
+```json
+{
+  "events": [],
+  "eventCount": 0,
+  "url": "https://target.example/path",
+  "analysisRequested": false,
+  "status": "recording",
+  "error": null
+}
+```
+
+**Analysis persistence rule:**
+
+1. Browser `getAnalysisFlag()` may reset the in-page flag after read.
+2. Therefore the first poll tick that sees `analysisRequested=true` MUST immediately persist it via `mark_analysis_requested(session_dir)`.
+3. URL-change reinjection MUST preserve the persisted `session.json::analysis_requested` state.
+4. `start_active_tracking` treats either browser flag OR persisted session flag as authoritative until `consume_analysis_request()` runs.
+
+**DAO integration design:**
+
+Add a behavior-learning branch to Librarian classification:
+
+```yaml
+classification:
+  behavior_learning:
+    triggers:
+      - "learn behavior"
+      - "track behavior"
+      - "observe user flow"
+      - "mimic website behavior"
+    route:
+      skill: x-ipe-knowledge-mimic-web-behavior-tracker
+      operation: start_active_tracking
+```
+
+Execution behavior:
+- If request_type is `behavior_learning`, skip constructor framework/rubric planning.
+- Invoke mimic `start_active_tracking` and wait for its final return.
+- Convert returned `observation_summary`/`observations` into `gathered_knowledge[]`.
+- Continue with ontology/store/present steps when requested by caller; otherwise return mimic observation summary.
+
+**Acceptance test mapping:**
+
+| AC | Test approach |
+|----|---------------|
+| AC-059C-18a | Structural test: Librarian SKILL.md contains behavior_learning classification and delegates to mimic `start_active_tracking`. |
+| AC-059C-18b | Helper/procedure test: mimic SKILL.md states `start_active_tracking` owns loop and continues until Analysis. |
+| AC-059C-18c | Unit tests for `mark_analysis_requested`, `consume_analysis_request`, `build_observation_payload`; structural test for stop/consolidate/return phases. |
+| AC-059C-18d | Unit simulation: Analysis marked, URL changes, navigation recorded/reinject path runs, persisted Analysis remains true until consumed. |
 
 ---
 
@@ -872,3 +1094,4 @@ The `lifecycle`, `synthesize_id`, and `synthesize_message` fields are added to t
 | v1.0 | 2026-04-16 | Initial design |
 | v1.1 | 2026-04-16 | Added `synthesize_id` and `synthesize_message` fields to class meta and instance data; added Complete Meta Field Reference tables |
 | v1.2 | 2026-04-23 | [CR-001](x-ipe-docs/requirements/EPIC-059/FEATURE-059-C/CR-001.md) — Added D4-CR1 section: `start_active_tracking` + `poll_tick` sub-op design (agent-driven loop, single accumulating `track-list.json`, screenshot only on new events). Adds `scripts/active_tracking.py` helper module. |
+| v1.3 | 2026-04-27 | [CR-002](x-ipe-docs/requirements/EPIC-059/FEATURE-059-C/CR-002.md) — Added D4-CR2 design: DAO classifies/delegates mimic behavior-learning requests; mimic `start_active_tracking` owns polling/consolidation until toolbar Analysis; final observations returned to DAO. |

@@ -42,11 +42,12 @@ function loadTrackerSandbox() {
         'utf-8'
     );
 
+    const storage = new Map();
     const sandbox = {
         window: { __xipeBehaviorTrackerInjected: false },
         document: {
             createElement: (tag) => makeMockElement(tag),
-            body: { appendChild: () => {} },
+            body: { appendChild(el) { this._lastAppended = el; } },
             getElementById: () => null,
             title: 'Test Page',
             addEventListener: () => {},
@@ -66,13 +67,18 @@ function loadTrackerSandbox() {
             bufferCapacity: 100
         },
         console: { log: () => {}, warn: () => {}, error: () => {} },
-        localStorage: { setItem: () => {}, getItem: () => null, removeItem: () => {} },
+        localStorage: {
+            setItem: (k, v) => storage.set(k, String(v)),
+            getItem: (k) => storage.has(k) ? storage.get(k) : null,
+            removeItem: (k) => storage.delete(k)
+        },
         JSON: JSON,
         Date: Date,
     };
     sandbox.globalThis = sandbox;
     vm.createContext(sandbox);
     vm.runInContext(source, sandbox);
+    sandbox.__storage = storage;
     return sandbox;
 }
 
@@ -263,12 +269,33 @@ describe('Tracker IIFE Integration (CR-001)', () => {
         expect(flag).toBe(false);
     });
 
-    it('should set and clear analysis flag', () => {
+    it('should keep analysis flag sticky until reset', () => {
         sandbox.window.__xipe_analysis_requested = true;
         const flag = sandbox.window.__xipeBehaviorTracker.getAnalysisFlag();
         expect(flag).toBe(true);
-        // Should auto-clear after read
+        expect(sandbox.window.__xipeBehaviorTracker.getAnalysisFlag()).toBe(true);
+        sandbox.window.__xipeBehaviorTracker.resetAnalysisUI();
         expect(sandbox.window.__xipeBehaviorTracker.getAnalysisFlag()).toBe(false);
+    });
+
+    it('should persist analysis flag in localStorage for reinjection', () => {
+        const bar = sandbox.document.body._lastAppended;
+        const analysis = bar.querySelector('#__xb-analysis');
+        analysis.onclick();
+
+        expect(sandbox.window.__xipeBehaviorTracker.getAnalysisFlag()).toBe(true);
+        expect(sandbox.__storage.get('__xipe_bk_test-session_analysis')).toBe('true');
+
+        const source = readFileSync(
+            resolve(import.meta.dirname, '../../.github/skills/x-ipe-knowledge-mimic-web-behavior-tracker/references/tracker-toolbar.js'),
+            'utf-8'
+        );
+        sandbox.window.__xipeBehaviorTrackerInjected = false;
+        vm.runInContext(source, sandbox);
+
+        expect(sandbox.window.__xipeBehaviorTracker.getAnalysisFlag()).toBe(true);
+        sandbox.window.__xipeBehaviorTracker.resetAnalysisUI();
+        expect(sandbox.__storage.get('__xipe_bk_test-session_analysis')).toBeUndefined();
     });
 
     it('should have status default to idle', () => {

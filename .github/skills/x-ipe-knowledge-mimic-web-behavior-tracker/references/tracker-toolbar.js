@@ -1,7 +1,7 @@
 /**
  * X-IPE Behavior Tracker — Lightweight IIFE (<5KB)
  * Passive event capture with minimal UI (Start/Stop/Analysis).
- * Control is handled by track_behavior.py via Chrome DevTools MCP polling.
+ * Control is handled by the mimic skill via Chrome DevTools MCP polling.
  */
 if (!window.__xipeBehaviorTrackerInjected) {
     window.__xipeBehaviorTrackerInjected = true;
@@ -122,6 +122,7 @@ if (!window.__xipeBehaviorTrackerInjected) {
 
     // LocalStorage backup
     const LS_KEY = '__xipe_bk_' + C.sessionId;
+    const ANALYSIS_KEY = LS_KEY + '_analysis';
     function lsFlush(buf) {
         try { localStorage.setItem(LS_KEY, JSON.stringify(buf.toArray())); } catch (_) {}
     }
@@ -165,6 +166,7 @@ if (!window.__xipeBehaviorTrackerInjected) {
     };
     bar.querySelector('#__xb-analysis').onclick = () => {
         window.__xipe_analysis_requested = true;
+        try { localStorage.setItem(ANALYSIS_KEY, 'true'); } catch (_) {}
         const btn = bar.querySelector('#__xb-analysis');
         btn.textContent = '⏳ Analyzing...'; btn.disabled = true;
     };
@@ -176,7 +178,7 @@ if (!window.__xipeBehaviorTrackerInjected) {
         if (window.__xipe_status === 'recording') lsFlush(buf);
     }, 1000);
 
-    // Expose API for polling by track_behavior.py
+    // Expose API for polling by the mimic skill
     window.__xipeBehaviorTracker = {
         collect: () => ({ events: buf.toArray(), eventCount: buf.size(), url: location.href }),
         stop: () => { eng.stop(); lsFlush(buf); },
@@ -187,13 +189,20 @@ if (!window.__xipeBehaviorTrackerInjected) {
         },
         clear: () => buf.clear(),
         getStatus: () => window.__xipe_status || 'idle',
-        getAnalysisFlag: () => { const f = !!window.__xipe_analysis_requested; window.__xipe_analysis_requested = false; return f; },
+        getAnalysisFlag: () => {
+            let stored = false;
+            try { stored = localStorage.getItem(ANALYSIS_KEY) === 'true'; } catch (_) {}
+            return !!window.__xipe_analysis_requested || stored;
+        },
         resetAnalysisUI: () => {
+            window.__xipe_analysis_requested = false;
+            try { localStorage.removeItem(ANALYSIS_KEY); } catch (_) {}
             const b = document.getElementById('__xipe-tracker-bar');
             if (b) { const a = b.querySelector('#__xb-analysis'); if (a) { a.textContent = '📊 Analysis'; a.disabled = false; } }
         }
     };
 
     window.__xipe_status = 'idle';
-    window.__xipe_analysis_requested = false;
+    try { window.__xipe_analysis_requested = localStorage.getItem(ANALYSIS_KEY) === 'true'; }
+    catch (_) { window.__xipe_analysis_requested = false; }
 }

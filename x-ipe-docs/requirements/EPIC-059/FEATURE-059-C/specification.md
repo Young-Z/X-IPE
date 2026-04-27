@@ -1,8 +1,8 @@
 # Feature Specification: Layer 2 — Domain Skills (Constructors + Mimic + Ontology-Builder)
 
-> Feature ID: FEATURE-059-C  
-> Version: v1.4
-> Status: Completed
+> Feature ID: FEATURE-059-C
+> Version: v1.5
+> Status: Planned
 > Last Updated: 04-27-2026
 
 ## Version History
@@ -14,6 +14,7 @@
 | v1.2 | 04-22-2026 | [CR-001](x-ipe-docs/requirements/EPIC-059/FEATURE-059-C/CR-001.md) — Add `start_active_tracking` operation to mimic skill (5s polling + auto-reinject on URL change + auto-screenshot on new events); ports capabilities from deprecated `x-ipe-tool-learning-behavior-tracker-for-web` |
 | v1.3 | 04-23-2026 | Refinement (TASK-1147) — clarify agent-driven loop model, single accumulating `track-list.json`, screenshot only on new events (matches deprecated skill semantics) |
 | v1.4 | 04-27-2026 | Feature closing — remove retired `x-ipe-tool-learning-behavior-tracker-for-web` after `x-ipe-knowledge-mimic-web-behavior-tracker` reaches active-tracking parity |
+| v1.5 | 04-27-2026 | [CR-002](x-ipe-docs/requirements/EPIC-059/FEATURE-059-C/CR-002.md) — route active mimic learning through Knowledge Librarian DAO; `start_active_tracking` owns polling until toolbar Analysis click; mimic returns consolidated observations to DAO |
 
 ## Linked Mockups
 
@@ -48,6 +49,8 @@ Additionally, this feature deprecates old extraction tool skills by adding migra
 5. **As** a developer, **I want** old extraction tool skills deprecated with clear migration pointers, **so that** I know which new knowledge skill replaces each old tool.
 
 6. **As** the ontology-builder, **I want** to mark entities as `Ephemeral` when they reference `.working/` content, **so that** downstream consumers know the entity may become orphaned if the working content is removed.
+
+7. **As** the Knowledge Librarian DAO, **I want** to identify behavior-learning requests as mimic tasks and delegate them to `x-ipe-knowledge-mimic-web-behavior-tracker`, **so that** user-guided website behavior learning flows through the central knowledge pipeline.
 
 ## Acceptance Criteria
 
@@ -189,6 +192,15 @@ Additionally, this feature deprecates old extraction tool skills by adding migra
 | AC-059C-17b | GIVEN an active tracking session is running AND the page navigates to a different URL WHEN `poll_tick` detects the URL change (via `evaluate_script` reading `location.href`) THEN the tracker IIFE is re-injected (after clearing `window.__xipeBehaviorTrackerInjected`) AND the new URL is appended to `session.json::navigation_history` | Integration |
 | AC-059C-17c | GIVEN an active tracking session is running WHEN `poll_tick` detects new events since the last tick (`event_count > last_event_count`) THEN a screenshot is captured via Chrome DevTools MCP AND saved to `x-ipe-docs/.mimicked/{session_id}/screenshots/tick-{n}.png` AND the path is referenced in the updated `track-list.json`. Empty ticks (no new events) MUST NOT trigger screenshots and MUST NOT create per-tick files (matches deprecated tool behavior — accumulating single `track-list.json`). | Integration |
 
+### AC-059C-18: Mimic — DAO-Owned Active Learning Flow (CR-002)
+
+| AC ID | Criterion (Given/When/Then) | Test Type |
+|-------|-------------------------------|-----------|
+| AC-059C-18a | GIVEN a user asks the Knowledge Librarian DAO to learn behavior from a website/application WHEN the DAO classifies the request THEN it identifies the request as a mimic task AND delegates to `x-ipe-knowledge-mimic-web-behavior-tracker.start_active_tracking` as the supported orchestration path | Integration |
+| AC-059C-18b | GIVEN mimic-owned active tracking is running inside `start_active_tracking` WHEN polling ticks execute every `polling_interval_s` seconds THEN `start_active_tracking` continues polling until the tracker toolbar **Analysis** button is clicked AND does not terminate merely because `stop_tracking` was not called or the toolbar Stop button was pressed | Integration |
+| AC-059C-18c | GIVEN the user clicks the tracker toolbar **Analysis** button WHEN `start_active_tracking` detects the request through `poll_tick` THEN it flushes/merges current events, stops tracking, consolidates observations or an observation summary, returns the result to the Knowledge Librarian DAO, and marks the Analysis handoff consumed | Integration |
+| AC-059C-18d | GIVEN a URL change/reinject occurs during mimic-owned active tracking WHEN the user has requested Analysis THEN the Analysis request is not lost before `start_active_tracking` returns the observation handoff to DAO | Integration |
+
 ## Functional Requirements
 
 **FR-1: Constructor — provide_framework**
@@ -247,6 +259,18 @@ Additionally, this feature deprecates old extraction tool skills by adding migra
 - Output: `tracking_session_id`, `polling_started: true`, `sub_op: poll_tick` contract
 - Writes to: `x-ipe-docs/.mimicked/{session_id}/` (`session.json`, `track-list.json`, `screenshots/tick-{n}.png`)
 
+**FR-7c: Mimic + Librarian DAO — active behavior learning (CR-002)**
+- Input: user request to learn behavior from a target website/application, target URL, tracking purpose, optional PII/screenshot/reinject config
+- Process:
+  1. Knowledge Librarian DAO classifies the user request as a mimic behavior-learning task and delegates to `x-ipe-knowledge-mimic-web-behavior-tracker.start_active_tracking`
+  2. `start_active_tracking` owns the 5s polling loop and internally invokes `poll_tick(tracking_session_id, tick_n)` until `poll_tick` reports `analysis_requested: true`
+  3. Each tick preserves CR-001 behavior: merge events into a single `track-list.json`, reinject on URL change, and screenshot only when new events arrive
+  4. On Analysis request, `start_active_tracking` flushes/merges current events, stops tracking, consolidates collected information, and returns the observation payload to DAO
+  5. DAO consumes the observation payload as knowledge input for downstream construction/extraction/ontology steps
+  6. The toolbar Stop button, if pressed before Analysis, must not terminate the mimic-owned polling loop; only the Analysis handoff ends the active loop
+- Output: DAO receives `tracking_session_id`, `event_count`, `analysis_requested: true`, and `observation_summary`/`observations` from `start_active_tracking`
+- Writes to: `x-ipe-docs/.mimicked/{session_id}/`; no persistent memory write unless a downstream keeper operation promotes the result
+
 **FR-8: Ontology-Builder — build_ontology (Single Operation)**
 - Input: `source_content` (paths to memory files), `depth_limit` (1 | 3 | "auto", default: "auto")
 - Process: 6-step iterative workflow:
@@ -264,7 +288,7 @@ Additionally, this feature deprecates old extraction tool skills by adding migra
 
 **NFR-1: Write Discipline** — Constructors write to `.working/` subfolders only. Mimic writes to `x-ipe-docs/.mimicked/` (a dedicated folder outside the memory structure). Ontology-builder writes directly to `.ontology/`. No domain skill writes to persistent memory folders — that remains keeper-memory's responsibility.
 
-**NFR-2: Statelessness** — All five skills are stateless services. The orchestrator (Librarian) passes full context per invocation. No session state is retained between calls.
+**NFR-2: Statelessness** — All five knowledge skills are stateless services. The orchestrator (Librarian DAO) passes full context per invocation, and active tracking session state is stored explicitly in `x-ipe-docs/.mimicked/{session_id}/` rather than hidden process memory.
 
 **NFR-3: Template Compliance** — All SKILL.md files must follow the `x-ipe-knowledge` template from FEATURE-059-A. Skill creation must go through `x-ipe-meta-skill-creator`.
 
@@ -276,7 +300,7 @@ Additionally, this feature deprecates old extraction tool skills by adding migra
 
 ## UI/UX Requirements
 
-N/A — These are backend knowledge skills with no UI components.
+Knowledge skills are primarily backend/agent-facing, but the mimic tracker injects a small browser toolbar into the target website. For CR-002, the existing **Analysis** button is the user-controlled completion signal for mimic-owned active behavior learning. No new UI surface is introduced, but the Analysis button must behave as a sticky handoff request until `start_active_tracking` consolidates observations and returns the payload to the Knowledge Librarian DAO.
 
 ## Dependencies
 
@@ -284,6 +308,7 @@ N/A — These are backend knowledge skills with no UI components.
 - FEATURE-059-A (Implemented) — `x-ipe-knowledge` template must exist in skill-creator
 - FEATURE-059-B (Implemented) — `keeper-memory`, `extractor-web`, `extractor-memory` must exist (constructor operations reference them via `suggested_extractor`)
 - `x-ipe-meta-skill-creator` — Used to create all 5 skill SKILL.md files
+- `x-ipe-assistant-knowledge-librarian-DAO` — Routes DAO-entered active behavior learning requests in CR-002 and delegates mimic tracking operations
 - `x-ipe-tool-rev-eng-*` (8 existing sub-skills) — Referenced by `constructor-app-reverse-engineering` for section-level extraction
 - Chrome DevTools MCP — Required by `mimic-web-behavior-tracker` at runtime
 - Existing `.ontology/` folder structure (created by keeper-memory's `init_memory.py`) — Required by ontology-builder writes
@@ -303,6 +328,10 @@ N/A — These are backend knowledge skills with no UI components.
 
 **BR-5:** The `x-ipe-tool-rev-eng-*` sub-skills remain as tool skills (not migrated to knowledge namespace). `constructor-app-reverse-engineering` references them as external dependencies.
 
+**BR-6:** User requests to learn website/application behavior should enter through the Knowledge Librarian DAO. The DAO identifies the request as a mimic task, delegates to `x-ipe-knowledge-mimic-web-behavior-tracker.start_active_tracking`, and consumes the returned observations as gathered knowledge.
+
+**BR-7:** In mimic-owned active behavior learning, only the tracker toolbar **Analysis** action completes the active polling loop. `stop_tracking`, toolbar Stop, or transient tracker loss must not be treated as successful loop completion.
+
 ## Edge Cases & Constraints
 
 | Edge Case | Expected Behavior |
@@ -311,6 +340,10 @@ N/A — These are backend knowledge skills with no UI components.
 | `fill_structure` with partial knowledge | Draft produced with `[INCOMPLETE: reason]` markers on unfilled sections |
 | Mimic start on already-tracked page | IIFE guard prevents double injection, existing session ID returned |
 | Mimic stop with invalid session ID | Error returned with SESSION_NOT_FOUND, no side effects |
+| Mimic-owned active tracking with no Analysis click | `start_active_tracking` keeps polling at `polling_interval_s` until Analysis is observed or an explicit external cancellation/error policy is introduced in technical design |
+| Toolbar Stop clicked before Analysis | Event recording may pause according to toolbar behavior, but mimic-owned polling continues until Analysis handoff |
+| Analysis clicked immediately after navigation/reinject | Analysis request remains sticky until `start_active_tracking` returns the observation handoff to DAO |
+| Analysis clicked with no new events since prior tick | `start_active_tracking` still returns an observation handoff to DAO; screenshot behavior follows technical design |
 | Ontology-builder discovers no classes in source | Empty build_report with classes_created=0; no writes to .ontology/ |
 | Ontology-builder finds existing class in .ontology/ | Critique sub-agent suggests reuse; builder references existing class instead of creating duplicate |
 | Entity references `.working/` path that was already cleaned up | Entity remains with `lifecycle: "Ephemeral"` — downstream consumers check source existence |
@@ -320,7 +353,7 @@ N/A — These are backend knowledge skills with no UI components.
 
 - **Ontology-synthesizer** (discover_related, wash_terms, link_nodes) — deferred to FEATURE-059-D
 - **Presenter skills** (render, connector) — deferred to FEATURE-059-D
-- **Orchestrator/Librarian assistant** — deferred to FEATURE-059-E
+- **New Librarian assistant family** — not in scope; CR-002 updates the existing `x-ipe-assistant-knowledge-librarian-DAO` integration for mimic behavior learning
 - **Migration of existing knowledge-base content** — deferred to FEATURE-059-F
 - **Modifications to `x-ipe-tool-rev-eng-*` sub-skills** — they remain as-is, referenced by constructor
 - **Web app UI changes** — deferred to FEATURE-059-F
@@ -336,7 +369,8 @@ N/A — These are backend knowledge skills with no UI components.
 - Ontology-builder's `lifecycle` field should be added to entity JSONL records alongside existing fields
 - Ontology-builder exposes a single `build_ontology` operation with iterative critique-implement loop — the orchestrator does NOT call separate discover/create/validate steps
 - Constructor templates should be adapted (not copy-pasted) from old skills to fit the 4-operation interface
+- CR-002 implementation must update both the mimic knowledge skill and the Knowledge Librarian DAO skill; changing only one side is incomplete.
 
 ## Open Questions
 
-None — all questions resolved during refinement.
+None — CR-002 refinement confirmed that user requests enter the DAO first, the DAO identifies mimic tasks, the DAO delegates active tracking to the mimic skill, and `start_active_tracking` owns polling/consolidation until it returns observations to DAO.

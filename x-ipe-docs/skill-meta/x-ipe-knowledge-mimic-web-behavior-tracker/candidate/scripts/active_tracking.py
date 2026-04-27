@@ -1,10 +1,10 @@
 """
 FEATURE-059-C / CR-001: Active Tracking Helpers
 
-Pure helpers for the agent-driven 5s polling loop in the
+Pure helpers for the mimic-owned 5s polling loop in the
 x-ipe-knowledge-mimic-web-behavior-tracker skill.
 
-Architecture: NO I/O loop, NO subprocess. The orchestrating agent runs the
+Architecture: NO subprocess. The start_active_tracking operation owns the
 5-second polling loop via Chrome DevTools MCP, calling these helpers per tick.
 
 Helpers:
@@ -24,6 +24,16 @@ Helpers:
         Returns x-ipe-docs/.mimicked/{session_id}/screenshots/tick-{n}.png.
     - record_screenshot(track_list_path, screenshot_relpath) -> None
         Append screenshot path to track-list.json::screenshots array.
+    - mark_analysis_requested(session_dir) -> dict
+        Persist sticky toolbar Analysis request in session.json.
+    - consume_analysis_request(session_dir) -> dict
+        Mark Analysis handoff consumed after DAO payload is prepared.
+    - build_stop_script() -> str
+        JS to stop in-page tracker and return final collected events.
+    - build_reset_analysis_ui_script() -> str
+        JS to reset toolbar Analysis button after payload handoff.
+    - build_observation_payload(track_list_path, observation_summary) -> dict
+        Build final return payload for Knowledge Librarian DAO.
 
 Source pattern: ported from the retired learning behavior tracker tool
 (BehaviorTrackerSkill poll loop + InjectionManager helpers).
@@ -57,7 +67,8 @@ def build_poll_script() -> str:
     """JS to drain the in-page event buffer.
 
     Returns a JSON string with shape:
-        {events: [...], eventCount: int, url: str, error?: 'not_injected'}
+        {events: [...], eventCount: int, url: str,
+         analysisRequested: bool, status: str, error?: 'not_injected'}
     """
     return (
         "(() => {"
@@ -66,6 +77,8 @@ def build_poll_script() -> str:
         "  }"
         "  const d = window.__xipeBehaviorTracker.collect();"
         "  d.url = location.href;"
+        "  d.analysisRequested = window.__xipeBehaviorTracker.getAnalysisFlag();"
+        "  d.status = window.__xipeBehaviorTracker.getStatus();"
         "  return JSON.stringify(d);"
         "})();"
     )
@@ -74,6 +87,34 @@ def build_poll_script() -> str:
 def build_clear_guard_script() -> str:
     """JS to clear the injection guard so the tracker can be re-injected."""
     return "window.__xipeBehaviorTrackerInjected = false;"
+
+
+def build_stop_script() -> str:
+    """JS to stop the in-page tracker and return the final event buffer."""
+    return (
+        "(() => {"
+        "  if (!window.__xipeBehaviorTracker) {"
+        "    return JSON.stringify({events:[],eventCount:0,url:location.href,error:'not_injected'});"
+        "  }"
+        "  window.__xipeBehaviorTracker.stop();"
+        "  const d = window.__xipeBehaviorTracker.collect();"
+        "  d.url = location.href;"
+        "  d.status = window.__xipeBehaviorTracker.getStatus();"
+        "  d.analysisRequested = window.__xipeBehaviorTracker.getAnalysisFlag();"
+        "  return JSON.stringify(d);"
+        "})();"
+    )
+
+
+def build_reset_analysis_ui_script() -> str:
+    """JS to reset the toolbar Analysis UI after the DAO handoff is prepared."""
+    return (
+        "(() => {"
+        "  if (window.__xipeBehaviorTracker) {"
+        "    window.__xipeBehaviorTracker.resetAnalysisUI();"
+        "  }"
+        "})();"
+    )
 
 
 def _read_json(path: Path, default):
@@ -163,6 +204,53 @@ def record_screenshot(track_list_path: Path, screenshot_relpath: str) -> None:
     _write_json(track_list_path, record)
 
 
+def mark_analysis_requested(session_dir: Path) -> dict:
+    """Persist a sticky Analysis request in session.json until consumed."""
+    session_json = session_dir / "session.json"
+    session = _read_json(session_json, {})
+    now = datetime.now(timezone.utc).isoformat()
+    session["analysis_requested"] = True
+    session["analysis_requested_at"] = session.get("analysis_requested_at") or now
+    session["analysis_handoff_consumed"] = False
+    session["last_updated"] = now
+    _write_json(session_json, session)
+    return session
+
+
+def consume_analysis_request(session_dir: Path) -> dict:
+    """Mark the sticky Analysis request consumed after final payload creation."""
+    session_json = session_dir / "session.json"
+    session = _read_json(session_json, {})
+    now = datetime.now(timezone.utc).isoformat()
+    session["analysis_requested"] = False
+    session["analysis_handoff_consumed"] = True
+    session["analysis_handoff_consumed_at"] = now
+    session["last_updated"] = now
+    _write_json(session_json, session)
+    return session
+
+
+def is_analysis_requested(session_dir: Path) -> bool:
+    """Return persisted Analysis request state for start_active_tracking."""
+    return bool(_read_json(session_dir / "session.json", {}).get("analysis_requested"))
+
+
+def build_observation_payload(track_list_path: Path, observation_summary: dict) -> dict:
+    """Build final mimic observations payload returned to Knowledge Librarian DAO."""
+    record = _read_json(track_list_path, {"events": [], "event_count": 0, "session": {}})
+    events = list(record.get("events", []))
+    session = record.get("session", {}) or {}
+    return {
+        "tracking_session_id": session.get("session_id") or session.get("id"),
+        "analysis_requested": True,
+        "event_count": record.get("event_count", len(events)),
+        "observation_summary": observation_summary or {},
+        "observations": events,
+        "raw_events": events,
+        "writes_to": str(track_list_path.parent),
+    }
+
+
 def init_session(
     session_dir: Path,
     session_id: str,
@@ -189,6 +277,9 @@ def init_session(
         "buffer_capacity": buffer_capacity,
         "active_config": active_config or {},
         "navigation_history": existing.get("navigation_history") or [target_app],
+        "last_event_count": existing.get("last_event_count", 0),
+        "analysis_requested": existing.get("analysis_requested", False),
+        "analysis_handoff_consumed": existing.get("analysis_handoff_consumed", False),
         "started_at": existing.get("started_at") or now,
         "last_updated": now,
     }

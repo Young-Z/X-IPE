@@ -29,9 +29,15 @@ sys.path.insert(
 from active_tracking import (  # noqa: E402
     SCHEMA_VERSION,
     build_clear_guard_script,
+    build_observation_payload,
     build_poll_script,
+    build_reset_analysis_ui_script,
+    build_stop_script,
+    consume_analysis_request,
     detect_url_change,
     init_session,
+    is_analysis_requested,
+    mark_analysis_requested,
     merge_events,
     record_navigation,
     record_screenshot,
@@ -55,6 +61,12 @@ class TestPollScript:
 
     def test_collects_url(self):
         assert "location.href" in build_poll_script()
+
+    def test_collects_analysis_signal_and_status(self):
+        s = build_poll_script()
+        assert "getAnalysisFlag" in s
+        assert "analysisRequested" in s
+        assert "getStatus" in s
 
 
 class TestMergeEvents:
@@ -107,6 +119,18 @@ class TestClearGuardScript:
         assert "false" in s
 
 
+class TestAnalysisControlScripts:
+    def test_stop_script_stops_tracker_and_returns_events(self):
+        s = build_stop_script()
+        assert "__xipeBehaviorTracker.stop()" in s
+        assert "collect()" in s
+        assert "analysisRequested" in s
+
+    def test_reset_analysis_ui_script_calls_toolbar_reset(self):
+        s = build_reset_analysis_ui_script()
+        assert "resetAnalysisUI" in s
+
+
 class TestNavigationTracking:
     def test_first_call_returns_change(self, tmp_path):
         # No history yet → treat as change so initial seed happens.
@@ -122,6 +146,8 @@ class TestNavigationTracking:
             buffer_capacity=10000,
         )
         assert s["navigation_history"] == ["https://example.com"]
+        assert s["analysis_requested"] is False
+        assert s["analysis_handoff_consumed"] is False
 
     def test_no_change_when_url_matches_last(self, tmp_path):
         init_session(tmp_path, "s1", "https://example.com", "p", [], 10000)
@@ -151,6 +177,22 @@ class TestNavigationTracking:
             "https://example.com",
             "https://example.com/page2",
         ]
+
+    def test_analysis_request_survives_navigation_update_until_consumed(self, tmp_path):
+        init_session(tmp_path, "s1", "https://example.com", "p", [], 10000)
+        mark_analysis_requested(tmp_path)
+        record_navigation(tmp_path, "https://example.com/page2")
+
+        assert is_analysis_requested(tmp_path) is True
+        session = json.loads((tmp_path / "session.json").read_text())
+        assert session["analysis_requested"] is True
+        assert session["analysis_handoff_consumed"] is False
+        assert session["navigation_history"][-1] == "https://example.com/page2"
+
+        consumed = consume_analysis_request(tmp_path)
+        assert consumed["analysis_requested"] is False
+        assert consumed["analysis_handoff_consumed"] is True
+        assert is_analysis_requested(tmp_path) is False
 
 
 # --- AC-17c: screenshot gating + path layout ---
@@ -235,3 +277,27 @@ class TestActiveTickSimulation:
             "https://app.example.com",
             "https://app.example.com/checkout",
         ]
+
+
+# --- AC-18c: final payload returned to DAO ---
+
+
+class TestObservationPayload:
+    def test_builds_final_payload_for_dao(self, tmp_path):
+        track = tmp_path / "track-list.json"
+        merge_events(
+            track,
+            [{"type": "click", "target": {"cssSelector": "button.buy"}}],
+            {"session_id": "mimic-20260427-abc"},
+        )
+        summary = {"analysis": {"flow_narrative": "User clicked buy."}}
+
+        payload = build_observation_payload(track, summary)
+
+        assert payload["tracking_session_id"] == "mimic-20260427-abc"
+        assert payload["analysis_requested"] is True
+        assert payload["event_count"] == 1
+        assert payload["observation_summary"] == summary
+        assert payload["observations"][0]["type"] == "click"
+        assert payload["raw_events"] == payload["observations"]
+        assert payload["writes_to"] == str(tmp_path)

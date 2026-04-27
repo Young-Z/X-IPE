@@ -15,6 +15,86 @@
       "next_task": "N/A",
       "created_at": "2026-04-27T02:15:16.794851+00:00",
       "last_updated": "2026-04-27T02:26:23.473972+00:00"
+    },
+    {
+      "task_id": "TASK-1152",
+      "task_type": "Change Request",
+      "description": "CR against FEATURE-059-C: Active tracking should run through Knowledge Librarian DAO, keep polling until user clicks Analysis on the tracker toolbar, then collect observations and pass results back to DAO.",
+      "status": "completed",
+      "role": "Drift",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-059/FEATURE-059-C/CR-002.md",
+        "x-ipe-docs/requirements/EPIC-059/FEATURE-059-C/specification.md",
+        "x-ipe-docs/requirements/EPIC-059/FEATURE-059-C/technical-design.md"
+      ],
+      "next_task": "x-ipe-task-based-feature-refinement",
+      "created_at": "2026-04-27T05:24:52.277036+00:00",
+      "last_updated": "2026-04-27T05:43:30.787927+00:00"
+    },
+    {
+      "task_id": "TASK-1153",
+      "task_type": "Feature Refinement",
+      "description": "Refine FEATURE-059-C CR-002: DAO-owned active behavior learning, polling until toolbar Analysis click, and observation handoff back to Knowledge Librarian DAO.",
+      "status": "completed",
+      "role": "Drift",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-059/FEATURE-059-C/specification.md",
+        "x-ipe-docs/requirements/EPIC-059/FEATURE-059-C/CR-002.md"
+      ],
+      "next_task": "x-ipe-task-based-technical-design",
+      "created_at": "2026-04-27T05:46:03.377549+00:00",
+      "last_updated": "2026-04-27T05:50:20.731422+00:00"
+    },
+    {
+      "task_id": "TASK-1154",
+      "task_type": "Technical Design",
+      "description": "Technical design for FEATURE-059-C CR-002: DAO delegates mimic behavior-learning requests to start_active_tracking; start_active_tracking owns polling until Analysis, consolidates observations, then returns results to DAO.",
+      "status": "completed",
+      "role": "Drift",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-059/FEATURE-059-C/technical-design.md",
+        "x-ipe-docs/requirements/EPIC-059/FEATURE-059-C/specification.md",
+        "x-ipe-docs/requirements/EPIC-059/FEATURE-059-C/CR-002.md"
+      ],
+      "next_task": "x-ipe-task-based-code-implementation",
+      "created_at": "2026-04-27T05:51:49.962123+00:00",
+      "last_updated": "2026-04-27T05:59:32.580779+00:00"
+    },
+    {
+      "task_id": "TASK-1155",
+      "task_type": "Code Implementation",
+      "description": "Implement FEATURE-059-C CR-002: DAO classifies/delegates mimic behavior-learning requests; mimic start_active_tracking owns polling until Analysis, consolidates observations, and returns result to DAO.",
+      "status": "completed",
+      "role": "Drift",
+      "output_links": [
+        ".github/skills/x-ipe-knowledge-mimic-web-behavior-tracker/SKILL.md",
+        ".github/skills/x-ipe-knowledge-mimic-web-behavior-tracker/scripts/active_tracking.py",
+        ".github/skills/x-ipe-knowledge-mimic-web-behavior-tracker/references/tracker-toolbar.js",
+        ".github/skills/x-ipe-assistant-knowledge-librarian-DAO/SKILL.md",
+        "tests/test_active_tracking_059c_cr1.py",
+        "tests/test_mimic_dao_cr2_docs.py",
+        "tests/frontend-js/tracker-components-054ce.test.js"
+      ],
+      "next_task": "x-ipe-task-based-feature-acceptance-test",
+      "created_at": "2026-04-27T06:01:14.701459+00:00",
+      "last_updated": "2026-04-27T06:08:57.642818+00:00"
+    },
+    {
+      "task_id": "TASK-1156",
+      "task_type": "Feature Closing",
+      "description": "Commit and push safe FEATURE-059-C CR-002 implementation changes to main; exclude generated .mimicked runtime captures that contain URL tokens.",
+      "status": "completed",
+      "role": "assistant",
+      "output_links": [
+        "pushed to main",
+        ".github/skills/x-ipe-knowledge-mimic-web-behavior-tracker/",
+        ".github/skills/x-ipe-assistant-knowledge-librarian-DAO/",
+        ".github/skills/xlsx/",
+        "x-ipe-docs/requirements/EPIC-059/FEATURE-059-C/"
+      ],
+      "next_task": "N/A",
+      "created_at": "2026-04-27T06:10:23.825787+00:00",
+      "last_updated": "2026-04-27T06:11:07.210752+00:00"
     }
   ]
 }

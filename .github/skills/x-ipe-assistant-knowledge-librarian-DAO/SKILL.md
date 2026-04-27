@@ -63,7 +63,7 @@ not_for:
 ```yaml
 input:
   request: "string"                          # Required — the knowledge task description
-  request_type_override: "string | null"     # Optional — skip classification (construction|extraction|ontology_only|presentation|storage)
+  request_type_override: "string | null"     # Optional — skip classification (construction|extraction|ontology_only|presentation|storage|behavior_learning)
   target_constructor: "string | null"        # Optional — skip routing (specific constructor skill name)
   max_iterations: 3                          # Optional — critique loop max iterations
   output_format: "markdown"                  # Optional — structured | markdown | graph
@@ -82,7 +82,7 @@ input:
   </field>
   <field name="request_type_override" source="Caller may override classification">
     <steps>
-      1. IF caller provides a value in {construction, extraction, ontology_only, presentation, storage} → use it
+      1. IF caller provides a value in {construction, extraction, ontology_only, presentation, storage, behavior_learning} → use it
       2. ELSE → null (perform classification in Phase 1)
     </steps>
   </field>
@@ -190,14 +190,19 @@ BLOCKING: Phase 1 (格物) adapts based on request_type — non-construction typ
            c. Ontology verbs (discover, link, synthesize, normalize) → "ontology_only"
            d. Presentation verbs (render, summarize, show, present) → "presentation"
            e. Storage verbs (store, save, promote, persist) → "storage"
-           f. No match → "classification_failed"
-        4. IF type = "construction" AND target_constructor is null:
+           f. Behavior-learning verbs (learn behavior, track behavior, observe user flow, mimic website behavior, record user actions) → "behavior_learning"
+           g. No match → "classification_failed"
+        4. IF type = "behavior_learning":
+           a. SELECT best matching skill from discovered_skills.mimics[] whose description or operations include behavior tracking
+           b. Preferred operation: x-ipe-knowledge-mimic-web-behavior-tracker.start_active_tracking
+           c. IF no mimic skill exists → "classification_failed"
+        5. IF type = "construction" AND target_constructor is null:
            a. FOR EACH constructor in discovered_skills.constructors[]:
               Compare request against constructor description (semantic similarity)
            b. Select highest-scoring constructor
            c. On tie → alphabetical first, log tie-breaking
            d. On zero matches → "classification_failed"
-        5. Mark pipeline_state.classification = "done"
+        6. Mark pipeline_state.classification = "done"
       </action>
       <output>request_type + selected_constructor (if applicable)</output>
     </step_1_2>
@@ -264,9 +269,17 @@ BLOCKING: Phase 1 (格物) adapts based on request_type — non-construction typ
         2. IF request_type = "extraction":
            INVOKE appropriate extractor directly with request content
            COLLECT gathered_knowledge[]
-        3. IF request_type in {ontology_only, presentation, storage}:
+        3. IF request_type = "behavior_learning":
+           a. INVOKE selected mimic skill operation `start_active_tracking` with request context:
+              - target_app from request/session_context
+              - session_config.purpose from request
+              - active_config defaults: polling_interval_s=5, auto_reinject=true, auto_screenshot=true
+           b. WAIT for `start_active_tracking` to own polling until toolbar Analysis is clicked
+           c. RECEIVE operation_output.result.observation_payload from the mimic skill
+           d. APPEND observation_payload to gathered_knowledge[] for downstream processing
+        4. IF request_type in {ontology_only, presentation, storage}:
            SKIP extraction (mark "skipped")
-        4. Mark pipeline_state.致知_1_execute = "done"
+        5. Mark pipeline_state.致知_1_execute = "done"
       </action>
       <output>gathered_knowledge[] (or skipped)</output>
     </step_2_1>
@@ -427,7 +440,7 @@ pipeline_output:
   </checkpoint>
   <checkpoint required="true">
     <name>Request Classified</name>
-    <verification>request_type resolved to one of: construction, extraction, ontology_only, presentation, storage (or classification_failed)</verification>
+    <verification>request_type resolved to one of: construction, extraction, ontology_only, presentation, storage, behavior_learning (or classification_failed)</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>Pipeline Executed</name>
