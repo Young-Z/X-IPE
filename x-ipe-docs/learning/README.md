@@ -1,6 +1,6 @@
 # Learning Sessions
 
-Tracked behavior sessions for AI agent training. Each session captures user interactions on a target website via the `x-ipe-tool-learning-behavior-tracker-for-web` skill.
+Tracked behavior sessions for AI agent training. Historical sessions were captured by the retired `x-ipe-tool-learning-behavior-tracker-for-web` skill. New behavior observations are captured by `x-ipe-knowledge-mimic-web-behavior-tracker` and written to `x-ipe-docs/.mimicked/`.
 
 | Session | Purpose | Domain | Events | Screenshots | Date |
 |---------|---------|--------|--------|-------------|------|

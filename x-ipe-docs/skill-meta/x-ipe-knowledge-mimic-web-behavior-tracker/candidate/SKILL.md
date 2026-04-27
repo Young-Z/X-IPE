@@ -62,7 +62,7 @@ not_for:
 
 ```yaml
 input:
-  operation: "start_tracking | stop_tracking | get_observations"
+  operation: "start_tracking | stop_tracking | get_observations | start_active_tracking | poll_tick"
   context:
     # For start_tracking:
     target_app: "string"            # URL to track (https:// required)
@@ -70,8 +70,16 @@ input:
       pii_whitelist: "string[]"     # CSS selectors to reveal (default: [])
       buffer_capacity: "int"        # Max events before pruning (default: 10000)
       purpose: "string"             # Tracking purpose (≤200 words, required)
+    # For start_active_tracking (CR-001): same as start_tracking PLUS:
+    active_config:
+      polling_interval_s: "int"     # default: 5
+      auto_screenshot: "bool"       # default: true
+      auto_reinject: "bool"         # default: true
     # For stop_tracking:
     tracking_session_id: "string"   # Session ID from start_tracking
+    # For poll_tick (CR-001): invoked by orchestrating agent each tick
+    tracking_session_id: "string"
+    tick_n: "int"                   # Monotonic counter from agent
     # For get_observations:
     tracking_session_id: "string"   # Session ID to query
     filter:                         # Optional filter criteria
@@ -89,10 +97,10 @@ BLOCKING: All input fields with non-trivial initialization MUST be documented he
 ```xml
 <input_init>
   <field name="operation" source="Assistant orchestrator specifies which operation to perform">
-    <validation>Must be one of: start_tracking, stop_tracking, get_observations</validation>
+    <validation>Must be one of: start_tracking, stop_tracking, get_observations, start_active_tracking, poll_tick</validation>
   </field>
 
-  <field name="context.target_app" source="Orchestrator provides URL for start_tracking">
+  <field name="context.target_app" source="Orchestrator provides URL for start_tracking/start_active_tracking">
     <validation>Must have https:// or http:// protocol and valid hostname</validation>
   </field>
 
@@ -114,6 +122,25 @@ BLOCKING: All input fields with non-trivial initialization MUST be documented he
     <validation>Must reference an existing session directory in x-ipe-docs/.mimicked/</validation>
   </field>
 
+  <field name="context.active_config.polling_interval_s" source="Optional start_active_tracking config">
+    <default>5</default>
+    <validation>Positive integer; recommended value is 5</validation>
+  </field>
+
+  <field name="context.active_config.auto_screenshot" source="Optional start_active_tracking config">
+    <default>true</default>
+    <validation>Boolean</validation>
+  </field>
+
+  <field name="context.active_config.auto_reinject" source="Optional start_active_tracking config">
+    <default>true</default>
+    <validation>Boolean</validation>
+  </field>
+
+  <field name="context.tick_n" source="Agent monotonic counter for poll_tick">
+    <validation>Positive integer starting at 1</validation>
+  </field>
+
   <field name="context.filter" source="Optional filter for get_observations">
     <default>null (return all observations)</default>
     <validation>If provided, must contain at least one sub-field</validation>
@@ -129,7 +156,7 @@ BLOCKING: All input fields with non-trivial initialization MUST be documented he
 <definition_of_ready>
   <checkpoint required="true">
     <name>Operation specified</name>
-    <verification>input.operation matches one of: start_tracking, stop_tracking, get_observations</verification>
+    <verification>input.operation matches one of: start_tracking, stop_tracking, get_observations, start_active_tracking, poll_tick</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>Chrome DevTools available (start/stop)</name>
@@ -137,7 +164,7 @@ BLOCKING: All input fields with non-trivial initialization MUST be documented he
   </checkpoint>
   <checkpoint required="true">
     <name>Operation-specific inputs present</name>
-    <verification>start_tracking: target_app + purpose; stop_tracking: tracking_session_id; get_observations: tracking_session_id</verification>
+    <verification>start_tracking/start_active_tracking: target_app + purpose; stop_tracking/get_observations: tracking_session_id; poll_tick: tracking_session_id + tick_n</verification>
   </checkpoint>
 </definition_of_ready>
 ```
@@ -386,7 +413,176 @@ BLOCKING: All input fields with non-trivial initialization MUST be documented he
          - writes_to: null
          - errors: []
     </action>
-    <output>Get observations complete, filtered results returned to orchestrator</output>
+     <output>Get observations complete, filtered results returned to orchestrator</output>
+   </phase_5>
+
+</operation>
+```
+
+### Operation: start_active_tracking
+
+> **Contract (CR-001):**
+> - **Input:** target_app: string (URL), session_config (same as start_tracking), active_config: { polling_interval_s: int (default 5), auto_screenshot: bool (default true), auto_reinject: bool (default true) }
+> - **Output:** tracking_session_id: string, polling_started: true, sub_op_contract: { name: "poll_tick", interval_s: int, until: "stop_tracking called for tracking_session_id" }
+> - **Writes To:** x-ipe-docs/.mimicked/{session_id}/ (session.json + track-list.json + screenshots/)
+> - **Constraints:** Reuses start_tracking's injection; persists active_config to session.json so poll_tick can read it; seeds navigation_history with target_app; returns control to agent — does NOT block or spawn subprocess; agent owns the 5s loop timing.
+
+**When:** Orchestrator needs continuous capture with auto-reinject + auto-screenshot for sessions longer than the in-page buffer can hold, or where URL changes are expected.
+
+```xml
+<operation name="start_active_tracking">
+
+  <phase_1 name="博学之 — Study Broadly">
+    <action>
+      1. READ input context: target_app, session_config, active_config
+      2. APPLY defaults: polling_interval_s → 5, auto_screenshot → true, auto_reinject → true
+      3. DELEGATE to start_tracking phases 1-3 to: validate input, navigate, inject IIFE, generate session_id, start recording
+    </action>
+    <output>Session created and IIFE injected (start_tracking semantics)</output>
+  </phase_1>
+
+  <phase_2 name="审问之 — Inquire Thoroughly">
+    <action>
+      1. VALIDATE active_config.polling_interval_s ≥ 1 (recommended: 5)
+      2. VALIDATE active_config.auto_screenshot is bool
+      3. VALIDATE active_config.auto_reinject is bool
+    </action>
+    <constraints>
+      - BLOCKING: polling_interval_s &lt; 1 → return error INVALID_POLLING_INTERVAL
+    </constraints>
+    <output>active_config validated</output>
+  </phase_2>
+
+  <phase_3 name="慎思之 — Think Carefully">
+    <action>
+      1. CALL `scripts/active_tracking.py::init_session` with active_config to:
+         - Create/update session.json with active_config + navigation_history seeded with target_app
+      2. PREPARE poll_tick contract for the agent (interval_s, helper script paths)
+    </action>
+    <output>session.json updated with active_config + navigation_history; poll_tick contract ready</output>
+  </phase_3>
+
+  <phase_4 name="明辨之 — Discern Clearly">
+    <action>
+      1. VERIFY session.json contains active_config and navigation_history
+      2. VERIFY IIFE guard is set on page (window.__xipeBehaviorTrackerInjected === true)
+    </action>
+    <output>Active session setup verified</output>
+  </phase_4>
+
+  <phase_5 name="笃行之 — Practice Earnestly">
+    <action>
+      1. RETURN operation_output:
+         - success: true
+         - operation: "start_active_tracking"
+         - result: {
+             tracking_session_id,
+             polling_started: true,
+             sub_op_contract: {
+               name: "poll_tick",
+               interval_s: active_config.polling_interval_s,
+               until: "stop_tracking called for tracking_session_id"
+             }
+           }
+         - writes_to: "x-ipe-docs/.mimicked/{tracking_session_id}/"
+         - errors: []
+      2. AGENT INSTRUCTION: Begin polling loop — every interval_s seconds, call poll_tick(tracking_session_id, tick_n) where tick_n is monotonic from 1. Continue until stop_tracking returns successfully OR poll_tick returns error TRACKER_LOST with auto_reinject=false.
+    </action>
+    <output>Active tracking ready; agent owns the 5s timing loop</output>
+  </phase_5>
+
+</operation>
+```
+
+### Operation: poll_tick
+
+> **Contract (CR-001):**
+> - **Input:** tracking_session_id: string, tick_n: int (monotonic counter from agent, starts at 1)
+> - **Output:** event_count: int, new_events: bool, url_changed: bool, screenshot_path: string?, reinjected: bool
+> - **Writes To:** x-ipe-docs/.mimicked/{session_id}/ (track-list.json + screenshots/tick-{n}.png + session.json::navigation_history)
+> - **Constraints:** Single accumulating track-list.json (NO per-tick JSON files); screenshots only on new events; URL-change reinject if active_config.auto_reinject=true; if IIFE not injected AND auto_reinject=false → error TRACKER_LOST.
+
+**When:** Invoked by orchestrating agent on each polling tick (every active_config.polling_interval_s seconds) after start_active_tracking returned `polling_started: true`.
+
+```xml
+<operation name="poll_tick">
+
+  <phase_1 name="博学之 — Study Broadly">
+    <action>
+      1. READ tracking_session_id, tick_n from input
+      2. RESOLVE session_dir = x-ipe-docs/.mimicked/{tracking_session_id}/
+      3. READ session.json to get active_config and last navigation
+      4. IF session.json not found → return error SESSION_NOT_FOUND
+    </action>
+    <output>Session context loaded</output>
+  </phase_1>
+
+  <phase_2 name="审问之 — Inquire Thoroughly">
+    <action>
+      1. evaluate_script(active_tracking.build_poll_script()) → get {events, eventCount, url, error?}
+      2. IF error == "not_injected":
+         - IF active_config.auto_reinject == false → return error TRACKER_LOST
+         - ELSE → mark reinject_needed = true (handled in phase 3)
+    </action>
+    <output>In-page poll completed; events + url collected (or reinject flagged)</output>
+  </phase_2>
+
+  <phase_3 name="慎思之 — Think Carefully">
+    <action>
+      1. URL CHANGE HANDLING:
+         IF active_config.auto_reinject AND active_tracking.detect_url_change(session_dir, current_url):
+           a. evaluate_script(active_tracking.build_clear_guard_script())
+           b. RE-INJECT IIFE (delegate to start_tracking's phase 3 injection logic)
+           c. active_tracking.record_navigation(session_dir, current_url)
+           d. SET reinjected = true
+           e. SET url_changed = true
+      2. EVENT MERGE:
+         track_list_path = session_dir / "track-list.json"
+         active_tracking.merge_events(track_list_path, events, session_metadata)
+      3. SCREENSHOT GATING:
+         last_event_count = (read from previous tick state OR 0)
+         new_events_flag = active_tracking.should_screenshot(eventCount, last_event_count)
+         IF active_config.auto_screenshot AND new_events_flag:
+           a. screenshot_p = active_tracking.screenshot_path(session_dir, tick_n)
+           b. Chrome DevTools MCP take_screenshot(filePath=screenshot_p, fullPage=false)
+           c. active_tracking.record_screenshot(track_list_path, "screenshots/tick-{n}.png".format(n=tick_n))
+           d. SET screenshot_path_result = str(screenshot_p)
+         ELSE:
+           SET screenshot_path_result = null
+    </action>
+    <constraints>
+      - CRITICAL: NO per-tick JSON files. track-list.json is the single accumulating store.
+      - CRITICAL: Empty ticks (no new events) MUST NOT trigger screenshots.
+      - CRITICAL: Reinject MUST clear the guard flag first or injection will be skipped by IIFE.
+    </constraints>
+    <output>Events merged, navigation recorded if changed, screenshot captured if new events</output>
+  </phase_3>
+
+  <phase_4 name="明辨之 — Discern Clearly">
+    <action>
+      1. VERIFY track-list.json updated with new event_count
+      2. IF reinjected: VERIFY window.__xipeBehaviorTrackerInjected === true
+      3. IF screenshot taken: VERIFY screenshot file exists
+    </action>
+    <output>Tick side effects verified</output>
+  </phase_4>
+
+  <phase_5 name="笃行之 — Practice Earnestly">
+    <action>
+      1. RETURN operation_output:
+         - success: true
+         - operation: "poll_tick"
+         - result: {
+             event_count: eventCount,
+             new_events: new_events_flag,
+             url_changed: url_changed,
+             reinjected: reinjected,
+             screenshot_path: screenshot_path_result
+           }
+         - writes_to: "x-ipe-docs/.mimicked/{tracking_session_id}/"
+         - errors: []
+    </action>
+    <output>Tick complete; agent uses result.event_count as last_event_count for next tick</output>
   </phase_5>
 
 </operation>
@@ -399,7 +595,7 @@ BLOCKING: All input fields with non-trivial initialization MUST be documented he
 ```yaml
 operation_output:
   success: true | false
-  operation: "start_tracking | stop_tracking | get_observations"
+  operation: "start_tracking | stop_tracking | get_observations | start_active_tracking | poll_tick"
   result:
     # start_tracking:
     tracking_session_id: "mimic-{YYYYMMDD}-{short_uuid}"
@@ -474,6 +670,7 @@ operation_output:
 | `references/tracker-toolbar.js` | Readable IIFE source — RecordingEngine, PIIMasker, CircularBuffer, EventSerializer, toolbar UI |
 | `references/tracker-toolbar.mini.js` | Minified IIFE for injection (<5KB) |
 | `scripts/post_processor.py` | PostProcessor class — generates flow narrative, key paths, pain points, AI annotations |
+| `scripts/active_tracking.py` | CR-001 helpers — build_poll_script, build_clear_guard_script, init_session, merge_events, detect_url_change, record_navigation, should_screenshot, screenshot_path, record_screenshot |
 | `references/examples.md` | Worked examples for each operation |
 
 ---

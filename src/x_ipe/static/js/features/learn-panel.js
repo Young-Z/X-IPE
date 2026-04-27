@@ -159,7 +159,7 @@ class LearnPanelManager {
 
         // Build skill invocation command
         const purposeArg = ` --purpose "${purpose.replace(/"/g, '\\"')}"`;
-        const command = `Use x-ipe-tool-learning-behavior-tracker-for-web skill to track behavior on ${url}${purposeArg}`;
+        const command = `Use x-ipe-knowledge-mimic-web-behavior-tracker start_active_tracking operation to track behavior on ${url}${purposeArg}`;
 
         // Expand terminal panel
         if (window.terminalPanel) {

@@ -38,7 +38,7 @@ function makeMockElement(tag) {
 
 function loadTrackerSandbox() {
     const source = readFileSync(
-        resolve(import.meta.dirname, '../../.github/skills/x-ipe-tool-learning-behavior-tracker-for-web/references/tracker-toolbar.js'),
+        resolve(import.meta.dirname, '../../.github/skills/x-ipe-knowledge-mimic-web-behavior-tracker/references/tracker-toolbar.js'),
         'utf-8'
     );
 
@@ -78,7 +78,7 @@ function loadTrackerSandbox() {
 
 function extractClass(className) {
     const source = readFileSync(
-        resolve(import.meta.dirname, '../../.github/skills/x-ipe-tool-learning-behavior-tracker-for-web/references/tracker-toolbar.js'),
+        resolve(import.meta.dirname, '../../.github/skills/x-ipe-knowledge-mimic-web-behavior-tracker/references/tracker-toolbar.js'),
         'utf-8'
     );
     const start = source.indexOf(`class ${className} {`);

@@ -1,0 +1,75 @@
+{
+  "_version": "1.0",
+  "tasks": [
+    {
+      "task_id": "TASK-1146",
+      "task_type": "Change Request",
+      "description": "CR against FEATURE-059-C: Add start_active_tracking operation to x-ipe-knowledge-mimic-web-behavior-tracker — bundles 5s polling loop, auto-reinject on URL change, and auto-screenshot on new events (capabilities lost when migrating from x-ipe-tool-learning-behavior-tracker-for-web)",
+      "status": "completed",
+      "role": "engineer",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-059/FEATURE-059-C/CR-001.md",
+        "x-ipe-docs/requirements/EPIC-059/FEATURE-059-C/specification.md"
+      ],
+      "next_task": "x-ipe-task-based-feature-refinement",
+      "created_at": "2026-04-23T06:01:04.068133+00:00",
+      "last_updated": "2026-04-23T06:02:50.004570+00:00"
+    },
+    {
+      "task_id": "TASK-1147",
+      "task_type": "Feature Refinement",
+      "description": "Formal refinement pass on FEATURE-059-C v1.2 (post CR-001) — validate AC-059C-17 GWT format, test type, mockup-N/A, dependencies, and DoR/DoD",
+      "status": "completed",
+      "role": "engineer",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-059/FEATURE-059-C/specification.md",
+        "x-ipe-docs/requirements/EPIC-059/FEATURE-059-C/CR-001.md"
+      ],
+      "next_task": "x-ipe-task-based-technical-design",
+      "created_at": "2026-04-23T06:04:06.993348+00:00",
+      "last_updated": "2026-04-23T07:24:54.065567+00:00"
+    },
+    {
+      "task_id": "TASK-1148",
+      "task_type": "Technical Design",
+      "description": "Update FEATURE-059-C technical-design.md with start_active_tracking + poll_tick sub-op design (CR-001 v1.3)",
+      "status": "completed",
+      "role": "engineer",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-059/FEATURE-059-C/technical-design.md"
+      ],
+      "next_task": "x-ipe-task-based-code-implementation",
+      "created_at": "2026-04-23T07:25:30.286609+00:00",
+      "last_updated": "2026-04-23T07:26:44.923294+00:00"
+    },
+    {
+      "task_id": "TASK-1149",
+      "task_type": "Code Implementation",
+      "description": "Implement start_active_tracking + poll_tick for x-ipe-knowledge-mimic-web-behavior-tracker per FEATURE-059-C v1.3 spec / TD v1.2 (CR-001). Adds scripts/active_tracking.py + SKILL.md operations.",
+      "status": "completed",
+      "role": "engineer",
+      "output_links": [
+        ".github/skills/x-ipe-knowledge-mimic-web-behavior-tracker/scripts/active_tracking.py",
+        ".github/skills/x-ipe-knowledge-mimic-web-behavior-tracker/SKILL.md",
+        "tests/test_active_tracking_059c_cr1.py"
+      ],
+      "next_task": "x-ipe-task-based-feature-acceptance-test",
+      "created_at": "2026-04-23T07:27:25.592770+00:00",
+      "last_updated": "2026-04-23T07:35:50.900914+00:00"
+    },
+    {
+      "task_id": "TASK-1150",
+      "task_type": "Feature Acceptance Test",
+      "description": "AC test for CR-001 (FEATURE-059-C AC-17 a/b/c) — active tracking poll/reinject/screenshot",
+      "status": "completed",
+      "role": "Drift",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-059/FEATURE-059-C/acceptance-test-cases.md",
+        "tests/test_active_tracking_059c_cr1.py"
+      ],
+      "next_task": "x-ipe-task-based-feature-closing",
+      "created_at": "2026-04-23T07:48:02.763982+00:00",
+      "last_updated": "2026-04-23T07:49:05.915224+00:00"
+    }
+  ]
+}

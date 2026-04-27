@@ -1,6 +1,6 @@
 # Technical Design: Layer 2 — Domain Skills (Constructors + Mimic + Ontology-Builder)
 
-> Feature ID: FEATURE-059-C | Version: v1.1 | Last Updated: 2026-04-16
+> Feature ID: FEATURE-059-C | Version: v1.3 | Last Updated: 2026-04-27
 
 ---
 
@@ -16,9 +16,9 @@
 | `x-ipe-knowledge-constructor-user-manual` | Domain expert for user manual construction (4 ops: framework, rubric, request_knowledge, fill_structure) | Absorbs `x-ipe-tool-knowledge-extraction-user-manual` | #knowledge #constructor #user-manual #domain-expert |
 | `x-ipe-knowledge-constructor-notes` | Domain expert for knowledge notes construction (same 4-op interface) | Absorbs `x-ipe-tool-knowledge-extraction-notes` | #knowledge #constructor #notes #domain-expert |
 | `x-ipe-knowledge-constructor-app-reverse-engineering` | Domain expert for RE reports (same 4-op interface, delegates to `x-ipe-tool-rev-eng-*`) | Absorbs `x-ipe-tool-knowledge-extraction-application-reverse-engineering` | #knowledge #constructor #reverse-engineering #domain-expert |
-| `x-ipe-knowledge-mimic-web-behavior-tracker` | Observe & record user behavior on websites via Chrome DevTools MCP | Absorbs `x-ipe-tool-learning-behavior-tracker-for-web`, writes to `x-ipe-docs/.mimicked/` | #knowledge #mimic #behavior-tracker #chrome-devtools |
+| `x-ipe-knowledge-mimic-web-behavior-tracker` | Observe & record user behavior on websites via Chrome DevTools MCP. **CR-001:** adds `start_active_tracking` + `poll_tick` for agent-driven 5s polling, URL-change reinject, screenshot on new events. | Absorbs `x-ipe-tool-learning-behavior-tracker-for-web`, writes to `x-ipe-docs/.mimicked/` | #knowledge #mimic #behavior-tracker #chrome-devtools |
 | `x-ipe-knowledge-ontology-builder` | Build ontology graph (classes, instances, vocabulary) from source knowledge via iterative discover-critique-implement loop (single `build_ontology` op) | Absorbs build ops from retired `x-ipe-tool-ontology`, writes directly to `.ontology/` with `lifecycle` flag | #knowledge #ontology #builder #graph |
-| Deprecation headers (×4) | Add migration pointers to old tool skills | 4 old skills get deprecation banners | #deprecation #migration |
+| Deprecation/retirement | Add migration pointers to old extraction tools; retire redundant behavior tracker tool after CR-001 parity | Old extraction tools keep deprecation banners; behavior tracker tool removed | #deprecation #migration |
 
 ### Dependencies
 
@@ -30,7 +30,7 @@
 | `x-ipe-knowledge-extractor-memory` | FEATURE-059-B | [technical-design.md](x-ipe-docs/requirements/EPIC-059/FEATURE-059-B/technical-design.md) | Constructors reference as `suggested_extractor` in `request_knowledge` output |
 | `x-ipe-meta-skill-creator` | Foundation | [SKILL.md](.github/skills/x-ipe-meta-skill-creator/SKILL.md) | Skill creation workflow — candidate → production merge |
 | `x-ipe-tool-rev-eng-*` (8 sub-skills) | Existing | [SKILL.md](.github/skills/x-ipe-tool-rev-eng-api-contract-extraction/SKILL.md) | Referenced by constructor-app-RE for section-level extraction |
-| `x-ipe-tool-learning-behavior-tracker-for-web` | Existing | [SKILL.md](.github/skills/x-ipe-tool-learning-behavior-tracker-for-web/SKILL.md) | Source for mimic migration — scripts/, IIFE, post-processor |
+| `x-ipe-tool-learning-behavior-tracker-for-web` | Retired | N/A | Removed after CR-001 parity; replaced by `x-ipe-knowledge-mimic-web-behavior-tracker` |
 | `x-ipe-tool-ontology/scripts/ontology.py` | Existing | [SKILL.md](.github/skills/x-ipe-tool-ontology/SKILL.md) | Reference for JSONL format, entity CRUD patterns, validation logic |
 | Chrome DevTools MCP | External | N/A | Runtime dependency for mimic (navigate_page, evaluate_script) |
 
@@ -128,7 +128,7 @@ context:
 | D6 | Deprecation: knowledge-extraction-user-manual | Edit | `.github/skills/x-ipe-tool-knowledge-extraction-user-manual/SKILL.md` | AC-059C-16a |
 | D7 | Deprecation: knowledge-extraction-notes | Edit | `.github/skills/x-ipe-tool-knowledge-extraction-notes/SKILL.md` | AC-059C-16b |
 | D8 | Deprecation: knowledge-extraction-app-RE | Edit | `.github/skills/x-ipe-tool-knowledge-extraction-application-reverse-engineering/SKILL.md` | AC-059C-16c |
-| D9 | Deprecation: learning-behavior-tracker | Edit | `.github/skills/x-ipe-tool-learning-behavior-tracker-for-web/SKILL.md` | AC-059C-16d |
+| D9 | Retirement: learning-behavior-tracker | Remove | `.github/skills/x-ipe-tool-learning-behavior-tracker-for-web/` | Superseded by AC-059C-17 |
 
 ### Workflow Diagram — Librarian ↔ Domain Skills
 
@@ -567,6 +567,98 @@ constraints:
 
 ---
 
+#### D4-CR1: start_active_tracking + poll_tick (CR-001 v1.3)
+
+**Purpose:** Port the deprecated tool's polling/reinject/screenshot capabilities into the knowledge skill as an opt-in, agent-driven loop. Existing 3 ops (start_tracking / stop_tracking / get_observations) remain unchanged.
+
+**Execution model:** Agent-driven loop (matches deprecated `x-ipe-tool-learning-behavior-tracker-for-web` exactly). The skill exposes building blocks; the orchestrating agent runs the 5s timing via Chrome DevTools MCP.
+
+**New script:** `scripts/active_tracking.py` — pure helpers (no I/O loop), provides:
+- `build_poll_script() → str` — JS to drain in-page buffer (returns `{events, eventCount, url}`)
+- `merge_events(track_list_path, new_events) → dict` — merges into accumulating `track-list.json` (schema_version 2.0; matches old skill's `write_track_list`)
+- `detect_url_change(session_dir, current_url) → bool` — reads `session.json::navigation_history`, compares last URL
+- `record_navigation(session_dir, url) → None` — appends to `navigation_history`
+- `should_screenshot(event_count, last_event_count) → bool` — returns `event_count > last_event_count`
+- `screenshot_path(session_dir, tick_n) → Path` — `screenshots/tick-{n}.png`
+
+The poll loop itself is documented in SKILL.md operation steps (no Python loop), so the agent drives timing.
+
+**Operation contracts:**
+
+```yaml
+operation: start_active_tracking
+input:
+  target_app: string                # URL to track
+  session_config:                   # Same as start_tracking
+    pii_whitelist: string[]
+    buffer_capacity: int
+    purpose: string
+  active_config:
+    polling_interval_s: int         # default: 5
+    auto_screenshot: bool           # default: true
+    auto_reinject: bool             # default: true
+output:
+  tracking_session_id: string
+  polling_started: true
+  sub_op_contract:                  # Hands the agent the poll_tick contract
+    name: poll_tick
+    interval_s: 5
+    until: "stop_tracking called for tracking_session_id"
+writes_to: x-ipe-docs/.mimicked/{session_id}/
+constraints:
+  - Reuses start_tracking's injection logic (DRY)
+  - Persists active_config to session.json so poll_tick can read it
+  - Initializes navigation_history: [target_app] in session.json
+  - Returns control to agent; does NOT block or spawn subprocess
+```
+
+```yaml
+operation: poll_tick                # Sub-op invoked by agent every polling_interval_s
+input:
+  tracking_session_id: string
+  tick_n: int                       # Monotonic counter from agent
+output:
+  event_count: int
+  new_events: bool
+  url_changed: bool
+  screenshot_path: string?          # null if no screenshot taken
+writes_to: x-ipe-docs/.mimicked/{session_id}/
+constraints:
+  - evaluate_script(build_poll_script()) → drain buffer
+  - merge_events into track-list.json (single accumulating file)
+  - IF active_config.auto_reinject AND detect_url_change:
+      → clear window.__xipeBehaviorTrackerInjected via evaluate_script
+      → re-inject IIFE (delegate to start_tracking's injection logic)
+      → record_navigation(session_dir, current_url)
+  - IF active_config.auto_screenshot AND should_screenshot:
+      → Chrome DevTools MCP take_screenshot → screenshot_path(session_dir, tick_n)
+      → append to track-list.json::screenshots array
+  - Empty ticks (no new events): NO screenshot, NO extra files (matches old skill's `if new_events:` gate)
+  - If session_id not found → error: SESSION_NOT_FOUND
+  - If IIFE not injected AND auto_reinject=false → error: TRACKER_LOST
+```
+
+**stop_tracking interaction:** No changes. The existing op's stop sub-op terminates the in-page IIFE, which is the natural loop-exit signal — once the agent's next `poll_tick` returns `error: not_injected`, the agent exits its loop and post-processes the accumulated `track-list.json`.
+
+**Session directory layout (active session):**
+```
+x-ipe-docs/.mimicked/{session_id}/
+├── session.json              # metadata + navigation_history[] + active_config
+├── track-list.json           # accumulating events (schema 2.0); screenshots[] array
+└── screenshots/
+    ├── tick-3.png            # tick where new events first detected
+    ├── tick-7.png
+    └── ...                   # only ticks with new_events=true
+```
+
+**Decision rationale:**
+- **Why agent-driven, not subprocess?** The deprecated skill is agent-driven. Subprocess would (a) require new PID/signal handling, (b) duplicate Chrome DevTools MCP session ownership, (c) violate stateless-skill principle from 059-C. Agent loop is simpler, matches existing orchestration model, no new failure modes.
+- **Why poll_tick as separate sub-op?** Keeps `start_active_tracking` idempotent (single setup call) while making the per-tick contract explicit and testable in isolation.
+- **Why single `track-list.json` not per-tick files?** Matches old skill's proven format; downstream `post_processor.py` already consumes this shape; avoids file-count explosion in long sessions.
+- **Why screenshots only on new events?** Direct port of old skill's `if new_events: take_screenshot` line. Empty ticks would produce identical images (no visual change without DOM events).
+
+---
+
 ### D5: ontology-builder
 
 **New skill that absorbs build/CRUD capabilities from retired `x-ipe-tool-ontology`.**
@@ -740,7 +832,7 @@ description: "⚠️ DEPRECATED — Migrated to {new-skill-name} (FEATURE-059-C)
 | `x-ipe-tool-knowledge-extraction-user-manual` | `x-ipe-knowledge-constructor-user-manual` | D6 |
 | `x-ipe-tool-knowledge-extraction-notes` | `x-ipe-knowledge-constructor-notes` | D7 |
 | `x-ipe-tool-knowledge-extraction-application-reverse-engineering` | `x-ipe-knowledge-constructor-app-reverse-engineering` | D8 |
-| `x-ipe-tool-learning-behavior-tracker-for-web` | `x-ipe-knowledge-mimic-web-behavior-tracker` | D9 |
+| `x-ipe-tool-learning-behavior-tracker-for-web` | `x-ipe-knowledge-mimic-web-behavior-tracker` | D9 (removed after CR-001 parity) |
 
 ---
 
@@ -779,3 +871,4 @@ The `lifecycle`, `synthesize_id`, and `synthesize_message` fields are added to t
 |---------|------|---------|
 | v1.0 | 2026-04-16 | Initial design |
 | v1.1 | 2026-04-16 | Added `synthesize_id` and `synthesize_message` fields to class meta and instance data; added Complete Meta Field Reference tables |
+| v1.2 | 2026-04-23 | [CR-001](x-ipe-docs/requirements/EPIC-059/FEATURE-059-C/CR-001.md) — Added D4-CR1 section: `start_active_tracking` + `poll_tick` sub-op design (agent-driven loop, single accumulating `track-list.json`, screenshot only on new events). Adds `scripts/active_tracking.py` helper module. |

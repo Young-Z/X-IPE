@@ -1,9 +1,9 @@
 # Feature Specification: Layer 2 — Domain Skills (Constructors + Mimic + Ontology-Builder)
 
 > Feature ID: FEATURE-059-C  
-> Version: v1.0  
-> Status: Refined  
-> Last Updated: 07-16-2025
+> Version: v1.4
+> Status: Completed
+> Last Updated: 04-27-2026
 
 ## Version History
 
@@ -11,6 +11,9 @@
 |---------|------|-------------|
 | v1.0 | 07-16-2025 | Initial specification |
 | v1.1 | 07-16-2025 | Redesign ontology-builder: collapse 5 operations into single `build_ontology` with iterative 6-step loop |
+| v1.2 | 04-22-2026 | [CR-001](x-ipe-docs/requirements/EPIC-059/FEATURE-059-C/CR-001.md) — Add `start_active_tracking` operation to mimic skill (5s polling + auto-reinject on URL change + auto-screenshot on new events); ports capabilities from deprecated `x-ipe-tool-learning-behavior-tracker-for-web` |
+| v1.3 | 04-23-2026 | Refinement (TASK-1147) — clarify agent-driven loop model, single accumulating `track-list.json`, screenshot only on new events (matches deprecated skill semantics) |
+| v1.4 | 04-27-2026 | Feature closing — remove retired `x-ipe-tool-learning-behavior-tracker-for-web` after `x-ipe-knowledge-mimic-web-behavior-tracker` reaches active-tracking parity |
 
 ## Linked Mockups
 
@@ -30,7 +33,7 @@ The five skills are:
 
 Each skill follows the `x-ipe-knowledge` template (FEATURE-059-A) and is created via `x-ipe-meta-skill-creator`. Constructors ship with SKILL.md + `templates/` + `references/`. Mimic and ontology-builder additionally include `scripts/`.
 
-Additionally, this feature deprecates 4 old tool skills by adding deprecation headers pointing to their replacements.
+Additionally, this feature deprecates old extraction tool skills by adding migration headers pointing to their replacements. The behavior tracker tool is retired after CR-001 because its active tracking capabilities are now covered by `x-ipe-knowledge-mimic-web-behavior-tracker`.
 
 ## User Stories
 
@@ -176,7 +179,15 @@ Additionally, this feature deprecates 4 old tool skills by adding deprecation he
 | AC-059C-16a | GIVEN `x-ipe-tool-knowledge-extraction-user-manual` WHEN this feature is implemented THEN a deprecation header is added pointing to `x-ipe-knowledge-constructor-user-manual` | Unit |
 | AC-059C-16b | GIVEN `x-ipe-tool-knowledge-extraction-notes` WHEN this feature is implemented THEN a deprecation header is added pointing to `x-ipe-knowledge-constructor-notes` | Unit |
 | AC-059C-16c | GIVEN `x-ipe-tool-knowledge-extraction-application-reverse-engineering` WHEN this feature is implemented THEN a deprecation header is added pointing to `x-ipe-knowledge-constructor-app-reverse-engineering` | Unit |
-| AC-059C-16d | GIVEN `x-ipe-tool-learning-behavior-tracker-for-web` WHEN this feature is implemented THEN a deprecation header is added pointing to `x-ipe-knowledge-mimic-web-behavior-tracker` | Unit |
+| AC-059C-16d | GIVEN `x-ipe-tool-learning-behavior-tracker-for-web` WHEN FEATURE-059-C is closed after CR-001 THEN the retired skill is removed from `.github/skills/` AND active behavior tracking is served by `x-ipe-knowledge-mimic-web-behavior-tracker` | Unit |
+
+### AC-059C-17: Mimic — start_active_tracking Operation (CR-001)
+
+| AC ID | Criterion (Given/When/Then) | Test Type |
+|-------|-------------------------------|-----------|
+| AC-059C-17a | GIVEN `start_active_tracking` is called with a target URL AND `polling_interval_s: 5` WHEN the operation runs THEN it injects the IIFE AND returns control to the orchestrating agent with `polling_started: true` AND a `poll_tick` sub-operation contract (the agent runs the 5s loop, calling `poll_tick` until `stop_tracking` is called) | Integration |
+| AC-059C-17b | GIVEN an active tracking session is running AND the page navigates to a different URL WHEN `poll_tick` detects the URL change (via `evaluate_script` reading `location.href`) THEN the tracker IIFE is re-injected (after clearing `window.__xipeBehaviorTrackerInjected`) AND the new URL is appended to `session.json::navigation_history` | Integration |
+| AC-059C-17c | GIVEN an active tracking session is running WHEN `poll_tick` detects new events since the last tick (`event_count > last_event_count`) THEN a screenshot is captured via Chrome DevTools MCP AND saved to `x-ipe-docs/.mimicked/{session_id}/screenshots/tick-{n}.png` AND the path is referenced in the updated `track-list.json`. Empty ticks (no new events) MUST NOT trigger screenshots and MUST NOT create per-tick files (matches deprecated tool behavior — accumulating single `track-list.json`). | Integration |
 
 ## Functional Requirements
 
@@ -221,6 +232,20 @@ Additionally, this feature deprecates 4 old tool skills by adding deprecation he
 - Process: Read stored observations → apply filter → return matches
 - Output: `observations[]`
 - Read-only (no writes)
+
+**FR-7b: Mimic — start_active_tracking (CR-001)**
+- Input: `target_app` (URL), `session_config` (pii_whitelist, buffer_capacity, purpose), `active_config` (`polling_interval_s` default 5, `auto_screenshot` default true, `auto_reinject` default true)
+- Process (agent-driven loop, ports deprecated `x-ipe-tool-learning-behavior-tracker-for-web` logic):
+  1. Inject IIFE (same path as `start_tracking`) and create session directory
+  2. Return `polling_started: true` + `poll_tick` sub-op contract to orchestrating agent
+  3. **Agent runs the loop** — every `polling_interval_s` seconds calls `poll_tick`:
+     - `evaluate_script` to drain in-page event buffer; merge into accumulating `track-list.json` (single file overwritten each tick with full event list, schema_version 2.0 — matches old skill format)
+     - IF `auto_reinject`: read `location.href`; if changed since last tick, clear `__xipeBehaviorTrackerInjected` and re-inject; append URL to `session.json::navigation_history`
+     - IF `auto_screenshot` AND `event_count > last_event_count`: capture screenshot via Chrome DevTools MCP; save to `screenshots/tick-{n}.png`; reference in `track-list.json::screenshots` array
+     - Empty ticks (no new events): no screenshot, no extra file writes
+  4. Loop terminates when agent calls `stop_tracking` for the same `tracking_session_id` (which executes the existing stop sub-op)
+- Output: `tracking_session_id`, `polling_started: true`, `sub_op: poll_tick` contract
+- Writes to: `x-ipe-docs/.mimicked/{session_id}/` (`session.json`, `track-list.json`, `screenshots/tick-{n}.png`)
 
 **FR-8: Ontology-Builder — build_ontology (Single Operation)**
 - Input: `source_content` (paths to memory files), `depth_limit` (1 | 3 | "auto", default: "auto")

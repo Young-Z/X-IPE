@@ -63,7 +63,7 @@ input:
     timeout_seconds: 15
     max_files_per_section: 20  # default matches tool skill default; override to increase
 
-  # Behavior Context (optional — provided by x-ipe-tool-learning-behavior-tracker-for-web)
+  # Behavior Context (optional — provided by x-ipe-knowledge-mimic-web-behavior-tracker)
   behavior_context:
     learning_folder: ""  # path to learning folder with track/track-list.json and imgs/
                          # When provided, use tracked behavior data as SUPPLEMENTARY guidance
