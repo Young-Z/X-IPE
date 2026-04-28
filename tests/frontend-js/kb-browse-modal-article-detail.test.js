@@ -98,4 +98,35 @@ describe('FEATURE-049-B / CR-003: KB Article Detail Description', () => {
     expect(css).toContain('white-space: normal');
     expect(css).toContain('word-break: break-word');
   });
+
+  it('renders memory labels and ontology tags for memory entries', () => {
+    if (!ensureImpl()) return;
+
+    const modal = createModal();
+    modal._renderArticleScene({
+      ...ARTICLE_DATA,
+      path: 'procedural/xiaohongshu-user-manual.md',
+      frontmatter: {
+        ...ARTICLE_DATA.frontmatter,
+        title: 'Xiaohongshu User Manual',
+        memory_entry_id: 'proc-20260427-001',
+        memory_type: 'procedural',
+        tags: {
+          memory: ['xiaohongshu', 'user-manual']
+        }
+      },
+      ontology_tags: ['Search Xiaohongshu', 'UserTask', 'Home Feed']
+    });
+
+    const text = modal.overlay.textContent;
+    expect(text).toContain('Memory');
+    expect(text).toContain('Ontology Tags');
+    expect(text).toContain('Search Xiaohongshu');
+    expect(text).toContain('Memory Type');
+    expect(text).toContain('procedural');
+    expect(text).toContain('proc-20260427-001');
+    expect(text).not.toContain('Knowledge Base');
+    expect(modal.overlay.querySelector('.kb-meta-filepath').textContent)
+      .toContain('memory/procedural/xiaohongshu-user-manual.md');
+  });
 });

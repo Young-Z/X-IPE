@@ -1,6 +1,6 @@
 /**
- * FEATURE-049-B / CR-002: KB Browse Modal — "Knowledge Atelier"
- * Full-featured KB interface matching mockup kb-interface-v1.html.
+ * FEATURE-049-B / CR-002: Memory Browse Modal.
+ * Full-featured Memory interface.
  * Scenes: Browse (grid/list), Article Detail, Intake placeholder.
  */
 class KBBrowseModal {
@@ -96,20 +96,24 @@ class KBBrowseModal {
             fetch(KBBrowseModal.API.CONFIG),
             fetch('/api/kb/intake'),
         ]);
-        if (treeRes.status === 'fulfilled' && treeRes.value.ok) {
-            const d = await treeRes.value.json();
+        const treeData = await this._readSettledJson(treeRes);
+        const filesData = await this._readSettledJson(filesRes);
+        const configData = await this._readSettledJson(configRes);
+        const intakeData = await this._readSettledJson(intakeRes);
+        if (treeData) {
+            const d = treeData;
             this.tree = d.tree || [];
         }
-        if (filesRes.status === 'fulfilled' && filesRes.value.ok) {
-            const d = await filesRes.value.json();
+        if (filesData) {
+            const d = filesData;
             this.files = d.files || [];
         }
-        if (configRes.status === 'fulfilled' && configRes.value.ok) {
-            const d = await configRes.value.json();
+        if (configData) {
+            const d = configData;
             this.config = d.config || d || { tags: { lifecycle: [], domain: [] } };
         }
-        if (intakeRes.status === 'fulfilled' && intakeRes.value.ok) {
-            const d = await intakeRes.value.json();
+        if (intakeData) {
+            const d = intakeData;
             this._intakeStats = d.stats || { total: 0, pending: 0, processing: 0, filed: 0 };
             this._intakePendingDeep = d.pending_deep_count ?? this._intakeStats.pending ?? 0;
         } else {
@@ -117,6 +121,13 @@ class KBBrowseModal {
             this._intakePendingDeep = 0;
         }
         this._buildFolderColorMap();
+    }
+
+    async _readSettledJson(result) {
+        if (result.status !== 'fulfilled' || !result.value?.ok || typeof result.value.json !== 'function') {
+            return null;
+        }
+        return result.value.json();
     }
 
     async _refreshData() {
@@ -253,7 +264,7 @@ class KBBrowseModal {
                 <div class="kb-modal-header">
                     <div class="kb-modal-header-left">
                         <div class="kb-modal-header-title">
-                            <i class="bi bi-book"></i> Knowledge Base
+                            <i class="bi bi-book"></i> Memory
                         </div>
                     </div>
                     <div class="kb-modal-header-actions">
@@ -261,7 +272,7 @@ class KBBrowseModal {
                             <i class="bi bi-plus-lg"></i> New Article
                         </button>
                         <button class="kb-modal-hdr-btn" data-action="reference-kb">
-                            <i class="bi bi-link-45deg"></i> Reference KB
+                            <i class="bi bi-link-45deg"></i> Reference Memory
                         </button>
                         <button class="kb-modal-close" title="Close">&times;</button>
                     </div>
@@ -270,7 +281,7 @@ class KBBrowseModal {
                     <div class="kb-modal-sidebar">
                         <div class="kb-modal-sidebar-search">
                             <i class="bi bi-search"></i>
-                            <input type="text" placeholder="Search KB…" data-role="sidebar-search" />
+                            <input type="text" placeholder="Search Memory…" data-role="sidebar-search" />
                         </div>
                         <div class="kb-modal-sidebar-content" data-role="sidebar-folders"></div>
                     </div>
@@ -300,7 +311,7 @@ class KBBrowseModal {
             <div class="kb-sidebar-section">
                 <div class="kb-sidebar-section-header expanded">
                     <i class="bi bi-book section-icon" style="color:#10b981;"></i>
-                    <span style="color:#fff;font-weight:600;">Knowledge Base</span>
+                    <span style="color:#fff;font-weight:600;">Memory</span>
                     <i class="bi bi-chevron-down chevron"></i>
                 </div>
                 <div class="kb-sidebar-section-content open">
@@ -350,7 +361,7 @@ class KBBrowseModal {
         scene.innerHTML = `
             <div class="kb-content-header">
                 <div class="kb-content-header-left">
-                    <div class="kb-content-title"><i class="bi bi-book"></i> Knowledge Base</div>
+                    <div class="kb-content-title"><i class="bi bi-book"></i> Memory</div>
                 </div>
                 <div class="kb-content-header-right">
                     <button class="kb-content-btn" data-action="toggle-upload-view">
@@ -614,6 +625,8 @@ class KBBrowseModal {
         const tags = fm.tags || {};
         const lc = Array.isArray(tags.lifecycle) ? tags.lifecycle : (tags.lifecycle ? [tags.lifecycle] : []);
         const dm = Array.isArray(tags.domain) ? tags.domain : (tags.domain ? [tags.domain] : []);
+        const memoryTags = Array.isArray(tags.memory) ? tags.memory : (tags.memory ? [tags.memory] : []);
+        const ontologyTags = Array.isArray(data.ontology_tags) ? data.ontology_tags : [];
         const title = fm.title || data.name || 'Untitled';
         const folder = data.path?.includes('/') ? data.path.split('/')[0] : '';
         const fileName = data.path?.split('/').pop() || '';
@@ -655,7 +668,7 @@ class KBBrowseModal {
                 <div class="kb-article-main">
                     <div class="kb-article-header-block">
                         <div class="kb-article-breadcrumb">
-                            <a data-action="back-to-browse">Knowledge Base</a>
+                            <a data-action="back-to-browse">Memory</a>
                             <span>\u203A</span>
                             ${breadcrumbParts.length > 1 ? `<a>${this._escapeHtml(breadcrumbParts.slice(0, -1).join('/'))}</a><span>\u203A</span>` : ''}
                             <span>${this._escapeHtml(breadcrumbParts[breadcrumbParts.length - 1])}</span>
@@ -688,10 +701,22 @@ class KBBrowseModal {
                         <div class="kb-meta-section-title">Domain</div>
                         <div class="kb-meta-tags">${dm.map(t => `<span class="kb-meta-tag-domain">${this._escapeHtml(t)}</span>`).join('')}</div>
                     </div>` : ''}
+                    ${memoryTags.length ? `
+                    <div class="kb-meta-section">
+                        <div class="kb-meta-section-title">Memory Tags</div>
+                        <div class="kb-meta-tags">${memoryTags.map(t => `<span class="kb-meta-tag-domain">${this._escapeHtml(t)}</span>`).join('')}</div>
+                    </div>` : ''}
+                    ${ontologyTags.length ? `
+                    <div class="kb-meta-section">
+                        <div class="kb-meta-section-title">Ontology Tags</div>
+                        <div class="kb-meta-tags">${ontologyTags.map(t => `<span class="kb-meta-tag-lifecycle">${this._escapeHtml(t)}</span>`).join('')}</div>
+                    </div>` : ''}
                     <div class="kb-meta-section">
                         <div class="kb-meta-section-title">Details</div>
                         <div class="kb-meta-field"><span class="kb-meta-field-label">Folder</span><span class="kb-meta-field-value">${this._escapeHtml(folder || '/')}</span></div>
                         ${description ? `<div class="kb-meta-field kb-meta-field-wrap"><span class="kb-meta-field-label">Description</span><span class="kb-meta-field-value">${this._escapeHtml(description)}</span></div>` : ''}
+                        ${fm.memory_type ? `<div class="kb-meta-field"><span class="kb-meta-field-label">Memory Type</span><span class="kb-meta-field-value">${this._escapeHtml(fm.memory_type)}</span></div>` : ''}
+                        ${fm.memory_entry_id ? `<div class="kb-meta-field"><span class="kb-meta-field-label">Memory Entry ID</span><span class="kb-meta-field-value">${this._escapeHtml(fm.memory_entry_id)}</span></div>` : ''}
                         <div class="kb-meta-field"><span class="kb-meta-field-label">Author</span><span class="kb-meta-field-value">${this._escapeHtml(fm.author || 'unknown')}</span></div>
                         <div class="kb-meta-field"><span class="kb-meta-field-label">Created</span><span class="kb-meta-field-value">${this._escapeHtml(created)}</span></div>
                         <div class="kb-meta-field"><span class="kb-meta-field-label">Auto-generated</span><span class="kb-meta-field-value">${fm.auto_generated ? 'Yes' : 'No'}</span></div>
@@ -699,7 +724,7 @@ class KBBrowseModal {
                     </div>
                     <div class="kb-meta-section">
                         <div class="kb-meta-section-title">File Path</div>
-                        <div class="kb-meta-filepath">${this._escapeHtml('knowledge-base/' + (data.path || ''))}</div>
+                        <div class="kb-meta-filepath">${this._escapeHtml('memory/' + (data.path || ''))}</div>
                     </div>
                 </div>
             </div>
@@ -865,7 +890,7 @@ class KBBrowseModal {
         if (item.status === 'filed') {
             let btns = '';
             if (!isFolder) {
-                btns += `<button class="kb-content-btn sm" data-action="intake-action" data-intake-op="view" data-intake-file="${path}" data-intake-dest="${dest}" data-intake-type="${itemType}" title="View in KB"><i class="bi bi-arrow-right-circle"></i></button>`;
+                btns += `<button class="kb-content-btn sm" data-action="intake-action" data-intake-op="view" data-intake-file="${path}" data-intake-dest="${dest}" data-intake-type="${itemType}" title="View in Memory"><i class="bi bi-arrow-right-circle"></i></button>`;
             }
             btns += `<button class="kb-content-btn sm" data-action="intake-action" data-intake-op="undo" data-intake-file="${path}" data-intake-dest="${dest}" data-intake-type="${itemType}" title="Undo"><i class="bi bi-arrow-counterclockwise"></i></button>`;
             return btns;
@@ -1468,7 +1493,7 @@ class KBBrowseModal {
     }
 
     _runAILibrarian() {
-        const command = 'organize knowledge base intake files with AI Librarian';
+        const command = 'organize memory intake files with AI Librarian';
         if (!window.terminalManager?.sendCopilotPromptCommand) {
             navigator.clipboard?.writeText(command);
             if (typeof showToast === 'function') showToast('Command copied — paste into Copilot CLI', 'info');

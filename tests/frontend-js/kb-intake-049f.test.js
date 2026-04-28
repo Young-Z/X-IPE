@@ -100,7 +100,7 @@ describe('FEATURE-049-F: KB AI Librarian & Intake', () => {
       globalThis.navigator = { clipboard: { writeText: vi.fn() } };
       modal._runAILibrarian();
       const copiedText = globalThis.navigator.clipboard.writeText.mock.calls[0]?.[0];
-      expect(copiedText).toBe('organize knowledge base intake files with AI Librarian');
+      expect(copiedText).toBe('organize memory intake files with AI Librarian');
       expect(copiedText).not.toContain('--workflow-mode');
     });
   });

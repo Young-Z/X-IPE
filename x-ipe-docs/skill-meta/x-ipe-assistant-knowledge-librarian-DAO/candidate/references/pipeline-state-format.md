@@ -12,7 +12,9 @@ pipeline_state:
   request_type: "construction | extraction | ontology_only | presentation | storage | classification_failed"
   selected_constructor: "x-ipe-knowledge-constructor-{name} | null"
   iteration_count: 0
-  max_iterations: 3
+  deep_research: "smart | 1_round | 3_round"
+  satisfaction_status: "pending | fully_satisfied | partial_quality | skipped"
+  source_map: []
   steps:
     discovery:        { status: "pending | done | failed", output_ref: null }
     classification:   { status: "pending | done | failed", output_ref: null }

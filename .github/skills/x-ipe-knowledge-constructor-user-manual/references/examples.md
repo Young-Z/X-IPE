@@ -17,6 +17,7 @@ context:
     app_name: "DataViz Dashboard"
     app_type: "web"
     user_goal: "Create a comprehensive user manual for end users"
+    instruction_temperature: "balanced"
     source_paths:
       - "./src"
       - "./docs"
@@ -26,8 +27,8 @@ context:
 
 ### Processing
 
-1. **博学之:** Load `playbook-template.md` (8-section base). Load `mixin-web.md` (adds Authentication, Navigation, Browser Requirements, API Endpoints sections).
-2. **审问之:** Validate app_type="web" → valid. app_name="DataViz Dashboard" → non-empty. source_paths → non-empty.
+1. **博学之:** Load `playbook-template.md` (8-section base). Load `mixin-web.md` (adds Authentication, Navigation, Browser Requirements, API Endpoints sections). Resolve instruction_temperature="balanced".
+2. **审问之:** Validate app_type="web" → valid. app_name="DataViz Dashboard" → non-empty. source_paths → non-empty. instruction_temperature="balanced" → valid.
 3. **慎思之:** Merge mixin into base: insert Authentication after Section 3, insert Navigation into Section 4 as first subsection, insert Browser Requirements into Section 2, insert API Endpoints into Section 8. Replace `{app_name}` → "DataViz Dashboard". Adapt "Your First {Action}" → "Your First Dashboard".
 4. **明辨之:** Verify 8 base sections + 4 mixin additions present. toc_structure has 12 entries. No unresolved placeholders.
 5. **笃行之:** Write to `.working/framework/dataviz-dashboard-framework.md`.
@@ -131,7 +132,7 @@ operation_output:
 
 ## Example 3: request_knowledge
 
-**Scenario:** Identify knowledge gaps after partial extraction — Overview is filled, Getting Started is empty, Core Features is partial.
+**Scenario:** Identify knowledge gaps after partial extraction using the default balanced instruction temperature — Overview is filled, Getting Started is empty, Core Features is partial.
 
 ### Input
 
@@ -144,14 +145,15 @@ context:
     empty_sections: ["3-getting-started", "5-common-workflows", "7-troubleshooting", "8-faq-reference"]
     partial_sections: ["4-core-features"]
   rubric: { ... }  # from Example 2
+  instruction_temperature: "balanced"
 ```
 
 ### Processing
 
-1. **博学之:** Load `collection-template.md` extraction patterns. Build section inventory from framework.
-2. **审问之:** Framework valid. current_state has all three arrays. Rubric present.
-3. **慎思之:** Walk sections — skip filled (1, 2, 6). For empty section "3-getting-started" (weight=3): generate request for quickstart guide, basic workflow, first dashboard tutorial. suggested_extractor="extractor-web" (needs live source). For partial "4-core-features" (weight=3): generate request for remaining feature details. For empty "5-common-workflows" (weight=2): request workflow patterns. Priority by weight descending.
-4. **明辨之:** Each request has target_section, what_needed, suggested_extractor, priority. All specific.
+1. **博学之:** Load `collection-template.md` extraction patterns. Build section inventory from framework. Resolve instruction_temperature="balanced".
+2. **审问之:** Framework valid. current_state has all three arrays. Rubric present. instruction_temperature valid.
+3. **慎思之:** Use balanced policy: create targeted requests only for empty/partial sections. Walk sections — skip filled (1, 2, 6). For empty section "3-getting-started" (weight=3): generate request for quickstart guide, basic workflow, first dashboard tutorial. suggested_extractor="extractor-web" (needs live source). For partial "4-core-features" (weight=3): generate request for remaining feature details. For empty "5-common-workflows" (weight=2): request workflow patterns. Priority by weight descending.
+4. **明辨之:** Each request has target_section, what_needed, suggested_extractor, priority, extraction_scope. All specific.
 5. **笃行之:** Write to `.working/plan/dataviz-dashboard-plan.md`.
 
 ### Output
@@ -166,29 +168,80 @@ operation_output:
         what_needed: "Extract quickstart guide: minimal steps to create first dashboard from a data source. Look for QUICKSTART.md, README 'Getting Started', examples/ directory. Need step-by-step with exact UI actions and expected outcomes."
         suggested_extractor: "extractor-web"
         priority: 3
+        extraction_scope: "targeted"
 
       - target_section: "4-core-features"
         what_needed: "Complete feature documentation for: chart builder, data source connector, sharing/export. Need interaction patterns, step-by-step instructions, and screenshots for each."
         suggested_extractor: "extractor-web"
         priority: 3
+        extraction_scope: "targeted"
 
       - target_section: "5-common-workflows"
         what_needed: "Identify ≥3 end-to-end workflows: e.g., 'Create dashboard from CSV', 'Share dashboard with team', 'Schedule report email'. Look for tutorials, integration tests, example scripts."
         suggested_extractor: "extractor-web"
         priority: 2
+        extraction_scope: "targeted"
 
       - target_section: "7-troubleshooting"
         what_needed: "Extract common issues from TROUBLESHOOTING.md, GitHub Issues, error handling code. Need ≥3 issues with symptoms and solutions."
         suggested_extractor: "extractor-memory"
         priority: 1
+        extraction_scope: "targeted"
 
       - target_section: "8-faq-reference"
         what_needed: "Extract FAQ from FAQ.md or docs, glossary of DataViz-specific terms, keyboard shortcuts if any, version history from CHANGELOG.md."
         suggested_extractor: "extractor-memory"
         priority: 1
+        extraction_scope: "targeted"
     writes_to: "x-ipe-docs/memory/.working/plan/"
   errors: []
 ```
+
+---
+
+## Example 3B: request_knowledge with instruction temperature
+
+**Scenario:** The same partial manual can produce broader or narrower extraction plans depending on the user preference.
+
+### Creative
+
+```yaml
+operation: request_knowledge
+context:
+  framework: { ... }
+  current_state:
+    filled_sections: ["1-overview"]
+    empty_sections: ["3-getting-started"]
+    partial_sections: ["4-core-features"]
+  rubric: { ... }
+  instruction_temperature: "creative"
+```
+
+Expected behavior:
+- Generate required gap requests.
+- Add bounded exploratory requests for adjacent workflows, hidden capabilities, edge cases, and richer examples.
+- Use extractor skills more broadly, including `x-ipe-knowledge-extractor-web` for source/live app exploration and `x-ipe-knowledge-extractor-memory` for existing Memory.
+- Mark exploratory additions with `extraction_scope: "exploratory"`.
+
+### Strict
+
+```yaml
+operation: request_knowledge
+context:
+  framework: { ... }
+  current_state:
+    filled_sections: ["1-overview"]
+    empty_sections: ["3-getting-started"]
+    partial_sections: ["4-core-features"]
+  rubric: { ... }
+  instruction_temperature: "strict"
+```
+
+Expected behavior:
+- Generate only requests needed to satisfy required rubric gaps.
+- Prefer existing Memory/existing material.
+- Use source/web extraction only when a required rubric item cannot be satisfied otherwise.
+- Mark requests with `extraction_scope: "limited"` and create no exploratory requests.
 
 ---
 

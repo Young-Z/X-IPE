@@ -1,0 +1,18 @@
+evaluation:
+  status: pass
+  must_pass_rate: 100
+  should_pass_rate: 100
+  summary: "Candidate adds user-manual instruction temperature preference and keeps knowledge-skill structure within limits."
+  checks:
+    - id: TC-UM-TEMP-001
+      result: pass
+      evidence: "candidate/SKILL.md documents creative, balanced, strict; default balanced; orchestrator should ask user preference."
+    - id: TC-UM-TEMP-002
+      result: pass
+      evidence: "request_knowledge maps creative to exploratory, balanced to targeted, strict to limited, and adds extraction_scope."
+    - id: TC-UM-TEMP-003
+      result: pass
+      evidence: "examples include balanced request_knowledge plus creative/strict behavior."
+    - id: TC-UM-STRUCT-001
+      result: pass
+      evidence: "candidate/SKILL.md has 553 lines; DoR=3; DoD=4; Input Initialization present."

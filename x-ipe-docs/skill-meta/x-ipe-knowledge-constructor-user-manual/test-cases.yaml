@@ -1,0 +1,46 @@
+test_cases:
+  - id: TC-UM-TEMP-001
+    name: "Preference options documented"
+    type: content
+    must_pass: true
+    given: "candidate/SKILL.md"
+    when: "validate instruction temperature documentation"
+    then:
+      - "creative, balanced, and strict are documented"
+      - "balanced is documented as the default"
+      - "orchestrator is instructed to ask the user preference"
+
+  - id: TC-UM-TEMP-002
+    name: "request_knowledge scopes extraction by temperature"
+    type: content
+    must_pass: true
+    given: "candidate/SKILL.md"
+    when: "inspect request_knowledge operation"
+    then:
+      - "creative creates exploratory extractor-backed requests"
+      - "balanced creates targeted gap requests"
+      - "strict creates limited necessary requests and no exploratory requests"
+      - "knowledge_requests include extraction_scope"
+
+  - id: TC-UM-TEMP-003
+    name: "Examples cover balanced, creative, and strict"
+    type: content
+    must_pass: true
+    given: "candidate/references/examples.md"
+    when: "inspect examples"
+    then:
+      - "balanced example includes instruction_temperature"
+      - "creative behavior is shown"
+      - "strict behavior is shown"
+
+  - id: TC-UM-STRUCT-001
+    name: "Knowledge skill structure remains valid"
+    type: structure
+    must_pass: true
+    given: "candidate/SKILL.md"
+    when: "validate line count and required sections"
+    then:
+      - "SKILL.md is under 600 lines"
+      - "Input Initialization is present"
+      - "DoR has at most 5 checkpoints"
+      - "DoD has at most 10 checkpoints"

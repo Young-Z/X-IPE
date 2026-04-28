@@ -24,7 +24,7 @@ from x_ipe.tracing import x_ipe_tracing
 # Constants
 # ---------------------------------------------------------------------------
 
-KB_ROOT_DIR = 'x-ipe-docs/knowledge-base'
+KB_ROOT_DIR = 'x-ipe-docs/memory'
 KB_CONFIG_FILE = 'knowledgebase-config.json'
 KB_CONFIG_DIR = 'x-ipe-docs/config'
 INTAKE_FOLDER = '.intake'
@@ -52,6 +52,7 @@ class TagSet:
     """Two-dimensional tag taxonomy."""
     lifecycle: List[str] = field(default_factory=list)
     domain: List[str] = field(default_factory=list)
+    memory: List[str] = field(default_factory=list)
 
 
 @dataclass
@@ -62,23 +63,39 @@ class FrontmatterData:
     tags: Optional[TagSet] = None
     author: Optional[str] = None
     created: Optional[str] = None
+    updated: Optional[str] = None
     auto_generated: bool = False
     url: Optional[str] = None
+    memory_entry_id: Optional[str] = None
+    memory_type: Optional[str] = None
+    metadata: Optional[Dict[str, Any]] = None
 
     def to_dict(self) -> Dict[str, Any]:
+        tags_dict = None
+        if self.tags:
+            tags_dict = {
+                'lifecycle': self.tags.lifecycle,
+                'domain': self.tags.domain,
+            }
+            if self.tags.memory:
+                tags_dict['memory'] = self.tags.memory
         result: Dict[str, Any] = {
             'title': self.title,
             'description': self.description,
-            'tags': {
-                'lifecycle': self.tags.lifecycle,
-                'domain': self.tags.domain,
-            } if self.tags else None,
+            'tags': tags_dict,
             'author': self.author,
             'created': self.created,
+            'updated': self.updated,
             'auto_generated': self.auto_generated,
         }
         if self.url is not None:
             result['url'] = self.url
+        if self.memory_entry_id is not None:
+            result['memory_entry_id'] = self.memory_entry_id
+        if self.memory_type is not None:
+            result['memory_type'] = self.memory_type
+        if self.metadata is not None:
+            result['metadata'] = self.metadata
         return result
 
 
@@ -93,6 +110,7 @@ class KBNode:
     modified_date: Optional[str] = None
     file_type: Optional[str] = None
     frontmatter: Optional[FrontmatterData] = None
+    ontology_tags: List[str] = field(default_factory=list)
 
     def to_dict(self) -> Dict[str, Any]:
         result: Dict[str, Any] = {
@@ -110,6 +128,8 @@ class KBNode:
             result['file_type'] = self.file_type
         if self.frontmatter is not None:
             result['frontmatter'] = self.frontmatter.to_dict()
+        if self.ontology_tags:
+            result['ontology_tags'] = self.ontology_tags
         return result
 
 
@@ -349,18 +369,30 @@ class KBService:
         if isinstance(tags_raw, dict):
             lc = tags_raw.get('lifecycle', [])
             dm = tags_raw.get('domain', [])
+            memory = tags_raw.get('memory', [])
             lc = [lc] if isinstance(lc, str) else (lc or [])
             dm = [dm] if isinstance(dm, str) else (dm or [])
-        else:
+            memory = [memory] if isinstance(memory, str) else (memory or [])
+        elif isinstance(tags_raw, list):
             lc, dm = [], []
-        tags = TagSet(lifecycle=lc, domain=dm)
+            memory = [str(t) for t in tags_raw]
+        elif isinstance(tags_raw, str):
+            lc, dm, memory = [], [], [tags_raw]
+        else:
+            lc, dm, memory = [], [], []
+        tags = TagSet(lifecycle=lc, domain=dm, memory=memory)
         return FrontmatterData(
             title=raw.get('title'),
+            description=raw.get('description'),
             tags=tags,
             author=raw.get('author'),
             created=str(raw.get('created', '')) or None,
+            updated=str(raw.get('updated', '')) or None,
             auto_generated=bool(raw.get('auto_generated', False)),
             url=raw.get('url'),
+            memory_entry_id=raw.get('memory_entry_id'),
+            memory_type=raw.get('memory_type'),
+            metadata=raw.get('metadata') if isinstance(raw.get('metadata'), dict) else None,
         )
 
     @staticmethod
@@ -378,9 +410,17 @@ class KBService:
             fm_dict['author'] = fm_data.author
         if fm_data.created is not None:
             fm_dict['created'] = fm_data.created
+        if fm_data.updated is not None:
+            fm_dict['updated'] = fm_data.updated
         fm_dict['auto_generated'] = fm_data.auto_generated
         if fm_data.url is not None:
             fm_dict['url'] = fm_data.url
+        if fm_data.memory_entry_id is not None:
+            fm_dict['memory_entry_id'] = fm_data.memory_entry_id
+        if fm_data.memory_type is not None:
+            fm_dict['memory_type'] = fm_data.memory_type
+        if fm_data.metadata is not None:
+            fm_dict['metadata'] = fm_data.metadata
         yaml_str = yaml.safe_dump(fm_dict, default_flow_style=False, allow_unicode=True).rstrip('\n')
         return f"---\n{yaml_str}\n---\n{body}"
 
@@ -397,9 +437,15 @@ class KBService:
         if isinstance(tags_raw, dict):
             lc = tags_raw.get('lifecycle', [])
             dm = tags_raw.get('domain', [])
+            memory = tags_raw.get('memory', [])
             lc = [lc] if isinstance(lc, str) else (lc or [])
             dm = [dm] if isinstance(dm, str) else (dm or [])
-            tags = TagSet(lifecycle=lc, domain=dm)
+            memory = [memory] if isinstance(memory, str) else (memory or [])
+            tags = TagSet(lifecycle=lc, domain=dm, memory=memory)
+        elif isinstance(tags_raw, list):
+            tags = TagSet(memory=[str(t) for t in tags_raw])
+        elif isinstance(tags_raw, str):
+            tags = TagSet(memory=[tags_raw])
         else:
             tags = TagSet()
         author = fm.get('author') or 'unknown'
@@ -409,6 +455,10 @@ class KBService:
         return FrontmatterData(
             title=title, tags=tags, author=author,
             created=created, auto_generated=auto_generated, url=url,
+            updated=str(fm.get('updated', '')) or None,
+            memory_entry_id=fm.get('memory_entry_id'),
+            memory_type=fm.get('memory_type'),
+            metadata=fm.get('metadata') if isinstance(fm.get('metadata'), dict) else None,
         )
 
     @staticmethod
@@ -498,12 +548,20 @@ class KBService:
 
         tags_raw = metadata.get('tags', {})
         if isinstance(tags_raw, dict):
+            memory = tags_raw.get('memory', [])
             lc = tags_raw.get('lifecycle', [])
             dm = tags_raw.get('domain', [])
+            memory = [memory] if isinstance(memory, str) else (memory or [])
             lc = [lc] if isinstance(lc, str) else (lc or [])
             dm = [dm] if isinstance(dm, str) else (dm or [])
-        else:
+        elif isinstance(tags_raw, list):
+            memory = [str(t) for t in tags_raw]
             lc, dm = [], []
+        elif isinstance(tags_raw, str):
+            memory = [tags_raw]
+            lc, dm = [], []
+        else:
+            lc, dm, memory = [], [], []
 
         entry = {
             'title': metadata.get('title') or stem.replace('-', ' ').replace('_', ' ').title(),
@@ -514,6 +572,11 @@ class KBService:
             'type': self._detect_kb_file_type(filename),
             'auto_generated': bool(metadata.get('auto_generated', False)),
         }
+        if memory:
+            entry['tags']['memory'] = memory
+        for key in ('updated', 'memory_entry_id', 'memory_type', 'metadata'):
+            if metadata.get(key) is not None:
+                entry[key] = metadata[key]
         if metadata.get('url') is not None:
             entry['url'] = metadata['url']
         return entry
@@ -525,6 +588,7 @@ class KBService:
             tags = TagSet(
                 lifecycle=tags_raw.get('lifecycle', []),
                 domain=tags_raw.get('domain', []),
+                memory=tags_raw.get('memory', []),
             )
         else:
             tags = TagSet()
@@ -534,8 +598,12 @@ class KBService:
             tags=tags,
             author=entry.get('author'),
             created=entry.get('created'),
+            updated=entry.get('updated'),
             auto_generated=bool(entry.get('auto_generated', False)),
             url=entry.get('url'),
+            memory_entry_id=entry.get('memory_entry_id'),
+            memory_type=entry.get('memory_type'),
+            metadata=entry.get('metadata') if isinstance(entry.get('metadata'), dict) else None,
         )
 
     def _migrate_frontmatter_to_index(self, folder_path: Path) -> None:
@@ -607,9 +675,9 @@ class KBService:
         for entry in entries:
             if not entry.is_file():
                 continue
-            if entry.name.startswith('.'):
-                continue
             rel = str(entry.relative_to(self.kb_root)).replace('\\', '/')
+            if self._path_has_hidden_segment(rel):
+                continue
             stat = entry.stat()
             # Read the index for this file's parent folder (cached)
             parent = entry.parent
@@ -658,6 +726,7 @@ class KBService:
                 'path': rel_path,
                 'content': None,
                 'frontmatter': fm.to_dict() if fm else None,
+                'ontology_tags': self._ontology_tags_for_path(rel_path),
                 'size_bytes': stat.st_size,
                 'modified_date': self._iso_mtime(stat),
                 'file_type': file_type,
@@ -670,6 +739,7 @@ class KBService:
             'path': rel_path,
             'content': body,
             'frontmatter': fm.to_dict() if fm else None,
+            'ontology_tags': self._ontology_tags_for_path(rel_path),
             'size_bytes': stat.st_size,
             'modified_date': self._iso_mtime(stat),
             'file_type': file_type,
@@ -903,7 +973,95 @@ class KBService:
             modified_date=self._iso_mtime(stat),
             file_type=self._determine_file_type(name),
             frontmatter=frontmatter,
+            ontology_tags=self._ontology_tags_for_path(path),
         )
+
+    @staticmethod
+    def _path_has_hidden_segment(rel_path: str) -> bool:
+        return any(part.startswith('.') for part in rel_path.replace('\\', '/').split('/'))
+
+    def _ontology_tags_for_path(self, rel_path: str) -> List[str]:
+        ontology_root = self.kb_root / '.ontology'
+        if not ontology_root.is_dir():
+            return []
+
+        tags: List[str] = []
+
+        def add_tag(value: Any) -> None:
+            if value is None:
+                return
+            text = str(value).strip()
+            if text and text not in tags:
+                tags.append(text)
+
+        for jsonl_path in ontology_root.rglob('*.jsonl'):
+            if self._path_has_hidden_segment(str(jsonl_path.relative_to(ontology_root)).replace('\\', '/')):
+                continue
+            try:
+                for line in jsonl_path.read_text(encoding='utf-8').splitlines():
+                    if not line.strip():
+                        continue
+                    record = json.loads(line)
+                    if isinstance(record, dict):
+                        record_data = self._ontology_record_data(record)
+                        if self._record_references_path(record_data, rel_path):
+                            add_tag(record_data.get('label') or record_data.get('name') or record_data.get('id'))
+                            add_tag(record_data.get('class') or self._ontology_record_type_tag(record))
+            except (json.JSONDecodeError, OSError):
+                continue
+
+        for json_path in ontology_root.rglob('*.json'):
+            if self._path_has_hidden_segment(str(json_path.relative_to(ontology_root)).replace('\\', '/')):
+                continue
+            try:
+                payload = json.loads(json_path.read_text(encoding='utf-8'))
+            except (json.JSONDecodeError, OSError):
+                continue
+            for record in self._iter_ontology_records(payload):
+                record_data = self._ontology_record_data(record)
+                if self._record_references_path(record_data, rel_path):
+                    add_tag(record_data.get('term') or record_data.get('label') or record_data.get('name') or record_data.get('id'))
+                    add_tag(record_data.get('class') or self._ontology_record_type_tag(record))
+
+        return tags
+
+    def _iter_ontology_records(self, payload: Any) -> List[Dict[str, Any]]:
+        if isinstance(payload, dict):
+            records: List[Dict[str, Any]] = [payload]
+            for value in payload.values():
+                if isinstance(value, list):
+                    records.extend(item for item in value if isinstance(item, dict))
+            return records
+        if isinstance(payload, list):
+            return [item for item in payload if isinstance(item, dict)]
+        return []
+
+    @staticmethod
+    def _ontology_record_data(record: Dict[str, Any]) -> Dict[str, Any]:
+        props = record.get('props')
+        if isinstance(props, dict):
+            return {**record, **props}
+        return record
+
+    @staticmethod
+    def _ontology_record_type_tag(record: Dict[str, Any]) -> Optional[str]:
+        if isinstance(record.get('props'), dict):
+            return None
+        return record.get('type')
+
+    def _record_references_path(self, record: Dict[str, Any], rel_path: str) -> bool:
+        sources = record.get('source_files') or record.get('source_file') or record.get('source_paths') or []
+        if isinstance(sources, str):
+            sources = [sources]
+        if not isinstance(sources, list):
+            return False
+        return any(self._source_matches_path(source, rel_path) for source in sources)
+
+    def _source_matches_path(self, source: Any, rel_path: str) -> bool:
+        source_path = str(source).replace('\\', '/').strip('/')
+        rel = rel_path.replace('\\', '/').strip('/')
+        project_rel = str((self.kb_root / rel).relative_to(self.project_root)).replace('\\', '/')
+        return source_path in {rel, project_rel} or source_path.endswith('/' + rel)
 
     @staticmethod
     def _matches(rel_path: str, fm: Optional[FrontmatterData],
@@ -930,7 +1088,7 @@ class KBService:
             if fm.author and query in fm.author.lower():
                 return True
             if fm.tags:
-                all_tags = [t.lower() for t in fm.tags.lifecycle + fm.tags.domain]
+                all_tags = [t.lower() for t in fm.tags.lifecycle + fm.tags.domain + fm.tags.memory]
                 if any(query in t for t in all_tags):
                     return True
         return False

@@ -87,7 +87,7 @@ class KBBrowseView {
         this.container.innerHTML = `
             <div class="kb-browse">
                 <div class="kb-browse-header">
-                    <h2>📚 Knowledge Base</h2>
+                    <h2>📚 Memory</h2>
                     <button class="kb-browse-new-btn" title="New Article">
                         <i class="bi bi-plus-lg"></i> New Article
                     </button>

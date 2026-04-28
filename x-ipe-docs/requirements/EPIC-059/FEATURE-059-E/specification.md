@@ -1,15 +1,16 @@
 # Feature Specification: Layer 4 — Orchestrator (Knowledge Librarian + User Representative Migration)
 
 > Feature ID: FEATURE-059-E  
-> Version: v1.0  
+> Version: v1.1
 > Status: Refined  
-> Last Updated: 04-20-2026
+> Last Updated: 04-27-2026
 
 ## Version History
 
 | Version | Date | Description |
 |---------|------|-------------|
 | v1.0 | 04-20-2026 | Initial specification |
+| v1.1 | 04-27-2026 | CR-001: Require extractor-driven overview/gap research and replace fixed max-3 loop with deep-research modes |
 
 ## Linked Mockups
 
@@ -33,7 +34,7 @@ Both skills follow the `x-ipe-assistant` template and are created via `x-ipe-met
 
 3. **As** the Knowledge Librarian, **I want** to semantically understand an incoming request and route it to the best-matching constructor, **so that** the right domain expert handles the knowledge construction.
 
-4. **As** the Knowledge Librarian, **I want** to run a critique loop with a max-3-iteration guard, **so that** the constructed draft meets the rubric quality bar without falling into infinite loops.
+4. **As** the Knowledge Librarian, **I want** deep-research modes (`1_round`, `3_round`, `smart`) with smart as the default, **so that** the workflow can keep researching until the rubric is fully satisfied while still preventing infinite loops.
 
 5. **As** the Knowledge Librarian, **I want** to handle pure ontology operations (discover + wash + link) without needing a constructor, **so that** ontology maintenance tasks don't require unnecessary knowledge construction overhead.
 
@@ -69,7 +70,7 @@ Both skills follow the `x-ipe-assistant` template and are created via `x-ipe-met
 | AC ID | Criterion (Given/When/Then) | Test Type |
 |-------|-------------------------------|-----------|
 | AC-059E-03a | GIVEN a classified `construction` request WHEN the 格物 phase begins THEN the Librarian invokes the selected constructor's `provide_framework` operation AND receives a `framework_document` with domain-appropriate structure | Unit |
-| AC-059E-03b | GIVEN a `framework_document` from the constructor WHEN the Librarian needs topic context THEN it invokes the appropriate extractor's `extract_overview` operation to gather high-level context AND passes the overview back to the constructor | Unit |
+| AC-059E-03b | GIVEN a `framework_document` from the constructor WHEN the Librarian needs topic context THEN it MUST invoke an appropriate extractor's `extract_overview` operation, save the extractor output to `.working/overview/`, and pass that overview back to the constructor before rubric design | Unit |
 | AC-059E-03c | GIVEN the constructor has received the framework and overview WHEN `design_rubric` is invoked THEN the constructor returns `rubric_metrics[]` with measurable quality criteria per framework section | Unit |
 | AC-059E-03d | GIVEN rubric metrics are defined WHEN the constructor's `request_knowledge` operation is invoked THEN it returns `knowledge_requests[]` specifying what knowledge is needed, for which section, and which extractor to use | Unit |
 | AC-059E-03e | GIVEN the 格物 phase completes WHEN all intermediate artifacts are examined THEN framework is in `.working/framework/`, rubric is in `.working/rubric/`, and plan is in `.working/plan/` (all ephemeral, no persistent writes) | Unit |
@@ -81,9 +82,11 @@ Both skills follow the `x-ipe-assistant` template and are created via `x-ipe-met
 | AC-059E-04a | GIVEN `knowledge_requests[]` from the constructor WHEN the 致知 execute step begins THEN the Librarian dispatches each request to the appropriate extractor (extractor-web for URLs, extractor-memory for existing knowledge) AND collects `gathered_knowledge[]` | Unit |
 | AC-059E-04b | GIVEN `gathered_knowledge[]` is collected WHEN the Librarian invokes the constructor's `fill_structure` operation THEN the constructor returns a `completed_draft` with knowledge mapped to framework sections AND incomplete sections marked with `[INCOMPLETE: reason]` | Unit |
 | AC-059E-04c | GIVEN a `completed_draft` and `rubric_metrics[]` WHEN the critique sub-agent evaluates the draft THEN it returns a `critique_result` with per-section scores, identified gaps, and a `pass` or `fail` overall verdict | Unit |
-| AC-059E-04d | GIVEN critique returns `fail` with identified gaps WHEN the Librarian processes the critique THEN it returns to 格物 Phase Step 4 (request_knowledge) for the constructor to request additional knowledge for the gap sections AND increments `iteration_count` | Unit |
-| AC-059E-04e | GIVEN `iteration_count` reaches 3 AND critique still returns `fail` WHEN the Librarian evaluates whether to continue THEN it stops the loop, logs a warning with remaining gaps, marks the draft as `partial_quality`, and proceeds to the ontology step | Unit |
-| AC-059E-04f | GIVEN critique returns `pass` WHEN the Librarian processes the result THEN it proceeds directly to the ontology step without further iteration | Unit |
+| AC-059E-04d | GIVEN critique returns `fail` with identified gaps WHEN the Librarian processes the critique THEN it returns to 格物 Phase Step 4 for the constructor to request additional gap knowledge AND fulfills those requests by invoking extractor skills using the accumulated overview, gathered knowledge, source map, and newly discovered leads | Unit |
+| AC-059E-04e | GIVEN `deep_research = 1_round` WHEN the first critique fails THEN the Librarian performs at most one extractor-backed refinement round before producing either `fully_satisfied` or `partial_quality` with documented blockers | Unit |
+| AC-059E-04f | GIVEN `deep_research = 3_round` WHEN critique fails THEN the Librarian performs up to three extractor-backed refinement rounds and only reports success when the rubric is fully satisfied | Unit |
+| AC-059E-04g | GIVEN `deep_research = smart` or the input omits `deep_research` WHEN critique fails THEN the Librarian continues extractor-backed refinement while actionable gaps remain until rubric satisfaction is 100% or a documented blocker/safety cap is reached | Unit |
+| AC-059E-04h | GIVEN critique returns 100% satisfaction with no gaps WHEN the Librarian processes the result THEN it proceeds directly to the ontology step with `satisfaction_status: fully_satisfied` | Unit |
 
 ### AC-059E-05: Librarian — Ontology Processing
 
@@ -134,7 +137,7 @@ Both skills follow the `x-ipe-assistant` template and are created via `x-ipe-met
 |-------|-------------------------------|-----------|
 | AC-059E-10a | GIVEN `x-ipe-assistant-knowledge-librarian-DAO` WHEN its SKILL.md is examined THEN it conforms to the `x-ipe-assistant` template with orchestration procedure sections (Purpose, Input Parameters, Execution Procedure with phases, Output Result) | Unit |
 | AC-059E-10b | GIVEN the Librarian's SKILL.md WHEN the execution procedure is examined THEN it documents the full 格物致知 workflow with phase markers (格物.1 through 格物.4, 致知.1 through 致知.6) AND each step specifies the actor (DAO, Constructor, Extractor, Sub-agent) | Unit |
-| AC-059E-10c | GIVEN the Librarian's SKILL.md WHEN the input parameters are examined THEN it documents: `request` (the knowledge task), `request_type_override` (optional — skip classification), `target_constructor` (optional — skip routing), `max_iterations` (default: 3), `output_format` (structured\|markdown\|graph) | Unit |
+| AC-059E-10c | GIVEN the Librarian's SKILL.md WHEN the input parameters are examined THEN it documents: `request` (the knowledge task), `request_type_override` (optional — skip classification), `target_constructor` (optional — skip routing), `deep_research` (default: smart; values: `1_round`, `3_round`, `smart`), `output_format` (structured\|markdown\|graph) | Unit |
 | AC-059E-10d | GIVEN the Librarian's SKILL.md WHEN the output result is examined THEN it documents: `pipeline_summary`, `pipeline_status` (success\|partial\|failed), `completed_steps[]`, `stored_path`, `ontology_result`, `presented_output` | Unit |
 
 ## Functional Requirements
@@ -161,25 +164,27 @@ The Librarian MUST implement the two-phase workflow:
 **格物 (Plan) Phase:**
 1. **Input Init**: Classify request → identify request type → select constructor (if applicable)
 2. **Framework**: Invoke constructor's `provide_framework` → receive domain structure
-3. **Overview**: Invoke extractor to gather topic overview → pass back to constructor
+3. **Overview**: Invoke extractor `extract_overview` to gather topic overview → pass back to constructor
 4. **Rubric**: Invoke constructor's `design_rubric` → receive quality metrics
 5. **Plan**: Invoke constructor's `request_knowledge` → receive extraction plan
 
 **致知 (Execute) Phase:**
 1. **Execute**: Dispatch extractors per knowledge_requests[] → collect gathered_knowledge[]
 2. **Fill & Draft**: Invoke constructor's `fill_structure` → receive completed_draft
-3. **Critique**: Launch sub-agent evaluator against rubric → loop back to 格物.4 if gaps (max 3 iterations)
+3. **Critique**: Launch sub-agent evaluator against rubric → loop back to 格物.4 if gaps, using `deep_research` mode to decide refinement depth
 4. **Ontology**: Invoke ontology-builder → ontology-synthesizer pipeline
 5. **Store**: Invoke keeper-memory to persist to appropriate tier
 6. **Respond**: Invoke present-to-user (and optionally present-to-knowledge-graph) to deliver output
 
-### FR-4: Critique Loop with Iteration Guard
+### FR-4: Deep-Research Critique Loop
 
 The critique step MUST:
 - Launch a sub-agent to evaluate the draft against rubric_metrics[]
-- Return per-section scores and identified gaps
-- If gaps exist and iteration_count < 3: return to 格物 Phase Step 4 for replanning
-- If iteration_count reaches 3: stop looping, log warning, proceed with `partial_quality` flag
+- Return per-section scores, satisfaction percentage, identified gaps, and actionable next knowledge needs
+- If gaps exist: return to 格物 Phase Step 4 for constructor-driven replanning
+- Fulfill every new knowledge request via extractor skills; the Librarian MUST NOT manually inspect sources or synthesize gap knowledge without extractor output
+- Track a source map from overview and extraction results, and use newly discovered leads to expand later extractor requests
+- Use `deep_research` to determine refinement depth: `1_round` allows one refinement round, `3_round` allows three refinement rounds, and `smart` continues until 100% rubric satisfaction or a documented blocker/safety cap
 - Track iteration_count as state within the pipeline execution
 
 ### FR-5: Pipeline Error Handling
@@ -207,7 +212,7 @@ The migration MUST:
 - The full pipeline timeout is governed by individual skill timeouts, not a global timer
 
 ### NFR-2: Reliability
-- Max-3-iteration guard MUST be enforced — no infinite loops under any circumstance
+- Deep-research safety guards MUST be enforced — no infinite loops under any circumstance; smart mode MUST stop only on 100% satisfaction or a documented blocker/safety cap
 - Pipeline failures MUST be gracefully handled with partial results returned
 - Direct invocation fallback MUST always work if the Librarian is unavailable
 
@@ -243,7 +248,7 @@ None.
 | Rule ID | Rule |
 |---------|------|
 | BR-1 | The Librarian is the PREFERRED entry point for complex multi-step knowledge tasks, but NOT a mandatory gateway. Knowledge skills CAN be invoked directly by other agents. |
-| BR-2 | The critique loop MUST NOT exceed 3 iterations. After 3 iterations, the draft is accepted as `partial_quality` regardless of rubric score. |
+| BR-2 | The critique loop is controlled by `deep_research`: `1_round`, `3_round`, or default `smart`. Success requires 100% rubric satisfaction; otherwise the output is `partial_quality` with documented blockers. |
 | BR-3 | All intermediate artifacts (framework, rubric, plan, gathered knowledge, drafts) MUST be written to `.working/` only. Only `keeper-memory` writes to persistent memory. |
 | BR-4 | The Librarian MUST NOT expand the scope of a request beyond what was asked. If a user requests extraction only, do not auto-trigger construction. |
 | BR-5 | Constructor-driven paradigm: the constructor defines WHAT knowledge is needed. The Librarian fulfills HOW to get it. The Librarian does not decide knowledge structure — the constructor does. |
@@ -257,6 +262,7 @@ None.
 | Constructor's `request_knowledge` returns empty list | Skip extraction, proceed directly to fill_structure with existing overview knowledge |
 | All extractors fail during Execute step | Log errors, pass empty gathered_knowledge to fill_structure — constructor marks all sections as `[INCOMPLETE]` |
 | Critique returns `pass` on first iteration | Skip replanning, proceed directly to ontology step |
+| Smart deep research repeats the same gaps without new extractor leads | Stop at safety cap, mark `partial_quality`, and report repeated gaps plus exhausted extractor paths |
 | Pure ontology request with no existing graphs | ontology-synthesizer's discover_related returns empty — Librarian logs "no graphs to synthesize" and returns success with empty synthesis result |
 | Request matches multiple constructors equally | Select the first match alphabetically and log the tie-breaking decision |
 | Pipeline interrupted mid-execution | `.working/` retains all artifacts up to the interruption point for manual recovery |

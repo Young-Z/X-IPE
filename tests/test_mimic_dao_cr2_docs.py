@@ -58,3 +58,15 @@ def test_dao_delegates_behavior_learning_to_mimic_active_tracking():
     assert "WAIT for `start_active_tracking` to own polling" in text
     assert "operation_output.result.observation_payload" in text
     assert "APPEND observation_payload to gathered_knowledge[]" in text
+
+
+def test_dao_documents_behavior_learning_parameter_extraction():
+    text = DAO_SKILL.read_text(encoding="utf-8")
+
+    assert "request_type_override=behavior_learning" in text
+    assert "target_app=<URL>" in text
+    assert 'purpose="<PURPOSE>"' in text
+    assert "Extract target_app from explicit `target_app=`" in text
+    assert "Extract purpose from explicit `purpose=`" in text
+    assert "BEHAVIOR_LEARNING_TARGET_REQUIRED" in text
+    assert "BEHAVIOR_LEARNING_PURPOSE_REQUIRED" in text

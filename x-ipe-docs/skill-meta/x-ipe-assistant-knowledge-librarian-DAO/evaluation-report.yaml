@@ -1,0 +1,25 @@
+evaluation: x-ipe-assistant-knowledge-librarian-DAO-cr001
+created: 2026-04-27
+must_pass_rate: 100
+should_pass_rate: 100
+decision: pass
+summary: >
+  Candidate implements CR-001 by replacing fixed max_iterations with deep_research,
+  making construction overview extractor-driven, requiring extractor-backed gap
+  replanning, and reporting satisfaction status.
+validated_outputs:
+  - x-ipe-docs/skill-meta/x-ipe-assistant-knowledge-librarian-DAO/candidate/SKILL.md
+  - x-ipe-docs/skill-meta/x-ipe-assistant-knowledge-librarian-DAO/candidate/references/examples.md
+  - x-ipe-docs/skill-meta/x-ipe-assistant-knowledge-librarian-DAO/candidate/references/pipeline-state-format.md
+  - x-ipe-docs/skill-meta/x-ipe-assistant-knowledge-librarian-DAO/test-cases.yaml
+  - x-ipe-docs/skill-meta/x-ipe-assistant-knowledge-librarian-DAO/sandbox/execution-log.yaml
+quality_gates:
+  structural:
+    status: pass
+    notes: "candidate/SKILL.md is 495 lines and keeps DoR/DoD within limits."
+  behavior:
+    status: pass
+    notes: "Deep-research modes and extractor-backed overview/gap flows are explicit."
+  merge_readiness:
+    status: pass
+    notes: "Candidate contains all referenced resources before production merge."

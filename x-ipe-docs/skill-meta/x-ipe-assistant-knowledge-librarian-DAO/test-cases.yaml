@@ -1,0 +1,40 @@
+test_suite: x-ipe-assistant-knowledge-librarian-DAO-cr001
+created: 2026-04-27
+source_cr: x-ipe-docs/requirements/EPIC-059/FEATURE-059-E/CR-001.md
+cases:
+  - id: CR001-T01
+    name: deep_research replaces fixed max_iterations
+    type: content_check
+    must_pass: true
+    assertions:
+      - candidate/SKILL.md contains 'deep_research: "smart"'
+      - candidate/SKILL.md does not contain 'max_iterations'
+      - candidate/SKILL.md documents aliases for '1 round' and '3 round'
+  - id: CR001-T02
+    name: construction overview must use extractor overview
+    type: content_check
+    must_pass: true
+    assertions:
+      - candidate/SKILL.md contains 'extract_overview'
+      - candidate/SKILL.md contains 'construction MUST NOT proceed to rubric design from agent-only browsing'
+  - id: CR001-T03
+    name: gap replanning must be extractor backed
+    type: content_check
+    must_pass: true
+    assertions:
+      - candidate/SKILL.md contains 'source_map + gathered_knowledge + newly discovered leads'
+      - candidate/SKILL.md contains 'INVOKE extractors for every new knowledge request'
+  - id: CR001-T04
+    name: smart mode targets full satisfaction with safety cap
+    type: content_check
+    must_pass: true
+    assertions:
+      - candidate/SKILL.md contains 'satisfaction_score == 100'
+      - candidate/SKILL.md contains 'smart_safety_cap = 10'
+      - candidate/SKILL.md contains 'Success requires 100% satisfaction'
+  - id: CR001-T05
+    name: candidate stays within skill line limit
+    type: structural_check
+    must_pass: true
+    assertions:
+      - candidate/SKILL.md line_count < 500

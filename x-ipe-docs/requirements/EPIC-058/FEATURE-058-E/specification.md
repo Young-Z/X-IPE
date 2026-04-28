@@ -10,6 +10,7 @@
 | Version | Date | Description |
 |---------|------|-------------|
 | v1.0 | 07-13-2026 | Initial specification |
+| v1.1 | 2026-04-27 | Superseded graph-file/sidebar assumptions by FEATURE-059-F CR-001 Memory ontology KG refinement |
 
 ## Linked Mockups
 
@@ -31,7 +32,9 @@
 
 **US-1:** As a developer, I want to open a Knowledge Graph view from the main navigation, so that I can visually explore my KB's ontology without leaving the X-IPE application.
 
-**US-2:** As a knowledge worker, I want to select one or more graph files from a sidebar list, so that I can control which portion of my knowledge base is visualized.
+**US-2:** [RETIRED by FEATURE-059-F CR-001] As a knowledge worker, I want to select one or more graph files from a sidebar list, so that I can control which portion of my knowledge base is visualized.
+
+> Replacement: KG auto-loads user-facing Memory graph data without exposing `.ontology` graph files. Optional scope controls must use Memory/domain labels rather than raw storage filenames.
 
 **US-3:** As a developer, I want to click on a node to see its full metadata (description, dimensions, source files, related nodes), so that I can understand what each entity represents.
 
@@ -56,6 +59,8 @@
 
 ### AC-058E-02: Graph Collection Sidebar
 
+> [RETIRED by FEATURE-059-F CR-001] Raw graph-file sidebar behavior is superseded by the FEATURE-059-F auto-load Memory graph workflow. The legend remains in scope, but graph selection, select-all behavior, and `.jsonl` file listing are no longer user-facing requirements.
+
 | AC ID | Criterion (Given/When/Then) | Test Type |
 |-------|-------------------------------|-----------|
 | AC-058E-02a | GIVEN the graph viewer is open AND the active KB has `.ontology/` folder with graph files WHEN the sidebar loads THEN it lists all `.jsonl` graph files from `knowledge-base/.ontology/` with their node count, edge count, and dominant-type badge | UI |
@@ -65,6 +70,13 @@
 | AC-058E-02e | GIVEN the sidebar has graph items WHEN no graphs are selected THEN the canvas shows an empty state with an illustration and message "Select a graph to begin exploring" | UI |
 | AC-058E-02f | GIVEN the API returns graph list WHEN the sidebar renders THEN each graph item displays: checkbox, graph name, node count, edge count, and a color-coded badge indicating the dominant node type (concept=emerald, document=blue, entity=amber) | UI |
 | AC-058E-02g | GIVEN the sidebar has loaded WHEN the user views the bottom of the sidebar THEN a legend section shows 4 node types (Concept, Document, Entity, Dimension) with their corresponding colored dots | UI |
+
+### AC-058E-02R: Replacement Memory Graph Loading
+
+| AC ID | Criterion (Given/When/Then) | Test Type |
+|-------|-------------------------------|-----------|
+| AC-058E-02R-a | GIVEN KG is opened WHEN Memory ontology data exists under `x-ipe-docs/memory/.ontology/` THEN graph data is loaded automatically without a graph-file sidebar | UI |
+| AC-058E-02R-b | GIVEN KG renders scope/status labels WHEN the backing data came from `.ontology` files THEN the UI shows user-facing Memory/Knowledge Graph labels and never raw `.ontology` paths | UI |
 
 ### AC-058E-03: Graph Rendering
 
@@ -174,15 +186,15 @@
 | AC ID | Criterion (Given/When/Then) | Test Type |
 |-------|-------------------------------|-----------|
 | AC-058E-14a | GIVEN the graph viewer is opened WHEN graph data is being fetched from the API THEN a loading spinner is displayed on the canvas area | UI |
-| AC-058E-14b | GIVEN the KB has no `.ontology/` folder or no graph files WHEN the graph viewer opens THEN an empty state illustration is shown with a message like "No ontology graphs found. Run KB Librarian intake to generate graphs." | UI |
+| AC-058E-14b | GIVEN Memory has no graph data WHEN the graph viewer opens THEN an empty state illustration is shown with a user-facing message like "No Knowledge Graph data found. Add Memory entries or run Memory learning to generate graph data." | UI |
 | AC-058E-14c | GIVEN graph data is loaded WHEN the Cytoscape.js layout is computing THEN a brief loading indicator appears until the layout animation completes | UI |
 
 ### AC-058E-15: API Endpoints
 
 | AC ID | Criterion (Given/When/Then) | Test Type |
 |-------|-------------------------------|-----------|
-| AC-058E-15a | GIVEN the Flask app is running WHEN `GET /api/kb/ontology/graphs` is called THEN the API returns a JSON array of graph files from `knowledge-base/.ontology/` with each entry containing: `name`, `file_path`, `node_count`, `edge_count`, and `dominant_type` | API |
-| AC-058E-15b | GIVEN a valid graph name WHEN `GET /api/kb/ontology/graph/<name>` is called THEN the API reads the corresponding `.jsonl` file from `.ontology/` AND returns JSON with `nodes` array (id, label, node_type, weight, description, dimensions, source_files, metadata) and `edges` array (source, target, relation_type, label) | API |
+| AC-058E-15a | GIVEN the Flask app is running WHEN `GET /api/kb/ontology/graphs` is called THEN the API returns a JSON array of user-facing graph descriptors derived from Memory graph data; legacy graph-file descriptors remain supported for compatibility | API |
+| AC-058E-15b | GIVEN a valid graph name WHEN `GET /api/kb/ontology/graph/<name>` is called THEN the API returns JSON with `nodes` array (id, label, node_type, weight, description, dimensions, source_files, metadata) and `edges` array (source, target, relation_type, label) from either legacy graph JSONL or the new Memory ontology layout | API |
 | AC-058E-15c | GIVEN an invalid graph name WHEN `GET /api/kb/ontology/graph/<name>` is called THEN the API returns HTTP 404 with `{"error": "Graph not found"}` | API |
 | AC-058E-15d | GIVEN a search query and graph scope WHEN `GET /api/kb/ontology/search?q=<query>&graphs=<comma-separated>` is called THEN the API invokes the `search.py` module's search function scoped to the specified graphs AND returns `{"results": [{"node_id": "...", "label": "...", "graph": "...", "relevance": N}]}` | API |
 | AC-058E-15e | GIVEN the `.graph-index.json` file exists in `.ontology/` WHEN `GET /api/kb/ontology/graphs` is called THEN the API reads graph metadata from the index file for fast listing (without parsing each JSONL) | API |

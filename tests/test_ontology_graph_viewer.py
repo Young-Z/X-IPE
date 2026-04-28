@@ -712,6 +712,65 @@ def client_relations(app_with_relations):
     return app_with_relations.test_client()
 
 
+@pytest.fixture
+def memory_root_with_new_ontology(tmp_path):
+    """Memory root with new .ontology schema/instances/vocabulary layout."""
+    ontology_dir = tmp_path / ".ontology"
+    schema_dir = ontology_dir / "schema"
+    instances_dir = ontology_dir / "instances"
+    vocabulary_dir = ontology_dir / "vocabulary"
+    schema_dir.mkdir(parents=True)
+    instances_dir.mkdir(parents=True)
+    vocabulary_dir.mkdir(parents=True)
+
+    schema_records = [
+        {"op": "create", "type": "KnowledgeNode", "id": "user-manual", "ts": "2026-04-27T00:00:00Z",
+         "props": {"label": "User Manual", "description": "Procedural guide", "source_files": ["x-ipe-docs/memory/procedural/xiaohongshu-user-manual.md"], "weight": 5}},
+        {"op": "update", "type": "KnowledgeNode", "id": "user-manual", "ts": "2026-04-27T00:00:01Z",
+         "props": {"properties": [{"name": "memory_entry_id", "type": "string"}]}},
+        {"op": "create", "type": "KnowledgeNode", "id": "web-application", "ts": "2026-04-27T00:00:02Z",
+         "props": {"label": "Web Application", "description": "Browser app", "weight": 4}},
+    ]
+    (schema_dir / "class-registry.jsonl").write_text("\n".join(json.dumps(r) for r in schema_records))
+
+    instance_records = [
+        {"op": "create", "type": "KnowledgeNode", "id": "inst-001", "ts": "2026-04-27T00:00:03Z",
+         "props": {"label": "Xiaohongshu User Manual", "class": "user-manual",
+                   "source_files": ["x-ipe-docs/memory/procedural/xiaohongshu-user-manual.md"],
+                   "lifecycle": "Persistent", "memory_entry_id": "proc-001",
+                   "documents_app": "Xiaohongshu", "synthesize_id": "syn-1"}},
+        {"op": "create", "type": "KnowledgeNode", "id": "inst-002", "ts": "2026-04-27T00:00:04Z",
+         "props": {"label": "Xiaohongshu", "class": "web-application",
+                   "source_files": ["x-ipe-docs/memory/procedural/xiaohongshu-user-manual.md"],
+                   "lifecycle": "Persistent", "platform": "web"}},
+    ]
+    (instances_dir / "instance.001.jsonl").write_text("\n".join(json.dumps(r) for r in instance_records))
+
+    relation_records = [
+        {"op": "create", "type": "relation", "id": "rel-001", "ts": "2026-04-27T00:00:05Z",
+         "props": {"from_id": "inst-001", "to_id": "inst-002", "relation_type": "documents",
+                   "synthesis_version": "v1"}},
+    ]
+    (instances_dir / "_relations.001.jsonl").write_text("\n".join(json.dumps(r) for r in relation_records))
+
+    vocabulary = {
+        "scheme": "xiaohongshu-web-manual",
+        "concepts": {
+            "Explore": {"label": "Explore"},
+            "Search Result": {"label": "Search Result"},
+        },
+    }
+    (vocabulary_dir / "xiaohongshu-web-manual.json").write_text(json.dumps(vocabulary))
+
+    return tmp_path
+
+
+@pytest.fixture
+def memory_graph_service(memory_root_with_new_ontology):
+    from x_ipe.services.ontology_graph_service import OntologyGraphService
+    return OntologyGraphService(str(memory_root_with_new_ontology))
+
+
 class TestSynthesizerMetadataInNodes:
     """AC-059F-08b: Nodes include synthesize_id and synthesize_message."""
 
@@ -846,3 +905,61 @@ class TestGetAllGraphsAPI:
         # 'all' must hit /graphs/all, not /graph/<name='all'>
         resp = client_relations.get('/api/kb/ontology/graphs/all')
         assert resp.status_code == 200  # not 404
+
+
+class TestMemoryOntologyLayout:
+    """CR-001: New Memory ontology layout without .graph-index.json."""
+
+    def test_list_graphs_synthesizes_user_facing_memory_graph(self, memory_graph_service):
+        graphs = memory_graph_service.list_graphs()
+        assert graphs == [{
+            "name": "memory-knowledge-graph",
+            "display_name": "Memory Knowledge Graph",
+            "file_path": "memory://knowledge-graph",
+            "node_count": 6,
+            "edge_count": 1,
+            "dominant_type": "concept",
+        }]
+
+    def test_get_all_graphs_reads_schema_instances_and_vocabulary(self, memory_graph_service):
+        result = memory_graph_service.get_all_graphs()
+        nodes = result["elements"]["nodes"]
+        labels = {n["data"]["label"] for n in nodes}
+
+        assert "User Manual" in labels
+        assert "Xiaohongshu User Manual" in labels
+        assert "Explore" in labels
+        assert result["graph_names"] == ["memory-knowledge-graph"]
+
+    def test_memory_instance_node_preserves_props_without_exposing_ontology_path(self, memory_graph_service):
+        result = memory_graph_service.get_all_graphs()
+        node = next(n for n in result["elements"]["nodes"] if n["data"]["id"] == "inst-001")
+
+        assert node["data"]["class"] == "user-manual"
+        assert node["data"]["memory_entry_id"] == "proc-001"
+        assert node["data"]["documents_app"] == "Xiaohongshu"
+        assert node["data"]["synthesize_id"] == "syn-1"
+        assert node["data"]["source_files"] == ["procedural/xiaohongshu-user-manual.md"]
+        assert ".ontology" not in json.dumps(node["data"])
+
+    def test_get_graph_returns_synthesized_memory_graph(self, memory_graph_service):
+        result = memory_graph_service.get_graph("memory-knowledge-graph")
+        assert result is not None
+        assert result["name"] == "memory-knowledge-graph"
+        assert result["display_name"] == "Memory Knowledge Graph"
+        assert len(result["elements"]["nodes"]) == 6
+
+    def test_relations_are_loaded_from_instances_directory(self, memory_graph_service):
+        result = memory_graph_service.get_all_graphs()
+        edges = result["elements"]["edges"]
+        assert len(edges) == 1
+        assert edges[0]["data"]["source"] == "inst-001"
+        assert edges[0]["data"]["target"] == "inst-002"
+        assert edges[0]["data"]["relation_type"] == "documents"
+        assert edges[0]["data"]["cross_graph"] is True
+
+    def test_search_uses_synthesized_memory_graph(self, memory_graph_service):
+        results = memory_graph_service.search("Xiaohongshu")
+        ids = {r["node_id"] for r in results}
+        assert "inst-001" in ids
+        assert any(r["graph"] == "memory-knowledge-graph" for r in results)

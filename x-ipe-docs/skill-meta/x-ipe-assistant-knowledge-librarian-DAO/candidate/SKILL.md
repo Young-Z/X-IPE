@@ -9,7 +9,7 @@ description: Central orchestrator for the knowledge pipeline. Discovers availabl
 
 AI Agents follow this skill to orchestrate the knowledge pipeline by:
 1. Discovering available `x-ipe-knowledge-*` skills at runtime and classifying incoming requests
-2. Driving the 格物致知 workflow: plan (framework → overview → rubric → requests) then execute (extract → fill → critique → ontology → store → present)
+2. Driving the 格物致知 workflow: plan (framework → extractor overview → rubric → requests) then execute (extract → fill → critique → deep research → ontology → store → present)
 3. Tracking pipeline state step-by-step with graceful degradation on individual failures
 
 ---
@@ -18,7 +18,7 @@ AI Agents follow this skill to orchestrate the knowledge pipeline by:
 
 BLOCKING: This skill coordinates knowledge skills — it does NOT perform extraction, construction, or ontology operations itself. Each step delegates to the appropriate knowledge skill.
 CRITICAL: Knowledge skills CAN be invoked directly without this orchestrator as a degraded-mode fallback (AC-059E-08a/b).
-CRITICAL: The 格物致知 backbone is the INTERNAL orchestration methodology — callers see only pipeline_summary output, never phase names.
+CRITICAL: Construction overview and critique gaps MUST be fulfilled through extractor skills; do not manually inspect sources or synthesize missing facts outside extractor output.
 
 CRITICAL: **Best-Model Requirement.** When this skill is delegated to a sub-agent, it MUST use the most capable (premium) LLM model available. The orchestration logic requires nuanced semantic matching and critique evaluation.
 
@@ -33,7 +33,7 @@ This skill serves as the central coordinator for the entire knowledge pipeline (
 **Key Concepts:**
 - **Skill Discovery** — Runtime glob scan of `.github/skills/x-ipe-knowledge-*/SKILL.md` builds a categorized registry
 - **Semantic Routing** — Request text matched against constructor descriptions for best-fit selection
-- **Critique Loop** — Sub-agent evaluates draft against rubric; max 3 iterations before accepting partial quality
+- **Deep Research Loop** — Sub-agent evaluates draft against rubric; extractor-backed refinement continues per `deep_research`
 - **Pipeline State** — Each step tracked independently; failures are logged and pipeline continues where possible
 
 ---
@@ -65,7 +65,7 @@ input:
   request: "string"                          # Required — the knowledge task description
   request_type_override: "string | null"     # Optional — skip classification (construction|extraction|ontology_only|presentation|storage|behavior_learning)
   target_constructor: "string | null"        # Optional — skip routing (specific constructor skill name)
-  max_iterations: 3                          # Optional — critique loop max iterations
+  deep_research: "smart"                     # Optional — 1_round | 3_round | smart
   output_format: "markdown"                  # Optional — structured | markdown | graph
   session_context:                           # Optional — caller context
     task_id: "{TASK-XXX | N/A}"
@@ -92,11 +92,32 @@ input:
       2. ELSE → null (perform semantic routing in Phase 1)
     </steps>
   </field>
-  <field name="max_iterations" source="Caller or default">
-    <validation>Integer >= 1. Default: 3.</validation>
+  <field name="deep_research" source="Caller or default">
+    <steps>
+      1. IF caller provides `1_round`, `1 round`, or `one round` → normalize to `1_round`.
+      2. IF caller provides `3_round`, `3 round`, or `three round` → normalize to `3_round`.
+      3. IF caller provides `smart` or omits the field → use `smart`.
+      4. FAIL FAST for any other value.
+    </steps>
   </field>
   <field name="output_format" source="Caller or default">
     <validation>One of: structured, markdown, graph. Default: markdown.</validation>
+  </field>
+  <field name="behavior_learning.target_app" source="Request text or session_context when request_type is behavior_learning">
+    <steps>
+      1. Prefer explicit terminal format: `request_type_override=behavior_learning target_app=<URL> purpose="<PURPOSE>"`
+      2. Extract target_app from explicit `target_app=` token until whitespace.
+      3. ELSE extract the first http:// or https:// URL from request text.
+      4. Validate target_app has http:// or https:// protocol and a hostname.
+    </steps>
+  </field>
+  <field name="behavior_learning.purpose" source="Request text or session_context when request_type is behavior_learning">
+    <steps>
+      1. Prefer explicit terminal format: `request_type_override=behavior_learning target_app=<URL> purpose="<PURPOSE>"`
+      2. Extract purpose from explicit `purpose=` value; support quoted values with spaces.
+      3. ELSE infer purpose from phrases like `for purpose: ...` or `to learn ...`.
+      4. Validate purpose is non-empty and at most 200 words.
+    </steps>
   </field>
 </input_init>
 ```
@@ -126,7 +147,7 @@ input:
 |-------|-------|--------|------|
 | 0 | 0.1 | 礼 — Greet | Announce identity | Greeting delivered |
 | 1 | 1.1–1.6 | 格物 — Plan | Discover skills, classify request, framework, overview, rubric, plan | Plan complete |
-| 2 | 2.1–2.6 | 致知 — Execute | Extract, fill, critique loop, ontology, store, present | Pipeline complete |
+| 2 | 2.1–2.6 | 致知 — Execute | Extract, fill, deep-research critique loop, ontology, store, present | Pipeline complete |
 | 3 | 3.1 | 录 — Record | Write pipeline execution log | Log written |
 | 4 | 4.1 | 示 — Present | Return pipeline_summary to caller | Output delivered |
 
@@ -195,7 +216,10 @@ BLOCKING: Phase 1 (格物) adapts based on request_type — non-construction typ
         4. IF type = "behavior_learning":
            a. SELECT best matching skill from discovered_skills.mimics[] whose description or operations include behavior tracking
            b. Preferred operation: x-ipe-knowledge-mimic-web-behavior-tracker.start_active_tracking
-           c. IF no mimic skill exists → "classification_failed"
+           c. Extract behavior_learning.target_app and behavior_learning.purpose using the Input Initialization parsing rules
+           d. IF target_app missing/invalid → return error BEHAVIOR_LEARNING_TARGET_REQUIRED
+           e. IF purpose missing/invalid → return error BEHAVIOR_LEARNING_PURPOSE_REQUIRED
+           f. IF no mimic skill exists → "classification_failed"
         5. IF type = "construction" AND target_constructor is null:
            a. FOR EACH constructor in discovered_skills.constructors[]:
               Compare request against constructor description (semantic similarity)
@@ -223,10 +247,13 @@ BLOCKING: Phase 1 (格物) adapts based on request_type — non-construction typ
       <name>Gather Overview</name>
       <action>
         1. IF request_type != "construction" → SKIP
-        2. SELECT appropriate extractor (extractor-web for URLs, extractor-memory for existing knowledge)
-        3. INVOKE extractor to gather high-level overview of the target
-        4. SAVE to .working/{session_id}/overview/
-        5. Mark pipeline_state.格物_2_overview = "done"
+        2. SELECT an extractor capable of the source type:
+           - URLs → extractor-web `extract_overview`
+           - existing memory, local working notes, or mimicked outputs → extractor-memory `extract_overview`
+        3. INVOKE the selected extractor; construction MUST NOT proceed to rubric design from agent-only browsing.
+        4. SAVE overview_content and source_map to .working/{session_id}/overview/
+        5. IF no extractor can produce an overview → mark step "failed" and return partial/failed per pipeline_state.
+        6. Mark pipeline_state.格物_2_overview = "done"
       </action>
       <output>overview_content (or skipped)</output>
     </step_1_4>
@@ -247,7 +274,7 @@ BLOCKING: Phase 1 (格物) adapts based on request_type — non-construction typ
       <name>Plan Knowledge Requests</name>
       <action>
         1. IF request_type != "construction" → SKIP
-        2. INVOKE selected_constructor's `request_knowledge` with framework + rubric
+        2. INVOKE selected_constructor's `request_knowledge` with framework + overview + rubric + source_map
         3. RECEIVE knowledge_requests[] specifying what, for which section, which extractor
         4. SAVE to .working/{session_id}/plan/
         5. Mark pipeline_state.格物_4_plan = "done"
@@ -271,8 +298,8 @@ BLOCKING: Phase 1 (格物) adapts based on request_type — non-construction typ
            COLLECT gathered_knowledge[]
         3. IF request_type = "behavior_learning":
            a. INVOKE selected mimic skill operation `start_active_tracking` with request context:
-              - target_app from request/session_context
-              - session_config.purpose from request
+              - target_app from behavior_learning.target_app
+              - session_config.purpose from behavior_learning.purpose
               - active_config defaults: polling_interval_s=5, auto_reinject=true, auto_screenshot=true
            b. WAIT for `start_active_tracking` to own polling until toolbar Analysis is clicked
            c. RECEIVE operation_output.result.observation_payload from the mimic skill
@@ -301,21 +328,24 @@ BLOCKING: Phase 1 (格物) adapts based on request_type — non-construction typ
       <action>
         1. IF request_type != "construction" → SKIP
         2. SET iteration_count = 0
-        3. LOOP:
+        3. SET smart_safety_cap = 10
+        4. LOOP:
            a. INVOKE critique sub-agent (premium model) with (draft, rubric_metrics)
-           b. RECEIVE critique_result: { verdict: pass|fail, gaps[], scores{} }
-           c. IF verdict == "pass" → EXIT loop
-           d. IF iteration_count >= max_iterations → mark "partial_quality", log gaps, EXIT loop
+           b. RECEIVE critique_result: { verdict, satisfaction_score, gaps[], scores{} }
+           c. IF satisfaction_score == 100 AND gaps is empty → mark "fully_satisfied", EXIT loop
+           d. IF deep_research limit reached OR smart_safety_cap reached OR no actionable extractor-backed gaps remain → mark "partial_quality", log blockers, EXIT loop
            e. iteration_count++
-           f. INVOKE constructor's `request_knowledge` for gap sections only (replan)
-           g. INVOKE extractors for new knowledge requests
-           h. INVOKE constructor's `fill_structure` for gap sections
-           i. CONTINUE loop
-        4. Mark pipeline_state.致知_3_critique = "done"
+           f. INVOKE constructor's `request_knowledge` for gap sections only with source_map + gathered_knowledge + newly discovered leads
+           g. INVOKE extractors for every new knowledge request; expand queries from newly discovered source_map entries when available
+           h. MERGE new extracted knowledge into gathered_knowledge and source_map
+           i. INVOKE constructor's `fill_structure` for gap sections
+           j. CONTINUE loop
+        5. Mark pipeline_state.致知_3_critique = "done"
       </action>
       <constraints>
         - Critique sub-agent MUST use premium model
-        - max_iterations prevents infinite loops (default: 3)
+        - `1_round` allows one refinement round; `3_round` allows three; `smart` is default and targets 100% satisfaction with safety cap 10
+        - Success requires 100% satisfaction; otherwise report partial_quality with blockers
       </constraints>
       <output>critique_result + iteration_count</output>
     </step_2_3>
@@ -410,25 +440,14 @@ BLOCKING: Phase 1 (格物) adapts based on request_type — non-construction typ
 pipeline_output:
   pipeline_status: "success | partial | failed"
   pipeline_summary: "Human-readable pipeline execution summary"
-  completed_steps:
-    - { name: "discovery", status: "done" }
-    - { name: "classification", status: "done" }
-    - { name: "格物_1_framework", status: "done | skipped" }
-    - { name: "格物_2_overview", status: "done | skipped" }
-    - { name: "格物_3_rubric", status: "done | skipped" }
-    - { name: "格物_4_plan", status: "done | skipped" }
-    - { name: "致知_1_execute", status: "done | skipped | failed" }
-    - { name: "致知_2_fill", status: "done | skipped | failed" }
-    - { name: "致知_3_critique", status: "done | skipped | failed" }
-    - { name: "致知_4_ontology", status: "done | skipped | failed" }
-    - { name: "致知_5_store", status: "done | skipped | failed" }
-    - { name: "致知_6_present", status: "done | skipped | failed" }
+  completed_steps: [{ name: "step_name", status: "done | skipped | failed" }]
   stored_path: "x-ipe-docs/memory/{type}/{slug}.md"
   ontology_result: { entities_created: 0, relations_created: 0, terms_normalized: 0 }
   presented_output: { format: "markdown", content: "..." }
+  deep_research: "smart | 1_round | 3_round"
+  iteration_count: 0
+  satisfaction_status: "fully_satisfied | partial_quality | skipped"
 ```
-
----
 
 ## Definition of Done
 
@@ -450,10 +469,12 @@ pipeline_output:
     <name>Pipeline Summary Returned</name>
     <verification>pipeline_output returned with pipeline_status, pipeline_summary, and completed_steps</verification>
   </checkpoint>
+  <checkpoint required="true">
+    <name>Deep Research Resolved</name>
+    <verification>construction outputs include deep_research, iteration_count, and satisfaction_status</verification>
+  </checkpoint>
 </definition_of_done>
 ```
-
----
 
 ## Error Handling
 
@@ -463,20 +484,12 @@ pipeline_output:
 | `CLASSIFICATION_FAILED` | Request doesn't match any known type | Return available capabilities list; caller can retry with request_type_override |
 | `CONSTRUCTOR_UNAVAILABLE` | Selected constructor skill missing or errored | Mark step as "failed", return partial result |
 | `EXTRACTOR_TIMEOUT` | Extractor skill timed out | Log timeout, pass partial gathered_knowledge to next step |
+| `OVERVIEW_EXTRACTOR_UNAVAILABLE` | No extractor can produce required construction overview | Mark overview failed; do not design rubric from manually gathered context |
+| `DEEP_RESEARCH_BLOCKED` | Smart mode cannot find new extractor-backed knowledge before 100% satisfaction | Mark partial_quality and report exhausted gaps/source paths |
 | `CRITIQUE_UNAVAILABLE` | Critique sub-agent failed to respond | Skip critique loop, proceed with draft as-is, mark "partial_quality" |
 | `STORE_FAILED` | keeper-memory store operation failed | Log error, continue to present step; caller still gets presented_output |
 
----
-
 ## References
 
-| File | Purpose |
-|------|---------|
-| [references/examples.md](.github/skills/x-ipe-assistant-knowledge-librarian-DAO/references/examples.md) | Worked examples for construction, extraction, and ontology_only pipelines |
-| [references/pipeline-state-format.md](.github/skills/x-ipe-assistant-knowledge-librarian-DAO/references/pipeline-state-format.md) | Pipeline state tracker schema documentation |
-
----
-
-## Examples
-
-See [references/examples.md](.github/skills/x-ipe-assistant-knowledge-librarian-DAO/references/examples.md) for detailed execution examples.
+- [references/examples.md](.github/skills/x-ipe-assistant-knowledge-librarian-DAO/references/examples.md) — Worked examples.
+- [references/pipeline-state-format.md](.github/skills/x-ipe-assistant-knowledge-librarian-DAO/references/pipeline-state-format.md) — Pipeline state schema.

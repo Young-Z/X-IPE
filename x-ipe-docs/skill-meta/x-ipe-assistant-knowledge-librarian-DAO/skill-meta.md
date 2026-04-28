@@ -7,10 +7,10 @@
 # ─────────────────────────────────────────────────────────────
 skill_name: x-ipe-assistant-knowledge-librarian-DAO
 skill_type: x-ipe-assistant
-version: "1.0.0"
+version: "1.1.0"
 status: candidate
 created: 2026-04-20
-updated: 2026-04-20
+updated: 2026-04-27
 
 # ─────────────────────────────────────────────────────────────
 # PURPOSE
@@ -51,10 +51,10 @@ inputs:
       description: "Skip routing: specific constructor skill name"
       default: null
 
-    - name: max_iterations
-      type: integer
-      default: 3
-      description: "Maximum critique loop iterations before accepting partial quality"
+    - name: deep_research
+      type: string
+      default: smart
+      description: "Research depth mode: 1_round | 3_round | smart. Smart iterates until 100% rubric satisfaction or documented blocker/safety cap."
 
     - name: output_format
       type: string
@@ -131,9 +131,9 @@ acceptance_criteria:
 
     - id: AC-C04
       category: content
-      criterion: Critique loop with max_iterations guard
+      criterion: Deep-research critique loop documented
       test: content_check
-      expected: "iteration_count check and partial_quality fallback documented"
+      expected: "deep_research modes, 100% satisfaction target, and blocker/safety-cap fallback documented"
 
     - id: AC-C05
       category: content
@@ -149,9 +149,14 @@ acceptance_criteria:
 
     - id: AC-B01
       category: behavior
-      criterion: Input parameters document request, request_type_override, target_constructor, max_iterations, output_format
+      criterion: Input parameters document request, request_type_override, target_constructor, deep_research, output_format
       test: content_check
       expected: "All 5 parameters in Input Parameters section"
+    - id: AC-C09
+      category: content
+      criterion: Construction overview and refinement gaps require extractor skills
+      test: content_check
+      expected: "extract_overview is mandatory for construction and gap replanning invokes extractors with source_map context"
 
   should:
     - id: AC-C07

@@ -576,7 +576,7 @@
 /* Zoom controls */
 .ogv-zoom-controls {
     position: absolute;
-    bottom: 52px;
+    bottom: 156px;
     right: 12px;
     display: flex;
     flex-direction: column;
@@ -1026,7 +1026,8 @@
 .ogv-legend-overlay {
     position: absolute;
     bottom: 16px;
-    left: 16px;
+    right: 16px;
+    left: auto;
     z-index: 10;
     background: rgba(255, 255, 255, 0.92);
     border: 1px solid #e2e8f0;

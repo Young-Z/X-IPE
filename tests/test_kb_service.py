@@ -78,6 +78,12 @@ def _create_md_file(kb_root: Path, rel_path: str, body: str = 'Hello',
 class TestKBRootInitialization:
     """AC-01: Auto-create KB root + knowledgebase-config.json with default tags."""
 
+    def test_kb_root_uses_memory_directory(self, temp_project):
+        from x_ipe.services.kb_service import KBService
+        svc = KBService(temp_project)
+        expected = Path(temp_project) / 'x-ipe-docs' / 'memory'
+        assert svc.kb_root == expected.resolve()
+
     def test_ensure_kb_root_creates_directory(self, temp_project):
         from x_ipe.services.kb_service import KBService
         svc = KBService(temp_project)
@@ -356,6 +362,81 @@ class TestFileListing:
         files = kb_service.list_files()
         assert files[0].frontmatter is not None
         assert files[0].frontmatter.title == 'Tagged'
+
+    def test_list_files_exposes_memory_metadata_and_ontology_tags(self, kb_service):
+        _create_md_file(
+            kb_service.kb_root,
+            'procedural/xiaohongshu-user-manual.md',
+            body='# Xiaohongshu Manual',
+            frontmatter={
+                'memory_entry_id': 'proc-20260427-001',
+                'title': 'Xiaohongshu User Manual',
+                'memory_type': 'procedural',
+                'tags': ['xiaohongshu', 'user-manual'],
+                'created': '2026-04-27',
+                'updated': '2026-04-27',
+            },
+        )
+        ontology_dir = kb_service.kb_root / '.ontology'
+        (ontology_dir / 'instances').mkdir(parents=True)
+        (ontology_dir / 'instances' / 'instance.001.jsonl').write_text(
+            '\n'.join([
+                json.dumps({
+                    'id': 'inst-xhs-search',
+                    'label': 'Search Xiaohongshu',
+                    'class': 'UserTask',
+                    'source_files': ['x-ipe-docs/memory/procedural/xiaohongshu-user-manual.md'],
+                }),
+                json.dumps({
+                    'op': 'create',
+                    'type': 'KnowledgeNode',
+                    'id': 'inst-xhs-note',
+                    'props': {
+                        'label': 'Open and Engage with Xiaohongshu Note',
+                        'class': 'user-workflow',
+                        'source_files': ['x-ipe-docs/memory/procedural/xiaohongshu-user-manual.md'],
+                    },
+                }),
+                json.dumps({
+                    'op': 'create',
+                    'type': 'KnowledgeNode',
+                    'id': 'user-manual',
+                    'props': {
+                        'label': 'User Manual',
+                        'source_files': ['x-ipe-docs/memory/procedural/xiaohongshu-user-manual.md'],
+                    },
+                }),
+            ]) + '\n',
+            encoding='utf-8',
+        )
+        (ontology_dir / 'vocabulary').mkdir(parents=True)
+        (ontology_dir / 'vocabulary' / 'xiaohongshu-web-manual.json').write_text(
+            json.dumps({
+                'terms': [
+                    {
+                        'term': 'Home Feed',
+                        'source_files': ['procedural/xiaohongshu-user-manual.md'],
+                    }
+                ]
+            }),
+            encoding='utf-8',
+        )
+
+        kb_service._invalidate_cache()
+        files = kb_service.list_files(recursive=True)
+        manual = next(f for f in files if f.path == 'procedural/xiaohongshu-user-manual.md')
+        data = manual.to_dict()
+
+        assert data['frontmatter']['memory_entry_id'] == 'proc-20260427-001'
+        assert data['frontmatter']['memory_type'] == 'procedural'
+        assert data['frontmatter']['tags']['memory'] == ['xiaohongshu', 'user-manual']
+        assert 'Search Xiaohongshu' in data['ontology_tags']
+        assert 'UserTask' in data['ontology_tags']
+        assert 'Open and Engage with Xiaohongshu Note' in data['ontology_tags']
+        assert 'user-workflow' in data['ontology_tags']
+        assert 'User Manual' in data['ontology_tags']
+        assert 'KnowledgeNode' not in data['ontology_tags']
+        assert 'Home Feed' in data['ontology_tags']
 
     def test_list_files_no_frontmatter_returns_null(self, kb_service):
         _create_md_file(kb_service.kb_root, 'plain.md', body='No frontmatter')
@@ -1865,6 +1946,24 @@ class TestHiddenFileFiltering:
         assert '.kb-index.json.lock' not in names
         assert '.kb-index.json' not in names
         assert 'doc.md' in names
+
+    def test_list_files_recursive_excludes_files_inside_dotfolders(self, kb_service):
+        """Memory internals such as .ontology and .working must stay hidden."""
+        _create_md_file(kb_service.kb_root, 'procedural/visible.md')
+        ontology = kb_service.kb_root / '.ontology' / 'vocabulary'
+        ontology.mkdir(parents=True)
+        (ontology / 'terms.json').write_text('{}', encoding='utf-8')
+        working = kb_service.kb_root / '.working' / 'draft'
+        working.mkdir(parents=True)
+        (working / 'draft.md').write_text('# Draft', encoding='utf-8')
+
+        kb_service._invalidate_cache()
+        files = kb_service.list_files(recursive=True)
+        paths = [f.path for f in files]
+
+        assert 'procedural/visible.md' in paths
+        assert '.ontology/vocabulary/terms.json' not in paths
+        assert '.working/draft/draft.md' not in paths
 
 
 # ===========================================================================

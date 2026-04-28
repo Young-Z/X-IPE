@@ -66,5 +66,10 @@ package-lock.json
 # Screenshots (dev artifacts)
 screenshots/
 
+# X-IPE generated knowledge/workspace artifacts
+x-ipe-docs/.mimicked/
+x-ipe-docs/dao/
+x-ipe-docs/memory/
+
 # Workflow lock files (advisory flock coordination)
 x-ipe-docs/engineering-workflow/*.lock

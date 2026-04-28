@@ -7,21 +7,22 @@
 # ─────────────────────────────────────────────────────────────
 skill_name: x-ipe-knowledge-constructor-user-manual
 skill_type: x-ipe-knowledge
-version: "1.0.0"
+version: "1.1.0"
 status: candidate
 created: 2025-07-16
-updated: 2025-07-16
+updated: 2026-04-27
 
 # ─────────────────────────────────────────────────────────────
 # PURPOSE
 # ─────────────────────────────────────────────────────────────
 summary: |
-  Domain expert for user manual construction — provides framework, rubric, knowledge requests, and structure filling via a 4-operation interface called by the Knowledge Librarian assistant.
+  Domain expert for user manual construction — provides framework, rubric, temperature-scoped knowledge requests, and structure filling via a 4-operation interface called by the Knowledge Librarian assistant.
 
 triggers:
   - "Provide a user manual framework for an application"
   - "Design quality rubric for a user manual"
   - "Identify knowledge gaps in a user manual draft"
+  - "Ask user preference for user-manual instruction temperature"
   - "Fill user manual structure with gathered knowledge"
 
 not_for:
@@ -46,6 +47,11 @@ inputs:
       validation: "All required context fields for the specified operation must be present"
 
   optional:
+    - name: instruction_temperature
+      type: string
+      default: "balanced"
+      description: "User preference for extraction breadth: creative | balanced | strict"
+
     - name: output_format
       type: string
       default: "markdown"
@@ -132,6 +138,18 @@ acceptance_criteria:
       test: table_parse
       expected: columns [Error, Cause, Resolution]
 
+    - id: AC-C07
+      category: content
+      criterion: Instruction temperature preference documented
+      test: content_check
+      expected: "SKILL.md defines creative, balanced, strict and default balanced"
+
+    - id: AC-C08
+      category: behavior
+      criterion: request_knowledge scopes extraction requests by instruction_temperature
+      test: content_check
+      expected: "creative creates exploratory extractor-backed requests; balanced creates targeted gap requests; strict creates limited necessary requests"
+
     # BEHAVIOR
     - id: AC-B01
       category: behavior
@@ -140,25 +158,25 @@ acceptance_criteria:
       expected: returns operation_output with success, operation, result, errors
 
   should:
-    - id: AC-C07
+    - id: AC-C09
       category: content
       criterion: When to Use includes explicit triggers for all 4 operations
       test: yaml_parse
-      expected: triggers list has 4 entries
+      expected: triggers list includes all 4 operations plus instruction temperature preference
 
-    - id: AC-C08
+    - id: AC-C10
       category: content
       criterion: Key Concepts section in About
       test: content_check
-      expected: "Operation Contract, Stateless Service, writes_to Discipline"
+      expected: "Operation Contract, Stateless Service, writes_to Discipline, Instruction Temperature"
 
-    - id: AC-C09
+    - id: AC-C11
       category: content
       criterion: Input Initialization subsection present under Input Parameters
       test: section_parse
       expected: "### Input Initialization with <input_init> XML block"
 
-    - id: AC-C10
+    - id: AC-C12
       category: content
       criterion: Operation contract types are domain-specific (not generic string/object)
       test: content_check
@@ -221,9 +239,19 @@ test_scenarios:
       then: "success=true, rubric_metrics[] has per-section criteria, Getting Started has highest weight"
 
     - name: "request_knowledge success"
-      given: "framework, current_state with 3 empty sections, rubric"
+      given: "framework, current_state with 3 empty sections, rubric, instruction_temperature='balanced'"
       when: "execute request_knowledge"
-      then: "success=true, knowledge_requests[] has 3 entries with target_section, what_needed, suggested_extractor"
+      then: "success=true, knowledge_requests[] has 3 targeted entries with target_section, what_needed, suggested_extractor, extraction_scope"
+
+    - name: "request_knowledge creative"
+      given: "framework, current_state with gaps, rubric, instruction_temperature='creative'"
+      when: "execute request_knowledge"
+      then: "success=true, knowledge_requests[] includes exploratory requests that leverage extractor skills beyond required gaps"
+
+    - name: "request_knowledge strict"
+      given: "framework, current_state with gaps, rubric, instruction_temperature='strict'"
+      when: "execute request_knowledge"
+      then: "success=true, knowledge_requests[] includes only limited necessary requests and no exploratory requests"
 
     - name: "fill_structure success"
       given: "framework, gathered_knowledge[] covering all sections, rubric"
@@ -246,6 +274,11 @@ test_scenarios:
       when: "execute request_knowledge"
       then: "success=true, knowledge_requests[] is empty"
 
+    - name: "Invalid instruction temperature"
+      given: "instruction_temperature='wild'"
+      when: "execute request_knowledge"
+      then: "success=false, errors contains INVALID_INSTRUCTION_TEMPERATURE"
+
 # ─────────────────────────────────────────────────────────────
 # EVALUATION
 # ─────────────────────────────────────────────────────────────
@@ -256,3 +289,4 @@ evaluation:
     - "DoD checkpoints all verified"
     - "Error scenarios handled gracefully"
     - "Templates adapted from old skill with constructor focus"
+    - "Instruction temperature is documented with creative, balanced, strict and default balanced"

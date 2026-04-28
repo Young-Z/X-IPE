@@ -157,9 +157,9 @@ class LearnPanelManager {
         if (!this._validateURL(url)) return;
         if (!purpose) return;
 
-        // Build skill invocation command
-        const purposeArg = ` --purpose "${purpose.replace(/"/g, '\\"')}"`;
-        const command = `Use x-ipe-knowledge-mimic-web-behavior-tracker start_active_tracking operation to track behavior on ${url}${purposeArg}`;
+        // Route through DAO so it can classify behavior-learning and delegate to mimic.
+        const escapedPurpose = purpose.replace(/"/g, '\\"');
+        const command = `Use x-ipe-assistant-knowledge-librarian-DAO for behavior-learning: request_type_override=behavior_learning target_app=${url} purpose="${escapedPurpose}" preferred_operation=start_active_tracking`;
 
         // Expand terminal panel
         if (window.terminalPanel) {

@@ -1,0 +1,30 @@
+test_suite: x-ipe-assistant-knowledge-librarian-DAO-cr001
+executed: 2026-04-27
+method: static_candidate_validation
+results:
+  - id: CR001-T01
+    status: pass
+    evidence:
+      - "deep_research input found"
+      - "max_iterations absent from candidate/SKILL.md"
+      - "1 round and 3 round aliases documented"
+  - id: CR001-T02
+    status: pass
+    evidence:
+      - "extract_overview found in overview step"
+      - "rubric design blocked from agent-only browsing"
+  - id: CR001-T03
+    status: pass
+    evidence:
+      - "gap replanning passes source_map, gathered_knowledge, and newly discovered leads"
+      - "extractors invoked for every new knowledge request"
+  - id: CR001-T04
+    status: pass
+    evidence:
+      - "satisfaction_score == 100 gate found"
+      - "smart_safety_cap = 10 found"
+      - "success requires 100% satisfaction"
+  - id: CR001-T05
+    status: pass
+    evidence:
+      - "candidate/SKILL.md line count: 495"

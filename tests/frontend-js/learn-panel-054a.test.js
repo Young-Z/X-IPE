@@ -254,8 +254,12 @@ describe('LearnPanelManager', () => {
 
             expect(globalThis.window.terminalManager.sendCopilotPromptCommandNoEnter).toHaveBeenCalledTimes(1);
             const calledWith = globalThis.window.terminalManager.sendCopilotPromptCommandNoEnter.mock.calls[0][0];
-            expect(calledWith).toContain('x-ipe-knowledge-mimic-web-behavior-tracker');
+            expect(calledWith).toContain('x-ipe-assistant-knowledge-librarian-DAO');
+            expect(calledWith).toContain('behavior-learning');
+            expect(calledWith).toContain('request_type_override=behavior_learning');
+            expect(calledWith).toContain('target_app=https://example.com');
             expect(calledWith).toContain('start_active_tracking');
+            expect(calledWith).not.toMatch(/^Use x-ipe-knowledge-mimic-web-behavior-tracker /);
             expect(calledWith).toContain('https://example.com');
             expect(calledWith).toContain('Test checkout flow');
 

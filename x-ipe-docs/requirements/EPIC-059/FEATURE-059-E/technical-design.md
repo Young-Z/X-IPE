@@ -1,6 +1,6 @@
 # Technical Design: Layer 4 — Orchestrator (Knowledge Librarian + User Representative Migration)
 
-> Feature ID: FEATURE-059-E | Version: v1.0 | Last Updated: 04-20-2026
+> Feature ID: FEATURE-059-E | Version: v1.1 | Last Updated: 04-27-2026
 
 ---
 
@@ -17,7 +17,7 @@
 | `x-ipe-assistant-user-representative-Engineer` | Migrated human representative under assistant namespace | All DAO call sites across all skills | #assistant #user-representative #migration #工程師 |
 | Skill Discovery Engine | Runtime discovery of `x-ipe-knowledge-*` skills via glob | Librarian initialization | #discovery #glob #knowledge-skills |
 | Semantic Router | Request classification and constructor selection | Librarian input init phase | #classification #routing #semantic |
-| Critique Loop Engine | Sub-agent rubric evaluation with max-3-iteration guard | 致知 Phase 3 | #critique #rubric #iteration-guard |
+| Deep Research Loop Engine | Sub-agent rubric evaluation with extractor-backed refinement and `deep_research` modes | 致知 Phase 3 | #critique #rubric #deep-research |
 | Pipeline State Tracker | Step-by-step execution tracking with partial-failure support | Full pipeline | #pipeline #state #error-handling |
 
 ### Dependencies
@@ -39,8 +39,8 @@
 ### Major Flow
 
 1. **Request → Classify → Route**: Incoming knowledge request → Librarian classifies type (construction/extraction/ontology_only/presentation/storage) → routes to best-matching skill
-2. **格物 Phase (Plan)**: Constructor provides framework → Extractor gathers overview → Constructor designs rubric → Constructor requests knowledge
-3. **致知 Phase (Execute)**: Extractors fulfill requests → Constructor fills draft → Sub-agent critiques against rubric → Loop (max 3) → Ontology processing → Store → Present
+2. **格物 Phase (Plan)**: Constructor provides framework → Extractor gathers overview via `extract_overview` → Constructor designs rubric → Constructor requests knowledge
+3. **致知 Phase (Execute)**: Extractors fulfill requests → Constructor fills draft → Sub-agent critiques against rubric → Deep research loop (`1_round`, `3_round`, or default `smart`) → Ontology processing → Store → Present
 4. **Fallback**: Direct skill invocation always available if Librarian is unavailable
 
 ### Usage Example
@@ -114,9 +114,9 @@ stateDiagram-v2
     state "致知 (Execute)" as ZhiZhi {
         Execute --> Fill: Dispatch extractors
         Fill --> Critique: fill_structure
-        Critique --> Replan: fail + iteration < 3
-        Replan --> Execute: request_knowledge (replan)
-        Critique --> Ontology: pass OR iteration = 3
+        Critique --> Replan: fail + deep_research allows
+        Replan --> Execute: request_knowledge + extractor-backed gaps
+        Critique --> Ontology: 100% satisfied OR blocker/safety cap
         Ontology --> Store: builder + synthesizer
         Store --> Present: keeper-memory
         Present --> [*]: present-to-user
@@ -182,30 +182,39 @@ Constructor Routing (when type = "construction"):
 4. On zero matches → classification_failed
 ```
 
-#### Critique Loop State Machine
+#### Deep Research Loop State Machine
 
 ```
 critique_state = {
   iteration_count: 0,
-  max_iterations: 3,  # from input or default
+  deep_research: "smart",  # 1_round | 3_round | smart
+  smart_safety_cap: 10,
   last_critique: null,
-  status: "pending"    # pending | passing | partial_quality
+  source_map: [],
+  status: "pending"    # pending | fully_satisfied | partial_quality
 }
 
 Loop:
   1. Invoke critique sub-agent with (draft, rubric_metrics)
-     - Sub-agent MUST use premium model (claude-opus-4.6)
-  2. Receive critique_result: { verdict: pass|fail, gaps[], scores{} }
-  3. IF verdict == "pass":
-       status = "passing" → exit loop
-  4. ELIF iteration_count >= max_iterations:
-       status = "partial_quality" → log warning → exit loop
+      - Sub-agent MUST use premium model (claude-opus-4.6)
+  2. Receive critique_result: { verdict, satisfaction_score, gaps[], scores{} }
+  3. IF satisfaction_score == 100 AND gaps is empty:
+       status = "fully_satisfied" → exit loop
+  4. ELIF deep_research limit reached OR no actionable extractor-backed gaps remain:
+       status = "partial_quality" → log blocker details → exit loop
   5. ELSE:
        iteration_count++
-       Return to 格物.4 (request_knowledge for gap sections only)
-       Re-execute 致知.1 (extract) and 致知.2 (fill) for gaps
+       Return to 格物.4 (request_knowledge for gap sections only, with source_map + discovered leads)
+       Re-execute 致知.1 (extract) using extractor skills only
+       Merge new gathered knowledge into source_map
+       Re-execute 致知.2 (fill) for gaps
        Continue loop
 ```
+
+Deep-research limits:
+- `1_round`: at most one refinement round after the initial critique.
+- `3_round`: at most three refinement rounds after the initial critique.
+- `smart`: default; continue while critique gaps are actionable and extractors have unexplored leads, with a safety cap of 10 refinement rounds to prevent infinite loops. Smart mode reports success only when satisfaction is 100%.
 
 #### Pipeline State Tracker
 
@@ -272,7 +281,7 @@ SKILL.md sections:
 │   ├── request: string (the knowledge task)
 │   ├── request_type_override: optional (skip classification)
 │   ├── target_constructor: optional (skip routing)
-│   ├── max_iterations: int, default 3
+│   ├── deep_research: smart | 1_round | 3_round, default smart
 │   ├── output_format: structured | markdown | graph
 │   └── session_context: optional (task_id, feature_id, etc.)
 ├── Input Initialization
@@ -407,3 +416,4 @@ During transition, the old `x-ipe-assistant-user-representative-Engineer` contin
 | Date | Phase | Change Summary |
 |------|-------|----------------|
 | 04-20-2026 | Initial Design | Initial technical design for FEATURE-059-E. Two deliverables: E.1 Knowledge Librarian DAO (格物致知 orchestrator) and E.2 User Representative migration to assistant namespace. |
+| 04-27-2026 | CR-001 | Replaced fixed max-3 critique guard with deep-research modes and made overview/gap refinement explicitly extractor-driven. |

@@ -35,7 +35,7 @@ def get_graphs():
     svc = _get_service_or_abort()
     try:
         if not svc.has_ontology:
-            return _error('ONTOLOGY_NOT_FOUND', 'No .ontology/ directory found in knowledge base', 404)
+            return _error('ONTOLOGY_NOT_FOUND', 'No Knowledge Graph data found in Memory', 404)
         graphs = svc.list_graphs()
         return jsonify({'graphs': graphs})
     except Exception as exc:
@@ -54,7 +54,7 @@ def get_all_graphs():
     svc = _get_service_or_abort()
     try:
         if not svc.has_ontology:
-            return _error('ONTOLOGY_NOT_FOUND', 'No .ontology/ directory found in knowledge base', 404)
+            return _error('ONTOLOGY_NOT_FOUND', 'No Knowledge Graph data found in Memory', 404)
         result = svc.get_all_graphs()
         return jsonify(result)
     except Exception as exc:
@@ -68,7 +68,7 @@ def get_graph(name):
     svc = _get_service_or_abort()
     try:
         if not svc.has_ontology:
-            return _error('ONTOLOGY_NOT_FOUND', 'No .ontology/ directory found in knowledge base', 404)
+            return _error('ONTOLOGY_NOT_FOUND', 'No Knowledge Graph data found in Memory', 404)
         result = svc.get_graph(name)
         if result is None:
             return _error('GRAPH_NOT_FOUND', f"Graph '{name}' not found", 404)
@@ -115,7 +115,7 @@ def search_bfs():
             return _error('MISSING_QUERY', 'Query parameter "q" is required', 400)
 
         if not svc.has_ontology:
-            return _error('ONTOLOGY_NOT_FOUND', 'No .ontology/ directory found in knowledge base', 404)
+            return _error('ONTOLOGY_NOT_FOUND', 'No Knowledge Graph data found in Memory', 404)
 
         scope_param = request.args.get('scope', 'all').strip()
         graph_names = None

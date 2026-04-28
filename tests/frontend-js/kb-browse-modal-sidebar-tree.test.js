@@ -71,6 +71,24 @@ describe('KB Browse Modal — Sidebar Tree (TASK-1086)', () => {
     document.body.innerHTML = '';
   });
 
+  afterEach(() => {
+    document.body.innerHTML = '';
+  });
+
+  it.skipIf(!ensureImpl())('uses Memory labels in the modal chrome', () => {
+    const modal = createModal();
+    modal._createModal();
+
+    const text = modal.overlay.textContent;
+    const searchInput = modal.overlay.querySelector('[data-role="sidebar-search"]');
+
+    expect(text).toContain('Memory');
+    expect(text).toContain('Reference Memory');
+    expect(searchInput.getAttribute('placeholder')).toBe('Search Memory…');
+    expect(text).not.toContain('Knowledge Base');
+    expect(text).not.toContain('Reference KB');
+  });
+
   it.skipIf(!ensureImpl())('renders subfolders in sidebar tree', () => {
     const modal = createModal();
     modal._renderSidebarFolders();

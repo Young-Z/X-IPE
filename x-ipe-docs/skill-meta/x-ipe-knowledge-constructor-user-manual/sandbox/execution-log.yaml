@@ -1,0 +1,15 @@
+execution:
+  status: completed
+  command_summary:
+    - "wc -l candidate/SKILL.md"
+    - "grep instruction_temperature/extraction_scope in candidate/SKILL.md"
+    - "grep instruction_temperature/extraction_scope in candidate/references/examples.md"
+  results:
+    TC-UM-TEMP-001: pass
+    TC-UM-TEMP-002: pass
+    TC-UM-TEMP-003: pass
+    TC-UM-STRUCT-001: pass
+  notes:
+    - "candidate/SKILL.md line count: 553 (<600)"
+    - "DoR checkpoint count: 3"
+    - "DoD checkpoint count: 4"

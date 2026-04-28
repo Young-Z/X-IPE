@@ -15,6 +15,7 @@ class OntologyGraphViewer {
         this._socket = null;
         this._selectedGraphs = new Set();
         this._graphIndex = [];
+        this._graphLabels = new Map();
         this._cdnLoaded = false;
         this._destroyed = false;
         this._selectedDropdownIndex = -1;
@@ -234,13 +235,13 @@ class OntologyGraphViewer {
     async _autoLoadAll() {
         // FEATURE-059-F: Replaces sidebar checkbox-driven loading.
         // Fetches /api/kb/ontology/graphs/all and loads all elements at once.
-        this._updateStatus('Loading graphs…');
+        this._updateStatus('Loading Knowledge Graph…');
         try {
             const resp = await fetch('/api/kb/ontology/graphs/all');
             if (!resp.ok) {
                 if (resp.status === 404) {
-                    this._showEmptyState('No Ontology Found', 'Run ontology extraction on your knowledge base to generate graph data.');
-                    this._updateStatus('No ontology');
+                    this._showEmptyState('No Knowledge Graph Data', 'Add Memory entries or run Memory learning to generate graph data.');
+                    this._updateStatus('No graph data');
                     return;
                 }
                 throw new Error(`HTTP ${resp.status}`);
@@ -248,10 +249,12 @@ class OntologyGraphViewer {
             const data = await resp.json();
             const elements = data.elements || { nodes: [], edges: [] };
             const graphNames = data.graph_names || [];
+            const graphLabels = data.graph_labels || {};
 
             // Populate state with all graphs marked as selected
             this._graphIndex = graphNames.map(n => ({ name: n }));
             this._selectedGraphs = new Set(graphNames);
+            this._graphLabels = new Map(graphNames.map(n => [n, graphLabels[n] || n]));
 
             // Build flat array for Cytoscape
             const flat = [];
@@ -259,8 +262,8 @@ class OntologyGraphViewer {
             (elements.edges || []).forEach(e => flat.push({ group: 'edges', data: { ...e.data } }));
 
             if (flat.length === 0) {
-                this._showEmptyState('No Graph Data', 'The ontology contains no entities or relations to display.');
-                this._updateStatus('Empty ontology');
+                this._showEmptyState('No Knowledge Graph Data', 'Memory contains no entities or relations to display yet.');
+                this._updateStatus('Empty graph');
                 return;
             }
 
@@ -270,7 +273,7 @@ class OntologyGraphViewer {
             this._refreshNav();
             this._updateStatus('Connected');
         } catch (err) {
-            this._showError(`Failed to load graphs: ${err.message}`);
+            this._showError(`Failed to load Knowledge Graph: ${err.message}`);
             this._updateStatus('Error');
         }
     }
@@ -356,10 +359,11 @@ class OntologyGraphViewer {
         const items = results.slice(0, 10).map((r, i) => {
             const color = typeColors[r.node_type] || '#94a3b8';
             const relevanceWidth = Math.round((r.relevance || 0) * 100);
+            const graphLabel = this._graphLabels.get(r.graph) || r.graph || 'Knowledge Graph';
             return `<div class="ogv-search-dropdown-item" data-index="${i}" data-node-id="${r.node_id}" data-graph="${r.graph}">
                 <span class="ogv-dropdown-type-dot" style="background:${color}"></span>
                 <span class="ogv-dropdown-label">${this._escapeHtml(r.label)}</span>
-                <span class="ogv-dropdown-graph">${this._escapeHtml(r.graph)}</span>
+                <span class="ogv-dropdown-graph">${this._escapeHtml(graphLabel)}</span>
                 <span class="ogv-dropdown-relevance"><span class="ogv-dropdown-relevance-bar" style="width:${relevanceWidth}%"></span></span>
             </div>`;
         }).join('');
@@ -494,8 +498,8 @@ class OntologyGraphViewer {
         }
 
         // Build and send command
-        const scopeStr = graphs.join(', ');
-        const command = `search the knowledge graph scoped to ${scopeStr} via ontology skill for: `;
+        const scopeStr = graphs.map(name => this._graphLabels.get(name) || name).join(', ');
+        const command = `search the Memory knowledge graph scoped to ${scopeStr} for: `;
         if (tm.sendCopilotPromptCommandNoEnter) {
             tm.sendCopilotPromptCommandNoEnter(command);
         }
@@ -511,7 +515,7 @@ class OntologyGraphViewer {
         // re-fetch via the per-graph endpoint.
         if (selected) {
             this._selectedGraphs.add(name);
-            this._updateStatus(`Loading ${name}…`);
+            this._updateStatus(`Loading ${this._graphLabels.get(name) || name}…`);
             const elements = await this._loadGraph(name);
             if (this._destroyed) return;
             this.canvas.addElements(elements);
@@ -583,7 +587,8 @@ class OntologyGraphViewer {
         const pill = document.createElement('span');
         pill.className = 'ogv-scope-pill';
         pill.dataset.scope = name;
-        pill.innerHTML = `<span class="ogv-scope-pill-dot"></span>${name}<span class="ogv-scope-pill-close">&times;</span>`;
+        const label = this._graphLabels.get(name) || name;
+        pill.innerHTML = `<span class="ogv-scope-pill-dot"></span>${label}<span class="ogv-scope-pill-close">&times;</span>`;
 
         pill.querySelector('.ogv-scope-pill-close').addEventListener('click', (e) => {
             e.stopPropagation();
@@ -1116,7 +1121,7 @@ class OntologyGraphViewer {
         // Scope count
         if (scopeEl) {
             const count = this._selectedGraphs.size;
-            scopeEl.textContent = count > 0 ? `${count} graph${count !== 1 ? 's' : ''} in scope` : '';
+            scopeEl.textContent = count > 0 ? `${count} Memory graph${count !== 1 ? 's' : ''} in scope` : '';
         }
     }
 

@@ -5,6 +5,7 @@
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | v1.0 | 2026-04-20 | Drift | Initial specification |
+| v1.1 | 2026-04-27 | Nova | CR-001: refine KG viewer to read the Memory ontology layout and hide ontology implementation files from end users |
 
 ## Linked Mockups
 
@@ -15,7 +16,7 @@ _No mockups linked for this feature._
 FEATURE-059-F is the final layer of EPIC-059 (Knowledge Pipeline Refactoring). It completes the migration by:
 
 1. **Removing the deprecated `x-ipe-assistant-user-representative-Engineer` skill** and updating all references across the codebase to point to its replacement `x-ipe-assistant-user-representative-Engineer` (created in 059-E).
-2. **Updating the web app ontology graph viewer** to adopt the new knowledge structure from 059-C/D — removing the per-graph sidebar (graph list + select-all), keeping the legend, and integrating cross-graph `_relations.NNN.jsonl` support from the ontology-synthesizer.
+2. **Updating the web app Knowledge Graph viewer** to adopt the new Memory knowledge structure from 059-C/D — removing the per-graph sidebar (graph list + select-all), keeping the legend, integrating cross-graph `_relations.NNN.jsonl` support from the ontology-synthesizer, and keeping `.ontology/` implementation files transparent to end users.
 
 This feature was deferred from earlier layers:
 - 059-A (spec line 221): "Migration of existing `x-ipe-dao-*` skills to `x-ipe-assistant-*` namespace — Layer 5"
@@ -28,7 +29,7 @@ This feature was deferred from earlier layers:
 |-----------|------|-------------|
 | FEATURE-059-E | Internal | `x-ipe-assistant-user-representative-Engineer` must exist (replacement for old DAO skill) |
 | FEATURE-059-D | Internal | `_relations.NNN.jsonl` cross-graph format defined by ontology-synthesizer |
-| FEATURE-059-C | Internal | Ontology-builder JSONL event format (`_entities.jsonl`, `synthesize_id`/`synthesize_message`) |
+| FEATURE-059-C | Internal | Memory ontology event format under `x-ipe-docs/memory/.ontology/{schema,instances,vocabulary}` with `props`, source-file links, and optional `synthesize_id`/`synthesize_message` |
 | FEATURE-058-E/F | Internal | Existing ontology graph viewer (routes, service, JS components) being modified |
 
 ---
@@ -42,10 +43,13 @@ This feature was deferred from earlier layers:
 **As** the X-IPE system, **I want** copilot-instructions and resource templates to reference the new assistant skill names, **so that** AI agents invoke the correct (non-deprecated) skills.
 
 ### US-F3: Streamlined Graph Viewer
-**As** a knowledge graph user, **I want** the graph viewer to show graphs without a per-graph selection sidebar, **so that** I get more canvas space and don't need to manage ontology internals.
+**As** a knowledge graph user, **I want** the graph viewer to show Memory knowledge relationships without a per-graph selection sidebar, **so that** I get more canvas space and don't need to manage ontology internals.
 
 ### US-F4: Cross-Graph Relation Visualization
 **As** a knowledge graph user, **I want** the graph viewer to display cross-graph relationships from `_relations.NNN.jsonl`, **so that** I can see how entities in different knowledge domains connect.
+
+### US-F5: Transparent Memory Ontology
+**As** a knowledge graph user, **I want** KG to load concepts, classes, instances, vocabulary, and relations from Memory automatically without showing `.ontology` filenames or raw implementation paths, **so that** I can understand my knowledge graph as user-facing Memory rather than internal storage files.
 
 ---
 
@@ -98,6 +102,8 @@ This feature was deferred from earlier layers:
 | AC-059F-06a | GIVEN the graph viewer opens WHEN the `/api/kb/ontology/graphs` endpoint returns a list of graphs THEN all graphs are automatically loaded and rendered on the canvas | Integration |
 | AC-059F-06b | GIVEN all graphs are auto-loaded WHEN examining the canvas THEN nodes from all graphs are visible with correct node types and labels | UI |
 | AC-059F-06c | GIVEN no graphs exist in `.ontology/` WHEN the viewer opens THEN an empty-state message is displayed (no errors) | UI |
+| AC-059F-06d | GIVEN `x-ipe-docs/memory/.ontology/` contains the new schema/instances/vocabulary layout and no `.graph-index.json` WHEN the viewer opens THEN KG synthesizes and renders a Memory graph from those records | Integration |
+| AC-059F-06e | GIVEN graph data is loaded from Memory ontology files WHEN graph scopes or status text are shown THEN labels are user-facing Memory/domain names and never raw `.ontology` file paths | UI |
 
 ### Group 07: Cross-Graph Relations Support (Backend)
 
@@ -107,6 +113,7 @@ This feature was deferred from earlier layers:
 | AC-059F-07b | GIVEN multiple `_relations.NNN.jsonl` chunks exist (001, 002, etc.) WHEN the service loads relations THEN it reads ALL chunk files and merges them | Unit |
 | AC-059F-07c | GIVEN a relation record in `_relations.NNN.jsonl` has `from_id`, `to_id`, `relation_type`, `synthesis_version` WHEN converted to Cytoscape edge format THEN `source` = `from_id`, `target` = `to_id`, `relation_type` and `label` = `relation_type` | Unit |
 | AC-059F-07d | GIVEN cross-graph relations link entities from different graphs WHEN a combined view is rendered THEN edges crossing graph boundaries are included and visually distinguishable | UI |
+| AC-059F-07e | GIVEN relation chunks are written under `.ontology/instances/_relations.NNN.jsonl` during the Memory migration WHEN the graph service loads cross-graph relations THEN those chunks are read in addition to `.ontology/relations/_relations.NNN.jsonl` | Unit |
 
 ### Group 08: Graph Service — Unified Graph Endpoint
 
@@ -115,6 +122,7 @@ This feature was deferred from earlier layers:
 | AC-059F-08a | GIVEN the viewer auto-loads all graphs WHEN a new API endpoint `/api/kb/ontology/graphs/all` is called THEN it returns merged Cytoscape elements (nodes + edges) from all graphs plus all `_relations.NNN.jsonl` files | API |
 | AC-059F-08b | GIVEN entities have `synthesize_id` and `synthesize_message` fields (from 059-D synthesizer) WHEN converting to Cytoscape nodes THEN these fields are included in the node data for tooltip display | Unit |
 | AC-059F-08c | GIVEN a graph has zero entities WHEN included in the merged response THEN no nodes are added (empty graphs are silently skipped) | Unit |
+| AC-059F-08d | GIVEN Memory ontology records use `{op,type,id,ts,props}` WHEN converted to Cytoscape nodes THEN `props.label`, `props.class`, `props.description`, `props.source_files`, `props.lifecycle`, `props.memory_entry_id`, and custom properties are preserved in node data without exposing storage-file names | Unit |
 
 ### Group 09: Search Behavior After Sidebar Removal
 
@@ -123,6 +131,7 @@ This feature was deferred from earlier layers:
 | AC-059F-09a | GIVEN the sidebar graph selector is removed WHEN the user performs a search via the topbar THEN the search scope defaults to all graphs | Integration |
 | AC-059F-09b | GIVEN BFS search previously filtered by selected graphs WHEN the sidebar is removed THEN BFS search operates on all graphs by default | Integration |
 | AC-059F-09c | GIVEN the scope pills bar exists in the topbar WHEN graphs are auto-loaded THEN scope pills still display per-graph pills for filtering the canvas view | UI |
+| AC-059F-09d | GIVEN KG is backed by the new Memory ontology layout WHEN the user searches THEN search matches synthesized Memory graph nodes without requiring old root-level graph JSONL files | Integration |
 
 ### Group 10: No Regression — Existing Functionality
 
@@ -153,16 +162,22 @@ Replace all occurrences of `x-ipe-assistant-user-representative-Engineer` with `
 Remove the graph-list and select-all checkbox sections from the `.ogv-sidebar`. Retain the NODE TYPES legend. Reposition the legend (e.g., overlay on canvas or compact bottom bar).
 
 ### FR-4: Auto-Load All Graphs
-On viewer initialization, automatically fetch all graphs from `/api/kb/ontology/graphs` and load them all without user selection.
+On viewer initialization, automatically fetch all Knowledge Graph data through the unified endpoint and load it without user selection.
 
 ### FR-5: Cross-Graph Relations
-Extend `OntologyGraphService` to read `_relations.NNN.jsonl` files from `.ontology/relations/` and include those edges when serving graph data.
+Extend `OntologyGraphService` to read `_relations.NNN.jsonl` files from both `.ontology/relations/` and migration-era `.ontology/instances/` locations and include those edges when serving graph data.
 
 ### FR-6: Unified Graph Endpoint
 Add `/api/kb/ontology/graphs/all` endpoint that returns merged Cytoscape elements from all graphs plus all cross-graph relations.
 
 ### FR-7: Synthesizer Metadata in Nodes
 Include `synthesize_id` and `synthesize_message` fields in Cytoscape node data when present on entities.
+
+### FR-8: Memory Ontology Layout Support
+When `.graph-index.json` is absent, synthesize graph data from `x-ipe-docs/memory/.ontology/schema/*.jsonl`, `instances/*.jsonl`, `vocabulary/*.json`, and relation chunks. Fold event-sourced records by id, map nested `props` to node data, and expose only user-facing graph names/labels.
+
+### FR-9: Ontology File Transparency
+Do not show raw `.ontology` filenames, folder names, or implementation paths in KG scope labels, status messages, empty states, node details, or source-file links. API field names may remain compatible, but UI text must refer to Memory / Knowledge Graph data.
 
 ---
 
@@ -176,6 +191,8 @@ Include `synthesize_id` and `synthesize_message` fields in Cytoscape node data w
 
 **NFR-4: Legend Readability** — The repositioned NODE TYPES legend must remain legible and not obscure graph content.
 
+**NFR-5: Backward-Compatible Migration** — Existing `.graph-index.json` + root graph JSONL files remain supported while Memory ontology layout becomes the preferred structure.
+
 ---
 
 ## UI/UX Requirements
@@ -187,7 +204,7 @@ Include `synthesize_id` and `synthesize_message` fields in Cytoscape node data w
 ### Interaction Changes
 - Graph selection replaced by auto-load-all
 - Search defaults to all-graphs scope
-- Scope pills remain for optional filtering
+- Scope pills remain for optional filtering only when they can use user-facing Memory/domain labels; raw ontology filenames are never displayed
 - Cross-graph edges visually distinguishable (e.g., dashed line, different color)
 
 ---
@@ -200,6 +217,8 @@ Include `synthesize_id` and `synthesize_message` fields in Cytoscape node data w
 
 **BR-3:** Cross-graph relation edges from `_relations.NNN.jsonl` follow the 059-D synthesizer format: `from_id`, `to_id`, `relation_type`, `synthesis_version`, `synthesized_with`, `ts`.
 
+**BR-4:** `.ontology/` is an implementation detail. End users interact with Memory and Knowledge Graph concepts, not ontology files.
+
 ---
 
 ## Edge Cases
@@ -208,6 +227,8 @@ Include `synthesize_id` and `synthesize_message` fields in Cytoscape node data w
 |-----------|-------------------|
 | No `.ontology/` directory exists | Graph viewer shows empty state, no errors |
 | `.ontology/relations/` directory doesn't exist | No cross-graph edges rendered; intra-graph edges still shown |
+| `.ontology/instances/_relations.NNN.jsonl` exists but `.ontology/relations/` doesn't | Relation chunks are still loaded during migration |
+| `.graph-index.json` doesn't exist but Memory ontology subdirectories exist | Service synthesizes a single user-facing Memory graph |
 | `_relations.NNN.jsonl` contains malformed lines | Malformed lines are skipped (same pattern as `_parse_graph_jsonl`) |
 | A relation references an entity ID not present in any loaded graph | Edge is included but may render as disconnected; no error |
 | Old DAO skill name appears in user-created files outside `.github/` and `src/` | Out of scope — only `.github/` and `src/` paths are updated |
@@ -228,8 +249,10 @@ Include `synthesize_id` and `synthesize_message` fields in Cytoscape node data w
 _(Focus on WHAT, not HOW)_
 
 - The reference migration touches ~24 skill files, 1 copilot-instructions file, and ~4 resource templates — all are text replacements.
-- The graph service (`ontology_graph_service.py`) needs a method to read `_relations.NNN.jsonl` from `.ontology/relations/` and merge them into Cytoscape edge format.
+- The graph service (`ontology_graph_service.py`) needs a method to read `_relations.NNN.jsonl` from `.ontology/relations/` and `.ontology/instances/` and merge them into Cytoscape edge format.
+- The graph service must prefer the Memory ontology layout when `.graph-index.json` is absent by synthesizing a graph from schema, instance, vocabulary, and relation records.
 - A new endpoint `/api/kb/ontology/graphs/all` aggregates all individual graphs plus cross-graph relations.
 - The JS viewer (`ontology-graph-viewer.js`) sidebar HTML and related event handlers need partial removal, with layout CSS adjustments.
 - The `_loadGraphIndex` and checkbox-toggling logic is replaced by auto-load-all behavior.
+- User-facing JS labels should say Knowledge Graph / Memory graph data, not "ontology found" or raw graph filenames.
 - Existing tests for the graph routes/service need updating to reflect the new endpoint and removed sidebar behavior.

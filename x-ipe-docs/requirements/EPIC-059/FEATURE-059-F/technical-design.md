@@ -1,6 +1,6 @@
 # Technical Design: Layer 5 — Integration, Migration & Deprecation
 
-> Feature ID: FEATURE-059-F | Version: v1.0 | Last Updated: 2026-04-20
+> Feature ID: FEATURE-059-F | Version: v1.1 | Last Updated: 2026-04-27
 
 ---
 
@@ -19,6 +19,8 @@
 | F7: Unified Graph Endpoint | New `/api/kb/ontology/graphs/all` returning merged nodes + edges | `src/x_ipe/routes/ontology_graph_routes.py`, `src/x_ipe/services/ontology_graph_service.py` | #backend #api #endpoint |
 | F8: Synthesizer Metadata in Nodes | Include `synthesize_id`/`synthesize_message` in Cytoscape node data | `src/x_ipe/services/ontology_graph_service.py` | #backend #node-data #synthesizer |
 | F9: Test Updates | Update existing tests + add tests for new endpoint and relations loading | `tests/test_ontology_graph_viewer.py` | #testing #pytest |
+| F10: Memory Ontology Loader | Synthesize a user-facing Memory graph from `.ontology/schema`, `.ontology/instances`, `.ontology/vocabulary`, and relation chunks when `.graph-index.json` is absent | `src/x_ipe/services/ontology_graph_service.py` | #backend #memory #ontology |
+| F11: Transparent KG UI | Keep endpoint compatibility while avoiding raw `.ontology` filenames or implementation paths in user-facing labels/messages | `src/x_ipe/static/js/features/ontology-graph-viewer.js`, `src/x_ipe/routes/ontology_graph_routes.py` | #frontend #ux #transparency |
 
 ### Dependencies
 
@@ -26,7 +28,7 @@
 |-----------|--------|-------------|-------------------|
 | FEATURE-059-E | `x-ipe-assistant-user-representative-Engineer` | [059-E spec](x-ipe-docs/requirements/EPIC-059/FEATURE-059-E/specification.md) | Replacement skill that old DAO references migrate to |
 | FEATURE-059-D | `x-ipe-knowledge-ontology-synthesizer` | [059-D tech design](x-ipe-docs/requirements/EPIC-059/FEATURE-059-D/technical-design.md) | Defines `_relations.NNN.jsonl` format and `synthesize_id`/`synthesize_message` fields |
-| FEATURE-059-C | `x-ipe-knowledge-ontology-builder` | [059-C spec](x-ipe-docs/requirements/EPIC-059/FEATURE-059-C/specification.md) | Defines JSONL event format (`_entities.jsonl`) and entity structure |
+| FEATURE-059-C | `x-ipe-knowledge-ontology-builder` | [059-C spec](x-ipe-docs/requirements/EPIC-059/FEATURE-059-C/specification.md) | Defines Memory ontology event format under `.ontology/schema`, `.ontology/instances`, and `.ontology/vocabulary` |
 | FEATURE-058-E/F | Ontology graph viewer | N/A | Existing viewer code being modified (JS, CSS, routes, service) |
 | Cytoscape.js | CDN | External | Graph rendering library used by canvas |
 
@@ -39,20 +41,22 @@
 4. Same replacement in `.github/copilot-instructions.md` and all `src/x_ipe/resources/` files containing the old name
 
 **Workstream B — Web App UI (F4 + F5 + F6 + F7 + F8 + F9):**
-1. Backend: Add `get_all_graphs()` method to `OntologyGraphService` that merges all graph JSONL files + all `_relations.NNN.jsonl` chunks into unified Cytoscape elements
+1. Backend: Add `get_all_graphs()` method to `OntologyGraphService` that merges all legacy graph JSONL files or synthesized Memory ontology records + all `_relations.NNN.jsonl` chunks into unified Cytoscape elements
 2. Backend: Add `/api/kb/ontology/graphs/all` route calling `get_all_graphs()`
 3. Backend: Extend `_entity_to_cytoscape_node()` to include `synthesize_id`/`synthesize_message`
 4. Frontend: Remove sidebar graph-list HTML + JS handlers; reposition legend as floating canvas overlay
 5. Frontend: On init, call `/api/kb/ontology/graphs/all` and `canvas.setElements()` directly
 6. Frontend: Default search scope to all graphs (remove graph_names filtering from UI)
-7. CSS: Change grid from `260px 1fr` to `1fr`, update canvas grid-column, reposition legend
-8. Tests: Update existing tests, add tests for `get_all_graphs()` and `/api/kb/ontology/graphs/all`
+7. Backend: When `.graph-index.json` is absent, read schema/instances/vocabulary subdirectories and produce a user-facing graph named `Memory Knowledge Graph`
+8. Frontend: Show Knowledge Graph / Memory messages and labels; do not display raw `.ontology` file paths or implementation filenames
+9. CSS: Change grid from `260px 1fr` to `1fr`, update canvas grid-column, reposition legend
+10. Tests: Update existing tests, add tests for `get_all_graphs()` and `/api/kb/ontology/graphs/all`
 
 ### Usage Example
 
 ```python
-# Backend — new unified endpoint
-svc = OntologyGraphService(kb_root="/path/to/knowledge-base")
+# Backend — unified endpoint against active Memory root
+svc = OntologyGraphService(kb_root="/path/to/x-ipe-docs/memory")
 result = svc.get_all_graphs()
 # Returns: {
 #   "elements": {
@@ -140,8 +144,8 @@ sequenceDiagram
     Note over V: Init — auto-load all
     V->>R: GET /api/kb/ontology/graphs/all
     R->>S: get_all_graphs()
-    S->>FS: Read all *.jsonl files
-    S->>FS: Read relations/_relations.NNN.jsonl (all chunks)
+    S->>FS: Read .graph-index + graph *.jsonl OR synthesize from schema/instances/vocabulary
+    S->>FS: Read relations/_relations.NNN.jsonl and instances/_relations.NNN.jsonl chunks
     S-->>R: {elements: {nodes, edges}, graph_names}
     R-->>V: JSON response
     V->>V: canvas.setElements(flat)
@@ -218,12 +222,12 @@ async _autoLoadAll() {
     try {
         const resp = await fetch('/api/kb/ontology/graphs/all');
         if (!resp.ok) {
-            this._showEmptyState();
+            this._showEmptyState('No Knowledge Graph Data', 'Add Memory entries or run Memory learning to generate graph data.');
             return;
         }
         const data = await resp.json();
         if (!data.elements || (!data.elements.nodes.length && !data.elements.edges.length)) {
-            this._showEmptyState();
+            this._showEmptyState('No Knowledge Graph Data', 'Add Memory entries or run Memory learning to generate graph data.');
             return;
         }
         const flat = [
@@ -238,7 +242,7 @@ async _autoLoadAll() {
         this._updateStatusBar(data.elements.nodes.length, data.elements.edges.length);
     } catch (err) {
         console.error('[OGV] auto-load failed:', err);
-        this._showEmptyState();
+        this._showEmptyState('Unable to Load Knowledge Graph', 'The graph data could not be loaded.');
     }
 }
 ```
@@ -255,13 +259,11 @@ Add new method `_load_cross_graph_relations()`:
 
 ```python
 def _load_cross_graph_relations(self) -> list[dict]:
-    """Read all _relations.NNN.jsonl chunks from .ontology/relations/ directory.
+    """Read all _relations.NNN.jsonl chunks from .ontology/relations/ and .ontology/instances/ directories.
 
     Returns list of Cytoscape edge dicts.
     """
-    relations_dir = self._ontology_dir / 'relations'
-    if not relations_dir.is_dir():
-        return []
+    relation_dirs = [self._ontology_dir / 'relations', self._ontology_dir / 'instances']
 
     edges = []
     # Sort by chunk number to maintain order
@@ -306,6 +308,7 @@ Key design decisions:
 - `cross_graph: True` flag enables frontend to style cross-graph edges differently (e.g., dashed)
 - Malformed lines skipped (same pattern as existing `_parse_graph_jsonl`)
 - Reads all chunks sorted by filename to maintain append order
+- Supports `.ontology/instances/_relations.NNN.jsonl` during migration because observed Memory ontology artifacts may emit relation chunks there
 
 #### F7: Unified Graph Endpoint
 
@@ -521,6 +524,9 @@ In `ontology-graph-canvas.js` `_getStylesheet()`, add:
 | `test_api_get_all_graphs_200` | API | GET `/api/kb/ontology/graphs/all` returns 200 |
 | `test_api_get_all_graphs_no_ontology_404` | API | Returns 404 when no .ontology/ |
 | `test_cross_graph_edge_format` | Service | Edge has `xr_` prefix, `cross_graph: True`, `synthesis_version` |
+| `test_memory_ontology_layout_without_graph_index` | Service | Synthesizes graph data from schema/instances/vocabulary when `.graph-index.json` is absent |
+| `test_memory_ontology_relations_from_instances_dir` | Service | Reads migration relation chunks from `.ontology/instances/_relations.NNN.jsonl` |
+| `test_memory_ontology_search` | Service | Searches synthesized Memory ontology nodes without old graph files |
 
 **Existing tests to modify:**
 - `test_entity_to_cytoscape_node` — verify `synthesize_id`/`synthesize_message` present in output
@@ -528,6 +534,7 @@ In `ontology-graph-canvas.js` `_getStylesheet()`, add:
 
 **Test fixtures needed:**
 - Create `.ontology/relations/` directory with `_relations.001.jsonl` containing sample relation records in 059-D event envelope format
+- Create a Memory ontology fixture with `.ontology/schema/class-registry.jsonl`, `.ontology/instances/instance.001.jsonl`, `.ontology/instances/_relations.001.jsonl`, and `.ontology/vocabulary/*.json`
 
 ---
 
@@ -535,18 +542,20 @@ In `ontology-graph-canvas.js` `_getStylesheet()`, add:
 
 | Step | Component | Files | AC Coverage |
 |------|-----------|-------|-------------|
-| 1 | F6: Cross-graph relations method | `ontology_graph_service.py` | AC-059F-07a,b,c |
-| 2 | F8: Synthesizer metadata | `ontology_graph_service.py` | AC-059F-08b |
-| 3 | F7: Unified endpoint + individual graph update | `ontology_graph_service.py`, `ontology_graph_routes.py` | AC-059F-07a, 08a,c |
-| 4 | F9: Backend tests | `test_ontology_graph_viewer.py` | AC-059F-10d |
-| 5 | F4: Sidebar removal (JS + CSS) | `ontology-graph-viewer.js`, `ontology-graph-viewer.css` | AC-059F-05a,b,c |
-| 6 | F5: Auto-load + search defaults | `ontology-graph-viewer.js` | AC-059F-05d, 06a,b,c, 09a,b,c |
-| 7 | F4: Cross-graph edge styling | `ontology-graph-canvas.js` | AC-059F-07d |
-| 8 | Regression: topbar, detail panel, SocketIO | `ontology-graph-viewer.js`, `ontology-graph-canvas.js`, `ontology-graph-socket.js` | AC-059F-10a,b,c |
-| 9 | F1: Delete old DAO folder | `.github/skills/x-ipe-assistant-user-representative-Engineer/` | AC-059F-01a,b,c |
-| 10 | F2: Skill reference migration | 24 × `.github/skills/*/SKILL.md` | AC-059F-02a,b,c |
-| 11 | F3: Instructions migration | copilot-instructions + src/ templates | AC-059F-03a,b,c, 04a,b |
-| 12 | Verification | `grep` scan | NFR-1 |
+| 1 | F10: Memory ontology loader | `ontology_graph_service.py` | AC-059F-06d, 08d, 09d |
+| 2 | F6: Cross-graph relations method | `ontology_graph_service.py` | AC-059F-07a,b,c,e |
+| 3 | F8: Synthesizer metadata | `ontology_graph_service.py` | AC-059F-08b |
+| 4 | F7: Unified endpoint + individual graph update | `ontology_graph_service.py`, `ontology_graph_routes.py` | AC-059F-07a, 08a,c |
+| 5 | F9: Backend tests | `test_ontology_graph_viewer.py` | AC-059F-10d |
+| 6 | F11: Transparent KG UI wording | `ontology-graph-viewer.js`, `ontology_graph_routes.py` | AC-059F-06e |
+| 7 | F4: Sidebar removal (JS + CSS) | `ontology-graph-viewer.js`, `ontology-graph-viewer.css` | AC-059F-05a,b,c |
+| 8 | F5: Auto-load + search defaults | `ontology-graph-viewer.js` | AC-059F-05d, 06a,b,c, 09a,b,c |
+| 9 | F4: Cross-graph edge styling | `ontology-graph-canvas.js` | AC-059F-07d |
+| 10 | Regression: topbar, detail panel, SocketIO | `ontology-graph-viewer.js`, `ontology-graph-canvas.js`, `ontology-graph-socket.js` | AC-059F-10a,b,c |
+| 11 | F1: Delete old DAO folder | `.github/skills/x-ipe-assistant-user-representative-Engineer/` | AC-059F-01a,b,c |
+| 12 | F2: Skill reference migration | 24 × `.github/skills/*/SKILL.md` | AC-059F-02a,b,c |
+| 13 | F3: Instructions migration | copilot-instructions + src/ templates | AC-059F-03a,b,c, 04a,b |
+| 14 | Verification | `grep` scan | NFR-1 |
 
 ---
 
@@ -556,12 +565,39 @@ In `ontology-graph-canvas.js` `_getStylesheet()`, add:
 |-----------|-----------|----------|
 | No `.ontology/` directory | F7 (service) | `get_all_graphs()` returns empty elements + empty graph_names |
 | No `relations/` directory | F6 (service) | `_load_cross_graph_relations()` returns empty list |
+| No `.graph-index.json` but Memory ontology subdirectories exist | F10 (service) | Synthesize a user-facing Memory graph |
+| Relation chunks under `instances/` | F6 (service) | Read alongside `relations/` chunks for migration compatibility |
 | Malformed JSONL in relation chunks | F6 (service) | Skip line, continue processing (same as `_parse_graph_jsonl`) |
 | Relation references missing entity | F6 (service) | Edge included — Cytoscape handles disconnected edges gracefully |
 | Empty `.graph-index.json` | F7 (service) | Returns empty elements |
 | No graphs returned from `/graphs/all` | F5 (viewer) | Show empty-state message on canvas |
 | `synthesize_id`/`synthesize_message` absent | F8 (service) | Default to empty string `''` |
 | Route ordering conflict (`all` vs `<name>`) | F7 (route) | Register `/graphs/all` before `/graph/<name>` |
+
+---
+
+### 2.5a Data Model: Memory Ontology Records
+
+Memory ontology records use the event envelope `{op,type,id,ts,props}`. The loader folds create/update events by `id` and maps nested `props` into Cytoscape node data. Example instance:
+
+```jsonl
+{"op":"create","type":"KnowledgeNode","id":"inst-001","props":{"label":"Xiaohongshu User Manual","class":"user-manual","source_files":["x-ipe-docs/memory/procedural/xiaohongshu-user-manual.md"],"memory_entry_id":"proc-20260427-001"}}
+```
+
+Transformed node data includes:
+
+```json
+{
+  "id": "inst-001",
+  "label": "Xiaohongshu User Manual",
+  "node_type": "entity",
+  "class": "user-manual",
+  "source_files": ["procedural/xiaohongshu-user-manual.md"],
+  "memory_entry_id": "proc-20260427-001"
+}
+```
+
+Internal `.ontology` file paths are never exposed in UI labels. Persistent Memory source files may be shown as Memory-relative paths.
 
 ---
 
@@ -610,3 +646,4 @@ tech_stack:
 | Date | Phase | Change Summary |
 |------|-------|----------------|
 | 2026-04-20 | Technical Design | Initial design covering two workstreams: (A) DAO skill removal + reference migration across 24 skill files, copilot-instructions, and resource templates; (B) Web app UI changes — sidebar removal with floating legend overlay, auto-load-all behavior, cross-graph `_relations.NNN.jsonl` support in backend service, new unified `/api/kb/ontology/graphs/all` endpoint, synthesizer metadata in nodes, and Cytoscape cross-graph edge styling. |
+| 2026-04-27 | CR-001 | Added Memory ontology loader design, relation migration path support, and transparent KG UI wording requirements. |

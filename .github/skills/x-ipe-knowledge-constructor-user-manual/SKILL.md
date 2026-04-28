@@ -10,7 +10,7 @@ description: Domain expert for user manual construction. Provides framework, rub
 AI Agents follow this skill to perform user manual construction operations:
 1. Provide a domain-appropriate framework (8-section layout with app-type mixins)
 2. Design measurable rubric criteria per framework section
-3. Identify knowledge gaps and generate extraction requests
+3. Ask/consume user-manual instruction temperature and generate appropriately scoped extraction requests
 4. Fill the framework structure with gathered knowledge into a completed draft
 
 ---
@@ -21,6 +21,7 @@ BLOCKING: Operations are stateless services — the assistant orchestrator passe
 CRITICAL: Each operation MUST define typed input/output contracts with a `writes_to` field.
 CRITICAL: This skill is NOT directly task-matched. It is called by the Knowledge Librarian assistant (`x-ipe-assistant-knowledge-librarian-DAO`) or another assistant orchestrator.
 CRITICAL: This skill writes ONLY to `.working/` paths. Promotion to persistent memory is handled by `x-ipe-knowledge-keeper-memory`.
+MANDATORY: The orchestrator SHOULD ask the user for `instruction_temperature` before constructing a user manual. Valid options: `creative`, `balanced`, `strict`. Default to `balanced` when no explicit preference is provided.
 
 ---
 
@@ -34,6 +35,7 @@ This skill serves as the domain expert for user manual construction. It knows th
 - **writes_to Discipline** — Every operation writes to `x-ipe-docs/memory/.working/{subpath}/` only. No persistent writes.
 - **Domain Templates** — 6 templates in `templates/` define the user manual structure, extraction prompts, rubric criteria, and app-type overlays.
 - **8-Section Layout** — Standard user manual sections: Overview, Installation & Setup, Getting Started, Core Features, Common Workflows, Configuration, Troubleshooting, FAQ & Reference.
+- **Instruction Temperature** — User preference controlling extraction breadth: `creative` explores adjacent source knowledge via extractor skills, `balanced` targets rubric gaps, `strict` uses existing material with only necessary limited extraction.
 
 ---
 
@@ -44,6 +46,7 @@ triggers:
   - "Provide a user manual framework for an application"
   - "Design quality rubric for a user manual"
   - "Identify knowledge gaps in a user manual draft"
+  - "Ask user preference for user-manual instruction temperature"
   - "Fill user manual structure with gathered knowledge"
 
 not_for:
@@ -67,6 +70,7 @@ input:
       app_type: "web | cli | mobile"
       user_goal: "string"
       source_paths: "string[]"
+      instruction_temperature: "creative | balanced | strict"  # optional; default balanced
     output_format: "markdown | split"
     # For design_rubric:
     framework: "dict"
@@ -76,6 +80,7 @@ input:
     framework: "dict"
     current_state: "dict"
     rubric: "dict"
+    instruction_temperature: "creative | balanced | strict"  # optional; default balanced
     # For fill_structure:
     framework: "dict"
     gathered_knowledge: "object[]"
@@ -96,6 +101,9 @@ BLOCKING: All input fields with non-trivial initialization MUST be documented he
   </field>
   <field name="context.request_context.app_type" source="Determines which mixin template to apply">
     <validation>Must be one of: web, cli, mobile</validation>
+  </field>
+  <field name="context.request_context.instruction_temperature or context.instruction_temperature" source="Assistant orchestrator asks user preference before user-manual construction; default is balanced">
+    <validation>Must be one of: creative, balanced, strict. If missing, set balanced. Creative broadens extractor-backed exploration; strict limits requests to necessary gaps from existing material.</validation>
   </field>
   <field name="context.framework" source="Required for design_rubric, request_knowledge, fill_structure">
     <validation>Must be a valid framework_document from provide_framework</validation>
@@ -149,12 +157,15 @@ BLOCKING: All input fields with non-trivial initialization MUST be documented he
 
   <phase_1 name="博学之 — Study Broadly">
     <action>
-      1. READ input: request_context (app_name, app_type, user_goal, source_paths[]), output_format
+      1. READ input: request_context (app_name, app_type, user_goal, source_paths[], optional instruction_temperature), output_format
       2. LOAD templates/playbook-template.md as the base 8-section layout
       3. DETERMINE which mixin to apply based on app_type:
          - web → LOAD templates/mixin-web.md
          - cli → LOAD templates/mixin-cli.md
          - mobile → LOAD templates/mixin-mobile.md
+      4. RESOLVE instruction_temperature:
+         - IF request_context.instruction_temperature is missing → set "balanced"
+         - IF orchestrator has not asked user yet, request one of: creative, balanced, strict
     </action>
     <output>Base template and mixin loaded, request context understood</output>
   </phase_1>
@@ -165,6 +176,7 @@ BLOCKING: All input fields with non-trivial initialization MUST be documented he
       2. VALIDATE app_name is non-empty
       3. VALIDATE source_paths[] is non-empty array
       4. CHECK output_format defaults to "markdown" if not specified
+      5. VALIDATE instruction_temperature is one of: creative, balanced, strict
     </action>
     <constraints>
       - BLOCKING: Invalid app_type → return error INVALID_APP_TYPE
@@ -181,6 +193,7 @@ BLOCKING: All input fields with non-trivial initialization MUST be documented he
       2. ADAPT section titles and stubs to request_context:
          - Replace {App Name} placeholders with app_name
          - Tailor subsection guidance to user_goal
+         - Preserve instruction_temperature in framework metadata for downstream operations
       3. BUILD toc_structure array with {id, title, stubs, depth} per section
       4. FORMAT as output_format (inline markdown or split file references)
     </action>
@@ -289,10 +302,10 @@ BLOCKING: All input fields with non-trivial initialization MUST be documented he
 ### Operation: request_knowledge
 
 > **Contract:**
-> - **Input:** framework: dict, current_state: {filled_sections: string[], empty_sections: string[], partial_sections: string[]}, rubric: dict
-> - **Output:** knowledge_requests: {target_section: string, what_needed: string, suggested_extractor: "extractor-web"|"extractor-memory", priority: number}[]
+> - **Input:** framework: dict, current_state: {filled_sections: string[], empty_sections: string[], partial_sections: string[]}, rubric: dict, instruction_temperature: "creative"|"balanced"|"strict" (optional, default "balanced")
+> - **Output:** knowledge_requests: {target_section: string, what_needed: string, suggested_extractor: "extractor-web"|"extractor-memory", priority: number, extraction_scope: "exploratory"|"targeted"|"limited"}[]
 > - **Writes To:** x-ipe-docs/memory/.working/plan/
-> - **Constraints:** Walk framework sections; compare to current_state; generate specific requests per gap; set suggested_extractor; prioritize by rubric weight; return empty array if no gaps
+> - **Constraints:** Walk framework sections; compare to current_state; generate specific requests per gap; scope requests by instruction_temperature; set suggested_extractor; prioritize by rubric weight; return empty array if no gaps
 
 **When:** Orchestrator needs to know what knowledge to gather next.
 
@@ -301,9 +314,10 @@ BLOCKING: All input fields with non-trivial initialization MUST be documented he
 
   <phase_1 name="博学之 — Study Broadly">
     <action>
-      1. READ input: framework, current_state, rubric
+      1. READ input: framework, current_state, rubric, optional instruction_temperature
       2. LOAD templates/collection-template.md for per-section extraction prompt patterns
       3. BUILD section inventory from framework toc_structure
+      4. RESOLVE instruction_temperature from context, then framework metadata, then default "balanced"
     </action>
     <output>Framework sections, current state, and extraction prompts loaded</output>
   </phase_1>
@@ -313,6 +327,7 @@ BLOCKING: All input fields with non-trivial initialization MUST be documented he
       1. VALIDATE framework has sections
       2. VALIDATE current_state has filled_sections, empty_sections, partial_sections
       3. VALIDATE rubric has metrics for each section
+      4. VALIDATE instruction_temperature is one of: creative, balanced, strict
     </action>
     <constraints>
       - BLOCKING: Missing current_state → return error INPUT_VALIDATION_FAILED
@@ -322,28 +337,37 @@ BLOCKING: All input fields with non-trivial initialization MUST be documented he
 
   <phase_3 name="慎思之 — Think Carefully">
     <action>
-      1. FOR EACH section in framework:
-         a. IF section in current_state.filled_sections → SKIP
-         b. IF section in empty_sections or partial_sections:
-            - READ extraction prompts from collection-template.md for this section
-            - GENERATE specific what_needed description (not vague)
-            - SET suggested_extractor:
-              * "extractor-web" for content needing live source analysis (code, UI, API)
-              * "extractor-memory" for content that may exist in existing knowledge base
-            - SET priority from rubric weight (higher weight = higher priority)
-            - ADD to knowledge_requests[]
-      2. SORT knowledge_requests by priority descending
-      3. IF no gaps found → return empty knowledge_requests[]
+       1. SET extraction policy:
+          - creative: generate required gap requests plus exploratory requests for adjacent workflows, hidden capabilities, edge cases, and cross-source validation; prefer leveraging extractor-web and extractor-memory when source_paths or existing memory could add insight
+          - balanced: generate targeted requests only for empty/partial sections, using the best single extractor per gap
+          - strict: generate limited requests only for missing information required by rubric; prefer extractor-memory/existing material and avoid speculative adjacent exploration
+       2. FOR EACH section in framework:
+          a. IF section in current_state.filled_sections → SKIP
+          b. IF section in empty_sections or partial_sections:
+             - READ extraction prompts from collection-template.md for this section
+             - GENERATE specific what_needed description (not vague)
+             - SET suggested_extractor:
+               * creative: choose extractor-web for source exploration or extractor-memory for existing Memory; create separate requests when both are useful
+               * balanced: choose extractor-web for live/source analysis; choose extractor-memory for existing Memory coverage
+               * strict: choose extractor-memory first; use extractor-web only when a required rubric item cannot be satisfied from existing material
+             - SET priority from rubric weight (higher weight = higher priority)
+             - SET extraction_scope to "exploratory" for creative extras, "targeted" for balanced/default gap requests, or "limited" for strict requests
+             - ADD to knowledge_requests[]
+       3. IF instruction_temperature == "creative", ADD bounded exploratory requests for high-priority filled sections when they could improve examples, workflows, or troubleshooting; mark extraction_scope="exploratory"
+       4. SORT knowledge_requests by priority descending, then extraction_scope order: limited, targeted, exploratory
+       5. IF no gaps found and instruction_temperature != "creative" → return empty knowledge_requests[]
     </action>
     <output>knowledge_requests[] with targeted extraction requests</output>
   </phase_3>
 
   <phase_4 name="明辨之 — Discern Clearly">
     <action>
-      1. VERIFY each request has target_section, what_needed, suggested_extractor, priority
+      1. VERIFY each request has target_section, what_needed, suggested_extractor, priority, extraction_scope
       2. VERIFY suggested_extractor is "extractor-web" or "extractor-memory"
-      3. VERIFY what_needed is specific (not "get more info")
-      4. IF any check fails → return error with details
+      3. VERIFY extraction_scope is "exploratory", "targeted", or "limited"
+      4. VERIFY strict mode has no exploratory requests
+      5. VERIFY what_needed is specific (not "get more info")
+      6. IF any check fails → return error with details
     </action>
     <output>Output validated</output>
   </phase_4>
@@ -457,7 +481,7 @@ operation_output:
     rubric_metrics: "object[]"
     acceptance_criteria: "object[]"
     # request_knowledge:
-    knowledge_requests: "object[]"
+    knowledge_requests: "{target_section, what_needed, suggested_extractor, priority, extraction_scope}[]"
     # fill_structure:
     completed_draft: "string"
     completeness_score: "number"
@@ -498,6 +522,7 @@ operation_output:
 |-------|-------|------------|
 | `INVALID_OPERATION` | Operation name not one of the 4 defined | Return error listing valid operations |
 | `INVALID_APP_TYPE` | app_type not web/cli/mobile (provide_framework) | Return error listing valid types |
+| `INVALID_INSTRUCTION_TEMPERATURE` | instruction_temperature not creative/balanced/strict | Return error listing valid options and default behavior |
 | `INPUT_VALIDATION_FAILED` | Required input missing or wrong type | Return error with specific field and expected type |
 | `TEMPLATE_NOT_FOUND` | Domain template file missing from templates/ | Return error with expected template path |
 | `WRITE_FAILED` | Cannot write to .working/ path | Return error; orchestrator decides retry or alternate path |
@@ -512,12 +537,14 @@ operation_output:
 | Incremental fill | Large knowledge base | Fill sections iteratively, validate rubric after each pass |
 | Mixin composition | Multi-platform app | Stack platform mixins (web+mobile) in provide_framework |
 | Gap-first planning | Cold start | Run request_knowledge before any extraction to prioritize |
+| Temperature-scoped extraction | User controls breadth | Ask creative/balanced/strict; map to exploratory/targeted/limited requests |
 
 | Anti-Pattern | Why Bad | Do Instead |
 |--------------|---------|------------|
 | Skip rubric | No quality gate | Always design_rubric before fill_structure |
 | Persist from constructor | Bypasses librarian | Write to .working/ only; let librarian promote |
 | Monolithic fill | Hard to iterate | Fill per-section, validate incrementally |
+| Ignore instruction temperature | Violates user preference | Default balanced only when preference is missing |
 
 ---
 

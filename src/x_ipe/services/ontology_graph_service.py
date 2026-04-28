@@ -16,6 +16,8 @@ from x_ipe.tracing import x_ipe_tracing
 
 ONTOLOGY_DIR = '.ontology'
 GRAPH_INDEX_FILE = '.graph-index.json'
+MEMORY_GRAPH_NAME = 'memory-knowledge-graph'
+MEMORY_GRAPH_DISPLAY_NAME = 'Memory Knowledge Graph'
 
 
 def _import_ontology_search():
@@ -82,6 +84,16 @@ class OntologyGraphService:
 
         index = self._read_graph_index()
         if not index:
+            if self._has_memory_ontology_layout():
+                graph = self._build_memory_graph()
+                return [{
+                    'name': MEMORY_GRAPH_NAME,
+                    'display_name': MEMORY_GRAPH_DISPLAY_NAME,
+                    'file_path': 'memory://knowledge-graph',
+                    'node_count': len(graph['elements']['nodes']),
+                    'edge_count': len(graph['elements']['edges']),
+                    'dominant_type': 'concept',
+                }]
             return []
 
         result = []
@@ -105,6 +117,9 @@ class OntologyGraphService:
         FEATURE-059-F: Also includes cross-graph relations from
         .ontology/relations/_relations.NNN.jsonl that touch entities in this graph.
         """
+        if name == MEMORY_GRAPH_NAME and self._has_memory_ontology_layout():
+            return self._build_memory_graph()
+
         graph_path = self._ontology_dir / f'{name}.jsonl'
         if not graph_path.is_file():
             return None
@@ -143,6 +158,14 @@ class OntologyGraphService:
             return {'elements': {'nodes': [], 'edges': []}, 'graph_names': []}
 
         index = self._read_graph_index()
+        if not index:
+            if self._has_memory_ontology_layout():
+                graph = self._build_memory_graph()
+                graph['graph_names'] = [MEMORY_GRAPH_NAME]
+                graph['graph_labels'] = {MEMORY_GRAPH_NAME: MEMORY_GRAPH_DISPLAY_NAME}
+                return graph
+            return {'elements': {'nodes': [], 'edges': []}, 'graph_names': []}
+
         all_nodes: list[dict] = []
         all_edges: list[dict] = []
         graph_names: list[str] = []
@@ -182,13 +205,18 @@ class OntologyGraphService:
         FEATURE-059-F: Returns list of Cytoscape edge dicts representing
         cross-graph relations created by the ontology-synthesizer (059-D).
         """
-        relations_dir = self._ontology_dir / 'relations'
-        if not relations_dir.is_dir():
-            return []
-
         edges: list[dict] = []
-        # Sort by chunk number to maintain append order
-        chunks = sorted(relations_dir.glob('_relations.*.jsonl'))
+        relation_dirs = [
+            self._ontology_dir / 'relations',
+            self._ontology_dir / 'instances',
+        ]
+        chunks: list[Path] = []
+        for relation_dir in relation_dirs:
+            if relation_dir.is_dir():
+                chunks.extend(sorted(relation_dir.glob('_relations.*.jsonl')))
+
+        # Sort by path to maintain deterministic append order across locations.
+        chunks = sorted(chunks)
         for chunk_path in chunks:
             try:
                 with open(chunk_path) as f:
@@ -209,9 +237,10 @@ class OntologyGraphService:
                         if not from_id or not to_id:
                             continue
                         rel_type = props.get('relation_type', 'related_to')
+                        edge_id = record.get('id') or f'{from_id}_{to_id}'
                         edges.append({
                             'data': {
-                                'id': f'xr_{from_id}_{to_id}',
+                                'id': f'xr_{edge_id}',
                                 'source': from_id,
                                 'target': to_id,
                                 'relation_type': rel_type,
@@ -235,6 +264,9 @@ class OntologyGraphService:
             return []
 
         q = query.lower()
+        if self._has_memory_ontology_layout() and not self._read_graph_index():
+            return self._search_memory_graph(q, graph_names)
+
         targets = self._resolve_target_graphs(graph_names)
 
         results = []
@@ -273,6 +305,30 @@ class OntologyGraphService:
                 'results': [],
                 'subgraph': {'nodes': [], 'edges': []},
                 'pagination': {'page': page, 'page_size': page_size, 'total': 0, 'total_pages': 0},
+            }
+
+        if self._has_memory_ontology_layout() and not self._read_graph_index():
+            results = self.search(query, graph_names)
+            graph = self._build_memory_graph()
+            matching_ids = {r['node_id'] for r in results}
+            edges = [
+                edge['data'] for edge in graph['elements']['edges']
+                if edge['data'].get('source') in matching_ids or edge['data'].get('target') in matching_ids
+            ]
+            related_ids = set(matching_ids)
+            for edge in edges:
+                related_ids.add(edge.get('source', ''))
+                related_ids.add(edge.get('target', ''))
+            total = len(results)
+            return {
+                'results': results[(page - 1) * page_size: page * page_size],
+                'subgraph': {'nodes': sorted(related_ids), 'edges': edges},
+                'pagination': {
+                    'page': page,
+                    'page_size': page_size,
+                    'total': total,
+                    'total_pages': max(1, math.ceil(total / page_size)) if total > 0 else 0,
+                },
             }
 
         # Clamp parameters
@@ -338,6 +394,190 @@ class OntologyGraphService:
                 return json.load(f)
         except (json.JSONDecodeError, OSError):
             return None
+
+    def _has_memory_ontology_layout(self) -> bool:
+        return any(
+            (self._ontology_dir / name).is_dir()
+            for name in ('schema', 'instances', 'vocabulary')
+        )
+
+    def _build_memory_graph(self) -> dict:
+        nodes = self._load_memory_nodes()
+        edges = self._load_cross_graph_relations()
+        for node in nodes:
+            node['data']['_graph'] = MEMORY_GRAPH_NAME
+            node['data']['_graph_label'] = MEMORY_GRAPH_DISPLAY_NAME
+        for edge in edges:
+            edge['data']['_graph'] = MEMORY_GRAPH_NAME
+            edge['data']['_graph_label'] = MEMORY_GRAPH_DISPLAY_NAME
+
+        return {
+            'name': MEMORY_GRAPH_NAME,
+            'display_name': MEMORY_GRAPH_DISPLAY_NAME,
+            'elements': {
+                'nodes': nodes,
+                'edges': edges,
+            },
+        }
+
+    def _load_memory_nodes(self) -> list[dict]:
+        records: list[dict] = []
+        records.extend(self._fold_event_records(self._ontology_dir / 'schema', '*.jsonl', 'dimension'))
+        records.extend(self._fold_event_records(self._ontology_dir / 'instances', 'instance*.jsonl', 'entity'))
+        records.extend(self._load_vocabulary_nodes())
+        return [self._memory_record_to_cytoscape_node(record) for record in records]
+
+    def _fold_event_records(self, directory: Path, pattern: str, node_type: str) -> list[dict]:
+        if not directory.is_dir():
+            return []
+
+        by_id: dict[str, dict] = {}
+        for path in sorted(directory.glob(pattern)):
+            if path.name.startswith('_'):
+                continue
+            try:
+                with open(path) as f:
+                    for line in f:
+                        line = line.strip()
+                        if not line:
+                            continue
+                        try:
+                            record = json.loads(line)
+                        except json.JSONDecodeError:
+                            continue
+                        if record.get('op') not in ('create', 'update'):
+                            continue
+                        record_id = record.get('id')
+                        if not record_id:
+                            continue
+                        current = by_id.setdefault(record_id, {
+                            'id': record_id,
+                            'type': record.get('type', ''),
+                            'props': {},
+                            'created': record.get('ts', ''),
+                            'updated': '',
+                            'node_type': node_type,
+                        })
+                        current['type'] = record.get('type', current.get('type', ''))
+                        current['props'].update(record.get('props') or {})
+                        if record.get('op') == 'update':
+                            current['updated'] = record.get('ts', current.get('updated', ''))
+            except OSError:
+                continue
+        return list(by_id.values())
+
+    def _load_vocabulary_nodes(self) -> list[dict]:
+        vocabulary_dir = self._ontology_dir / 'vocabulary'
+        if not vocabulary_dir.is_dir():
+            return []
+
+        records: list[dict] = []
+        for path in sorted(vocabulary_dir.glob('*.json')):
+            if path.name.startswith('_'):
+                continue
+            try:
+                with open(path) as f:
+                    data = json.load(f)
+            except (json.JSONDecodeError, OSError):
+                continue
+
+            concepts = data.get('concepts', {})
+            if isinstance(concepts, dict):
+                items = concepts.items()
+            elif isinstance(concepts, list):
+                items = ((str(i), item) for i, item in enumerate(concepts))
+            else:
+                items = []
+
+            scheme = data.get('scheme') or path.stem
+            for key, concept in items:
+                props = concept if isinstance(concept, dict) else {'label': str(concept)}
+                label = props.get('label') or str(key)
+                records.append({
+                    'id': f'vocab:{scheme}:{key}',
+                    'type': 'VocabularyConcept',
+                    'props': {
+                        **props,
+                        'label': label,
+                        'scheme': scheme,
+                    },
+                    'created': '',
+                    'updated': '',
+                    'node_type': 'concept',
+                })
+        return records
+
+    def _memory_record_to_cytoscape_node(self, record: dict) -> dict:
+        props = dict(record.get('props') or {})
+        node_id = record.get('id', '')
+        node_type = record.get('node_type') or props.get('node_type') or 'entity'
+        source_files = self._public_source_files(props.get('source_files', []))
+
+        data = {
+            'id': node_id,
+            'label': props.get('label', node_id),
+            'node_type': node_type,
+            'weight': props.get('weight', 1),
+            'description': props.get('description', ''),
+            'dimensions': props.get('dimensions', {}),
+            'source_files': source_files,
+            'synthesize_id': props.get('synthesize_id') or '',
+            'synthesize_message': props.get('synthesize_message') or '',
+            'class': props.get('class', ''),
+            'lifecycle': props.get('lifecycle', ''),
+            'memory_entry_id': props.get('memory_entry_id', ''),
+            'metadata': {
+                'connections': 0,
+                'created': record.get('created', ''),
+                'updated': record.get('updated', ''),
+            },
+        }
+
+        reserved = set(data) | {'source_files', 'dimensions', 'description', 'weight', 'label'}
+        for key, value in props.items():
+            if key not in reserved:
+                data[key] = value
+
+        return {'data': data}
+
+    def _public_source_files(self, source_files: Any) -> list[str]:
+        if not isinstance(source_files, list):
+            return []
+
+        public_files: list[str] = []
+        for source in source_files:
+            if not isinstance(source, str):
+                continue
+            parts = Path(source).parts
+            if any(part.startswith('.') for part in parts):
+                continue
+            marker = ('x-ipe-docs', 'memory')
+            if marker[0] in parts:
+                idx = parts.index(marker[0])
+                if len(parts) > idx + 1 and parts[idx + 1] == marker[1]:
+                    public_files.append(str(Path(*parts[idx + 2:])))
+                    continue
+            public_files.append(source)
+        return public_files
+
+    def _search_memory_graph(self, query_lower: str, graph_names: list[str] | None = None) -> list[dict]:
+        if graph_names and MEMORY_GRAPH_NAME not in graph_names:
+            return []
+
+        graph = self._build_memory_graph()
+        results = []
+        for node in graph['elements']['nodes']:
+            data = node.get('data', {})
+            relevance = self._compute_relevance(data, query_lower)
+            if relevance > 0:
+                results.append({
+                    'node_id': data.get('id', ''),
+                    'label': data.get('label', ''),
+                    'graph': MEMORY_GRAPH_NAME,
+                    'relevance': relevance,
+                })
+        results.sort(key=lambda r: r['relevance'], reverse=True)
+        return results
 
     def _parse_graph_jsonl(self, path: Path) -> tuple[list[dict], list[dict]]:
         """Parse a graph JSONL file into entities and relations.
