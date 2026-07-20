@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>EffortEstimation_AI_v2 — CR-2026-014</title>
+  <style>
+    :root {
+      --color-primary:#0f172a;--color-secondary:#475569;--color-accent:#10b981;--color-neutral:#e2e8f0;
+      --color-success:#22c55e;--color-warning:#f59e0b;--color-error:#ef4444;--color-info:#3b82f6;
+      --slate-50:#f8fafc;--slate-100:#f1f5f9;--slate-200:#e2e8f0;--slate-300:#cbd5e1;
+      --slate-400:#94a3b8;--slate-500:#64748b;--slate-600:#475569;--slate-700:#334155;
+      --slate-800:#1e293b;--slate-900:#0f172a;--slate-950:#020617;--accent-light:#d1fae5;--accent-dark:#059669;
+      --font-heading:"Iowan Old Style","Palatino Linotype",Georgia,serif;
+      --font-body:"Avenir Next",Avenir,"Segoe UI",sans-serif;--font-mono:"SFMono-Regular",Consolas,monospace;
+      --space-xs:4px;--space-sm:8px;--space-md:16px;--space-lg:24px;--space-xl:32px;
+      --radius-sm:4px;--radius-md:8px;--radius-lg:12px;--radius-full:9999px;
+      --shadow-sm:0 1px 2px rgb(2 6 23/.05);--shadow-md:0 8px 24px rgb(2 6 23/.08);--shadow-lg:0 24px 60px rgb(2 6 23/.14);
+    }
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;color:var(--slate-800);font-family:var(--font-body);background:var(--slate-100)}
+    button{font:inherit;cursor:pointer}a{color:inherit;text-decoration:none}.shell{min-height:100vh;display:grid;grid-template-columns:260px minmax(0,1fr)}
+    .rail{position:sticky;top:0;height:100vh;padding:26px 18px;color:white;background:var(--slate-950);overflow:auto}
+    .seal{display:flex;align-items:center;gap:12px;padding:0 8px 24px;border-bottom:1px solid rgb(255 255 255/.1)}
+    .seal-mark{width:38px;height:38px;display:grid;place-items:center;border:1px solid rgb(52 211 153/.55);border-radius:50%;color:#6ee7b7;font:700 20px var(--font-heading)}
+    .seal b{display:block;font:600 15px var(--font-heading)}.seal small{color:var(--slate-500);font:9px var(--font-mono);letter-spacing:.12em}
+    .case-meta{margin:22px 8px;padding:14px;border:1px solid rgb(255 255 255/.09);border-radius:var(--radius-md);background:rgb(255 255 255/.04)}
+    .case-meta small,.nav-label{color:var(--slate-500);font:9px var(--font-mono);letter-spacing:.14em;text-transform:uppercase}
+    .case-meta strong{display:block;margin:8px 0 4px;font-size:12px}.case-meta span{color:#6ee7b7;font:10px var(--font-mono)}
+    nav{display:grid;gap:4px}.nav-label{margin:8px 10px}.nav{padding:10px 12px;border-left:2px solid transparent;border-radius:0 7px 7px 0;color:var(--slate-400);font-size:12px}
+    .nav:hover,.nav.active{color:white;border-left-color:var(--color-accent);background:rgb(16 185 129/.1)}
+    .rail-foot{margin-top:28px;padding:16px 8px 0;border-top:1px solid rgb(255 255 255/.08);color:var(--slate-500);font:9px/1.6 var(--font-mono)}
+    main{min-width:0}.hero{position:relative;min-height:390px;padding:42px clamp(24px,6vw,80px);color:white;background:linear-gradient(125deg,var(--slate-950),var(--slate-800));overflow:hidden}
+    .hero:after{content:"87";position:absolute;right:-20px;bottom:-88px;color:rgb(255 255 255/.025);font:700 330px/1 var(--font-heading)}
+    .topline{display:flex;justify-content:space-between;gap:20px;color:var(--slate-400);font:9px var(--font-mono);letter-spacing:.12em;text-transform:uppercase}
+    .hero h1{max-width:800px;margin:65px 0 15px;font:600 clamp(38px,6vw,72px)/.95 var(--font-heading);letter-spacing:-.04em}
+    .hero p{max-width:720px;margin:0;color:var(--slate-300);font-size:15px;line-height:1.65}
+    .hero-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}.btn{padding:10px 14px;border:1px solid rgb(255 255 255/.14);border-radius:var(--radius-md);color:white;background:rgb(255 255 255/.06);font-size:11px;font-weight:700}
+    .btn.primary{border-color:var(--accent-dark);background:var(--color-accent)}.content{max-width:1220px;margin:-52px auto 0;padding:0 28px 70px;position:relative}
+    .verdict-grid{display:grid;grid-template-columns:1.2fr repeat(3,.7fr);gap:12px}.verdict-card{min-height:150px;padding:22px;border:1px solid var(--slate-200);border-radius:var(--radius-lg);background:white;box-shadow:var(--shadow-md)}
+    .verdict-card.featured{color:white;background:var(--color-accent);border-color:var(--accent-dark)}.kicker{font:800 9px var(--font-mono);letter-spacing:.12em;text-transform:uppercase;opacity:.7}
+    .verdict-card strong{display:block;margin:18px 0 7px;color:var(--slate-900);font:600 34px/1 var(--font-heading)}.verdict-card.featured strong{color:white;font-size:43px}
+    .verdict-card span{color:var(--slate-500);font-size:11px;line-height:1.5}.verdict-card.featured span{color:#d1fae5}
+    section{scroll-margin-top:24px;margin-top:22px;padding:28px;border:1px solid var(--slate-200);border-radius:var(--radius-lg);background:white;box-shadow:var(--shadow-sm)}
+    .section-head{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:24px}.section-head h2{margin:5px 0 0;font:600 28px var(--font-heading)}
+    .section-head p{max-width:560px;margin:0;color:var(--slate-500);font-size:12px;line-height:1.55}.legend{display:flex;gap:14px;color:var(--slate-500);font:9px var(--font-mono)}
+    .legend i{display:inline-block;width:9px;height:9px;margin-right:5px;border-radius:2px;background:var(--slate-300)}.legend .ai{background:var(--color-accent)}
+    .compare{display:grid;gap:15px}.row{display:grid;grid-template-columns:180px minmax(220px,1fr) 80px 80px;gap:18px;align-items:center}
+    .row-title b{display:block;font-size:12px}.row-title small{color:var(--slate-400);font:9px var(--font-mono)}
+    .tracks{position:relative;height:34px;border-left:1px solid var(--slate-200);border-right:1px solid var(--slate-200);background:repeating-linear-gradient(90deg,var(--slate-100) 0,var(--slate-100) 1px,transparent 1px,transparent 20%)}
+    .vendor,.ai-range{position:absolute;height:8px;left:0;border-radius:var(--radius-full)}.vendor{top:5px;background:var(--slate-300)}.ai-range{bottom:5px;background:var(--color-accent)}
+    .row>strong{font:700 11px var(--font-mono)}.flag{padding:6px 8px;text-align:center;border-radius:var(--radius-full);color:#047857;background:var(--accent-light);font:800 9px var(--font-mono)}
+    .flag.warn{color:#92400e;background:#fef3c7}.scale{display:flex;justify-content:space-between;margin:8px 178px 0 198px;color:var(--slate-400);font:8px var(--font-mono)}
+    .modules{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.module{border:1px solid var(--slate-200);border-radius:var(--radius-md);overflow:hidden}
+    .module button{width:100%;display:grid;grid-template-columns:1fr auto;gap:12px;padding:17px;border:0;text-align:left;background:white}.module button b{font-size:12px}.module button strong{color:var(--accent-dark);font:700 11px var(--font-mono)}
+    .confidence{grid-column:1/-1;height:5px;border-radius:var(--radius-full);background:var(--slate-100);overflow:hidden}.confidence i{display:block;height:100%;background:var(--color-accent)}
+    .detail{display:none;padding:0 17px 17px;color:var(--slate-500);font-size:11px;line-height:1.6}.module.open .detail{display:block}
+    .factor-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.factor{padding:18px;border-left:3px solid var(--slate-300);background:var(--slate-50)}
+    .factor.positive{border-color:var(--color-accent)}.factor.negative{border-color:var(--color-warning)}.factor b{display:block;font:600 15px var(--font-heading)}.factor strong{display:block;margin:14px 0 5px;font:700 22px var(--font-mono)}
+    .factor span{color:var(--slate-500);font-size:10px;line-height:1.5}.recommendation{display:grid;grid-template-columns:1fr 1fr;gap:16px}.recommendation article{padding:22px;border-radius:var(--radius-lg);background:var(--slate-950);color:white}
+    .recommendation article:last-child{background:var(--accent-light);color:var(--slate-900)}.recommendation h3{margin:8px 0 12px;font:600 23px var(--font-heading)}.recommendation p{margin:0;color:var(--slate-400);font-size:11px;line-height:1.65}.recommendation article:last-child p{color:var(--slate-600)}
+    .drawer{position:fixed;z-index:50;top:0;right:0;width:min(440px,100%);height:100vh;padding:28px;transform:translateX(105%);transition:.25s ease;background:white;box-shadow:var(--shadow-lg);overflow:auto}.drawer.open{transform:none}
+    .drawer-head{display:flex;justify-content:space-between;gap:16px}.drawer h2{font:600 28px var(--font-heading)}.close{width:36px;height:36px;border:0;border-radius:50%;background:var(--slate-100)}
+    .source{margin-top:12px;padding:15px;border:1px solid var(--slate-200);border-radius:var(--radius-md)}.source b{font-size:11px}.source p{margin:7px 0 0;color:var(--slate-500);font-size:10px;line-height:1.55}
+    @media(max-width:900px){.shell{grid-template-columns:1fr}.rail{position:static;height:auto}.rail nav{display:flex;overflow:auto}.nav{white-space:nowrap}.case-meta,.rail-foot,.nav-label{display:none}.hero{min-height:350px}.hero h1{margin-top:50px}.verdict-grid{grid-template-columns:1fr 1fr}.row{grid-template-columns:130px 1fr 60px}.row .flag{display:none}.factor-grid{grid-template-columns:1fr 1fr}}
+    @media(max-width:620px){.content{padding:0 12px 40px}.hero{padding:28px 18px}.topline span:last-child{display:none}.verdict-grid,.modules,.recommendation{grid-template-columns:1fr}.section-head{display:block}.legend{margin-top:14px}.row{grid-template-columns:1fr}.tracks{height:38px}.row>strong{display:none}.scale{display:none}.factor-grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="rail">
+      <div class="seal"><div class="seal-mark">§</div><div><b>AI Court</b><small>Effort evidence</small></div></div>
+      <div class="case-meta"><small>Assessment file</small><strong>CR-2026-014</strong><span>● FINAL · VERSION 2</span></div>
+      <nav>
+        <span class="nav-label">Report index</span>
+        <a class="nav active" href="#verdict">01 · Executive verdict</a><a class="nav" href="#comparison">02 · Comparative evidence</a>
+        <a class="nav" href="#modules">03 · Module findings</a><a class="nav" href="#benchmarks">04 · Adjustment factors</a>
+        <a class="nav" href="#guidance">05 · Negotiation guidance</a>
+      </nav>
+      <div class="rail-foot">GENERATED 20 JUL 2026 · 14:32<br>ANALYSIS DEPTH: STANDARD<br>INPUT SNAPSHOT: 8C4A…91F2</div>
+    </aside>
+    <main>
+      <header class="hero" id="verdict">
+        <div class="topline"><span>Independent effort assessment / final</span><span>EffortEstimation_AI_v2.html</span></div>
+        <h1>Vendor estimate is materially high.</h1>
+        <p>AI 建议以 <b>27–34 人天</b>作为可信谈判区间。Vendor 的 46 人天报价主要在协议适配、配置界面与回归测试上高估；账户迁移仍需保留风险缓冲。</p>
+        <div class="hero-actions"><button class="btn primary" id="method">查看评估方法</button><a class="btn" href="suggested-technical-design-ai-v2.html">打开技术设计 →</a><button class="btn" id="print">导出 / 打印</button></div>
+      </header>
+      <div class="content">
+        <div class="verdict-grid">
+          <article class="verdict-card featured"><span class="kicker">AI credible range</span><strong>27–34d</strong><span>87% overall confidence</span></article>
+          <article class="verdict-card"><span class="kicker">Vendor quote</span><strong>46d</strong><span>Single-point estimate</span></article>
+          <article class="verdict-card"><span class="kicker">Negotiation room</span><strong>26–41%</strong><span>12–19 person-days</span></article>
+          <article class="verdict-card"><span class="kicker">Risk reserve</span><strong>+3d</strong><span>Account migration only</span></article>
+        </div>
+
+        <section id="comparison">
+          <div class="section-head"><div><span class="kicker">Comparative evidence</span><h2>Where the estimates diverge</h2></div><div class="legend"><span><i></i>VENDOR</span><span><i class="ai"></i>AI RANGE</span></div></div>
+          <div class="compare">
+            <div class="row"><div class="row-title"><b>身份协议适配</b><small>SSO PROTOCOL</small></div><div class="tracks"><i class="vendor" style="width:88%"></i><i class="ai-range" style="left:56%;width:13%"></i></div><strong>14 / 9–11d</strong><span class="flag">高估</span></div>
+            <div class="row"><div class="row-title"><b>账户绑定迁移</b><small>IDENTITY LINK</small></div><div class="tracks"><i class="vendor" style="width:50%"></i><i class="ai-range" style="left:44%;width:19%"></i></div><strong>8 / 7–10d</strong><span class="flag warn">合理</span></div>
+            <div class="row"><div class="row-title"><b>管理员配置</b><small>ADMIN UX</small></div><div class="tracks"><i class="vendor" style="width:63%"></i><i class="ai-range" style="left:31%;width:7%"></i></div><strong>10 / 5–6d</strong><span class="flag">高估</span></div>
+            <div class="row"><div class="row-title"><b>测试与发布</b><small>QUALITY</small></div><div class="tracks"><i class="vendor" style="width:88%"></i><i class="ai-range" style="left:38%;width:6%"></i></div><strong>14 / 6–7d</strong><span class="flag">高估</span></div>
+          </div><div class="scale"><span>0d</span><span>4d</span><span>8d</span><span>12d</span><span>16d</span></div>
+        </section>
+
+        <section id="modules">
+          <div class="section-head"><div><span class="kicker">Module findings</span><h2>Confidence-backed ranges</h2></div><p>点击每个模块查看估算依据、可复用资产与主要不确定性。</p></div>
+          <div class="modules">
+            <article class="module open"><button><b>01 · 身份协议适配</b><strong>9–11d · 92%</strong><span class="confidence"><i style="width:92%"></i></span></button><div class="detail">现有认证中间件提供 63% 可复用能力。新增工作集中在 SAML metadata、证书轮换、IdP/SP initiated flow。AI 辅助效率调整：−18%。</div></article>
+            <article class="module"><button><b>02 · 账户绑定迁移</b><strong>7–10d · 76%</strong><span class="confidence"><i style="width:76%"></i></span></button><div class="detail">历史账户数据质量未知；需覆盖重复邮箱、孤儿账户、回滚和分批迁移。此项存在 Vendor 低估风险，建议保留 3 人天缓冲。</div></article>
+            <article class="module"><button><b>03 · 管理员配置</b><strong>5–6d · 89%</strong><span class="confidence"><i style="width:89%"></i></span></button><div class="detail">沿用现有设置页与权限框架，主要新增 IdP 参数、证书上传、连接测试以及功能开关。</div></article>
+            <article class="module"><button><b>04 · 测试与发布</b><strong>6–7d · 84%</strong><span class="confidence"><i style="width:84%"></i></span></button><div class="detail">自动化覆盖正常登录、证书失效、绑定冲突和回退路径；分阶段启用降低发布风险。</div></article>
+          </div>
+        </section>
+
+        <section id="benchmarks">
+          <div class="section-head"><div><span class="kicker">Adjustment factors</span><h2>How the range was formed</h2></div><p>基线不是黑箱：每项增减因素都显示方向、影响和证据来源。</p></div>
+          <div class="factor-grid">
+            <article class="factor positive"><b>现有组件复用</b><strong>−21%</strong><span>认证中间件、权限框架与配置页可复用。</span></article>
+            <article class="factor positive"><b>AI 辅助开发</b><strong>−14%</strong><span>协议样板、测试生成与文档产出效率提升。</span></article>
+            <article class="factor negative"><b>迁移不确定性</b><strong>+12%</strong><span>历史账户质量与绑定冲突需风险储备。</span></article>
+            <article class="factor"><b>行业基准</b><strong>31d</strong><span>中型门户 SSO 改造的校准中位数。</span></article>
+          </div>
+        </section>
+
+        <section id="guidance">
+          <div class="section-head"><div><span class="kicker">Negotiation guidance</span><h2>Recommended position</h2></div></div>
+          <div class="recommendation">
+            <article><span class="kicker">Opening position</span><h3>以 29 人天开价</h3><p>要求 Vendor 拆分协议适配与回归测试的复用假设，并提供账户迁移的数据质量证据。</p></article>
+            <article><span class="kicker">Approval ceiling</span><h3>不超过 34 人天</h3><p>若 Vendor 提供迁移风险证据，可在区间上沿成交；超出部分应绑定明确风险或新增范围。</p></article>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <aside class="drawer" id="drawer"><div class="drawer-head"><div><span class="kicker">Methodology</span><h2>Transparent by design</h2></div><button class="close" aria-label="关闭">×</button></div>
+    <div class="source"><b>1 · Code impact baseline</b><p>按受影响模块、依赖链、复杂度和已有测试覆盖构建基础工作量。</p></div>
+    <div class="source"><b>2 · Industry calibration</b><p>使用同类企业门户 SSO 改造的分位数对基础估算做外部校准。</p></div>
+    <div class="source"><b>3 · Productivity adjustment</b><p>按可复用组件、自动化程度与 AI 辅助能力调整，不假设所有任务同等提效。</p></div>
+    <div class="source"><b>4 · Uncertainty envelope</b><p>将迁移数据质量等未知因素转换为区间宽度与置信度，而非隐藏在单点数字中。</p></div>
+  </aside>
+  <script>
+    document.querySelectorAll(".module button").forEach(button=>button.addEventListener("click",()=>button.parentElement.classList.toggle("open")));
+    const drawer=document.querySelector("#drawer");document.querySelector("#method").addEventListener("click",()=>drawer.classList.add("open"));
+    document.querySelector(".close").addEventListener("click",()=>drawer.classList.remove("open"));document.querySelector("#print").addEventListener("click",()=>window.print());
+    const links=[...document.querySelectorAll(".nav")];const sections=[...document.querySelectorAll("header[id],section[id]")];
+    window.addEventListener("scroll",()=>{let current=sections[0].id;sections.forEach(s=>{if(s.getBoundingClientRect().top<180)current=s.id});links.forEach(a=>a.classList.toggle("active",a.getAttribute("href")==="#"+current))});
+  </script>
+</body>
+</html>
