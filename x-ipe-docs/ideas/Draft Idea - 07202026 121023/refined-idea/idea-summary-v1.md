@@ -47,50 +47,46 @@ flowchart TD
 
 ### 系统架构
 
-```architecture-dsl
-layer "CR Assessment View" {
-  rows 1
-  module "Case List Panel" {
-    cols 4
-    component "案例列表 (名称 + 状态)"
-  }
-  module "Detail Panel" {
-    cols 8
-    component "信息表单 / 文件内嵌预览"
-  }
-}
+> 所有报告内的架构、流程、时序、状态、类和 ER 图均保存为 Mermaid 文本，并由 HTML 模板内置的 Mermaid JavaScript 插件在浏览器端渲染。
 
-layer "Case Storage" {
-  rows 1
-  module "cr-cases/{case-name}/" {
-    cols 12
-    component "CaseRecord.html (元数据 + CIO报告)"
-    component "EffortEstimation_AI_vN.html (AI估算)"
-    component "SuggestedTechnicalDesign_AI_vN.html (技术方案)"
-    component "EffortEstimation_Vendor (Vendor估算)"
-    component "SupportingDocuments/ (补充材料)"
-  }
-}
+```mermaid
+flowchart TB
+    subgraph UI["CR Assessment View"]
+        LIST["Case List Panel<br/>案例 + 状态"]
+        DETAIL["Detail Panel<br/>表单 / 内嵌报告"]
+    end
 
-layer "AI Evaluation Engine" {
-  rows 1
-  module "x-ipe-task-based-evaluate-change-request-efforts" {
-    cols 12
-    component "Quick (目标模块分析)"
-    component "Standard (影响范围分析)"
-    component "Deep (全量基线分析)"
-    component "Industry Benchmarks (内置基准)"
-    component "Output Templates (内置HTML模板)"
-  }
-}
+    subgraph ENGINE["x-ipe-task-based-evaluate-change-request-efforts"]
+        DEPTH["Quick / Standard / Deep"]
+        ANALYSIS["代码复杂度 + 行业基准<br/>+ AI 效率因子"]
+        MODEL["Structured Report Model<br/>统一输出数据"]
+        TEMPLATE["Bundled Template Renderer<br/>版本化 HTML 模板"]
+    end
 
-layer "X-IPE Console" {
-  rows 1
-  module "copilot-prompt.json" {
-    cols 12
-    component "CR评估prompt入口"
-  }
-}
+    subgraph TEMPLATES["Skill-owned Report Templates"]
+        CASE_TPL["case-record-template.html"]
+        EFFORT_TPL["effort-estimation-template.html"]
+        DESIGN_TPL["suggested-technical-design-template.html"]
+        MERMAID["Mermaid JS Plugin<br/>ESM + strict security"]
+    end
+
+    subgraph STORAGE["cr-cases/{case-name}/"]
+        CASE["CaseRecord.html"]
+        EFFORT["EffortEstimation_AI_vN.html"]
+        DESIGN["SuggestedTechnicalDesign_AI_vN.html"]
+        VENDOR["EffortEstimation_Vendor"]
+        DOCS["SupportingDocuments/"]
+    end
+
+    LIST --> DETAIL
+    DETAIL --> DEPTH --> ANALYSIS --> MODEL --> TEMPLATE
+    CASE_TPL --> TEMPLATE
+    EFFORT_TPL --> TEMPLATE
+    DESIGN_TPL --> TEMPLATE
+    MERMAID --> TEMPLATE
+    TEMPLATE --> CASE
+    TEMPLATE --> EFFORT
+    TEMPLATE --> DESIGN
 ```
 
 ## Key Features
@@ -195,16 +191,71 @@ flowchart LR
 
 ### 6. SuggestedTechnicalDesign_AI_vN.html
 
-- 完整技术设计方案，包含：
-  - 架构设计（支持 Mermaid 插件展示设计图）
-  - 模块变更清单 + 实现步骤
-  - 数据库变更（如有）
-  - API 变更（如有）
-  - 测试策略建议
-  - 风险评估
+- 面向 Vendor 的可执行技术设计蓝图，平衡高层决策与低层实现：
+  - **Part 1 — Adoption Summary**：采用理由、复用策略、范围边界、组件变更图、节省依据
+  - **Part 2 — Implementation Guide**：接口契约、API、错误语义、数据模型、运行时序、实施工作包、测试、迁移、回滚和交付检查表
+  - 架构、流程、时序、状态、类和 ER 图均使用 Mermaid 语法，由 Mermaid JS 插件动态渲染
+  - 每个工作包同时显示输出物、预计工作量及通过复用现有能力节省的工作量
+  - 验收标准必须可追溯到自动化测试或运行证据，帮助技术团队约束 Vendor 范围和报价
 - 针对不同分析深度输出不同粒度
 
-### 7. UI 布局
+### 7. Skill-Owned Report Templates
+
+未来创建 `x-ipe-task-based-evaluate-change-request-efforts` skill 时，必须将 mockup 提炼为技能自带、可版本化的报告模板，而不是在每次执行时自由生成 HTML。
+
+#### 模板清单
+
+| 模板 | 生成文件 | 主要职责 |
+|------|----------|----------|
+| `templates/case-record-template.html` | `CaseRecord.html` | 案例 metadata、CIO 幻灯报告、最新报告入口 |
+| `templates/effort-estimation-template.html` | `EffortEstimation_AI_vN.html` | 估算区间、置信度、Vendor 对比、基准和谈判建议 |
+| `templates/suggested-technical-design-template.html` | `SuggestedTechnicalDesign_AI_vN.html` | Vendor adoption summary + 可执行 implementation guide |
+
+#### 模板生成约束
+
+- Mockup 是模板视觉和信息架构的基线；创建 skill 时从 mockup 提取模板，不直接把示例案例数据写死
+- 分析引擎先生成统一的 **Structured Report Model**，模板只负责展示，避免分析逻辑与 HTML 拼接耦合
+- 模板使用明确占位符或数据注入点，并对缺失的可选区块进行条件隐藏
+- 模板与 skill 同版本管理；模板结构变化必须记录版本和兼容性说明
+- 生成文件保持 self-contained；除 Mermaid 运行库外，不依赖外部应用服务
+- 三份报告共享主题 tokens、导航和 metadata 约定，避免重复维护
+
+#### Mermaid JavaScript Rendering Contract
+
+- 所有 diagram source 以 Mermaid 文本存储在报告模型中，不预渲染为 PNG/SVG
+- HTML 使用 `<pre class="mermaid">...</pre>` 承载 diagram source
+- 使用 Mermaid v11 ESM plugin，并通过 `mermaid.initialize(...)` 统一配置
+- 默认配置：`startOnLoad: false`、`securityLevel: "strict"`；模板注入内容视为不可信输入
+- 数据注入和 DOM 完成后调用 `await mermaid.run({ querySelector: ".mermaid" })`
+- 若单个图渲染失败，显示原始 Mermaid source 和错误提示，但不阻断整份报告
+- 图表配色从报告主题 tokens 映射，打印模式必须保持可读
+- 不使用 Mermaid click callbacks、HTML labels 或 `securityLevel: "loose"`，除非未来有明确且经过安全评审的交互需求
+
+```html
+<pre class="mermaid">
+sequenceDiagram
+    participant V as Vendor
+    participant A as AI Assessment
+    participant T as Technical Team
+    V->>A: Submit CR + estimate
+    A-->>T: Effort evidence + suggested design
+    T-->>V: Adopt design and revise estimate
+</pre>
+
+<script type="module">
+  import mermaid from "./assets/mermaid.esm.min.mjs";
+
+  mermaid.initialize({
+    startOnLoad: false,
+    securityLevel: "strict",
+    theme: "base"
+  });
+
+  await mermaid.run({ querySelector: ".mermaid" });
+</script>
+```
+
+### 8. UI 布局
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -225,7 +276,7 @@ flowchart LR
 └────────────────────────┴────────────────────────────────┘
 ```
 
-### 8. Copilot Prompt 集成
+### 9. Copilot Prompt 集成
 
 遵循 X-IPE 现有模式，在 `copilot-prompt.json` 中添加 CR Assessment 入口：
 
@@ -256,7 +307,11 @@ flowchart LR
 - [ ] 上传 Vendor 的 CR 描述和估算文件，选择代码库路径
 - [ ] AI 在 3 种分析深度（Quick/Standard/Deep）下生成带置信度区间的估算报告
 - [ ] 生成的 `EffortEstimation_AI_vN.html` 展示模块级对比
-- [ ] 生成的 `SuggestedTechnicalDesign_AI_vN.html` 包含 Mermaid 架构图
+- [ ] 生成的 `SuggestedTechnicalDesign_AI_vN.html` 同时包含 adoption summary 和可执行 implementation guide
+- [ ] Skill 内置三份可版本化 HTML 模板，并从统一 Structured Report Model 生成报告
+- [ ] 所有报告 diagram source 使用 Mermaid 语法，并由 Mermaid v11 JavaScript plugin 在浏览器端渲染
+- [ ] Mermaid 使用 ESM、`securityLevel: "strict"` 和显式 `mermaid.run(...)`；单图失败不影响整份报告
+- [ ] 模板复用 mockup 的视觉与信息架构，但不包含写死的案例数据
 - [ ] `CaseRecord.html` 以幻灯翻页式展示，支持键盘导航
 - [ ] 案例状态自动流转（已创建 → 评估中 → 已完成）
 - [ ] 版本管理生效（v1, v2 保留旧文件，CaseRecord 链接最新）
@@ -269,6 +324,11 @@ flowchart LR
 - **行业基准**：技能内置，不依赖外部配置或服务
 - **知识图谱回写**：当前版本不回写，预留接口供未来扩展
 - **AI 效率因子**：评估考虑 AI 辅助开发效率，与纯人工估算区分
+- **模板归属**：三份 HTML 模板归 `x-ipe-task-based-evaluate-change-request-efforts` skill 所有并随 skill 版本管理
+- **内容与展示分离**：评估结果先形成 Structured Report Model，再注入模板；禁止分析逻辑直接拼接整页 HTML
+- **Mermaid 依赖**：模板随 skill 打包固定版本的 Mermaid ESM asset，避免运行时 CDN 漂移或离线不可用
+- **Mermaid 安全**：默认 `securityLevel: "strict"`，不启用 click callbacks 或不可信 HTML labels
+- **降级策略**：diagram 渲染失败时保留 Mermaid source 和局部错误状态，其他报告内容仍可阅读和打印
 
 ## Brainstorming Notes
 
@@ -285,7 +345,10 @@ flowchart LR
 | 技能关系 | 完全独立 |
 | 无代码库 | 严格拒绝，提示提供路径 |
 | 报告展示 | 幻灯翻页式（PPT 风格），页面动态生成 |
-| 技术设计 | 完整方案，支持 Mermaid 图 |
+| 技术设计 | Vendor adoption summary + implementation guide，兼顾高层和低层设计 |
+| 模板策略 | Skill 内置三份版本化 HTML 模板，由统一 Structured Report Model 驱动 |
+| 图表渲染 | 所有报告图表使用 Mermaid v11 ESM plugin；浏览器端显式渲染 |
+| Mermaid 安全 | `securityLevel: "strict"`；失败时局部降级并显示 source |
 
 ### 评审反馈采纳
 
@@ -298,6 +361,8 @@ flowchart LR
 | 与现有 CR 技能关系 | ✅ 采纳 — 完全独立 |
 | 知识图谱回写 | ⏸ 延迟决策，预留接口 |
 | 无代码库访问 | ✅ 采纳 — 严格拒绝 |
+| 报告模板沉淀 | ✅ 采纳 — 从三个 mockup 提炼为 skill-owned templates |
+| Mermaid JS 插件 | ✅ 采纳 — 所有 diagram 使用 Mermaid source + ESM plugin 渲染 |
 
 ## Source Files
 
@@ -343,3 +408,11 @@ flowchart LR
 - **区间估算优于点估算** — 用置信度区间代替单一数值，更真实反映不确定性
 - **AI 时代生产力调整** — 评估需考虑 AI 辅助开发对效率的实际提升，而非仅参考传统工时标准
 - **透明化推理** — 每个模块的估算附带基准来源和调整因子，输出可审计可追溯
+- **模板化而非临时生成** — 固定信息架构和视觉基线，让不同案例输出一致、可维护、可测试
+- **内容与渲染解耦** — Structured Report Model 承载事实，HTML 模板和 Mermaid plugin 负责展示
+- **安全默认值** — Mermaid diagram source 按不可信内容处理，保持 strict security 并提供局部降级
+
+### External References
+
+- [Mermaid official usage guide](https://mermaid.js.org/config/usage.html) — ESM loading, `<pre class="mermaid">`, `mermaid.initialize(...)`, explicit rendering API
+- [Mermaid configuration schema](https://mermaid.js.org/config/schema-docs/config.html) — `startOnLoad` and `securityLevel` configuration contract
