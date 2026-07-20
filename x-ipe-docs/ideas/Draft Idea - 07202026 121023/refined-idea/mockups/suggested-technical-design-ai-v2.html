@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>SuggestedTechnicalDesign_AI_v2 — CR-2026-014</title>
+  <style>
+    :root{
+      --color-primary:#0f172a;--color-secondary:#475569;--color-accent:#10b981;--color-neutral:#e2e8f0;
+      --color-success:#22c55e;--color-warning:#f59e0b;--color-error:#ef4444;--color-info:#3b82f6;
+      --slate-50:#f8fafc;--slate-100:#f1f5f9;--slate-200:#e2e8f0;--slate-300:#cbd5e1;--slate-400:#94a3b8;
+      --slate-500:#64748b;--slate-600:#475569;--slate-700:#334155;--slate-800:#1e293b;--slate-900:#0f172a;--slate-950:#020617;
+      --accent-light:#d1fae5;--accent-dark:#059669;--font-heading:"Iowan Old Style","Palatino Linotype",Georgia,serif;
+      --font-body:"Avenir Next",Avenir,"Segoe UI",sans-serif;--font-mono:"SFMono-Regular",Consolas,monospace;
+      --space-xs:4px;--space-sm:8px;--space-md:16px;--space-lg:24px;--space-xl:32px;
+      --radius-sm:4px;--radius-md:8px;--radius-lg:12px;--radius-full:9999px;
+      --shadow-sm:0 1px 2px rgb(2 6 23/.05);--shadow-md:0 8px 24px rgb(2 6 23/.08);--shadow-lg:0 24px 60px rgb(2 6 23/.14)
+    }
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;color:var(--slate-800);font-family:var(--font-body);background:var(--slate-50)}
+    a{color:inherit;text-decoration:none}button{font:inherit;cursor:pointer}.topbar{position:sticky;z-index:40;top:0;height:64px;display:flex;align-items:center;justify-content:space-between;gap:20px;padding:0 26px;color:white;border-bottom:1px solid rgb(255 255 255/.1);background:rgb(2 6 23/.94);backdrop-filter:blur(18px)}
+    .brand{display:flex;align-items:center;gap:12px}.brand-mark{width:34px;height:34px;display:grid;place-items:center;color:#6ee7b7;border:1px solid rgb(52 211 153/.5);border-radius:50%;font:700 18px var(--font-heading)}
+    .brand b{display:block;font:600 14px var(--font-heading)}.brand small,.mono{color:var(--slate-400);font:9px var(--font-mono);letter-spacing:.1em}
+    .top-actions{display:flex;gap:8px}.top-actions a,.top-actions button{padding:9px 12px;color:var(--slate-300);border:1px solid rgb(255 255 255/.12);border-radius:var(--radius-md);background:rgb(255 255 255/.04);font-size:10px}
+    .layout{display:grid;grid-template-columns:235px minmax(0,1fr)}.toc{position:sticky;top:64px;height:calc(100vh - 64px);padding:25px 18px;border-right:1px solid var(--slate-200);background:white;overflow:auto}
+    .toc-label,.eyebrow{color:var(--accent-dark);font:800 9px var(--font-mono);letter-spacing:.14em;text-transform:uppercase}.toc nav{display:grid;gap:3px;margin-top:14px}
+    .toc a{padding:10px 11px;border-radius:7px;color:var(--slate-500);font-size:11px}.toc a:hover,.toc a.active{color:var(--slate-900);background:var(--accent-light)}
+    .toc .meta{margin-top:26px;padding-top:18px;border-top:1px solid var(--slate-200);color:var(--slate-500);font:9px/1.7 var(--font-mono)}
+    main{min-width:0}.hero{padding:70px clamp(24px,7vw,92px);color:white;background:linear-gradient(135deg,var(--slate-950),var(--slate-800));overflow:hidden;position:relative}
+    .hero:after{content:"BLUEPRINT";position:absolute;right:-18px;bottom:13px;color:rgb(255 255 255/.025);font:700 88px var(--font-mono);letter-spacing:-.08em}
+    .hero h1{max-width:920px;margin:22px 0 18px;font:600 clamp(40px,6vw,72px)/.98 var(--font-heading);letter-spacing:-.04em}.hero p{max-width:760px;color:var(--slate-300);font-size:15px;line-height:1.7}
+    .hero-meta{display:flex;flex-wrap:wrap;gap:30px;margin-top:42px}.hero-meta div{min-width:130px;padding-top:10px;border-top:1px solid rgb(255 255 255/.16)}.hero-meta small{display:block;color:var(--slate-500);font:9px var(--font-mono)}.hero-meta b{display:block;margin-top:7px;font-size:12px}
+    .content{max-width:1180px;margin:auto;padding:24px 34px 80px}.summary{display:grid;grid-template-columns:1.2fr repeat(3,.7fr);gap:12px;margin-top:-42px;position:relative}
+    .summary article{min-height:135px;padding:20px;border:1px solid var(--slate-200);border-radius:var(--radius-lg);background:white;box-shadow:var(--shadow-md)}.summary article:first-child{background:var(--color-accent);border-color:var(--accent-dark);color:white}
+    .summary small{font:800 9px var(--font-mono);letter-spacing:.1em;text-transform:uppercase;opacity:.7}.summary strong{display:block;margin:18px 0 6px;font:600 27px var(--font-heading)}.summary span{color:var(--slate-500);font-size:10px}.summary article:first-child span{color:#d1fae5}
+    section{scroll-margin-top:84px;margin-top:24px;padding:30px;border:1px solid var(--slate-200);border-radius:var(--radius-lg);background:white;box-shadow:var(--shadow-sm)}
+    .section-head{display:flex;justify-content:space-between;align-items:end;gap:24px;margin-bottom:26px}.section-head h2{margin:6px 0 0;font:600 30px var(--font-heading)}.section-head p{max-width:520px;margin:0;color:var(--slate-500);font-size:11px;line-height:1.6}
+    .principles{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.principle{padding:20px;border-top:3px solid var(--slate-900);background:var(--slate-50)}.principle:nth-child(2){border-color:var(--color-accent)}.principle:nth-child(3){border-color:var(--color-warning)}
+    .principle b{display:block;font:600 17px var(--font-heading)}.principle p{margin:10px 0 0;color:var(--slate-500);font-size:10px;line-height:1.55}
+    .architecture{padding:22px;border-radius:var(--radius-lg);background:var(--slate-950);overflow:auto}.arch-toolbar{display:flex;justify-content:space-between;gap:20px;color:var(--slate-400);font:9px var(--font-mono)}
+    .arch-toolbar button{padding:7px 10px;color:white;border:1px solid rgb(255 255 255/.12);border-radius:6px;background:rgb(255 255 255/.05);font-size:9px}
+    .arch{min-width:680px;display:grid;gap:18px;margin-top:24px}.layer{display:grid;grid-template-columns:120px 1fr;gap:18px;align-items:center}.layer-label{color:var(--slate-500);font:9px var(--font-mono);text-transform:uppercase}
+    .nodes{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.node{position:relative;padding:14px;border:1px solid rgb(255 255 255/.11);border-radius:var(--radius-md);color:white;background:rgb(255 255 255/.05)}
+    .node.accent{border-color:rgb(52 211 153/.4);background:rgb(16 185 129/.12)}.node b{display:block;font-size:10px}.node span{display:block;margin-top:6px;color:var(--slate-500);font:8px var(--font-mono)}.node:after{content:"↓";position:absolute;left:50%;bottom:-20px;color:var(--slate-600)}
+    .layer:last-child .node:after{display:none}.architecture.compact .node span{display:none}.architecture.compact .node{padding:11px}
+    .changes{width:100%;border-collapse:collapse;font-size:11px}.changes th,.changes td{padding:13px 12px;border-bottom:1px solid var(--slate-200);text-align:left}.changes th{color:var(--slate-500);font:800 8px var(--font-mono);letter-spacing:.1em;text-transform:uppercase}
+    .badge{display:inline-block;padding:5px 7px;border-radius:var(--radius-full);font:800 8px var(--font-mono)}.badge.new{color:#047857;background:var(--accent-light)}.badge.change{color:#1d4ed8;background:#dbeafe}.badge.risk{color:#92400e;background:#fef3c7}
+    .steps{counter-reset:step;display:grid;gap:0}.step{counter-increment:step;display:grid;grid-template-columns:54px 1fr auto;gap:18px;align-items:start;padding:18px 0;border-bottom:1px solid var(--slate-200)}.step:before{content:"0" counter(step);width:42px;height:42px;display:grid;place-items:center;color:white;border-radius:50%;background:var(--slate-900);font:800 10px var(--font-mono)}
+    .step b{display:block;font:600 16px var(--font-heading)}.step p{margin:7px 0 0;color:var(--slate-500);font-size:10px;line-height:1.55}.step strong{color:var(--accent-dark);font:700 10px var(--font-mono)}
+    .tabs{display:flex;gap:6px;margin-bottom:18px}.tab{padding:8px 12px;border:1px solid var(--slate-200);border-radius:var(--radius-full);color:var(--slate-500);background:white;font-size:9px;font-weight:800}.tab.active{color:white;border-color:var(--slate-900);background:var(--slate-900)}
+    .test-panel{display:none}.test-panel.active{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.test{padding:18px;border:1px solid var(--slate-200);border-radius:var(--radius-md)}.test b{display:block;font-size:11px}.test p{margin:8px 0 0;color:var(--slate-500);font-size:10px;line-height:1.55}
+    .risks{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.risk-card{padding:18px;border-left:3px solid var(--color-warning);background:#fffbeb}.risk-card.high{border-color:var(--color-error);background:#fef2f2}.risk-top{display:flex;justify-content:space-between;gap:12px}.risk-card b{font-size:11px}.risk-card p{margin:9px 0 0;color:var(--slate-600);font-size:10px;line-height:1.55}
+    .decision{display:grid;grid-template-columns:1fr auto;gap:30px;align-items:center;color:white;background:var(--color-accent);border-color:var(--accent-dark)}.decision h2{margin:6px 0 10px;font:600 30px var(--font-heading)}.decision p{margin:0;color:#d1fae5;font-size:11px;line-height:1.6}.decision a{padding:12px 16px;border-radius:var(--radius-md);background:var(--slate-950);font-size:10px;font-weight:800}
+    @media(max-width:900px){.layout{grid-template-columns:1fr}.toc{position:sticky;top:64px;z-index:30;height:auto;padding:9px 14px;overflow:auto}.toc>.toc-label,.toc .meta{display:none}.toc nav{display:flex;margin:0}.toc a{white-space:nowrap}.summary{grid-template-columns:1fr 1fr}.principles{grid-template-columns:1fr}.test-panel.active{grid-template-columns:1fr 1fr}}
+    @media(max-width:620px){.topbar{padding:0 14px}.brand small,.top-actions button{display:none}.content{padding:18px 12px 50px}.hero{padding:48px 18px 75px}.summary{grid-template-columns:1fr}.section-head{display:block}.section-head p{margin-top:12px}.changes{font-size:9px}.changes th,.changes td{padding:9px 5px}.step{grid-template-columns:42px 1fr}.step strong{grid-column:2}.test-panel.active,.risks{grid-template-columns:1fr}.decision{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <header class="topbar"><div class="brand"><div class="brand-mark">§</div><div><b>AI Court · Technical Blueprint</b><small>CR-2026-014 / VERSION 2</small></div></div>
+    <div class="top-actions"><a href="effort-estimation-ai-v2.html">← Effort report</a><button onclick="window.print()">Export / Print</button></div></header>
+  <div class="layout">
+    <aside class="toc"><span class="toc-label">Design index</span><nav><a class="active" href="#intent">01 · Intent</a><a href="#architecture">02 · Architecture</a><a href="#changes">03 · Change map</a><a href="#delivery">04 · Delivery</a><a href="#testing">05 · Testing</a><a href="#risks">06 · Risks</a></nav><div class="meta">STATUS: PROPOSED<br>DEPTH: STANDARD<br>CONFIDENCE: 84%<br><br>OWNER: TECH LEAD</div></aside>
+    <main>
+      <header class="hero"><span class="eyebrow">Suggested technical design / v2</span><h1>SSO without rewriting identity.</h1><p>在现有认证边界之外新增协议适配层，以可回退的账户绑定机制和分阶段开关控制迁移风险。设计目标是最大化复用、隔离协议复杂度并保持本地登录可用。</p>
+        <div class="hero-meta"><div><small>Case</small><b>CR-2026-014</b></div><div><small>Estimated build</small><b>27–34 days</b></div><div><small>Architecture impact</small><b>4 modules</b></div><div><small>Decision</small><b style="color:#6ee7b7">Proceed with guardrails</b></div></div></header>
+      <div class="content">
+        <div class="summary"><article><small>Recommended pattern</small><strong>Adapter + Strangler</strong><span>隔离新协议，逐步启用</span></article><article><small>New components</small><strong>3</strong><span>Protocol, mapping, audit</span></article><article><small>Changed components</small><strong>4</strong><span>UI, auth, config, tests</span></article><article><small>Critical risks</small><strong>2</strong><span>Migration + certificates</span></article></div>
+
+        <section id="intent"><div class="section-head"><div><span class="eyebrow">Design intent</span><h2>Three non-negotiables</h2></div><p>技术方案围绕可逆性、隔离性和可审计性展开，而不是把 SSO 直接耦合进现有登录流程。</p></div>
+          <div class="principles"><article class="principle"><b>Local login survives</b><p>SSO 异常时保留受控本地登录回退，避免身份提供方故障扩大为平台级中断。</p></article><article class="principle"><b>Protocol stays isolated</b><p>SAML 解析、证书和 metadata 由适配层处理，业务会话只接收标准身份声明。</p></article><article class="principle"><b>Migration is reversible</b><p>账户绑定分批执行，保留映射历史、冲突队列与可验证回滚路径。</p></article></div>
+        </section>
+
+        <section id="architecture"><div class="section-head"><div><span class="eyebrow">Layered architecture</span><h2>Identity boundary</h2></div><p>绿色节点为新增组件。点击右上角切换紧凑视图。</p></div>
+          <div class="architecture" id="arch"><div class="arch-toolbar"><span>REQUEST → ASSERTION → SESSION → AUDIT</span><button id="compact">Compact view</button></div><div class="arch">
+            <div class="layer"><span class="layer-label">Experience</span><div class="nodes"><div class="node"><b>Login Choice</b><span>Local / Enterprise SSO</span></div><div class="node"><b>Admin Settings</b><span>IdP configuration</span></div><div class="node"><b>Connection Test</b><span>Readiness feedback</span></div><div class="node"><b>Audit Viewer</b><span>Security events</span></div></div></div>
+            <div class="layer"><span class="layer-label">Identity edge</span><div class="nodes"><div class="node accent"><b>SAML Adapter</b><span>Metadata + assertion</span></div><div class="node accent"><b>Identity Mapper</b><span>External → local</span></div><div class="node"><b>Session Gateway</b><span>Existing session contract</span></div><div class="node accent"><b>Auth Audit</b><span>Immutable trail</span></div></div></div>
+            <div class="layer"><span class="layer-label">Core services</span><div class="nodes"><div class="node"><b>User Directory</b><span>Existing accounts</span></div><div class="node"><b>Permission Engine</b><span>Existing roles</span></div><div class="node"><b>Feature Flags</b><span>Tenant rollout</span></div><div class="node"><b>Key Store</b><span>Certificates</span></div></div></div>
+            <div class="layer"><span class="layer-label">Persistence</span><div class="nodes"><div class="node"><b>Users</b><span>No credential rewrite</span></div><div class="node accent"><b>Identity Links</b><span>Versioned mapping</span></div><div class="node"><b>Settings</b><span>Encrypted IdP config</span></div><div class="node"><b>Audit Log</b><span>Retention policy</span></div></div></div>
+          </div></div>
+        </section>
+
+        <section id="changes"><div class="section-head"><div><span class="eyebrow">Change inventory</span><h2>What changes—and what does not</h2></div></div>
+          <table class="changes"><thead><tr><th>Area</th><th>Change</th><th>Type</th><th>Impact</th><th>Effort</th></tr></thead><tbody>
+            <tr><td>Authentication</td><td>SAML protocol adapter + assertion validation</td><td><span class="badge new">NEW</span></td><td>Isolated</td><td>9–11d</td></tr>
+            <tr><td>Identity</td><td>External subject to local account mapping</td><td><span class="badge new">NEW</span></td><td><span class="badge risk">HIGH</span></td><td>7–10d</td></tr>
+            <tr><td>Admin UX</td><td>IdP settings, certificate upload, connection test</td><td><span class="badge change">CHANGE</span></td><td>Medium</td><td>5–6d</td></tr>
+            <tr><td>Session</td><td>Accept normalized identity principal</td><td><span class="badge change">CHANGE</span></td><td>Low</td><td>Included</td></tr>
+            <tr><td>Quality</td><td>Protocol fixtures, migration, fallback and rollout tests</td><td><span class="badge change">CHANGE</span></td><td>Medium</td><td>6–7d</td></tr>
+          </tbody></table>
+        </section>
+
+        <section id="delivery"><div class="section-head"><div><span class="eyebrow">Delivery sequence</span><h2>Four reversible increments</h2></div><p>每个增量都可独立验证，且在进入下一阶段前保留明确回退点。</p></div>
+          <div class="steps"><article class="step"><div><b>Identity edge foundation</b><p>建立适配接口、SAML fixture、证书校验和审计事件模型。</p></div><strong>6–7 DAYS</strong></article><article class="step"><div><b>Mapping and migration controls</b><p>实现绑定表、冲突队列、预演模式、分批任务与回滚验证。</p></div><strong>7–10 DAYS</strong></article><article class="step"><div><b>Admin and login experience</b><p>配置页、连接测试、登录选择和错误恢复体验。</p></div><strong>7–9 DAYS</strong></article><article class="step"><div><b>Hardening and staged rollout</b><p>自动化回归、租户灰度、监控阈值与运行手册。</p></div><strong>7–8 DAYS</strong></article></div>
+        </section>
+
+        <section id="testing"><div class="section-head"><div><span class="eyebrow">Test strategy</span><h2>Prove the boundaries</h2></div></div>
+          <div class="tabs"><button class="tab active" data-panel="protocol">Protocol</button><button class="tab" data-panel="migration">Migration</button><button class="tab" data-panel="resilience">Resilience</button></div>
+          <div class="test-panel active" id="protocol"><article class="test"><b>Assertion contract</b><p>有效、过期、重放、错误受众和签名异常。</p></article><article class="test"><b>IdP variations</b><p>不同 metadata、NameID 和属性映射组合。</p></article><article class="test"><b>Certificate lifecycle</b><p>轮换、过期、双证书窗口与时钟偏差。</p></article></div>
+          <div class="test-panel" id="migration"><article class="test"><b>Dry-run parity</b><p>预演结果与实际迁移数量、冲突类型一致。</p></article><article class="test"><b>Rollback proof</b><p>恢复映射快照后本地登录行为不变。</p></article><article class="test"><b>Conflict handling</b><p>重复邮箱、孤儿用户与手工裁决流程。</p></article></div>
+          <div class="test-panel" id="resilience"><article class="test"><b>IdP outage</b><p>超时、错误提示和受控本地回退。</p></article><article class="test"><b>Partial rollout</b><p>租户级开关隔离与监控指标分群。</p></article><article class="test"><b>Audit completeness</b><p>成功、失败、配置和绑定事件完整留痕。</p></article></div>
+        </section>
+
+        <section id="risks"><div class="section-head"><div><span class="eyebrow">Risk controls</span><h2>Known uncertainty, explicit guardrails</h2></div></div>
+          <div class="risks"><article class="risk-card high"><div class="risk-top"><b>账户错误绑定</b><span class="badge risk">HIGH</span></div><p>使用预演、冲突队列、双人审核和版本化映射；禁止按邮箱静默覆盖。</p></article><article class="risk-card high"><div class="risk-top"><b>证书轮换中断</b><span class="badge risk">HIGH</span></div><p>支持双证书窗口、提前告警、连接测试与紧急回退。</p></article><article class="risk-card"><div class="risk-top"><b>IdP 可用性</b><span class="badge risk">MEDIUM</span></div><p>短超时、清晰错误状态、受控本地登录和租户级禁用。</p></article><article class="risk-card"><div class="risk-top"><b>权限漂移</b><span class="badge risk">MEDIUM</span></div><p>外部身份只映射本地账户，权限继续由现有引擎管理。</p></article></div>
+        </section>
+        <section class="decision"><div><span class="eyebrow" style="color:#d1fae5">Design recommendation</span><h2>Proceed—with migration as the gate.</h2><p>先验证账户数据与冲突率，再锁定最终范围。架构本身可复用且风险可隔离。</p></div><a href="effort-estimation-ai-v2.html">Review effort evidence →</a></section>
+      </div>
+    </main>
+  </div>
+  <script>
+    const arch=document.querySelector("#arch");document.querySelector("#compact").addEventListener("click",e=>{arch.classList.toggle("compact");e.target.textContent=arch.classList.contains("compact")?"Detailed view":"Compact view"});
+    document.querySelectorAll(".tab").forEach(tab=>tab.addEventListener("click",()=>{document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));document.querySelectorAll(".test-panel").forEach(p=>p.classList.remove("active"));tab.classList.add("active");document.querySelector("#"+tab.dataset.panel).classList.add("active")}));
+    const toc=[...document.querySelectorAll(".toc a")],sections=[...document.querySelectorAll("section[id]")];window.addEventListener("scroll",()=>{let id=sections[0].id;sections.forEach(s=>{if(s.getBoundingClientRect().top<170)id=s.id});toc.forEach(a=>a.classList.toggle("active",a.getAttribute("href")==="#"+id))});
+  </script>
+</body>
+</html>

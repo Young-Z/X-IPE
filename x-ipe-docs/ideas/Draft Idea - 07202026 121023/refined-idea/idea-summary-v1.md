@@ -308,12 +308,15 @@ flowchart LR
 | Mockup | Type | Path | Tool Used |
 |--------|------|------|-----------|
 | CR Assessment View | Interactive HTML | [Open mockup](mockups/cr-assessment-view-v1.html) | x-ipe-tool-frontend-design |
+| AI Effort Estimation v2 | Interactive HTML | [Open mockup](mockups/effort-estimation-ai-v2.html) | x-ipe-tool-frontend-design |
+| Suggested Technical Design v2 | Interactive HTML | [Open mockup](mockups/suggested-technical-design-ai-v2.html) | x-ipe-tool-frontend-design |
 
 ### Preview Instructions
 
-- Open `mockups/cr-assessment-view-v1.html` in a browser; it is self-contained and responsive.
+- Open any HTML file under `mockups/` in a browser; each artifact is self-contained and responsive.
 - Switch between **案例信息** and **AI 裁定报告** to review the two primary experiences.
 - Try case search/selection, analysis-depth selection, expandable module evidence, slide controls, and keyboard left/right navigation.
+- In the report mockups, try the methodology drawer, module evidence accordions, compact architecture view, test-strategy tabs, and cross-report navigation.
 
 ### What's covered
 - [x] Case List Panel (name + status badges)
@@ -323,6 +326,8 @@ flowchart LR
 - [x] Vendor vs AI comparison table
 - [x] Module-level foldable details
 - [x] File list with version management
+- [x] EffortEstimation_AI_v2 report with transparent benchmarks and negotiation guidance
+- [x] SuggestedTechnicalDesign_AI_v2 report with architecture, delivery, tests, and risk controls
 
 ## Next Steps
 
