@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}CR Assessment AI Court{% endblock %}
+{% block extra_css %}<link href="/static/css/cr-assessment.css" rel="stylesheet">{% endblock %}
+{% block body %}
+<div class="cr-assessment" id="cr-assessment-app">
+  <header class="cr-topbar">
+    <div class="cr-brand"><span class="cr-brand__mark" aria-hidden="true">§</span><div><h1>CR Assessment AI Court</h1><p>Independent effort intelligence</p></div></div>
+    <span class="cr-mode"><i aria-hidden="true"></i>Local assessment</span>
+  </header>
+  <div class="cr-workspace">
+    <aside class="cr-rail" id="cr-case-rail" aria-label="Assessment cases">
+      <div class="cr-rail__head"><strong>Assessment cases</strong><span id="cr-case-count">0</span></div>
+      <label class="cr-search"><i class="bi bi-search" aria-hidden="true"></i><span class="visually-hidden">Search cases</span><input id="cr-search" type="search" placeholder="Search cases…"></label>
+      <div id="cr-case-list" class="cr-case-list" aria-live="polite"></div>
+      <button id="cr-new-case" class="cr-new-case" type="button"><i class="bi bi-plus-lg" aria-hidden="true"></i> New Assessment Case</button>
+    </aside>
+    <main class="cr-main" id="cr-main" tabindex="-1">
+      <button id="cr-mobile-list" class="cr-mobile-list" type="button"><i class="bi bi-list" aria-hidden="true"></i> Cases</button>
+      <section class="cr-case-header" aria-labelledby="cr-case-title">
+        <div class="cr-case-title-wrap"><span class="cr-case-number" id="cr-case-number">NEW</span><div><h2 id="cr-case-title">New Assessment Case</h2><p id="cr-case-subtitle">Create an auditable, evidence-based Change Request assessment.</p></div></div>
+        <div class="cr-tabs" role="tablist" aria-label="Case views">
+          <button id="cr-tab-information" role="tab" aria-selected="true" aria-controls="cr-information-panel" tabindex="0">Case Information</button>
+          <button id="cr-tab-report" role="tab" aria-selected="false" aria-controls="cr-report-panel" tabindex="-1">AI Verdict Report</button>
+        </div>
+      </section>
+      <div id="cr-alert" class="cr-alert" role="status" aria-live="polite" hidden></div>
+      <section id="cr-information-panel" role="tabpanel" aria-labelledby="cr-tab-information">
+        <form id="cr-case-form" class="cr-form-layout" novalidate>
+          <article class="cr-panel">
+            <header class="cr-panel__head"><h3>Assessment Record</h3><small>Evidence intake</small></header>
+            <div class="cr-panel__body cr-form-grid">
+              <label class="cr-field"><span>Case Name <b aria-hidden="true">*</b></span><input id="cr-case-name" name="case_name" required><small class="cr-error" data-error="case_name"></small></label>
+              <label class="cr-field"><span>Case ID</span><input id="cr-case-id" readonly value="Assigned on save"></label>
+              <label class="cr-field cr-field--full"><span>CR Description <b aria-hidden="true">*</b></span><textarea id="cr-description" name="cr_description_text" rows="5"></textarea><input id="cr-description-file" name="cr_description_file" type="file"><small class="cr-error" data-error="cr_description"></small></label>
+              <label class="cr-field cr-field--full"><span>Codebase Path <b aria-hidden="true">*</b></span><span class="cr-path-row"><input id="cr-codebase" name="codebase_path"><button id="cr-browse" type="button">Browse</button></span><small class="cr-error" data-error="codebase_path"></small></label>
+              <label class="cr-field"><span>Supporting Documents</span><input id="cr-supporting" name="supporting_documents" type="file" multiple><span id="cr-supporting-list" class="cr-file-list"></span></label>
+              <label class="cr-field"><span>Vendor Effort Estimation <b aria-hidden="true">*</b></span><input id="cr-vendor" name="vendor_estimate" type="file"><span id="cr-vendor-file" class="cr-file-list"></span><small class="cr-error" data-error="vendor_estimate"></small></label>
+              <label class="cr-field cr-field--full"><span>Comments</span><textarea id="cr-comments" name="comments" rows="3"></textarea></label>
+            </div>
+            <footer class="cr-actions"><button id="cr-save" class="cr-btn cr-btn--secondary" type="submit">Save Update</button><button id="cr-open-report" class="cr-btn cr-btn--primary" type="button">View Latest Report <span aria-hidden="true">→</span></button></footer>
+          </article>
+          <aside class="cr-panel cr-readiness">
+            <div class="cr-verdict"><span>Assessment readiness</span><h3>Evidence before opinion.</h3><p>All required inputs must be ready before the Console prompt is prepared.</p></div>
+            <div id="cr-readiness-list" class="cr-readiness__list"></div>
+            <div class="cr-estimate-wrap">
+              <div id="cr-depth-menu" class="cr-depth-menu" hidden>
+                <button type="button" data-depth="quick"><b>Quick</b><small>Target modules only</small></button>
+                <button type="button" data-depth="standard" class="active"><b>Standard</b><small>Impact and dependency chain</small></button>
+                <button type="button" data-depth="deep"><b>Deep</b><small>Full baseline and cross-module risk</small></button>
+              </div>
+              <button id="cr-estimate" class="cr-estimate" type="button" aria-haspopup="menu" aria-expanded="false">AI Estimation · <b id="cr-depth-label">Standard</b><span aria-hidden="true">⌄</span></button>
+            </div>
+          </aside>
+        </form>
+      </section>
+      <section id="cr-report-panel" role="tabpanel" aria-labelledby="cr-tab-report" hidden>
+        <div id="cr-report-empty" class="cr-report-empty">No assessment report is available yet.</div>
+        <div id="cr-report-content" class="cr-report-shell" hidden>
+          <header class="cr-report-toolbar"><strong>AI Verdict · CIO Brief</strong><div id="cr-slide-dots" class="cr-slide-dots"></div></header>
+          <div id="cr-slide-stage" class="cr-slide-stage"></div>
+          <footer class="cr-slide-nav"><button id="cr-prev-slide" type="button">← Previous</button><span id="cr-slide-position">1 / 1</span><button id="cr-next-slide" type="button">Next →</button></footer>
+          <div id="cr-report-links" class="cr-report-links"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <div id="cr-toast" class="cr-toast" role="status" aria-live="polite" hidden></div>
+</div>
+{% endblock %}
+{% block app_js %}{% endblock %}
+{% block extra_js %}
+<script src="/static/js/core/file-preview-renderer.js"></script>
+<script src="/static/js/features/deliverable-viewer.js"></script>
+<script src="/static/js/features/cr-assessment-api.js"></script>
+<script src="/static/js/features/local-directory-picker.js"></script>
+<script src="/static/js/features/cr-assessment.js"></script>
+{% endblock %}

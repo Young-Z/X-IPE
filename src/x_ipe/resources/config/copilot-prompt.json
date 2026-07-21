@@ -545,11 +545,33 @@
       }
     ]
   },
+  "cr-assessment": {
+    "prompts": [
+      {
+        "id": "evaluate-cr-effort",
+        "icon": "bi-scale",
+        "prompt-details": [
+          {
+            "language": "en",
+            "label": "AI Estimation",
+            "command": "evaluate change request effort for <case-folder> with evaluate-change-request-efforts skill --analysis-depth <analysis-depth>"
+          },
+          {
+            "language": "zh",
+            "label": "AI 估算",
+            "command": "evaluate change request effort for <case-folder> with evaluate-change-request-efforts skill --analysis-depth <analysis-depth>"
+          }
+        ]
+      }
+    ]
+  },
   "placeholder": {
     "current-idea-file": "Replaced with currently open file path",
     "input-file": "Replaced with selected input file path from source action deliverables",
     "feature-id": "Replaced with the target feature ID (e.g. FEATURE-041-A) for per-feature actions",
-    "evaluation-file": "x-ipe-docs/quality-evaluation/project-quality-evaluation.md"
+    "evaluation-file": "x-ipe-docs/quality-evaluation/project-quality-evaluation.md",
+    "case-folder": "Replaced with the current CR assessment case folder",
+    "analysis-depth": "Replaced with quick, standard, or deep"
   },
   "ui-labels": {
     "action-execution-modal": [

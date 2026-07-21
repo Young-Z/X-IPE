@@ -226,6 +226,7 @@ def _register_blueprints(app):
     from x_ipe.routes.task_board_page_routes import task_board_page_bp
     from x_ipe.routes.feature_board_page_routes import feature_board_page_bp
     from x_ipe.routes.ontology_graph_routes import ontology_graph_bp
+    from x_ipe.routes.cr_assessment_routes import cr_assessment_bp
     
     # Initialize tracing middleware (FEATURE-023)
     from x_ipe.tracing.middleware import init_tracing_middleware
@@ -250,6 +251,7 @@ def _register_blueprints(app):
     app.register_blueprint(task_board_page_bp)
     app.register_blueprint(feature_board_page_bp)
     app.register_blueprint(ontology_graph_bp)
+    app.register_blueprint(cr_assessment_bp)
 
 
 def _register_handlers():

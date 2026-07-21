@@ -87,6 +87,7 @@
     <!-- CR-001: Bootstrap 5 Dialog Utilities (replaces native alert/confirm/prompt) -->
     <script src="/static/js/utils/bootstrap-dialogs.js"></script>
     
+    {% block app_js %}
     <!-- Application JS (modular) -->
     <script src="/static/js/core/content-renderer.js"></script>
     <!-- CR-008: Shared File Preview Renderer -->
@@ -155,6 +156,7 @@
     <script src="/static/js/features/ontology-graph-socket.js"></script>
     <script src="/static/js/features/ontology-graph-viewer.js"></script>
     <script src="/static/js/init.js"></script>
+    {% endblock %}
     
     {% block extra_js %}{% endblock %}
 </body>
