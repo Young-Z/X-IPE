@@ -73,6 +73,20 @@
       "next_task": "x-ipe-task-based-feature-breakdown",
       "created_at": "2026-07-20T09:03:52.728479+00:00",
       "last_updated": "2026-07-20T09:16:09.513401+00:00"
+    },
+    {
+      "task_id": "TASK-4913",
+      "task_type": "Feature Breakdown",
+      "description": "Break EPIC-060 CR Assessment AI Court requirements into implementation-ready features with dependencies, acceptance criteria, and a minimum runnable first feature.",
+      "role": "Nova",
+      "status": "completed",
+      "output_links": [
+        "x-ipe-docs/requirements/requirement-details-part-26.md",
+        "x-ipe-docs/planning/features/features.json"
+      ],
+      "next_task": "x-ipe-task-based-feature-refinement",
+      "created_at": "2026-07-20T09:17:03.043232+00:00",
+      "last_updated": "2026-07-21T03:57:37.977563+00:00"
     }
   ]
 }
