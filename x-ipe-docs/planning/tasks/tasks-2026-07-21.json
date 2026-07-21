@@ -20,11 +20,13 @@
       "task_type": "Technical Design",
       "description": "Create the technical design for refined FEATURE-060-A CR Assessment UI/UX and Case Service.",
       "role": "Nova",
-      "status": "pending",
-      "output_links": [],
+      "status": "completed",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-060/FEATURE-060-A/technical-design.md"
+      ],
       "next_task": "x-ipe-task-based-code-implementation",
       "created_at": "2026-07-21T04:10:17.246373+00:00",
-      "last_updated": "2026-07-21T04:10:17.246373+00:00"
+      "last_updated": "2026-07-21T06:07:58.710239+00:00"
     }
   ]
 }
