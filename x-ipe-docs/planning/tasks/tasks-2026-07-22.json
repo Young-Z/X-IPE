@@ -91,6 +91,21 @@
       "next_task": "",
       "created_at": "2026-07-22T06:40:45.721403+00:00",
       "last_updated": "2026-07-22T06:43:08.180553+00:00"
+    },
+    {
+      "task_id": "TASK-6730",
+      "task_type": "Code Implementation",
+      "description": "Build and publish X-IPE 1.1.50 to PyPI using ~/.pypirc with the embedded AI Court and Console insertion fixes.",
+      "role": "Nova",
+      "status": "completed",
+      "output_links": [
+        "https://pypi.org/project/x-ipe/1.1.50/",
+        "pyproject.toml",
+        "uv.lock"
+      ],
+      "next_task": "",
+      "created_at": "2026-07-22T06:45:47.284822+00:00",
+      "last_updated": "2026-07-22T06:48:17.670149+00:00"
     }
   ]
 }
