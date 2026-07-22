@@ -30,6 +30,21 @@
       "next_task": "x-ipe-task-based-feature-closing",
       "created_at": "2026-07-22T02:29:28.392361+00:00",
       "last_updated": "2026-07-22T03:15:35.676137+00:00"
+    },
+    {
+      "task_id": "TASK-6726",
+      "task_type": "Bug Fix",
+      "description": "Add the missing CR Assessment navigation entry to the Workplace section of the main project sidebar.",
+      "role": "Nova",
+      "status": "completed",
+      "output_links": [
+        "src/x_ipe/static/js/features/sidebar.js",
+        "src/x_ipe/static/css/sidebar.css",
+        "tests/frontend-js/kb-sidebar.test.js"
+      ],
+      "next_task": "",
+      "created_at": "2026-07-22T05:11:46.658366+00:00",
+      "last_updated": "2026-07-22T05:12:37.642272+00:00"
     }
   ]
 }

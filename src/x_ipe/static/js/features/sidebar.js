@@ -373,6 +373,10 @@ class ProjectSidebar {
                             <i class="bi bi-clipboard-check"></i>
                             <span>Quality Evaluation</span>
                         </div>
+                        <a class="nav-section-header sidebar-child nav-cr-assessment" data-section-id="cr-assessment" href="/cr-assessment">
+                            <i class="bi bi-scale"></i>
+                            <span>CR Assessment</span>
+                        </a>
                         <div class="nav-section-header sidebar-child nav-learn-panel" data-section-id="learn">
                             <i class="bi bi-mortarboard"></i>
                             <span>Learn</span>

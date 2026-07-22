@@ -77,6 +77,16 @@ describe('FEATURE-049-B: KB Sidebar & Navigation', () => {
   });
 
   describe('AC-049-B-01: Sidebar Section Presence', () => {
+    it('should expose CR Assessment from the Workplace submenu', () => {
+      if (!sidebar) return;
+      sidebar.sections = [{ id: 'workplace', label: 'Workplace', icon: 'bi-lightbulb', children: [] }];
+      sidebar.render();
+      const entry = document.querySelector('.nav-cr-assessment');
+      expect(entry).not.toBeNull();
+      expect(entry.textContent).toContain('CR Assessment');
+      expect(entry.getAttribute('href')).toBe('/cr-assessment');
+    });
+
     it('should render KB section with bi-book icon', () => {
       if (!sidebar) return;
       sidebar.sections = [KB_SECTION_WITH_FILES];
