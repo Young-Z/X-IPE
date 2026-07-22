@@ -48,7 +48,10 @@
                 <button type="button" data-depth="standard" class="active"><b>Standard</b><small>Impact and dependency chain</small></button>
                 <button type="button" data-depth="deep"><b>Deep</b><small>Full baseline and cross-module risk</small></button>
               </div>
-              <button id="cr-estimate" class="cr-estimate" type="button" aria-haspopup="menu" aria-expanded="false">AI Estimation · <b id="cr-depth-label">Standard</b><span aria-hidden="true">⌄</span></button>
+              <div class="cr-estimate-group">
+                <button id="cr-estimate" class="cr-estimate" type="button">AI Estimation · <b id="cr-depth-label">Standard</b></button>
+                <button id="cr-depth-toggle" class="cr-depth-toggle" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="Choose assessment depth"><span aria-hidden="true">⌄</span></button>
+              </div>
             </div>
           </aside>
         </form>

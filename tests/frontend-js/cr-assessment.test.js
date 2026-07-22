@@ -18,7 +18,10 @@ function fixture() {
       <div id="cr-case-list"></div><span id="cr-case-count"></span><input id="cr-search">
       <h2 id="cr-case-title"></h2><span id="cr-case-number"></span><div id="cr-alert" hidden></div>
       <div id="cr-readiness-list"></div><button id="cr-estimate"><span id="cr-depth-label"></span></button>
+      <button id="cr-depth-toggle"></button>
       <div id="cr-depth-menu" hidden><button data-depth="quick"></button><button data-depth="standard"></button><button data-depth="deep"></button></div>
+      <button id="cr-new-case"></button><button id="cr-mobile-list"></button><button id="cr-browse"></button>
+      <button id="cr-open-report"></button><button id="cr-prev-slide"></button><button id="cr-next-slide"></button>
       <button id="cr-tab-information"></button><button id="cr-tab-report"></button>
       <section id="cr-information-panel"></section><section id="cr-report-panel" hidden></section>
       <div id="cr-report-empty"></div><div id="cr-report-content"></div><div id="cr-slide-stage"></div>
@@ -46,19 +49,40 @@ describe('FEATURE-060-A CR assessment UI', () => {
     expect(view.el.readiness.querySelectorAll('[data-ready="true"]')).toHaveLength(3);
   });
 
-  it('selecting an analysis depth starts preparation', async () => {
+  it('selecting an analysis depth updates the next estimation', async () => {
     const view = fixture();
     view.el.search = document.querySelector('#cr-search');
     view.prepare = vi.fn();
     view._bind = CrAssessmentView.prototype._bind.bind(view);
     // Bind only the depth interaction required by this test.
     for (const option of view.el.depthMenu.querySelectorAll('[data-depth]')) {
-      option.addEventListener('click', () => { view._chooseDepth(option.dataset.depth); view.prepare(); });
+      option.addEventListener('click', () => view._chooseDepth(option.dataset.depth));
     }
     view.el.depthMenu.querySelector('[data-depth="deep"]').click();
     expect(view.depth).toBe('deep');
     expect(view.el.depthLabel.textContent).toBe('Deep');
+    expect(view.prepare).not.toHaveBeenCalled();
+  });
+
+  it('clicking AI Estimation prepares the selected depth immediately', () => {
+    const view = fixture();
+    view.prepare = vi.fn();
+    view._bind();
+
+    view.el.estimate.click();
+
     expect(view.prepare).toHaveBeenCalledOnce();
+  });
+
+  it('expands the Console and types the prepared command without Enter', () => {
+    const view = fixture();
+    window.terminalPanel = { expand: vi.fn() };
+    window.terminalManager = { sendCopilotPromptCommandNoEnter: vi.fn() };
+
+    view._insertCommand('evaluate-cr-effort --depth standard');
+
+    expect(window.terminalPanel.expand).toHaveBeenCalledOnce();
+    expect(window.terminalManager.sendCopilotPromptCommandNoEnter).toHaveBeenCalledWith('evaluate-cr-effort --depth standard');
   });
 
   it('poller prevents overlapping requests', async () => {

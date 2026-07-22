@@ -75,6 +75,22 @@
       "next_task": "Feature Acceptance Test",
       "created_at": "2026-07-22T06:29:27.076459+00:00",
       "last_updated": "2026-07-22T06:34:24.213465+00:00"
+    },
+    {
+      "task_id": "TASK-6729",
+      "task_type": "Bug Fix",
+      "description": "Ensure AI Estimation expands the X-IPE Console and types the prepared CR assessment command without executing it.",
+      "role": "Nova",
+      "status": "completed",
+      "output_links": [
+        "src/x_ipe/templates/cr-assessment.html",
+        "src/x_ipe/static/js/features/cr-assessment.js",
+        "src/x_ipe/static/css/cr-assessment.css",
+        "tests/frontend-js/cr-assessment.test.js"
+      ],
+      "next_task": "",
+      "created_at": "2026-07-22T06:40:45.721403+00:00",
+      "last_updated": "2026-07-22T06:43:08.180553+00:00"
     }
   ]
 }
