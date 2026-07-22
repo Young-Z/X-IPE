@@ -2,6 +2,8 @@
 
 {% block title %}X IPE - AI Native Integrated Project Environment{% endblock %}
 
+{% block extra_css %}<link href="/static/css/cr-assessment.css" rel="stylesheet">{% endblock %}
+
 {% block body %}
 <!-- Page Root: 3-row vertical layout (top menu, middle, bottom console) -->
 <div class="page-root" id="page-root">
@@ -191,4 +193,7 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="/static/js/features/cr-assessment-api.js"></script>
+<script src="/static/js/features/local-directory-picker.js"></script>
+<script src="/static/js/features/cr-assessment.js"></script>
 {% endblock %}

@@ -1,12 +1,13 @@
 # Technical Design: CR Assessment UI/UX and Case Service
 
-> Feature ID: FEATURE-060-A | Version: v1.0 | Last Updated: 2026-07-21
+> Feature ID: FEATURE-060-A | Version: v1.1 | Last Updated: 2026-07-22
 
 ## Version History
 
 | Version | Date | Description |
 |---------|------|-------------|
 | v1.0 | 2026-07-21 | Initial full-stack design for case storage, assessment invocation preparation, metadata polling, and report preview |
+| v1.1 | 2026-07-22 | Embedded AI Court in the X-IPE right-hand content host with navigation cleanup and standalone-route compatibility |
 
 ---
 
@@ -542,7 +543,8 @@ The current [CR Assessment View v1](x-ipe-docs/requirements/EPIC-060/FEATURE-060
 
 | Mockup Element | Implementation Component | Required Behavior |
 |----------------|--------------------------|-------------------|
-| Dark top bar and product identity | `.cr-assessment__topbar` | Preserve title/mode hierarchy within X-IPE page chrome |
+| X-IPE shell and content host | `ProjectSidebar` + `#content-body` | CR Assessment submenu activation fetches the view, extracts `#cr-assessment-app`, and mounts it into the existing right-hand content area without page navigation |
+| Dark top bar and product identity | `.cr-assessment__topbar` | Preserve title/mode hierarchy on the standalone compatibility route; omit the duplicate top bar when embedded in X-IPE page chrome |
 | Left case rail | `CaseRail` section in `CrAssessmentView` | Count, search, statuses, selection, empty/no-results, New Case |
 | Case heading and number tile | `CaseHeader` | Same selected case name/ID and lifecycle context |
 | Information / AI Verdict tabs | `CaseTabs` | ARIA tablist/tab/tabpanel with arrow/Home/End/Enter/Space behavior |
@@ -558,6 +560,8 @@ The current [CR Assessment View v1](x-ipe-docs/requirements/EPIC-060/FEATURE-060
 CSS requirements:
 
 - Scope selectors under `.cr-assessment` to avoid leaking mockup styles.
+- Load CR Assessment assets from the main `index.html` shell; use `.cr-assessment--embedded` to remove content padding and size the workspace to its host.
+- On navigation away, call `CrAssessmentView.destroy()` before replacing content so polling and document-level listeners are released.
 - Reuse existing X-IPE base tokens where equivalent; define feature tokens only for the mockup's slate/emerald treatment.
 - Desktop: rail + main workspace; information form + sticky readiness card.
 - Tablet: narrower rail and single-column information content without horizontal page scroll.
@@ -682,3 +686,4 @@ Add the same entry to the packaged resource and active project config where appl
 | Date | Phase | Change Summary |
 |------|-------|----------------|
 | 2026-07-21 | Technical Design | Created the initial full-stack design using a stable CaseRecord metadata envelope, atomic filesystem persistence, immutable snapshots, existing Console insertion, five-second HTTP polling, DeliverableViewer reuse, and mockup-derived accessible UI components. |
+| 2026-07-22 | Code Implementation | Changed Workplace navigation from a standalone redirect to an inline `#content-body` mount; added embedded sizing and explicit view cleanup on navigation. |

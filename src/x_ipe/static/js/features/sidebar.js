@@ -373,10 +373,10 @@ class ProjectSidebar {
                             <i class="bi bi-clipboard-check"></i>
                             <span>Quality Evaluation</span>
                         </div>
-                        <a class="nav-section-header sidebar-child nav-cr-assessment" data-section-id="cr-assessment" href="/cr-assessment">
+                        <div class="nav-section-header sidebar-child nav-cr-assessment" data-section-id="cr-assessment" role="button" tabindex="0">
                             <i class="bi bi-scale"></i>
                             <span>CR Assessment</span>
-                        </a>
+                        </div>
                         <div class="nav-section-header sidebar-child nav-learn-panel" data-section-id="learn">
                             <i class="bi bi-mortarboard"></i>
                             <span>Learn</span>
@@ -759,6 +759,10 @@ class ProjectSidebar {
         const cleanupBoardPolling = () => {
             if (window.TaskBoardPanel && window.TaskBoardPanel.destroy) window.TaskBoardPanel.destroy();
             if (window.FeatureBoardPanel && window.FeatureBoardPanel.destroy) window.FeatureBoardPanel.destroy();
+            if (window.crAssessmentView && window.crAssessmentView.destroy) {
+                window.crAssessmentView.destroy();
+                window.crAssessmentView = null;
+            }
         };
 
         // File click events
@@ -947,6 +951,50 @@ class ProjectSidebar {
                     }
                     window._qualityEvaluationInstance = new window.QualityEvaluationView(container);
                     window._qualityEvaluationInstance.init();
+                }
+            });
+        }
+
+        // FEATURE-060-A: Render CR Assessment inside the X-IPE content area.
+        const crAssessmentHeader = this.container.querySelector('.nav-cr-assessment');
+        if (crAssessmentHeader) {
+            const openCrAssessment = async () => {
+                cleanupBoardPolling();
+                fileItems.forEach(f => f.classList.remove('active'));
+                this.selectedFile = null;
+                const sidebarChildren = this.container.querySelectorAll('.sidebar-child');
+                sidebarChildren.forEach(child => child.classList.remove('active'));
+                crAssessmentHeader.classList.add('active');
+                if (window.contentRenderer) window.contentRenderer.currentPath = null;
+
+                const createIdeaBtn = document.getElementById('btn-create-idea');
+                if (createIdeaBtn) createIdeaBtn.classList.add('d-none');
+                const breadcrumb = document.getElementById('breadcrumb');
+                if (breadcrumb) breadcrumb.innerHTML = '<li class="breadcrumb-item active">CR Assessment</li>';
+
+                const container = document.getElementById('content-body');
+                if (!container) return;
+                container.innerHTML = '<div class="content-loading"><div class="spinner-border" role="status"><span class="visually-hidden">Loading CR Assessment</span></div></div>';
+                try {
+                    const response = await fetch('/cr-assessment');
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    const page = new DOMParser().parseFromString(await response.text(), 'text/html');
+                    const panel = page.querySelector('#cr-assessment-app');
+                    if (!panel) throw new Error('CR Assessment panel was not found');
+                    panel.classList.add('cr-assessment--embedded');
+                    panel.querySelector('.cr-topbar')?.remove();
+                    container.replaceChildren(panel);
+                    window.crAssessmentView = new window.CrAssessmentView(panel);
+                    await window.crAssessmentView.init();
+                } catch (error) {
+                    container.innerHTML = `<div class="alert alert-danger" role="alert">CR Assessment could not be loaded: ${String(error.message || error)}</div>`;
+                }
+            };
+            crAssessmentHeader.addEventListener('click', openCrAssessment);
+            crAssessmentHeader.addEventListener('keydown', event => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    openCrAssessment();
                 }
             });
         }

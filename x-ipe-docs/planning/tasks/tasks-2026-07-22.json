@@ -45,6 +45,36 @@
       "next_task": "",
       "created_at": "2026-07-22T05:11:46.658366+00:00",
       "last_updated": "2026-07-22T05:12:37.642272+00:00"
+    },
+    {
+      "task_id": "TASK-6727",
+      "task_type": "Code Implementation",
+      "description": "Build and publish X-IPE 1.1.49 to PyPI using ~/.pypirc, including the CR Assessment feature and sidebar entry.",
+      "role": "Nova",
+      "status": "completed",
+      "output_links": [
+        "https://pypi.org/project/x-ipe/1.1.49/"
+      ],
+      "next_task": "",
+      "created_at": "2026-07-22T05:24:24.204108+00:00",
+      "last_updated": "2026-07-22T06:29:26.998963+00:00"
+    },
+    {
+      "task_id": "TASK-6728",
+      "task_type": "Code Implementation",
+      "description": "Embed the CR Assessment AI Court inside the X-IPE right-hand content area instead of navigating to a standalone page.",
+      "role": "Nova",
+      "status": "completed",
+      "output_links": [
+        "src/x_ipe/static/js/features/sidebar.js",
+        "src/x_ipe/templates/index.html",
+        "tests/frontend-js/kb-sidebar.test.js",
+        "x-ipe-docs/requirements/EPIC-060/FEATURE-060-A/specification.md",
+        "x-ipe-docs/requirements/EPIC-060/FEATURE-060-A/technical-design.md"
+      ],
+      "next_task": "Feature Acceptance Test",
+      "created_at": "2026-07-22T06:29:27.076459+00:00",
+      "last_updated": "2026-07-22T06:34:24.213465+00:00"
     }
   ]
 }

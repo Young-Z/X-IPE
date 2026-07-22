@@ -10,6 +10,15 @@
   background: #020617;
   font-family: "Avenir Next", "Segoe UI", sans-serif;
 }
+.content-body:has(.cr-assessment--embedded) {
+  padding: 0;
+}
+.cr-assessment--embedded {
+  min-height: 100%;
+}
+.cr-assessment--embedded .cr-workspace {
+  min-height: 100%;
+}
 .cr-assessment * {
   box-sizing: border-box;
 }
@@ -662,6 +671,9 @@
     width: min(20rem, 90vw);
     transform: translateX(-105%);
     transition: transform 0.2s;
+  }
+  .cr-assessment--embedded .cr-rail {
+    inset: 0 auto 0 0;
   }
   .cr-assessment[data-rail-open="true"] .cr-rail {
     transform: none;

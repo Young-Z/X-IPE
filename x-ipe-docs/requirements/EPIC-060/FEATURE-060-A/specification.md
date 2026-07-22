@@ -2,15 +2,16 @@
 
 > Feature ID: FEATURE-060-A
 > Epic ID: EPIC-060
-> Version: v1.0
+> Version: v1.1
 > Status: Refined
-> Last Updated: 07-21-2026
+> Last Updated: 07-22-2026
 
 ## Version History
 
 | Version | Date | Description |
 |---------|------|-------------|
 | v1.0 | 07-21-2026 | Initial refined specification for case management, Console prompt invocation, polling, and report preview |
+| v1.1 | 07-22-2026 | Clarified that AI Court opens inside the existing X-IPE right-hand content area and preserves application chrome |
 
 ## Linked Mockups
 
@@ -38,6 +39,14 @@ Project Managers and Technical Leads are the primary interactive users. Vendors 
 6. **US-060-A-06 — Observe Progress:** As a Project Manager, I want the case status and report links to refresh using X-IPE's established polling convention, so that I see skill-published changes without reloading the page.
 7. **US-060-A-07 — Review Reports:** As a Project Manager or Technical Lead, I want to open the CIO report and navigate its slides and related report files as represented in the current mockup, so that I can inspect and share the result.
 8. **US-060-A-08 — Use Without a Mouse:** As a keyboard or assistive-technology user, I want the case list, form, tabs, depth selector, report navigation, and feedback messages to be operable and understandable, so that the full workflow is accessible.
+9. **US-060-A-09 — Stay in X-IPE:** As a Project Manager, I want CR Assessment to replace the current right-hand content view while the sidebar, top menu, and Console remain mounted, so that assessment remains part of the integrated workspace.
+
+### AC-060-A-00: Integrated Navigation
+
+| AC ID | Criterion (Given/When/Then) | Test Type |
+|-------|-------------------------------|-----------|
+| AC-060-A-00a | GIVEN the X-IPE workspace is open WHEN the user activates **CR Assessment** in the Workplace submenu THEN AI Court replaces only the right-hand content body AND the X-IPE top menu, sidebar, breadcrumb header, and Console remain mounted | Integration |
+| AC-060-A-00b | GIVEN AI Court is active WHEN the user selects another X-IPE view THEN CR Assessment polling and document-level listeners are released | UI |
 
 ## Acceptance Criteria
 

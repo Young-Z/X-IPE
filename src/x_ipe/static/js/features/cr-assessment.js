@@ -20,7 +20,7 @@ class CrAssessmentView {
         document.addEventListener('visibilitychange', this._visibility);
     }
 
-    destroy() { this.poller.stop(); document.removeEventListener('visibilitychange', this._visibility); }
+    destroy() { this.poller.stop(); document.removeEventListener('visibilitychange', this._visibility); document.removeEventListener('keydown', this._reportKeydown); }
 
     _cache() {
         const q = (id) => this.root.querySelector(`#${id}`);
@@ -44,7 +44,8 @@ class CrAssessmentView {
         for (const tab of [this.el.infoTab, this.el.reportTab]) tab.addEventListener('keydown', (event) => this._tabKey(event));
         this.root.querySelector('#cr-prev-slide').addEventListener('click', () => this.showSlide(this.slide - 1));
         this.root.querySelector('#cr-next-slide').addEventListener('click', () => this.showSlide(this.slide + 1));
-        document.addEventListener('keydown', (event) => { if (!this.el.reportPanel.hidden && !/INPUT|TEXTAREA|SELECT/.test(event.target.tagName)) { if (event.key === 'ArrowLeft') this.showSlide(this.slide - 1); if (event.key === 'ArrowRight') this.showSlide(this.slide + 1); } });
+        this._reportKeydown = (event) => { if (!this.el.reportPanel.hidden && !/INPUT|TEXTAREA|SELECT/.test(event.target.tagName)) { if (event.key === 'ArrowLeft') this.showSlide(this.slide - 1); if (event.key === 'ArrowRight') this.showSlide(this.slide + 1); } };
+        document.addEventListener('keydown', this._reportKeydown);
     }
 
     async loadCases(query = '') {

@@ -84,7 +84,36 @@ describe('FEATURE-049-B: KB Sidebar & Navigation', () => {
       const entry = document.querySelector('.nav-cr-assessment');
       expect(entry).not.toBeNull();
       expect(entry.textContent).toContain('CR Assessment');
-      expect(entry.getAttribute('href')).toBe('/cr-assessment');
+      expect(entry.tagName).toBe('DIV');
+      expect(entry.hasAttribute('href')).toBe(false);
+    });
+
+    it('should embed CR Assessment in the existing content area', async () => {
+      if (!sidebar) return;
+      document.body.innerHTML = `
+        <div id="sidebar-content"></div>
+        <ol id="breadcrumb"></ol>
+        <button id="btn-create-idea"></button>
+        <div id="content-body"></div>`;
+      sidebar = new globalThis.ProjectSidebar('sidebar-content');
+      sidebar.sections = [{ id: 'workplace', label: 'Workplace', icon: 'bi-lightbulb', children: [] }];
+      const init = vi.fn().mockResolvedValue(undefined);
+      globalThis.CrAssessmentView = class {
+        constructor() { this.init = init; this.destroy = vi.fn(); }
+      };
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        text: () => Promise.resolve('<div id="cr-assessment-app"><header class="cr-topbar"></header><div class="cr-workspace"></div></div>')
+      });
+
+      sidebar.render();
+      document.querySelector('.nav-cr-assessment').click();
+      await vi.waitFor(() => expect(init).toHaveBeenCalledOnce());
+
+      expect(document.querySelector('#content-body #cr-assessment-app')).not.toBeNull();
+      expect(document.querySelector('#content-body .cr-topbar')).toBeNull();
+      expect(document.querySelector('#breadcrumb').textContent).toContain('CR Assessment');
+      expect(globalThis.location.pathname).not.toBe('/cr-assessment');
     });
 
     it('should render KB section with bi-book icon', () => {
