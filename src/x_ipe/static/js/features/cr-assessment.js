@@ -10,6 +10,7 @@ class CrAssessmentView {
     constructor(root, api = new CrAssessmentApi()) {
         this.root = root; this.api = api; this.summaries = []; this.selectedCase = null;
         this.markers = {}; this.dirty = new Set(); this.depth = 'standard'; this.slide = 0;
+        this.loadSequence = 0;
         this.poller = new CrAssessmentPoller(() => this._poll());
         this.picker = new LocalDirectoryPicker(api);
     }
@@ -50,8 +51,9 @@ class CrAssessmentView {
     }
 
     async loadCases(query = '') {
-        try { const data = await this.api.listCases(query); this.summaries = data.cases; this.markers = Object.fromEntries(this.summaries.map((item) => [item.id, item.marker])); this.renderList(); if (!this.selectedCase && this.summaries.length) await this.selectCase(this.summaries[0].id); else if (!this.selectedCase && !this.summaries.length && !query) this.newCase(); }
-        catch (error) { this.el.list.textContent = `Cases could not be loaded: ${error.message}`; }
+        const sequence = ++this.loadSequence;
+        try { const data = await this.api.listCases(query); if (sequence !== this.loadSequence) return; this.summaries = data.cases; this.markers = Object.fromEntries(this.summaries.map((item) => [item.id, item.marker])); this.renderList(); if (!this.selectedCase && this.summaries.length) await this.selectCase(this.summaries[0].id); else if (!this.selectedCase && !this.summaries.length && !query) this.newCase(); }
+        catch (error) { if (sequence === this.loadSequence) this.el.list.textContent = `Cases could not be loaded: ${error.message}`; }
     }
 
     renderList() {

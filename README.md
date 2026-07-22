@@ -874,6 +874,9 @@ Improvements include:
 | **Interactive Console v2** | Full xterm.js terminal with session persistence, auto-reconnection, split-pane support | ✅ Completed |
 | **Application Action Tracing** | Python function tracing with @x_ipe_tracing decorator, sensitive data redaction, duration-based control, dashboard UI | ✅ Completed |
 | **File Link Preview** | Click internal links (`x-ipe-docs/`, `.github/skills/`) in rendered markdown to preview files in-place via modal overlay | ✅ Completed |
+| **CR Assessment AI Court** | Embedded change-request case management with evidence intake, assessment-depth selection, Console prompt preparation, filesystem polling, and report history preview | ✅ Completed |
+
+Open **Workplace → CR Assessment**, save the case evidence, choose an assessment depth, and select **AI Estimation**. X-IPE opens its existing Console and types the assessment command for review without submitting it automatically.
 
 ### 🔜 Planned
 

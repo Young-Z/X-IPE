@@ -104,6 +104,27 @@ describe('FEATURE-060-A CR assessment UI', () => {
     expect(view.renderList).not.toHaveBeenCalled();
   });
 
+  it('ignores a stale search response that resolves after the current query', async () => {
+    const view = fixture();
+    view.selectedCase = { case: { id: 'CR-2026-001' } };
+    let resolveOld;
+    let resolveCurrent;
+    view.api = {
+      listCases: vi.fn()
+        .mockImplementationOnce(() => new Promise(resolve => { resolveOld = resolve; }))
+        .mockImplementationOnce(() => new Promise(resolve => { resolveCurrent = resolve; }))
+    };
+
+    const oldRequest = view.loadCases('no-such-case');
+    const currentRequest = view.loadCases('');
+    resolveCurrent({ cases: [{ id: 'CR-2026-002', name: 'Current', marker: '2', updated_at: new Date().toISOString() }] });
+    await currentRequest;
+    resolveOld({ cases: [] });
+    await oldRequest;
+
+    expect(view.summaries.map(item => item.id)).toEqual(['CR-2026-002']);
+  });
+
   it('renders persisted file names and relative case update time', () => {
     const view = fixture();
     view.el.search.value = '';

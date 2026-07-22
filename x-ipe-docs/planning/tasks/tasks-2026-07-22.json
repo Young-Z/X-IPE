@@ -106,6 +106,35 @@
       "next_task": "",
       "created_at": "2026-07-22T06:45:47.284822+00:00",
       "last_updated": "2026-07-22T06:48:17.670149+00:00"
+    },
+    {
+      "task_id": "TASK-6731",
+      "task_type": "Feature Closing",
+      "description": "Close FEATURE-060-A CR Assessment UI/UX and Case Service after verified implementation, acceptance testing, and PyPI release.",
+      "role": "Nova",
+      "status": "completed",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-060/FEATURE-060-A/acceptance-test-cases.md",
+        "x-ipe-docs/refactoring/analysis-FEATURE-060-A.md",
+        "README.md"
+      ],
+      "next_task": "FEATURE-060-B refinement",
+      "created_at": "2026-07-22T06:55:45.492758+00:00",
+      "last_updated": "2026-07-22T07:11:33.408275+00:00"
+    },
+    {
+      "task_id": "TASK-6732",
+      "task_type": "Bug Fix",
+      "description": "Prevent stale asynchronous CR Assessment search responses from overwriting results for the current query.",
+      "role": "Nova",
+      "status": "completed",
+      "output_links": [
+        "src/x_ipe/static/js/features/cr-assessment.js",
+        "tests/frontend-js/cr-assessment.test.js"
+      ],
+      "next_task": "TASK-6731",
+      "created_at": "2026-07-22T07:02:36.294634+00:00",
+      "last_updated": "2026-07-22T07:11:33.381070+00:00"
     }
   ]
 }
