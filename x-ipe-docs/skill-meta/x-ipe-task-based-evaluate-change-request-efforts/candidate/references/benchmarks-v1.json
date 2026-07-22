@@ -1,0 +1,12 @@
+{
+  "benchmark_version": "1.0.0",
+  "unit": "person_day",
+  "policy": "fallback_context_only",
+  "categories": [
+    {"id": "small_change", "range": [1, 3], "applies_when": "localized behavior with existing tests and no contract change"},
+    {"id": "medium_component", "range": [3, 8], "applies_when": "one component plus contract and test updates"},
+    {"id": "cross_component", "range": [8, 20], "applies_when": "multiple components or data/integration change"},
+    {"id": "migration_or_security", "range": [10, 30], "applies_when": "migration, security-sensitive flow, or staged rollout"}
+  ],
+  "notes": ["Project evidence takes precedence", "Ranges are not automatic estimates", "AI adjustments are separately evidence-gated"]
+}

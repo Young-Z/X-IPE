@@ -1,0 +1,27 @@
+skill_name: x-ipe-task-based-evaluate-change-request-efforts
+version: "1.0.0"
+evaluated: 2026-07-22
+status: passed
+summary:
+  must_pass: "5/5 (100%)"
+  should_pass: "2/2 (100%)"
+  publisher_tests: "5/5"
+  structural_review: pass
+checks:
+  - {id: AC-M01, result: pass, evidence: "Candidate contains SKILL.md, references, publisher, templates, shared assets, Mermaid 11.16.0 chunks, and tests"}
+  - {id: AC-M02, result: pass, evidence: "All five task-based phases and continuation routing present; SKILL.md is 140 lines"}
+  - {id: AC-M03, result: pass, evidence: "Valid publication creates model, effort, design, CaseRecord, assets, and Completed metadata"}
+  - {id: AC-M04, result: pass, evidence: "Invalid totals create no next report and failure marking preserves report latest/history"}
+  - {id: AC-M05, result: pass, evidence: "HTML escaping and non-sensitive path redaction tests pass"}
+  - {id: AC-S01, result: pass, evidence: "Examples cover Quick, Standard, and qualified Deep"}
+  - {id: AC-S02, result: pass, evidence: "Three templates map to approved report roles and share offline CSS, JS, and Mermaid assets"}
+quality:
+  score: 4.7
+  strengths:
+    - Clear separation between AI reasoning and deterministic publication
+    - Evidence-first and symmetric comparison rules are explicit
+    - Candidate-first resources are complete and locally testable
+  limitations:
+    - End-to-end report content quality still depends on the invoking model's repository analysis
+    - Browser visual acceptance remains a separate FEATURE-060-B acceptance-test stage
+decision: merge_candidate_to_production

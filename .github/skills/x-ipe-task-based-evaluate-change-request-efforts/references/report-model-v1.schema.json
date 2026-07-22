@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "x-ipe://cr-assessment/report-model/v1",
+  "type": "object",
+  "required": ["schema_version", "provenance", "case", "coverage", "estimate", "design", "diagrams"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "provenance": {"type": "object", "required": ["skill_version", "benchmark_version", "template_version", "snapshot_version"]},
+    "case": {"type": "object", "required": ["id", "name", "language", "summary"]},
+    "coverage": {"type": "object", "required": ["depth", "status", "inspected", "gaps"]},
+    "estimate": {"type": "object", "required": ["vendor_range", "ai_range", "confidence", "comparison", "modules", "factors", "guidance"]},
+    "design": {"type": "object", "required": ["decision", "adoption", "contracts", "work_packages", "testing", "rollout", "rollback", "risks", "traceability"]},
+    "diagrams": {"type": "array", "items": {"type": "object", "required": ["id", "title", "source"]}}
+  },
+  "additionalProperties": true
+}

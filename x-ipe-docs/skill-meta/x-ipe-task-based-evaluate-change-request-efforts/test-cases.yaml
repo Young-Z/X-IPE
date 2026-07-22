@@ -1,0 +1,28 @@
+skill_name: x-ipe-task-based-evaluate-change-request-efforts
+version: "1.0.0"
+tests:
+  - id: TC-001
+    priority: must
+    scenario: Valid Standard publication creates model and three reports
+    command: python -m pytest candidate/tests/test_publish_reports.py -q
+    expected: pass
+  - id: TC-002
+    priority: must
+    scenario: Invalid totals preserve the latest valid report
+    command: python -m pytest candidate/tests/test_publish_reports.py -q
+    expected: pass
+  - id: TC-003
+    priority: must
+    scenario: Non-zero AI factor without evidence is rejected
+    command: python -m pytest candidate/tests/test_publish_reports.py -q
+    expected: pass
+  - id: TC-004
+    priority: must
+    scenario: Candidate structure, frontmatter, phases, DoR, DoD, and references validate
+    command: structural-review
+    expected: pass
+  - id: TC-005
+    priority: should
+    scenario: Quick, Standard, and qualified Deep examples are documented
+    command: content-review
+    expected: pass
