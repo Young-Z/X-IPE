@@ -92,6 +92,19 @@ def test_update_name_does_not_rename_folder(service: CrAssessmentService, projec
     assert (project / "x-ipe-docs" / "cr-cases" / case_id).is_dir()
 
 
+def test_stale_update_does_not_store_new_artifacts(service: CrAssessmentService, project: Path):
+    case = service.create_case(valid_form(project))
+    case_id = case["case"]["id"]
+    with pytest.raises(RevisionConflictError):
+        service.update_case(
+            case_id,
+            valid_form(project),
+            {"vendor_estimate": vendor_file("stale.xlsx")},
+            expected_revision=0,
+        )
+    assert not (project / "x-ipe-docs" / "cr-cases" / case_id / "inputs" / "vendor-estimate").exists()
+
+
 @pytest.mark.parametrize("path", ["https://example.com/repo.git", "git@github.com:a/b.git", "/missing/path"])
 def test_invalid_codebase_paths_are_rejected(service: CrAssessmentService, path: str):
     assert service.validate_codebase(path)["valid"] is False

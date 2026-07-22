@@ -114,6 +114,9 @@ class CrAssessmentService:
         """Update service-owned case fields while preserving skill metadata."""
         folder = self._case_dir(case_id)
         current = self.codec.read(folder / "CaseRecord.html")
+        current_revision = int(current.get("record_revision", 0))
+        if expected_revision is not None and expected_revision != current_revision:
+            raise RevisionConflictError("Case record changed since it was loaded")
         validation_form = dict(form)
         validation_form["has_cr_file"] = bool(
             form.get("has_cr_file")

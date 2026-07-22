@@ -13,7 +13,8 @@ function fixture() {
       <form id="cr-case-form"><input id="cr-case-name" name="case_name"><input id="cr-case-id">
         <textarea id="cr-description" name="cr_description_text"></textarea><input id="cr-description-file" type="file">
         <input id="cr-codebase" name="codebase_path"><textarea id="cr-comments"></textarea>
-        <input id="cr-vendor" type="file"><input id="cr-supporting" type="file"></form>
+        <input id="cr-vendor" type="file"><span id="cr-vendor-file"></span>
+        <input id="cr-supporting" type="file"><span id="cr-supporting-list"></span></form>
       <div id="cr-case-list"></div><span id="cr-case-count"></span><input id="cr-search">
       <h2 id="cr-case-title"></h2><span id="cr-case-number"></span><div id="cr-alert" hidden></div>
       <div id="cr-readiness-list"></div><button id="cr-estimate"><span id="cr-depth-label"></span></button>
@@ -69,5 +70,51 @@ describe('FEATURE-060-A CR assessment UI', () => {
     expect(callback).toHaveBeenCalledOnce();
     release();
     await first;
+  });
+
+  it('does not rerender when polling reports no changes', async () => {
+    const view = fixture();
+    view.api = { pollChanges: vi.fn().mockResolvedValue({ changed: [], removed: [], markers: {} }) };
+    view.renderList = vi.fn();
+    await view._poll();
+    expect(view.renderList).not.toHaveBeenCalled();
+  });
+
+  it('renders persisted file names and relative case update time', () => {
+    const view = fixture();
+    view.el.search.value = '';
+    view.summaries = [{ id: 'CR-2026-001', name: 'SSO', status: 'Created', updated_at: new Date().toISOString() }];
+    view.renderList();
+    expect(view.el.list.textContent).toContain('Updated just now');
+
+    view.selectedCase = {
+      case: { id: 'CR-2026-001', name: 'SSO', status: 'Created' }, record_revision: 1,
+      inputs: { cr_description: { text: 'brief' }, codebase_path: '/repo', supporting_documents: [{ original_name: 'scope.pdf' }], vendor_estimate: { original_name: 'estimate.xlsx' } },
+      readiness: { cr_brief: true, codebase: true, vendor_estimate: true }, reports: {}, invocation: {},
+    };
+    view.renderCase();
+    expect(document.querySelector('#cr-supporting-list').textContent).toContain('scope.pdf');
+    expect(document.querySelector('#cr-vendor-file').textContent).toContain('estimate.xlsx');
+  });
+
+  it('does not leave stale detail visible while selecting a case', async () => {
+    const view = fixture();
+    let resolveCase;
+    view.api = { getCase: vi.fn(() => new Promise((resolve) => { resolveCase = resolve; })) };
+    const pending = view.selectCase('CR-2026-002');
+    expect(view.root.getAttribute('aria-busy')).toBe('true');
+    expect(view.el.title.textContent).toContain('Loading');
+    resolveCase({ case: { id: 'CR-2026-002', name: 'Loaded', status: 'Created' }, record_revision: 1, inputs: {}, readiness: {}, reports: {}, invocation: {} });
+    await pending;
+    expect(view.root.getAttribute('aria-busy')).toBe('false');
+    expect(view.el.title.textContent).toBe('Loaded');
+  });
+
+  it('renders an accessible report module disclosure', () => {
+    const view = fixture();
+    view.selectedCase = { case: { id: 'CR-2026-001', name: 'SSO', status: 'Completed' }, reports: { latest: { effort: 'effort.html' }, history: [] } };
+    view._renderReports();
+    view.showSlide(1);
+    expect(view.el.stage.querySelector('details summary')).not.toBeNull();
   });
 });
