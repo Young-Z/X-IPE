@@ -2,7 +2,7 @@
 
 > Feature: FEATURE-060-A — CR Assessment UI/UX and Case Service  
 > Generated: 2026-07-22  
-> Status: Executed — Acceptance Gaps Found
+> Status: Re-executed — Automated Gaps Resolved; Browser Verification Blocked
 
 ## Overview
 
@@ -39,24 +39,24 @@
 | TC | AC coverage | Priority | Endpoint/service reference and generated data | Expected outcome | Assigned tool | Status |
 |---|---|---:|---|---|---|---|
 | TC-API-01 Case lifecycle and identity | 01b, 01c, 01d | P0 | `POST /api/cr-assessments`, `PUT /api/cr-assessments/{id}`; concurrent generated cases | Unique immutable `CR-YYYY-NNN` folders; rename never changes ID/folder | Python/pytest | Pass |
-| TC-API-02 Evidence persistence and failure safety | 02a, 02b, 02c, 02d, 02f | P0 | Multipart create/update with byte fixtures and forced write/conflict errors | Fields and original bytes persist; prior valid record remains readable on failure | Python/pytest | Fail |
+| TC-API-02 Evidence persistence and failure safety | 02a, 02b, 02c, 02d, 02f | P0 | Multipart create/update with byte fixtures and forced write/conflict errors | Fields and original bytes persist; prior valid record remains readable on failure | Python/pytest | Pass |
 | TC-API-03 Path validation | 03b, 03d | P0 | `POST /api/cr-assessments/validate-path`; missing/file/unreadable/readable temp paths | Invalid paths have corrective reasons; readable directory is ready | Python/pytest | Pass |
 | TC-API-04 Invocation transaction | 04c, 04d, 04e, 04f | P0 | `POST /api/cr-assessments/{id}/prepare` with each depth and failure fixtures | Auto-save and immutable snapshot precede Evaluating; command is populated, not executed; failure does not transition | Python/pytest | Pass |
 | TC-API-05 Polling lifecycle | 06a, 06c, 06f, 06g | P0 | `POST /api/cr-assessments/changes`; changed/unchanged/malformed/recovery cases | Five-second-compatible marker contract returns only changes; failures are recoverable; Evaluating has no timeout | Python/pytest + Vitest | Pass |
-| TC-API-06 Report history and missing files | 07b, 07g | P1 | Seed latest/history report metadata including a missing file; fetch case and preview links | Current and historical outputs remain reachable; missing file does not hide valid versions | Python/pytest | Fail |
+| TC-API-06 Report history and missing files | 07b, 07g | P1 | Seed latest/history report metadata including a missing file; fetch case and preview links | Current and historical outputs remain reachable; missing file does not hide valid versions | Python/pytest + structured review | Pass |
 
 ## Unit Tests
 
 | TC | AC coverage | Priority | Function/class reference | Expected outcome | Assigned tool | Status |
 |---|---|---:|---|---|---|---|
 | TC-UNIT-01 Local URL rejection | 03c | P0 | `CrAssessmentService.validate_codebase()` with HTTPS and SSH Git URLs | Remote repositories are rejected | Python/pytest | Pass |
-| TC-UNIT-02 No-change polling and cleanup | 06b, 06e | P1 | `CrAssessmentView._poll()`, `CrAssessmentPoller`, `destroy()` | Unchanged response does not rerender; cleanup stops interval and listener | Vitest | Fail |
+| TC-UNIT-02 No-change polling and cleanup | 06b, 06e | P1 | `CrAssessmentView._poll()`, `CrAssessmentPoller`, `destroy()` | Unchanged response does not rerender; cleanup stops interval and listener | Vitest | Pass |
 
 ## Structured Review Tests
 
 | TC | AC coverage | Priority | Review target | Expected outcome | Assigned tool | Status |
 |---|---|---:|---|---|---|---|
-| TC-REV-01 Complete AC implementation trace | All ACs | P1 | Specification ↔ template/JS/routes/services/tests | Every criterion has an implementation point or a documented gap | Agent structured review | Fail |
+| TC-REV-01 Complete AC implementation trace | All ACs | P1 | Specification ↔ template/JS/routes/services/tests | Every criterion has an implementation point or a documented gap | Agent structured review | Pass |
 
 ## Reflection Checklist
 
@@ -72,24 +72,24 @@
 | Type | Total | Passed | Failed | Blocked |
 |---|---:|---:|---:|---:|
 | Frontend UI | 10 | 0 | 0 | 10 |
-| Backend API / Integration | 6 | 4 | 2 | 0 |
-| Unit | 2 | 1 | 1 | 0 |
-| Structured review | 1 | 0 | 1 | 0 |
-| **Total** | **19** | **5** | **4** | **10** |
+| Backend API / Integration | 6 | 6 | 0 | 0 |
+| Unit | 2 | 2 | 0 | 0 |
+| Structured review | 1 | 1 | 0 | 0 |
+| **Total** | **19** | **9** | **0** | **10** |
 
-- Overall pass rate: **26.3%** (5/19).
-- Executed, non-blocked pass rate: **55.6%** (5/9).
-- Automated runner result: **24/24 underlying tests passed** (21 pytest + 3 Vitest).
-- New Python component coverage: **82%** overall (codec 91%, service 84%, routes 70%).
+- Overall pass rate: **47.4%** (9/19); the remaining 10 cases are blocked, not failed.
+- Executed, non-blocked pass rate: **100%** (9/9).
+- Automated runner result: **29/29 underlying tests passed** (22 pytest + 7 Vitest).
+- New Python component coverage: **83%** overall (codec 91%, service 84%, routes 70%).
 
 ## Execution Notes and Gaps
 
 1. **Frontend execution blocked:** `tools.json` mandates Chrome DevTools MCP, but no Chrome DevTools MCP tools were available. Per the acceptance skill, no alternative browser driver was substituted.
-2. **TC-API-02:** evidence bytes and metadata are tested, but the form does not render stored supporting/vendor file chips; files are written before revision merge, so a later merge conflict can leave artifact writes outside the metadata transaction.
-3. **TC-API-06:** latest/history metadata is flattened into links, but missing-file preview errors are delegated without a local recovery message and the required CaseRecord/current-history grouping is absent.
-4. **TC-UNIT-02:** `destroy()` stops polling, but `_poll()` always calls `renderList()` even when `changed` and `removed` are empty, violating AC-060-A-06b.
-5. **TC-REV-01:** case cards omit relative update time; case selection has no loading state; stored-file replacement/removal UI is absent; report module disclosures are not implemented; tab key handling does not explicitly implement Enter/Space; formal contrast and responsive checks remain blocked.
+2. **TC-API-02 resolved:** stale revisions are rejected before artifact storage, and stored supporting/vendor evidence is presented as named chips.
+3. **TC-API-06 resolved:** current/history links remain available, report modules expose native accessible disclosures, and preview failure produces a local message without removing other versions.
+4. **TC-UNIT-02 resolved:** unchanged marker responses return before list/detail rendering; cleanup still stops polling and removes its visibility listener.
+5. **TC-REV-01 resolved:** case cards now include relative update time, selection exposes `aria-busy` and a loading heading, stored files are visible, and report disclosure/error states are implemented. Native button behavior supplies Enter/Space activation; formal contrast and responsive execution remain in the blocked browser group.
 
 ## Recommended Action
 
-Return FEATURE-060-A to implementation for the functional gaps above, add explicit acceptance coverage for concurrency, write rollback, no-change polling, report error/history, keyboard tabs, and persisted-file display, then rerun the blocked Chrome DevTools batch when the mandated MCP is available.
+The executable and structured-review acceptance gates pass. Run the 10 blocked UI cases through the mandated Chrome DevTools MCP when it becomes available; do not declare fully verified visual/accessibility acceptance before that batch completes.

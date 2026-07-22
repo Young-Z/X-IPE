@@ -23,11 +23,13 @@
       "task_type": "Feature Acceptance Test",
       "description": "Rerun FEATURE-060-A acceptance testing after resolving the documented implementation gaps.",
       "role": "Nova",
-      "status": "pending",
-      "output_links": [],
+      "status": "completed",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-060/FEATURE-060-A/acceptance-test-cases.md"
+      ],
       "next_task": "x-ipe-task-based-feature-closing",
       "created_at": "2026-07-22T02:29:28.392361+00:00",
-      "last_updated": "2026-07-22T02:29:28.392361+00:00"
+      "last_updated": "2026-07-22T03:15:35.676137+00:00"
     }
   ]
 }
