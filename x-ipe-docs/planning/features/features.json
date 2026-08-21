@@ -2037,7 +2037,7 @@
       "feature_id": "FEATURE-027-F",
       "epic_id": "EPIC-027",
       "title": "Codex CLI Adapter",
-      "status": "Tested",
+      "status": "Completed",
       "version": "1.0",
       "description": "Add OpenAI Codex CLI (codex) as a fourth CLI adapter alongside copilot, opencode, claude-code: registry entry, auto-detection, skill translation to .codex/skills, AGENTS.md instructions, MCP deployment via codex mcp add.",
       "dependencies": [
@@ -2047,7 +2047,7 @@
         "FEATURE-027-D"
       ],
       "created_at": "2026-08-21T01:26:10.903797+00:00",
-      "last_updated": "2026-08-21T02:08:36.237314+00:00",
+      "last_updated": "2026-08-21T03:29:59.351585+00:00",
       "specification_link": "x-ipe-docs/requirements/EPIC-027/FEATURE-027-F/specification.md"
     }
   ]

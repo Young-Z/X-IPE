@@ -44,11 +44,14 @@
       "task_type": "Feature Closing",
       "description": "[Nova] Close FEATURE-027-F Codex CLI Adapter: verify ACs, code-to-docs review, refactoring analysis, commit and push to main (main-branch-only), then PyPI release per user request",
       "role": "Feature Closer",
-      "status": "in_progress",
-      "output_links": [],
+      "status": "completed",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-027/FEATURE-027-F/closing-report.md",
+        "x-ipe-docs/refactoring/analysis-TASK-1160.md"
+      ],
       "next_task": "N/A",
       "created_at": "2026-08-21T02:26:58.099405+00:00",
-      "last_updated": "2026-08-21T02:26:58.099405+00:00"
+      "last_updated": "2026-08-21T03:29:59.318167+00:00"
     }
   ]
 }
