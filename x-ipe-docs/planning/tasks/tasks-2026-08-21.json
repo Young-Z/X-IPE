@@ -52,6 +52,20 @@
       "next_task": "N/A",
       "created_at": "2026-08-21T02:26:58.099405+00:00",
       "last_updated": "2026-08-21T03:29:59.318167+00:00"
+    },
+    {
+      "task_id": "TASK-1161",
+      "task_type": "Bug Fix",
+      "description": "[Nova] x-ipe 1.1.51 init --cli codex fails with Unknown CLI in projects initialized by older versions: project-scaffolded x-ipe-docs/config/cli-adapters.yaml fully overrides the bundled registry, freezing adapters at init-time. Fix: bundled registry as base + per-adapter project override.",
+      "role": "Bug Fixer",
+      "status": "completed",
+      "output_links": [
+        "src/x_ipe/services/cli_adapter_service.py",
+        "tests/test_cli_adapter.py::TestProjectOverlayMerge"
+      ],
+      "next_task": "N/A",
+      "created_at": "2026-08-21T11:16:00.991658+00:00",
+      "last_updated": "2026-08-21T11:22:58.857948+00:00"
     }
   ]
 }
