@@ -186,7 +186,7 @@ def info(ctx: click.Context) -> None:
 @click.option(
     "--cli", "cli_name",
     default=None,
-    help="CLI to use (copilot, opencode, claude-code). Skips interactive prompt.",
+    help="CLI to use (copilot, opencode, claude-code, codex). Skips interactive prompt.",
 )
 @click.option(
     "--lang", "lang",
@@ -277,27 +277,44 @@ def init(ctx: click.Context, force: bool, dry_run: bool, no_skills: bool, no_mcp
         
         if servers_to_merge:
             mcp_format = 'project'
+            adapter = None
             try:
                 adapter = CLIAdapterService().get_adapter(selected_cli)
                 target_path = deployer.resolve_target_path(adapter)
                 mcp_format = adapter.mcp_config_format
             except Exception:
                 target_path = project_root / ".copilot" / "mcp-config.json"
-            
-            target_path = click.prompt(
-                "\nTarget MCP config path",
-                default=str(target_path),
-                type=click.Path(dir_okay=False, path_type=Path)
-            )
-            
-            # Use deployer with explicit target override via scaffold for backward compat
-            scaffold.merge_mcp_config(
-                servers_to_merge=servers_to_merge,
-                target_path=target_path,
-                source_servers=mcp_servers,
-                mcp_format=mcp_format
-            )
-            click.echo(f"\n✓ Merged {len(servers_to_merge)} MCP server(s) to {target_path}")
+
+            if mcp_format == 'codex-toml' and adapter is not None:
+                # FEATURE-027-F: codex manages its global config.toml itself —
+                # register via the codex CLI, no target path to prompt for
+                result = deployer.deploy(
+                    adapter,
+                    servers_to_merge=servers_to_merge,
+                    force=force,
+                    source_servers=mcp_servers,
+                )
+                if result.merged_count:
+                    click.echo(f"\n✓ Registered {result.merged_count} MCP server(s) via 'codex mcp add'")
+                if result.skipped_count:
+                    click.echo(f"○ {result.skipped_count} MCP server(s) already registered (skipped)")
+                if result.errors:
+                    click.echo(f"⚠ {len(result.errors)} MCP server(s) failed to register (see logs)")
+            else:
+                target_path = click.prompt(
+                    "\nTarget MCP config path",
+                    default=str(target_path),
+                    type=click.Path(dir_okay=False, path_type=Path)
+                )
+
+                # Use deployer with explicit target override via scaffold for backward compat
+                scaffold.merge_mcp_config(
+                    servers_to_merge=servers_to_merge,
+                    target_path=target_path,
+                    source_servers=mcp_servers,
+                    mcp_format=mcp_format
+                )
+                click.echo(f"\n✓ Merged {len(servers_to_merge)} MCP server(s) to {target_path}")
     
     # Show summary
     created, skipped = scaffold.get_summary()
@@ -952,28 +969,45 @@ def upgrade(ctx: click.Context, force: bool, dry_run: bool,
             # Resolve target path from active CLI
             active_cli = _read_existing_cli(project_root) or 'copilot'
             mcp_format = 'project'
+            adapter = None
             try:
                 adapter = CLIAdapterService().get_adapter(active_cli)
                 target_path = deployer.resolve_target_path(adapter)
                 mcp_format = adapter.mcp_config_format
             except Exception:
                 target_path = project_root / ".copilot" / "mcp-config.json"
-            
-            if not force:
-                target_path = click.prompt(
-                    "\nTarget MCP config path",
-                    default=str(target_path),
-                    type=click.Path(dir_okay=False, path_type=Path)
+
+            if mcp_format == 'codex-toml' and adapter is not None:
+                # FEATURE-027-F: codex manages its global config.toml itself —
+                # register via the codex CLI; never merge JSON into the TOML
+                result = deployer.deploy(
+                    adapter,
+                    servers_to_merge=servers_to_merge,
+                    force=force,
+                    source_servers=mcp_servers,
                 )
-            
-            scaffold.merge_mcp_config(
-                servers_to_merge=servers_to_merge,
-                target_path=target_path,
-                source_servers=mcp_servers,
-                mcp_format=mcp_format
-            )
-            
-            click.echo(f"\n✓ Merged {len(servers_to_merge)} MCP server(s) to {target_path}")
+                if result.merged_count:
+                    click.echo(f"\n✓ Registered {result.merged_count} MCP server(s) via 'codex mcp add'")
+                if result.skipped_count:
+                    click.echo(f"○ {result.skipped_count} MCP server(s) already registered (skipped)")
+                if result.errors:
+                    click.echo(f"⚠ {len(result.errors)} MCP server(s) failed to register (see logs)")
+            else:
+                if not force:
+                    target_path = click.prompt(
+                        "\nTarget MCP config path",
+                        default=str(target_path),
+                        type=click.Path(dir_okay=False, path_type=Path)
+                    )
+
+                scaffold.merge_mcp_config(
+                    servers_to_merge=servers_to_merge,
+                    target_path=target_path,
+                    source_servers=mcp_servers,
+                    mcp_format=mcp_format
+                )
+
+                click.echo(f"\n✓ Merged {len(servers_to_merge)} MCP server(s) to {target_path}")
 
 
 def main() -> None:

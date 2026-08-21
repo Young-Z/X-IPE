@@ -54,6 +54,9 @@ class SkillTranslator:
             return self._translate_opencode(source, target)
         elif adapter.name == 'claude-code':
             return self._translate_claude_code(source, target)
+        elif adapter.name == 'codex':
+            # FEATURE-027-F: Codex accepts the Agent Skills SKILL.md format as-is
+            return self._translate_claude_code(source, target)
         else:
             return self._translate_claude_code(source, target)
 

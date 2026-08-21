@@ -724,3 +724,136 @@ class TestMergeMCPWithSourceServers:
         config = json.loads(target.read_text())
         assert "existing" in config["mcpServers"]
         assert "new-server" in config["mcpServers"]
+
+
+# ============================================================================
+# FEATURE-027-F: CODEX INIT TESTS
+# ============================================================================
+
+class TestCodexInit:
+    """FEATURE-027-F: x-ipe init --cli codex end-to-end."""
+
+    def test_init_codex_creates_codex_artifacts(self, runner, temp_project):
+        """AC-4.1: init --cli codex stores cli key and writes AGENTS.md."""
+        from src.x_ipe.cli.main import cli
+
+        # Answer "n" to the MCP confirm so no real codex mcp add runs
+        result = runner.invoke(
+            cli,
+            ["-p", str(temp_project), "init", "--cli", "codex"],
+            input="\nn\n",  # language default, decline MCP
+        )
+        assert result.exit_code == 0, result.output
+
+        config = yaml.safe_load((temp_project / ".x-ipe.yaml").read_text())
+        assert config.get("cli") == "codex"
+        assert config.get("paths", {}).get("skills") == ".codex/skills"
+        assert (temp_project / "AGENTS.md").exists()
+
+    def test_copy_skills_codex_verbatim(self, temp_project):
+        """AC-2.1: codex skills are verbatim copies of the canonical skills."""
+        from src.x_ipe.core.scaffold import ScaffoldManager
+
+        skills_src = temp_project / "fake_skills"
+        skill_dir = skills_src / "my-skill"
+        skill_dir.mkdir(parents=True)
+        original = "---\nname: my-skill\ndescription: test\n---\n\n# Skill body\n"
+        (skill_dir / "SKILL.md").write_text(original)
+
+        scaffold = ScaffoldManager(temp_project)
+        scaffold.copy_skills(skills_source=skills_src, cli_name='codex')
+
+        target = temp_project / ".codex" / "skills"
+        assert target in scaffold.created
+        assert (target / "my-skill" / "SKILL.md").read_text() == original
+
+    def test_init_mcp_codex_uses_deployer_without_target_prompt(self, runner, temp_project):
+        """AC-3.4: codex MCP servers register via deployer.deploy; no target path prompt."""
+        from src.x_ipe.cli.main import cli
+
+        # Patch the module the CLI object was imported from (src.x_ipe.cli.main),
+        # NOT x_ipe.cli.main — they are distinct module objects in tests.
+        with patch("src.x_ipe.cli.main.CLIAdapterService") as MockService, \
+             patch("src.x_ipe.cli.main.MCPDeployerService") as MockDeployer:
+            mock_svc = MockService.return_value
+            adapter = MagicMock()
+            adapter.name = "codex"
+            adapter.mcp_config_path = "~/.codex/config.toml"
+            adapter.mcp_config_format = "codex-toml"
+            adapter.skills_folder = ".codex/skills/"
+            adapter.instructions_file = "AGENTS.md"
+            mock_svc.get_adapter.return_value = adapter
+            mock_svc.list_adapters.return_value = [adapter]
+            mock_svc.detect_installed_clis.return_value = ["codex"]
+            mock_svc.is_installed.return_value = True
+            deploy_result = MagicMock()
+            deploy_result.merged_count = 1
+            deploy_result.skipped_count = 0
+            deploy_result.errors = []
+            MockDeployer.return_value.deploy.return_value = deploy_result
+
+            # Only the server confirm prompt — a target-path prompt would fail here
+            result = runner.invoke(
+                cli,
+                ["-p", str(temp_project), "init", "--cli", "codex"],
+                input="\ny\n",  # language default, confirm MCP server
+            )
+            assert result.exit_code == 0, result.output
+
+            deploy = MockDeployer.return_value.deploy
+            assert deploy.called
+            kwargs = deploy.call_args.kwargs
+            # init discovers servers from package resources (chrome-devtools)
+            assert "chrome-devtools" in kwargs.get("servers_to_merge", [])
+            assert "chrome-devtools" in kwargs.get("source_servers", {})
+
+
+class TestCodexUpgrade:
+    """FEATURE-027-F: steady-state upgrade routes codex MCP through the deployer."""
+
+    def test_upgrade_mcp_codex_uses_deployer_never_scaffold_merge(self, runner, temp_project):
+        """Regression guard (closing review): upgrade with codex active must
+        register MCP servers via MCPDeployerService.deploy ('codex mcp add') —
+        never merge JSON into ~/.codex/config.toml via
+        ScaffoldManager.merge_mcp_config, which would clobber the TOML."""
+        from src.x_ipe.cli.main import cli, ScaffoldManager
+
+        # codex-active project
+        (temp_project / ".x-ipe.yaml").write_text("cli: codex\n")
+
+        # Patch the module the CLI object was imported from (src.x_ipe.cli.main)
+        with patch("src.x_ipe.cli.main.CLIAdapterService") as MockService, \
+             patch("src.x_ipe.cli.main.MCPDeployerService") as MockDeployer, \
+             patch.object(ScaffoldManager, "merge_mcp_config") as scaffold_merge:
+            adapter = MagicMock()
+            adapter.name = "codex"
+            adapter.mcp_config_format = "codex-toml"
+            adapter.mcp_config_path = "~/.codex/config.toml"
+            adapter.detection_command = "codex"
+            MockService.return_value.get_adapter.return_value = adapter
+
+            MockDeployer.return_value.get_source_servers.return_value = {
+                "chrome-devtools": {"command": "npx", "args": ["chrome-devtools-mcp@latest"]}
+            }
+            deploy_result = MagicMock()
+            deploy_result.merged_count = 1
+            deploy_result.skipped_count = 0
+            deploy_result.errors = []
+            MockDeployer.return_value.deploy.return_value = deploy_result
+
+            # --force auto-accepts the server confirm and skips prompts
+            result = runner.invoke(
+                cli,
+                ["-p", str(temp_project), "upgrade", "--force"],
+            )
+            assert result.exit_code == 0, result.output
+
+            deploy = MockDeployer.return_value.deploy
+            assert deploy.called
+            kwargs = deploy.call_args.kwargs
+            assert kwargs.get("servers_to_merge") == ["chrome-devtools"]
+            assert "chrome-devtools" in kwargs.get("source_servers", {})
+            # the hazard this test guards: the scaffold JSON merge must never
+            # run for a codex-toml target
+            scaffold_merge.assert_not_called()
+            assert "codex mcp add" in result.output

@@ -7,7 +7,7 @@ to each CLI's native format and location.
 import json
 import pytest
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from x_ipe.services.mcp_deployer_service import MCPDeployerService, MCPDeployResult
 from x_ipe.services.cli_adapter_service import CLIAdapterData
@@ -268,3 +268,161 @@ class TestMCPDeployResult:
         assert len(result.created) == 1
         assert result.merged_count == 2
         assert result.skipped_count == 0
+
+
+# ============================================================================
+# FEATURE-027-F: CODEX TOML DEPLOYMENT TESTS
+# ============================================================================
+
+@pytest.fixture
+def codex_adapter():
+    return CLIAdapterData(
+        name="codex",
+        display_name="Codex CLI",
+        command="codex",
+        run_args="exec --dangerously-bypass-approvals-and-sandbox",
+        inline_prompt_flag="",
+        prompt_format='{command} {run_args} "{escaped_prompt}"',
+        instructions_file="AGENTS.md",
+        skills_folder=".codex/skills/",
+        mcp_config_path="~/.codex/config.toml",
+        mcp_config_format="codex-toml",
+        detection_command="codex",
+    )
+
+
+def _fake_codex_run(calls, get_rc=1, add_rc=0, add_exc=None):
+    """Build a subprocess.run mock that records calls and scripts results."""
+    def fake_run(cmd, **kwargs):
+        calls.append(cmd)
+        if "get" in cmd:
+            return MagicMock(returncode=get_rc, stderr=b"", stdout=b"")
+        if "add" in cmd:
+            if add_exc is not None:
+                raise add_exc
+            return MagicMock(returncode=add_rc, stderr=b"" if add_rc == 0 else b"boom")
+        return MagicMock(returncode=0, stderr=b"", stdout=b"")
+    return fake_run
+
+
+class TestCodexTomlDeploy:
+    """FEATURE-027-F: codex-toml format deploys via `codex mcp add`."""
+
+    def test_resolve_target_path_expands_home(self, tmp_path, codex_adapter):
+        service = MCPDeployerService(tmp_path)
+        assert service.resolve_target_path(codex_adapter) == Path("~/.codex/config.toml").expanduser()
+
+    def test_deploy_adds_new_server(self, project_root, codex_adapter):
+        """AC-3.1: server registered via `codex mcp add <name> -- <command> <args>`."""
+        service = MCPDeployerService(project_root)
+        calls = []
+        with patch("shutil.which", return_value="/usr/local/bin/codex"), \
+             patch("x_ipe.services.mcp_deployer_service.subprocess.run",
+                   side_effect=_fake_codex_run(calls, get_rc=1, add_rc=0)):
+            result = service.deploy(codex_adapter, servers_to_merge=["chrome-devtools"])
+
+        assert result.merged_count == 1
+        add_calls = [c for c in calls if "add" in c]
+        assert len(add_calls) == 1
+        assert add_calls[0][:4] == ["codex", "mcp", "add", "chrome-devtools"]
+        assert add_calls[0][-3:] == ["--", "npx", "@anthropic/chrome-devtools-mcp"]
+
+    def test_deploy_passes_env_flags(self, project_root, codex_adapter):
+        """AC-3.1: env entries become --env KEY=VALUE flags."""
+        service = MCPDeployerService(project_root)
+        calls = []
+        servers = {"fake": {"command": "npx", "args": ["srv"], "env": {"API_KEY": "secret"}}}
+        with patch("shutil.which", return_value="/usr/local/bin/codex"), \
+             patch("x_ipe.services.mcp_deployer_service.subprocess.run",
+                   side_effect=_fake_codex_run(calls, get_rc=1, add_rc=0)):
+            result = service.deploy(codex_adapter, source_servers=servers)
+
+        assert result.merged_count == 1
+        add_call = next(c for c in calls if "add" in c)
+        assert "--env" in add_call
+        assert "API_KEY=secret" in add_call
+
+    def test_deploy_skips_existing_server(self, project_root, codex_adapter):
+        """AC-3.2: existing server (mcp get rc 0) is skipped without force."""
+        service = MCPDeployerService(project_root)
+        calls = []
+        with patch("shutil.which", return_value="/usr/local/bin/codex"), \
+             patch("x_ipe.services.mcp_deployer_service.subprocess.run",
+                   side_effect=_fake_codex_run(calls, get_rc=0)):
+            result = service.deploy(codex_adapter, servers_to_merge=["chrome-devtools"])
+
+        assert result.merged_count == 0
+        assert result.skipped_count == 1
+        assert not any("add" in c for c in calls)
+
+    def test_deploy_force_removes_then_readds(self, project_root, codex_adapter):
+        """AC-3.2: force removes the existing entry before re-adding."""
+        service = MCPDeployerService(project_root)
+        calls = []
+        with patch("shutil.which", return_value="/usr/local/bin/codex"), \
+             patch("x_ipe.services.mcp_deployer_service.subprocess.run",
+                   side_effect=_fake_codex_run(calls, get_rc=0, add_rc=0)):
+            result = service.deploy(codex_adapter, servers_to_merge=["chrome-devtools"], force=True)
+
+        assert result.merged_count == 1
+        assert any("remove" in c for c in calls)
+        assert any("add" in c for c in calls)
+
+    def test_deploy_not_installed_skips(self, project_root, codex_adapter):
+        """AC-3.3: missing codex binary skips deployment without crashing."""
+        service = MCPDeployerService(project_root)
+        with patch("shutil.which", return_value=None), \
+             patch("x_ipe.services.mcp_deployer_service.subprocess.run",
+                   side_effect=AssertionError("must not invoke codex")):
+            result = service.deploy(codex_adapter, servers_to_merge=["chrome-devtools"])
+
+        assert result.merged_count == 0
+        assert result.skipped == [Path("~/.codex/config.toml").expanduser()]
+
+    def test_deploy_dry_run_does_not_invoke_codex(self, project_root, codex_adapter):
+        """AC-3.5: dry-run reports intended registration without subprocess calls."""
+        service = MCPDeployerService(project_root)
+        with patch("shutil.which", return_value="/usr/local/bin/codex"), \
+             patch("x_ipe.services.mcp_deployer_service.subprocess.run",
+                   side_effect=AssertionError("dry-run must not invoke codex")):
+            result = service.deploy(codex_adapter, servers_to_merge=["chrome-devtools"], dry_run=True)
+
+        assert result.merged_count == 1
+        assert result.created == [Path("~/.codex/config.toml").expanduser()]
+
+    def test_deploy_failed_add_continues_remaining(self, project_root, codex_adapter):
+        """EC-2: a failing server records an error; remaining servers still deploy."""
+        service = MCPDeployerService(project_root)
+        calls = []
+
+        def fake_run(cmd, **kwargs):
+            calls.append(cmd)
+            if "get" in cmd:
+                return MagicMock(returncode=1, stderr=b"", stdout=b"")
+            if "add" in cmd:
+                rc = 1 if "chrome-devtools" in cmd else 0
+                return MagicMock(returncode=rc, stderr=b"boom" if rc else b"")
+            return MagicMock(returncode=0, stderr=b"", stdout=b"")
+
+        with patch("shutil.which", return_value="/usr/local/bin/codex"), \
+             patch("x_ipe.services.mcp_deployer_service.subprocess.run", side_effect=fake_run):
+            result = service.deploy(codex_adapter)
+
+        assert result.merged_count == 1
+        assert len(result.errors) == 1
+        assert "chrome-devtools" in result.errors[0]
+
+    def test_deploy_timeout_recorded(self, project_root, codex_adapter):
+        """EC-2: subprocess timeout is recorded as an error, not raised."""
+        import subprocess as sp
+        service = MCPDeployerService(project_root)
+        calls = []
+        with patch("shutil.which", return_value="/usr/local/bin/codex"), \
+             patch("x_ipe.services.mcp_deployer_service.subprocess.run",
+                   side_effect=_fake_codex_run(calls, get_rc=1,
+                                               add_exc=sp.TimeoutExpired(["codex"], 30))):
+            result = service.deploy(codex_adapter, servers_to_merge=["chrome-devtools"])
+
+        assert result.merged_count == 0
+        assert len(result.errors) == 1
+        assert "timed out" in result.errors[0]

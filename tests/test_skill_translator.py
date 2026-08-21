@@ -409,6 +409,58 @@ class TestClaudeCodeTranslation:
 
 
 # ============================================================================
+# TEST CLASS: Codex Translation (FEATURE-027-F)
+# ============================================================================
+
+class TestCodexTranslation:
+    """Tests for Codex adapter skill translation (verbatim, like claude-code)."""
+
+    def test_translates_all_skills(self, tmp_project):
+        """Codex translation copies all skills to .codex/skills/."""
+        from x_ipe.services.skill_translator import SkillTranslator
+        translator = SkillTranslator()
+        adapter = make_adapter(name='codex', skills_folder='.codex/skills/')
+        source = tmp_project / ".github" / "skills"
+        target = tmp_project / ".codex" / "skills"
+        result = translator.translate_skills(source, target, adapter)
+        assert result.translated == 3
+        assert result.errors == []
+
+    def test_copies_verbatim(self, tmp_project):
+        """Codex translation preserves frontmatter and body exactly."""
+        from x_ipe.services.skill_translator import SkillTranslator
+        translator = SkillTranslator()
+        adapter = make_adapter(name='codex', skills_folder='.codex/skills/')
+        source = tmp_project / ".github" / "skills"
+        target = tmp_project / ".codex" / "skills"
+        translator.translate_skills(source, target, adapter)
+        original = (source / "my-skill" / "SKILL.md").read_text()
+        copied = (target / "my-skill" / "SKILL.md").read_text()
+        assert copied == original
+
+    def test_copies_subdirectories(self, tmp_project):
+        """Codex translation copies subdirectories alongside SKILL.md."""
+        from x_ipe.services.skill_translator import SkillTranslator
+        translator = SkillTranslator()
+        adapter = make_adapter(name='codex', skills_folder='.codex/skills/')
+        source = tmp_project / ".github" / "skills"
+        target = tmp_project / ".codex" / "skills"
+        translator.translate_skills(source, target, adapter)
+        assert (target / "complex-skill" / "templates" / "template.md").exists()
+        assert (target / "complex-skill" / "references" / "example.md").exists()
+
+    def test_generates_agents_md(self, tmp_project):
+        """Codex generate_instructions() creates AGENTS.md at project root."""
+        from x_ipe.services.skill_translator import SkillTranslator
+        translator = SkillTranslator()
+        adapter = make_adapter(name='codex', instructions_file='AGENTS.md')
+        tpl = tmp_project / "resources" / "templates" / "instructions-template.md"
+        result = translator.generate_instructions(adapter, tmp_project, template_path=tpl)
+        assert result is not None
+        assert (tmp_project / "AGENTS.md").exists()
+
+
+# ============================================================================
 # TEST CLASS: Translation Behavior
 # ============================================================================
 

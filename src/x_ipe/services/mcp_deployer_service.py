@@ -5,12 +5,20 @@ reading target paths from the CLI adapter registry.
 """
 
 import json
+import logging
+import shutil
+import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import List, Optional
 
 from x_ipe.services.cli_adapter_service import CLIAdapterData
 from x_ipe.tracing import x_ipe_tracing
+
+logger = logging.getLogger(__name__)
+
+CODEX_TOML_FORMAT = "codex-toml"
+SUBPROCESS_TIMEOUT = 30
 
 
 @dataclass
@@ -20,6 +28,7 @@ class MCPDeployResult:
     skipped: List[Path] = field(default_factory=list)
     merged_count: int = 0
     skipped_count: int = 0
+    errors: List[str] = field(default_factory=list)
 
 
 class MCPDeployerService:
@@ -52,7 +61,7 @@ class MCPDeployerService:
     def resolve_target_path(self, adapter: CLIAdapterData) -> Path:
         """Resolve the target MCP config path based on adapter format."""
         raw = adapter.mcp_config_path
-        if adapter.mcp_config_format == "global":
+        if adapter.mcp_config_format in ("global", CODEX_TOML_FORMAT):
             return Path(raw).expanduser()
         return self.project_root / raw
 
@@ -63,15 +72,27 @@ class MCPDeployerService:
         servers_to_merge: Optional[List[str]] = None,
         force: bool = False,
         dry_run: bool = False,
+        source_servers: Optional[dict] = None,
     ) -> MCPDeployResult:
         """Merge MCP servers into the target CLI's config file.
 
-        Handles three MCP config formats:
+        Handles four MCP config formats:
         - "global": Standalone file with {"mcpServers": {...}} (copilot)
         - "project": Standalone file with {"mcpServers": {...}} (claude-code)
         - "nested": mcpServers key inside a larger config file (opencode)
+        - "codex-toml": Global ~/.codex/config.toml, managed via `codex mcp add` (codex)
+
+        Args:
+            adapter: Target CLI adapter.
+            servers_to_merge: Server names to deploy. If None, deploys all.
+            force: Overwrite existing entries.
+            dry_run: Report without writing.
+            source_servers: Explicit server configs. If None, reads the
+                project's .github/copilot/mcp-config.json (init passes the
+                package-resource servers because the project file may not
+                exist yet).
         """
-        source_servers = self.get_source_servers()
+        source_servers = source_servers if source_servers is not None else self.get_source_servers()
         if not source_servers:
             return MCPDeployResult()
 
@@ -89,6 +110,9 @@ class MCPDeployerService:
                 created=[target_path],
                 merged_count=len(source_servers),
             )
+
+        if adapter.mcp_config_format == CODEX_TOML_FORMAT:
+            return self._deploy_codex_cli(adapter, source_servers, force)
 
         # Load existing target config
         use_nested = (adapter.mcp_config_format == 'nested')
@@ -156,3 +180,81 @@ class MCPDeployerService:
             result.skipped.append(target_path)
 
         return result
+
+    @x_ipe_tracing()
+    def _deploy_codex_cli(
+        self,
+        adapter: CLIAdapterData,
+        servers: dict,
+        force: bool = False,
+    ) -> MCPDeployResult:
+        """Register MCP servers via the codex CLI (FEATURE-027-F).
+
+        Codex keeps MCP servers in the global ~/.codex/config.toml shared with
+        user settings, so we delegate to `codex mcp add` and let codex mutate
+        its own config rather than rewriting the TOML file ourselves.
+
+        Args:
+            adapter: The codex CLI adapter.
+            servers: Server configs (standard mcpServers entries).
+            force: Re-register servers that already exist.
+
+        Returns:
+            MCPDeployResult with per-server merged/skipped counts.
+        """
+        result = MCPDeployResult()
+
+        if shutil.which(adapter.detection_command) is None:
+            logger.warning(
+                "Codex CLI not installed — skipped MCP deployment to %s",
+                adapter.mcp_config_path,
+            )
+            result.skipped.append(self.resolve_target_path(adapter))
+            return result
+
+        target_path = self.resolve_target_path(adapter)
+
+        for name, cfg in servers.items():
+            returncode, _ = self._run_codex(
+                adapter, ["mcp", "get", name]
+            )
+            if returncode == 0 and not force:
+                result.skipped_count += 1
+                continue
+
+            if returncode == 0:
+                self._run_codex(adapter, ["mcp", "remove", name])
+
+            args = ["mcp", "add", name]
+            for key, value in (cfg.get("env") or {}).items():
+                args += ["--env", f"{key}={value}"]
+            args += ["--", cfg.get("command", "")] + list(cfg.get("args", []))
+
+            add_code, stderr = self._run_codex(adapter, args)
+            if add_code == 0:
+                result.merged_count += 1
+                if target_path not in result.created:
+                    result.created.append(target_path)
+            else:
+                detail = stderr or f"exit code {add_code}"
+                logger.warning("codex mcp add '%s' failed: %s", name, detail)
+                result.errors.append(f"{name}: {detail}")
+
+        return result
+
+    @staticmethod
+    def _run_codex(adapter: CLIAdapterData, args: List[str]) -> tuple[int, str]:
+        """Run a codex CLI command, returning (returncode, stderr)."""
+        try:
+            proc = subprocess.run(
+                [adapter.command] + args,
+                capture_output=True,
+                timeout=SUBPROCESS_TIMEOUT,
+                check=False,
+            )
+            stderr = proc.stderr.decode(errors="replace").strip()
+            return proc.returncode, stderr
+        except subprocess.TimeoutExpired:
+            return 124, f"timed out after {SUBPROCESS_TIMEOUT}s"
+        except OSError as exc:
+            return 1, str(exc)

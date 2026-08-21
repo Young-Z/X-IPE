@@ -1,0 +1,54 @@
+{
+  "_version": "1.0",
+  "tasks": [
+    {
+      "task_id": "TASK-1158",
+      "task_type": "Code Implementation",
+      "description": "[Nova] Implement FEATURE-027-F: Codex CLI Adapter. Add codex (OpenAI Codex CLI) as 4th CLI adapter: YAML registry entry (x-ipe-docs/config + src resources, both must stay in sync due to wheel force-include), AUTO_DETECT_PRIORITY, verbatim skill translation to .codex/skills/, AGENTS.md instructions, MCP deployment via codex mcp add subprocess in init/upgrade flows, update tests (test_cli_adapter count 3->4, new codex cases) and README multi-CLI docs.",
+      "role": "implementer",
+      "status": "completed",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-027/FEATURE-027-F/specification.md",
+        "x-ipe-docs/requirements/EPIC-027/FEATURE-027-F/technical-design.md",
+        "x-ipe-docs/config/cli-adapters.yaml",
+        "src/x_ipe/resources/config/cli-adapters.yaml",
+        "src/x_ipe/services/cli_adapter_service.py",
+        "src/x_ipe/services/skill_translator.py",
+        "src/x_ipe/services/mcp_deployer_service.py",
+        "src/x_ipe/cli/main.py",
+        "tests/test_cli_adapter.py",
+        "tests/test_mcp_deployer.py",
+        "tests/test_skill_translator.py",
+        "tests/test_cli_init_selection.py",
+        "README.md"
+      ],
+      "next_task": "",
+      "created_at": "2026-08-21T01:26:38.508162+00:00",
+      "last_updated": "2026-08-21T01:41:48.975347+00:00"
+    },
+    {
+      "task_id": "TASK-1159",
+      "task_type": "Feature Acceptance Test",
+      "description": "[Nova] Acceptance testing for FEATURE-027-F Codex CLI Adapter. Classify ACs by test type, generate acceptance-test-cases.md, execute via enabled tools, report results.",
+      "role": "tester",
+      "status": "completed",
+      "output_links": [
+        "x-ipe-docs/requirements/EPIC-027/FEATURE-027-F/acceptance-test-cases.md"
+      ],
+      "next_task": "",
+      "created_at": "2026-08-21T02:05:11.583011+00:00",
+      "last_updated": "2026-08-21T02:08:36.172007+00:00"
+    },
+    {
+      "task_id": "TASK-1160",
+      "task_type": "Feature Closing",
+      "description": "[Nova] Close FEATURE-027-F Codex CLI Adapter: verify ACs, code-to-docs review, refactoring analysis, commit and push to main (main-branch-only), then PyPI release per user request",
+      "role": "Feature Closer",
+      "status": "in_progress",
+      "output_links": [],
+      "next_task": "N/A",
+      "created_at": "2026-08-21T02:26:58.099405+00:00",
+      "last_updated": "2026-08-21T02:26:58.099405+00:00"
+    }
+  ]
+}

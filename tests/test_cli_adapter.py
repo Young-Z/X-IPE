@@ -56,6 +56,18 @@ SAMPLE_ADAPTERS_YAML = """adapters:
     mcp_config_path: ".mcp.json"
     mcp_config_format: "project"
     detection_command: "claude"
+
+  codex:
+    display_name: "Codex CLI"
+    command: "codex"
+    run_args: "exec --dangerously-bypass-approvals-and-sandbox"
+    inline_prompt_flag: ""
+    prompt_format: '{command} {run_args} "{escaped_prompt}"'
+    instructions_file: "AGENTS.md"
+    skills_folder: ".codex/skills/"
+    mcp_config_path: "~/.codex/config.toml"
+    mcp_config_format: "codex-toml"
+    detection_command: "codex"
 """
 
 
@@ -156,12 +168,13 @@ class TestAdapterConfiguration:
                 assert field in adapter_dict, f"Missing field '{field}' in adapter '{adapter.name}'"
 
     def test_ac_1_3_registry_includes_three_adapters(self, cli_adapter_service):
-        """AC-1.3: Registry includes copilot, opencode, claude-code."""
+        """AC-1.3: Registry includes copilot, opencode, claude-code, codex."""
         adapters = cli_adapter_service.list_adapters()
         names = [a.name for a in adapters]
         assert 'copilot' in names
         assert 'opencode' in names
         assert 'claude-code' in names
+        assert 'codex' in names
 
     def test_malformed_yaml_raises_error(self):
         """Edge case: malformed YAML raises error at init."""
@@ -201,11 +214,11 @@ class TestServiceLayer:
                 assert adapter.command is not None
 
     def test_ac_2_2_list_adapters_returns_all(self, cli_adapter_service):
-        """AC-2.2: list_adapters() returns all 3 registered adapters."""
+        """AC-2.2: list_adapters() returns all 4 registered adapters."""
         adapters = cli_adapter_service.list_adapters()
-        assert len(adapters) == 3
+        assert len(adapters) == 4
         names = [a.name for a in adapters]
-        assert set(names) == {'copilot', 'opencode', 'claude-code'}
+        assert set(names) == {'copilot', 'opencode', 'claude-code', 'codex'}
 
     def test_ac_2_3_detect_installed_clis(self, cli_adapter_service):
         """AC-2.3: detect_installed_clis() returns list of detected CLIs."""
@@ -492,3 +505,64 @@ class TestIntegration:
     def test_is_installed_unknown_adapter(self, cli_adapter_service):
         """is_installed() returns False for unknown adapter name."""
         assert cli_adapter_service.is_installed('nonexistent') is False
+
+
+# ============================================================================
+# FEATURE-027-F: CODEX ADAPTER TESTS
+# ============================================================================
+
+class TestCodexAdapter:
+    """FEATURE-027-F: codex adapter registration and resolution."""
+
+    @staticmethod
+    def _bundled_service():
+        """Service loaded from the bundled registry (src/x_ipe/resources/config)."""
+        import x_ipe.services.cli_adapter_service as mod
+        from x_ipe.services.cli_adapter_service import CLIAdapterService
+        bundled = Path(mod.__file__).parent.parent / 'resources' / 'config' / 'cli-adapters.yaml'
+        return CLIAdapterService(config_file_path=str(bundled))
+
+    def test_bundled_registry_includes_codex(self):
+        """AC-1.1/1.2: bundled cli-adapters.yaml defines codex with all fields."""
+        adapter = self._bundled_service().get_adapter('codex')
+        assert adapter.display_name == "Codex CLI"
+        assert adapter.command == "codex"
+        assert adapter.run_args == "exec --dangerously-bypass-approvals-and-sandbox"
+        assert adapter.inline_prompt_flag == ""
+        assert adapter.prompt_format == '{command} {run_args} "{escaped_prompt}"'
+        assert adapter.instructions_file == "AGENTS.md"
+        assert adapter.skills_folder == ".codex/skills/"
+        assert adapter.mcp_config_path == "~/.codex/config.toml"
+        assert adapter.mcp_config_format == "codex-toml"
+        assert adapter.detection_command == "codex"
+
+    def test_bundled_and_project_configs_in_sync(self):
+        """Packaging guard: x-ipe-docs/config copy must match bundled copy.
+
+        The wheel force-includes x-ipe-docs/config as x_ipe/resources/config,
+        so the two files drifting apart changes published behavior silently.
+        """
+        import x_ipe.services.cli_adapter_service as mod
+        bundled = Path(mod.__file__).parent.parent / 'resources' / 'config' / 'cli-adapters.yaml'
+        project = Path(__file__).parent.parent / 'x-ipe-docs' / 'config' / 'cli-adapters.yaml'
+        if not project.exists():
+            pytest.skip("x-ipe-docs/config not available (installed-package run)")
+        assert bundled.read_text() == project.read_text()
+
+    def test_auto_detect_picks_codex_when_only_codex_installed(
+        self, cli_adapter_service, temp_project_no_cli_key
+    ):
+        """AC-1.3: codex is in AUTO_DETECT_PRIORITY — detected when only codex exists."""
+        config_path = temp_project_no_cli_key['config_file']
+        with patch.object(cli_adapter_service, '_find_config_yaml', return_value=config_path):
+            with patch('shutil.which', side_effect=lambda cmd: '/usr/local/bin/codex' if cmd == 'codex' else None):
+                adapter = cli_adapter_service.get_active_adapter()
+                assert adapter.name == 'codex'
+
+    def test_build_command_codex_exec(self, cli_adapter_service, temp_project_with_config):
+        """AC-1.4: build_command produces the codex exec non-interactive form."""
+        config_path = temp_project_with_config['config_file']
+        with patch.object(cli_adapter_service, '_find_config_yaml', return_value=config_path):
+            cli_adapter_service.switch_cli('codex')
+            cmd = cli_adapter_service.build_command('test prompt')
+            assert cmd == 'codex exec --dangerously-bypass-approvals-and-sandbox "test prompt"'

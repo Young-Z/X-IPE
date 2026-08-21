@@ -140,6 +140,7 @@
   - [GitHub Copilot CLI](https://docs.github.com/en/copilot) (`copilot`)
   - [OpenCode](https://opencode.ai) (`opencode`)
   - [Claude Code](https://docs.anthropic.com/en/docs/claude-code) (`claude`)
+  - [Codex CLI](https://developers.openai.com/codex/cli) (`codex`)
 - AI model with skills/tools capability (Claude Sonnet 4.5+, Gemini 2.5 Flash+, etc.)
 
 ### Installation
@@ -206,7 +207,7 @@ X-IPE supports multiple AI coding CLIs. During `init` and `upgrade`, you'll be p
 # Initialize — auto-detects installed CLIs, prompts for selection
 x-ipe init
 # > Detected CLI(s): copilot, opencode
-# > Select CLI (copilot, opencode, claude-code) [copilot]:
+# > Select CLI (copilot, opencode, claude-code, codex) [copilot]:
 
 # Switch CLI — backs up old artifacts, deploys for new CLI
 x-ipe upgrade --cli opencode
@@ -217,9 +218,9 @@ x-ipe upgrade --cli opencode
 ```
 
 Each CLI gets its own:
-- **Skills folder** — `.github/skills/` (Copilot), `.opencode/skills/` (OpenCode), `.claude/skills/` (Claude Code)
-- **Instructions file** — `copilot-instructions.md`, `.opencode/instructions.md`, `CLAUDE.md`
-- **MCP config** — `~/.copilot/mcp-config.json` (global), `opencode.json` (project), `.mcp.json` (project)
+- **Skills folder** — `.github/skills/` (Copilot), `.opencode/skills/` (OpenCode), `.claude/skills/` (Claude Code), `.codex/skills/` (Codex)
+- **Instructions file** — `.github/copilot-instructions.md` (Copilot), `Agents.md` (OpenCode), `.claude/CLAUDE.md` (Claude Code), `AGENTS.md` (Codex)
+- **MCP config** — `.copilot/mcp-config.json` (project), `opencode.json` (project), `.mcp.json` (project), `~/.codex/config.toml` (Codex, global — registered via `codex mcp add`)
 
 ### Running from Source
 

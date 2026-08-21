@@ -34,3 +34,15 @@ adapters:
     mcp_config_path: ".mcp.json"
     mcp_config_format: "project"
     detection_command: "claude"
+
+  codex:
+    display_name: "Codex CLI"
+    command: "codex"
+    run_args: "exec --dangerously-bypass-approvals-and-sandbox"
+    inline_prompt_flag: ""
+    prompt_format: '{command} {run_args} "{escaped_prompt}"'
+    instructions_file: "AGENTS.md"
+    skills_folder: ".codex/skills/"
+    mcp_config_path: "~/.codex/config.toml"
+    mcp_config_format: "codex-toml"
+    detection_command: "codex"

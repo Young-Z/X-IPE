@@ -14,7 +14,7 @@ from x_ipe.tracing import x_ipe_tracing
 
 
 ADAPTERS_CONFIG_FILE = 'cli-adapters.yaml'
-AUTO_DETECT_PRIORITY = ['copilot', 'opencode', 'claude-code']
+AUTO_DETECT_PRIORITY = ['copilot', 'opencode', 'claude-code', 'codex']
 DEFAULT_CLI = 'copilot'
 
 
