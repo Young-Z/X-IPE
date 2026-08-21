@@ -566,3 +566,60 @@ class TestCodexAdapter:
             cli_adapter_service.switch_cli('codex')
             cmd = cli_adapter_service.build_command('test prompt')
             assert cmd == 'codex exec --dangerously-bypass-approvals-and-sandbox "test prompt"'
+
+
+# ============================================================================
+# TASK-1161: PROJECT YAML OVERLAYS BUNDLED REGISTRY
+# ============================================================================
+
+class TestProjectOverlayMerge:
+    """TASK-1161: bundled registry is the base; project yaml overlays per-adapter.
+
+    Projects initialized by older x-ipe versions carry a scaffolded
+    x-ipe-docs/config/cli-adapters.yaml frozen at init-time (e.g. without
+    codex). The loader must not let that stale copy hide newly shipped
+    adapters.
+    """
+
+    STALE_PROJECT_YAML = """adapters:
+  copilot:
+    display_name: "Custom Copilot"
+    command: "copilot"
+    run_args: "--allow-all-tools --allow-all-paths"
+    inline_prompt_flag: "-i"
+    prompt_format: '{command} {run_args} {inline_prompt_flag} "{escaped_prompt}"'
+    instructions_file: ".github/copilot-instructions.md"
+    skills_folder: ".github/skills/"
+    mcp_config_path: "~/.copilot/mcp-config.json"
+    mcp_config_format: "global"
+    detection_command: "copilot"
+"""
+
+    def _make_stale_project(self, tmp_path):
+        """Project whose scaffolded adapters yaml is frozen pre-codex."""
+        config_dir = tmp_path / "x-ipe-docs" / "config"
+        config_dir.mkdir(parents=True)
+        (config_dir / "cli-adapters.yaml").write_text(self.STALE_PROJECT_YAML)
+        config_path = tmp_path / ".x-ipe.yaml"
+        config_path.write_text("cli: copilot\n")
+        return config_path
+
+    def test_stale_project_yaml_does_not_hide_bundled_adapters(self, tmp_path):
+        """Bundled codex remains available in a project scaffolded pre-1.1.51."""
+        from x_ipe.services.cli_adapter_service import CLIAdapterService
+        config_path = self._make_stale_project(tmp_path)
+        with patch.object(CLIAdapterService, '_find_config_yaml', return_value=config_path):
+            service = CLIAdapterService()
+        names = [a.name for a in service.list_adapters()]
+        assert 'copilot' in names
+        assert 'codex' in names  # bundled, missing from the stale project copy
+        assert service.get_adapter('codex').mcp_config_format == 'codex-toml'
+
+    def test_project_entry_overrides_matching_bundled_adapter(self, tmp_path):
+        """Project customization still wins for adapters it defines."""
+        from x_ipe.services.cli_adapter_service import CLIAdapterService
+        config_path = self._make_stale_project(tmp_path)
+        with patch.object(CLIAdapterService, '_find_config_yaml', return_value=config_path):
+            service = CLIAdapterService()
+        assert service.get_adapter('copilot').display_name == "Custom Copilot"
+        assert 'codex' in [a.name for a in service.list_adapters()]

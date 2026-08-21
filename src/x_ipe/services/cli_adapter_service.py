@@ -60,23 +60,29 @@ class CLIAdapterService:
 
     @x_ipe_tracing()
     def _load_registry(self):
-        """Load adapters from cli-adapters.yaml. Project config overrides bundled default."""
+        """Load adapters from cli-adapters.yaml.
+
+        TASK-1161: the bundled registry is the base; a project-level copy
+        (x-ipe-docs/config/, scaffolded at init) overlays it per-adapter so
+        projects initialized by older versions still receive newly shipped
+        adapters. An explicit config_file_path remains a full replacement.
+        """
         if self._config_file_path:
-            yaml_path = Path(self._config_file_path)
+            sources = [Path(self._config_file_path)]
         else:
-            # Project-level config first (x-ipe-docs/config/), then bundled fallback
-            project_path = self._find_project_adapters_config()
             bundled_path = Path(__file__).parent.parent / 'resources' / 'config' / ADAPTERS_CONFIG_FILE
-            yaml_path = project_path if project_path else bundled_path
+            project_path = self._find_project_adapters_config()
+            sources = [bundled_path, project_path] if project_path else [bundled_path]
 
-        if not yaml_path.exists():
-            raise FileNotFoundError(f"CLI adapters config not found: {yaml_path}")
+        for yaml_path in sources:
+            if not yaml_path.exists():
+                raise FileNotFoundError(f"CLI adapters config not found: {yaml_path}")
 
-        with open(yaml_path, 'r', encoding='utf-8') as f:
-            raw = yaml.safe_load(f)
+            with open(yaml_path, 'r', encoding='utf-8') as f:
+                raw = yaml.safe_load(f)
 
-        for name, config in raw.get('adapters', {}).items():
-            self._registry[name] = CLIAdapterData(name=name, **config)
+            for name, config in raw.get('adapters', {}).items():
+                self._registry[name] = CLIAdapterData(name=name, **config)
 
     @x_ipe_tracing()
     def get_active_adapter(self) -> CLIAdapterData:

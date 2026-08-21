@@ -29,6 +29,7 @@ Codex is config-driven wherever the adapter registry already supports it. Two me
 |------|--------|
 | 2026-08-21 | Added optional `source_servers` param to `MCPDeployerService.deploy()` — `init` reads MCP servers from package resources (project config file doesn't exist yet on first init for non-copilot CLIs), so the codex init path passes them explicitly |
 | 2026-08-21 | Feature-closing review found `upgrade`'s trailing MCP block lacked the codex-toml branch: with codex active it would prompt for a target path and call `ScaffoldManager.merge_mcp_config(mcp_format='codex-toml')`, which JSON-parses and overwrites `~/.codex/config.toml`. Fixed by routing `upgrade` through `MCPDeployerService.deploy()` for `codex-toml` (same as `init`); regression guard added in `tests/test_cli_init_selection.py::TestCodexUpgrade` |
+| 2026-08-21 | TASK-1161 (post-release bug): `CLIAdapterService._load_registry()` gave the project-scaffolded `x-ipe-docs/config/cli-adapters.yaml` FULL override precedence over the bundled registry. Because `init` scaffolds that copy, projects initialized under ≤1.1.50 keep a frozen 3-adapter registry — `x-ipe 1.1.51 init --cli codex` fails with "Unknown CLI". Loading semantics changed to: bundled registry is the base, project-level entries overlay per-adapter (project still wins for matching names; explicit `config_file_path` remains a full replacement for tests) |
 
 ---
 
