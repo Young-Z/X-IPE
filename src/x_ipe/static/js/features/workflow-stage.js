@@ -424,11 +424,20 @@ const workflowStage = {
             if (!confirmed) return;
 
             // Rollback action status to pending
-            await fetch(`/api/workflow/${encodeURIComponent(wfName)}/action`, {
+            const rollbackResp = await fetch(`/api/workflow/${encodeURIComponent(wfName)}/action`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action: actionKey, status: 'pending' })
             });
+            if (!rollbackResp.ok) {
+                this._showToast('Failed to reopen action: status rollback failed', 'error');
+                return;
+            }
+            const rollbackJson = await rollbackResp.json();
+            if (rollbackJson.success !== true) {
+                this._showToast('Failed to reopen action: status rollback failed', 'error');
+                return;
+            }
 
             // Open in edit mode for modal actions, re-dispatch for CLI
             if (actionDef.interaction === 'modal') {
@@ -525,7 +534,7 @@ const workflowStage = {
 
             const modal = new ComposeIdeaModal({
                 workflowName: wfName,
-                mode: 'edit',
+                mode: filePath ? 'edit' : 'create',
                 filePath: filePath,
                 folderPath: folderPath,
                 folderName: folderName,

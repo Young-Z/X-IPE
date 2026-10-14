@@ -13,6 +13,8 @@ import pytest
 import yaml
 
 from tests.test_skill_creator_foundation import skill
+from tests.publication_recovery_6749 import resource_inventory
+from tests.skill_validation_harness_6749 import load_source, validate_resources
 
 ROOT = Path(__file__).resolve().parents[1]
 SKILLS = ROOT / ".github/skills"
@@ -23,15 +25,11 @@ NOW = "2026-10-14T00:00:00Z"
 
 
 def module(path, name):
-    spec = importlib.util.spec_from_file_location(name, path)
-    result = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(result)
-    return result
+    return load_source(path, name)
 
 
 @pytest.fixture
 def installed(monkeypatch):
-    monkeypatch.setattr(sys, "dont_write_bytecode", True)
     scripts = SKILLS / "x-ipe-meta-skill-creator/scripts"
     validator = module(scripts / "validate_skill.py", "installed_validator_6749")
     monkeypatch.setitem(sys.modules, "validate_skill", validator)
@@ -155,12 +153,14 @@ def test_documented_settlement_failure_preserves_plan_then_release(tmp_path, ins
 
 
 def test_candidate_validator_exact_existing_assistant_identity_only(tmp_path, installed):
+    tmp_path = tmp_path.resolve()
     current = module(CREATOR / "scripts/validate_skill.py", "candidate_validator_6749")
     assert current.validate(ROOT, META / REP / "candidate", REP, "x-ipe-assistant")["ok"]
     # Installed creator was actually promoted; preserve exact-identity controls.
     published = json.loads((META / "x-ipe-meta-skill-creator/publication-receipt-TASK-6749-R2.json").read_text())
-    actual = installed[0].manifest(installed[0].tree_bytes(SKILLS / "x-ipe-meta-skill-creator", ROOT))
-    assert actual == published["files"] | published["preserved_unmanaged"]
+    actual = resource_inventory(SKILLS / "x-ipe-meta-skill-creator")
+    assert actual == published["files"]
+    assert installed[0].fingerprint(published["files"] | published["preserved_unmanaged"]) == published["post_promotion"]["production_physical_hash"]
     assert installed[0].fingerprint(published["files"]) == published["candidate_hash"]
     assert installed[0].validate(ROOT, META / REP / "candidate", REP, "x-ipe-assistant") == current.validate(ROOT, META / REP / "candidate", REP, "x-ipe-assistant")
     for index, (name, kind) in enumerate([(REP, "x-ipe-tool"), (REP + "-copy", "x-ipe-assistant"),
@@ -172,7 +172,7 @@ def test_candidate_validator_exact_existing_assistant_identity_only(tmp_path, in
         (candidate / "SKILL.md").write_bytes(skill(name=name, skill_type=kind))
         assert not current.validate(root, candidate, name, kind)["ok"]
         assert not installed[0].validate(root, candidate, name, kind)["ok"]
-    receipt = current.validate(ROOT, CREATOR, "x-ipe-meta-skill-creator", "x-ipe-meta")
+    receipt = validate_resources(current, ROOT, CREATOR, "x-ipe-meta-skill-creator", "x-ipe-meta")
     assert receipt["ok"], receipt["errors"]
 
 

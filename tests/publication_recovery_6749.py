@@ -1,7 +1,10 @@
 """Read-only recovered publication checks; never synthesize publisher evidence."""
 import hashlib
+import importlib.util
 import json
 from pathlib import Path
+
+from tests.skill_validation_harness_6749 import source_cache
 
 ROOT = Path(__file__).resolve().parents[1]
 META = ROOT / "x-ipe-docs/skill-meta"
@@ -10,6 +13,22 @@ R2 = META / "x-ipe-meta-skill-creator/review-validation-TASK-6749-R2.json"
 
 def fingerprint(files):
     return hashlib.sha256(json.dumps(files, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+
+
+def resource_inventory(folder):
+    """Ignore only this interpreter's cache for an existing Python source.
+
+    Unknown bytecode, arbitrary files inside __pycache__, and source changes
+    remain visible. Publisher safety uses its own complete physical inventory.
+    """
+    folder = Path(folder)
+    nodes = list(folder.rglob("*"))
+    assert not folder.is_symlink(), f"Symlink resource: {folder}"
+    assert not any(p.is_symlink() for p in nodes), "Symlink resource in inventory"
+    sources = [p for p in nodes if p.suffix == ".py" and p.is_file()]
+    caches = {Path(importlib.util.cache_from_source(str(p))) for p in sources}
+    return {str(p.relative_to(folder)): hashlib.sha256(p.read_bytes()).hexdigest()
+            for p in nodes if p.is_file() and not source_cache(p, caches)}
 
 
 def recovered_publication(name, live=None):
@@ -38,11 +57,8 @@ def recovered_publication(name, live=None):
     assert hashlib.sha256(review.read_bytes()).hexdigest() == receipt["review_sha256"]
     assert receipt["candidate_hash"] in review.read_text()
     assert fingerprint(receipt["files"]) == receipt["candidate_hash"] == receipt["production_hash"]
-    def inventory(folder):
-        return {str(p.relative_to(folder)): hashlib.sha256(p.read_bytes()).hexdigest()
-                for p in folder.rglob("*") if p.is_file()}
-    assert inventory(ROOT / ".github/skills" / name) == receipt["files"]
-    assert inventory(directory / "candidate") == receipt["files"]
+    assert resource_inventory(ROOT / ".github/skills" / name) == receipt["files"]
+    assert resource_inventory(directory / "candidate") == receipt["files"]
     if live is not None:
         assert live == receipt["files"]
     history = (directory / "skill-meta.md").read_text().split("## R2 recovered publication history", 1)[1]

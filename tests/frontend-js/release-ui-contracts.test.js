@@ -50,6 +50,14 @@ function response(data, status = 200) {
   return { ok: status < 400, status, json: async () => ({ success: status < 400, data }) };
 }
 
+// Exact POST /api/workflow/<name>/action success envelope; unlike GET,
+// the data describes the persisted action transition, not workflow state.
+function rollbackResponse() {
+  return response({ action_updated: 'compose_idea', new_status: 'pending',
+    current_stage: 'ideation', next_action: { action: 'compose_idea', stage: 'ideation',
+      feature_id: null, reason: 'Next pending mandatory action' } });
+}
+
 describe('completed compose action: gate → confirm → rollback → edit', () => {
   let confirm, dispatch, toast;
   const action = { label: 'Compose Idea', interaction: 'modal' };
@@ -91,7 +99,7 @@ describe('completed compose action: gate → confirm → rollback → edit', () 
     expect(url).toBe('/api/workflow/release/action');
     expect(options.method).toBe('POST');
     expect(JSON.parse(options.body)).toEqual({ action: 'compose_idea', status: 'pending' });
-    resolveRollback(response({}));
+    resolveRollback(rollbackResponse());
     await pending;
     expect(dispatch).toHaveBeenCalledWith('release', 'compose_idea', state);
   });
@@ -105,10 +113,57 @@ describe('completed compose action: gate → confirm → rollback → edit', () 
   });
 
   it('failed HTTP rollback must not open edit mode (AC-015 prerequisite)', async () => {
-    fetch.mockResolvedValueOnce(response({ shared: stages() })).mockResolvedValueOnce(response({}, 500));
+    fetch.mockResolvedValueOnce(response({ shared: stages() })).mockResolvedValueOnce({
+      ok: false, status: 500,
+      json: async () => ({ success: false, error: 'INTERNAL_ERROR', message: 'Internal server error' }),
+    });
     await workflowStage._handleCompletedAction('release', 'compose_idea', action);
     expect(dispatch).not.toHaveBeenCalled();
     expect(toast).toHaveBeenCalledWith(expect.any(String), 'error');
+  });
+
+  it.each([
+    { label: 'API rejection', ok: false, status: 400,
+      body: { success: false, error: 'STAGE_LOCKED', message: 'Stage is locked' } },
+    // Defensive controls distinguish HTTP confirmation from body confirmation.
+    { label: 'HTTP failure despite success body', ok: false, status: 500,
+      body: { success: true } },
+    { label: 'application failure despite HTTP success', ok: true, status: 200,
+      body: { success: false } },
+    { label: 'missing application confirmation', ok: true, status: 200, body: {} },
+  ])('$label prevents modal and CLI redispatch', async ({ ok, status, body }) => {
+    const state = { shared: stages() };
+    const cliDispatch = vi.spyOn(workflowStage, '_dispatchCliAction').mockImplementation(() => {});
+    for (const interaction of ['modal', 'cli']) {
+      fetch.mockResolvedValueOnce(response(state)).mockResolvedValueOnce({
+        ok, status, json: async () => body,
+      });
+      await workflowStage._handleCompletedAction('release', 'compose_idea', { ...action, interaction });
+    }
+    expect(dispatch).not.toHaveBeenCalled();
+    expect(cliDispatch).not.toHaveBeenCalled();
+    expect(toast).toHaveBeenCalledTimes(2);
+    expect(toast).toHaveBeenCalledWith(expect.any(String), 'error');
+    expect(state.shared.ideation.actions.compose_idea.status).toBe('done');
+  });
+
+  it('rollback network rejection does not dispatch after confirmation', async () => {
+    fetch.mockResolvedValueOnce(response({ shared: stages() })).mockRejectedValueOnce(new Error('offline'));
+    await workflowStage._handleCompletedAction('release', 'compose_idea', action);
+    expect(confirm).toHaveBeenCalledOnce();
+    expect(dispatch).not.toHaveBeenCalled();
+    expect(toast).toHaveBeenCalledWith(expect.any(String), 'error');
+  });
+
+  it('successful rollback preserves CLI redispatch', async () => {
+    const cliDispatch = vi.spyOn(workflowStage, '_dispatchCliAction').mockImplementation(() => {});
+    fetch.mockResolvedValueOnce(response({ shared: stages() })).mockResolvedValueOnce(rollbackResponse());
+    await workflowStage._handleCompletedAction('release', 'compose_idea', {
+      ...action, interaction: 'cli', skill: 'example-skill',
+    });
+    expect(cliDispatch).toHaveBeenCalledWith('release', 'compose_idea', 'example-skill');
+    expect(dispatch).not.toHaveBeenCalled();
+    expect(toast).not.toHaveBeenCalled();
   });
 
   it('uses actual next-stage ordering rather than blocking on same-stage actions', () => {
@@ -134,6 +189,7 @@ describe('edit dispatch: keyed, legacy and missing deliverables', () => {
 
   it.each([
     { 'raw-ideas': 'x-ipe-docs/ideas/release/new idea.md', 'ideas-folder': 'x-ipe-docs/ideas/release' },
+    { 'raw-ideas': ['x-ipe-docs/ideas/release/new idea.md'], 'ideas-folder': 'x-ipe-docs/ideas/release' },
     ['x-ipe-docs/ideas/release/new idea.md', 'x-ipe-docs/ideas/release'],
   ])('opens the original file and folder in edit mode: %j', deliverables => {
     const state = { shared: { ideation: { actions: { compose_idea: { deliverables } } } } };
@@ -143,14 +199,17 @@ describe('edit dispatch: keyed, legacy and missing deliverables', () => {
       folderPath: 'x-ipe-docs/ideas/release', folderName: 'release' });
   });
 
-  it('missing deliverables falls back to create mode (FEATURE-037-B AC-027)', () => {
-    workflowStage._dispatchEditModalAction('release', 'compose_idea', {
-      shared: { ideation: { actions: { compose_idea: { status: 'done', deliverables: {} } } } },
+  it.each([undefined, null, {}, [], { 'raw-ideas': [] }].map(deliverables => ({ deliverables })))(
+    'missing deliverables $deliverables falls back to create mode (FEATURE-037-B AC-027)', ({ deliverables }) => {
+      workflowStage._dispatchEditModalAction('release', 'compose_idea', {
+        shared: { ideation: { actions: { compose_idea: { status: 'done', deliverables } } } },
+      });
+      expect(open).toHaveBeenCalledOnce();
+      expect(options.mode).not.toBe('edit');
+      expect(options.mode).toBe('create');
+      expect(options.filePath || '').toBe('');
+      expect(options.workflowName).toBe('release');
     });
-    expect(open).toHaveBeenCalledOnce();
-    expect(options.mode).not.toBe('edit');
-    expect(options.filePath || '').toBe('');
-  });
 });
 
 describe('compose validation and close lifecycle', () => {

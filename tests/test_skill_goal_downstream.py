@@ -19,7 +19,8 @@ import xml.etree.ElementTree as ET
 import pytest
 import yaml
 
-from tests.publication_recovery_6749 import recovered_publication
+from tests.publication_recovery_6749 import recovered_publication, resource_inventory
+from tests.skill_validation_harness_6749 import load_source, validate_resources
 
 from tests.test_goal_oriented_skills import (
     GOAL_COLUMNS, REFINEMENT, render_table_from_scaffold, rows, validator,
@@ -634,7 +635,7 @@ def test_acceptance_negative_authored_claims(defect):
 def test_acceptance_all_resources_config_action_outputs_and_owner():
     entry = (ACCEPT / "SKILL.md").read_text()
     resources = "\n".join(p.read_text() for p in ACCEPT.rglob("*.md"))
-    receipt = validator().validate(ROOT, ACCEPT, ACCEPT_NAME, "x-ipe-task-based")
+    receipt = validate_resources(validator(), ROOT, ACCEPT, ACCEPT_NAME, "x-ipe-task-based")
     assert receipt["ok"], receipt["errors"]
     baseline = json.loads((ACCEPT_META / "baseline-goal-TASK-6749.json").read_text())
     published = ACCEPT_META / "publication-receipt-goal-TASK-6749.json"
@@ -645,7 +646,7 @@ def test_acceptance_all_resources_config_action_outputs_and_owner():
         assert current["files"] == receipt["files"]
         assert current["candidate_hash"] == receipt["candidate_hash"]
         assert current["baseline_hash"] == publication["candidate_hash"]
-        assert validator().tree_bytes(ROOT / ".github/skills" / ACCEPT_NAME, ROOT) == validator().tree_bytes(ACCEPT, ROOT)
+        assert resource_inventory(ROOT / ".github/skills" / ACCEPT_NAME) == resource_inventory(ACCEPT)
     else:
         assert validator().manifest(validator().tree_bytes(ROOT / ".github/skills" / ACCEPT_NAME, ROOT)) == baseline
     assert set(receipt["files"]) == set(baseline) | {"references/integration.md", "scripts/verify_evidence.py"}
@@ -680,11 +681,7 @@ def test_acceptance_all_resources_config_action_outputs_and_owner():
 
 def evidence_verifier():
     path = ACCEPT / "scripts/verify_evidence.py"
-    spec = importlib.util.spec_from_file_location("acceptance_evidence_verifier", path)
-    assert spec is not None and spec.loader is not None
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
+    return load_source(path, "acceptance_evidence_verifier")
 
 
 @pytest.fixture
@@ -928,7 +925,7 @@ def test_acceptance_metadata_candidate_only_and_complete_contract():
     blocks = re.findall(r"```yaml\n(.*?)\n```", text, re.S)
     assert len(blocks) == 1
     meta = yaml.safe_load(blocks[0])
-    current = validator().validate(ROOT, ACCEPT, ACCEPT_NAME, "x-ipe-task-based")
+    current = validate_resources(validator(), ROOT, ACCEPT, ACCEPT_NAME, "x-ipe-task-based")
     assert recovered_publication(ACCEPT_NAME)["files"] == current["files"]
     receipt = json.loads((ACCEPT_META / "validation-receipt-goal-TASK-6749.json").read_text())
     assert meta["skill_name"] == ACCEPT_NAME and meta["task_id"] == "TASK-6749"
@@ -942,7 +939,7 @@ def test_acceptance_metadata_candidate_only_and_complete_contract():
         assert publication["candidate_hash"] == receipt["candidate_hash"]
         assert publication["files"] == receipt["files"]
         assert publication["baseline"] == json.loads((ACCEPT_META / "baseline-goal-TASK-6749.json").read_text())
-        assert validator().tree_bytes(ACCEPT, ROOT) == validator().tree_bytes(ROOT / ".github/skills" / ACCEPT_NAME, ROOT)
+        assert resource_inventory(ACCEPT) == resource_inventory(ROOT / ".github/skills" / ACCEPT_NAME)
     else:
         assert meta["publication_state"] == "candidate_ready"
         assert meta["independent_review"] == "pending_main_reviewer"

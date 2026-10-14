@@ -5,6 +5,7 @@ These checks do not declare revised candidates published or approve own edits.
 """
 import importlib.util
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -13,6 +14,8 @@ import pytest
 import yaml
 
 from tests.test_skill_pipeline_refactor import output_contract
+from tests.publication_recovery_6749 import resource_inventory
+from tests.skill_validation_harness_6749 import load_source, validation_project
 
 ROOT = Path(__file__).resolve().parents[1]
 META = ROOT / "x-ipe-docs/skill-meta"
@@ -28,10 +31,7 @@ MODES = (
 
 
 def load(path, name):
-    spec = importlib.util.spec_from_file_location(name, path)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
+    return load_source(path, name)
 
 
 @pytest.mark.parametrize("suffix", SUFFIXES)
@@ -105,13 +105,14 @@ def test_all_candidates_real_validator_api_equals_cli():
     identities += [("x-ipe-task-based-" + suffix, "x-ipe-task-based") for suffix in SUFFIXES]
     for name, kind in identities:
         candidate = META / name / "candidate"
-        api = validator.validate(ROOT, candidate, name, kind)
-        assert api["ok"], api["errors"]
-        process = subprocess.run([sys.executable, "-B", str(script), "--project-root", str(ROOT),
-                                  "--candidate", str(candidate), "--name", name, "--type", kind],
-                                 capture_output=True, text=True, check=False)
-        assert process.returncode == 0, process.stdout + process.stderr
-        assert json.loads(process.stdout) == api
+        with validation_project(validator, ROOT, candidate, name) as (project, copied):
+            api = validator.validate(project, copied, name, kind)
+            assert api["ok"], api["errors"]
+            process = subprocess.run([sys.executable, str(script), "--project-root", str(project),
+                                      "--candidate", str(copied), "--name", name, "--type", kind],
+                                     capture_output=True, text=True, check=False)
+            assert process.returncode == 0, process.stdout + process.stderr
+            assert json.loads(process.stdout) == api
 
 
 def test_publisher_blockers_are_actual_read_only_failures(monkeypatch):
@@ -132,16 +133,37 @@ def test_publisher_blockers_are_actual_read_only_failures(monkeypatch):
     assert published["baseline"]["managed_hash"] == validator.fingerprint(managed)
     assert all(managed[key] == digest for key, digest in published["baseline"]["replaced_file_hashes"].items())
     # Old managed hashes are historical, not the now-published creator revision.
-    assert validator.manifest(before) == published["files"] | published["preserved_unmanaged"]
+    assert resource_inventory(live) == published["files"]
     assert validator.fingerprint(published["files"]) == published["candidate_hash"]
-    assert validator.fingerprint(validator.manifest(before)) == published["post_promotion"]["production_physical_hash"]
-    removed = sorted(before.keys() - validator.candidate_bytes(meta / "candidate", ROOT, name).keys())
-    assert removed == ["scripts/__pycache__/publish_skill.cpython-312.pyc",
-                       "scripts/__pycache__/validate_skill.cpython-312.pyc"]
-    receipt = validator.validate(ROOT, meta / "candidate", name, "x-ipe-meta")
-    with pytest.raises(ValueError, match="dirty or unmanaged"):
-        publisher.publish(ROOT, meta / "candidate", name, "x-ipe-meta", validator.manifest(before),
-                          managed, receipt["candidate_hash"], apply=False)
+    # Preserve the historical physical receipt, but do not mistake regenerated
+    # interpreter caches for immutable published content. This call must still
+    # leave every current physical byte (including caches) untouched.
+    assert validator.fingerprint(published["files"] | published["preserved_unmanaged"]) == published["post_promotion"]["production_physical_hash"]
+    with validation_project(validator, ROOT, meta / "candidate", name) as (project, candidate):
+        target = project / ".github/skills" / name
+        # Generate genuine caches under normal interpreter defaults, only in
+        # the disposable live tree. They are not managed publication resources.
+        process = subprocess.run([sys.executable, "-c",
+                                  "import sys; sys.path.insert(0, sys.argv[1]); import publish_skill",
+                                  str(target / "scripts")], capture_output=True, text=True,
+                                 env={key: value for key, value in os.environ.items()
+                                      if key != "PYTHONDONTWRITEBYTECODE"})
+        assert process.returncode == 0, process.stdout + process.stderr
+        physical = validator.tree_bytes(target, project)
+        expected_caches = {Path(importlib.util.cache_from_source(str(target / "scripts" / filename)))
+                           .relative_to(target).as_posix()
+                           for filename in ("publish_skill.py", "validate_skill.py")}
+        assert expected_caches <= physical.keys()
+        assert resource_inventory(target) == published["files"]
+        removed = physical.keys() - validator.candidate_bytes(candidate, project, name).keys()
+        assert removed == expected_caches
+        receipt = validator.validate(project, candidate, name, "x-ipe-meta")
+        assert receipt["ok"], receipt["errors"]
+        for apply in (False, True):
+            with pytest.raises(ValueError, match="dirty or unmanaged"):
+                publisher.publish(project, candidate, name, "x-ipe-meta", validator.manifest(physical),
+                                  managed, receipt["candidate_hash"], apply=apply)
+            assert validator.tree_bytes(target, project) == physical
     assert validator.tree_bytes(live, ROOT) == before
     with pytest.raises(ValueError, match="Invalid canonical name"):
         publisher.paths(ROOT, "x-ipe-assistant-user-representative-Engineer")

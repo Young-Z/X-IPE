@@ -16,6 +16,7 @@ import pytest
 import yaml
 
 from tests.publication_recovery_6749 import recovered_publication
+from tests.skill_validation_harness_6749 import load_source
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -38,11 +39,7 @@ EVIDENCE_COLUMNS = ("AC ID", "Validation Evidence", "Delivery State", "Outcome S
 
 def validator():
     path = ROOT / ".github/skills/x-ipe-meta-skill-creator/scripts/validate_skill.py"
-    spec = importlib.util.spec_from_file_location("goal_validator", path)
-    assert spec and spec.loader
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
+    return load_source(path, "goal_validator")
 
 
 def assert_reviewed_live(name, live, baseline):

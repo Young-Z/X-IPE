@@ -2,16 +2,15 @@
 
 This verifies distributable contracts and publication bytes, not agent decisions.
 """
-import importlib.util
 import json
-import os
 from pathlib import Path
 import subprocess
 import sys
 
 import pytest
 
-from tests.publication_recovery_6749 import recovered_publication
+from tests.publication_recovery_6749 import recovered_publication, resource_inventory
+from tests.skill_validation_harness_6749 import load_source, validation_project
 
 ROOT = Path(__file__).resolve().parents[1]
 NAMES = ["x-ipe-workflow-task-execution"] + [
@@ -27,24 +26,27 @@ NAMES = ["x-ipe-workflow-task-execution"] + [
 @pytest.mark.parametrize("name", NAMES)
 def test_each_promoted_goal_package_current_receipt_cli_and_canonical_dependencies(name):
     script = ROOT / ".github/skills/x-ipe-meta-skill-creator/scripts/validate_skill.py"
-    spec = importlib.util.spec_from_file_location("inventory_validator_6749", script)
-    validator = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(validator)
+    validator = load_source(script, "inventory_validator_6749")
     meta = ROOT / "x-ipe-docs/skill-meta" / name
     candidate = meta / "candidate"
     kind = ("x-ipe-workflow-orchestration" if name.startswith("x-ipe-workflow-") else
             "x-ipe-task-category" if "+" in name else
             "x-ipe-tool" if name.startswith("x-ipe-tool-") else "x-ipe-task-based")
-    checked = validator.validate(ROOT, candidate, name, kind)
-    assert checked["ok"], checked["errors"]
-    process = subprocess.run([sys.executable, "-B", str(script), "--project-root", str(ROOT),
-                              "--candidate", str(candidate), "--name", name, "--type", kind],
-                             capture_output=True, text=True,
-                             env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"}, timeout=30)
-    assert process.returncode == 0, process.stdout + process.stderr
-    assert json.loads(process.stdout) == checked
     installed = ROOT / ".github/skills" / name
-    installed_files = validator.manifest(validator.tree_bytes(installed, ROOT))
+    before = (validator.tree_bytes(candidate, ROOT), validator.tree_bytes(installed, ROOT))
+    with validation_project(validator, ROOT, candidate, name) as (project, copied):
+        checked = validator.validate(project, copied, name, kind)
+        assert checked["ok"], checked["errors"]
+        copied_before = validator.tree_bytes(copied, project)
+        process = subprocess.run([sys.executable, str(script), "--project-root", str(project),
+                                  "--candidate", str(copied), "--name", name, "--type", kind],
+                                 capture_output=True, text=True, timeout=30)
+        assert process.returncode == 0, process.stdout + process.stderr
+        assert json.loads(process.stdout) == checked
+        assert validator.tree_bytes(copied, project) == copied_before
+    assert (validator.tree_bytes(candidate, ROOT), validator.tree_bytes(installed, ROOT)) == before
+    installed_files = resource_inventory(installed)
+    assert resource_inventory(candidate) == checked["files"]
     receipt_path = meta / "publication-receipt-goal-TASK-6749.json"
     if name == "x-ipe-workflow-task-execution":
         receipt_path = meta / "publication-receipt-mode-TASK-6749-R2.json"
