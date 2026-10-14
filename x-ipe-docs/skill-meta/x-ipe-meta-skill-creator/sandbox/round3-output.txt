@@ -1,0 +1,37 @@
+TASK-6749 Round 3 observed output
+
+Exact pytest command (both runs):
+PYTHONDONTWRITEBYTECODE=1 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 /Users/yzhang/Documents/projects/X-IPE/.venv/bin/python -B -m pytest -p no:cacheprovider --noconftest tests/test_skill_creator_foundation.py -q
+
+Run 1:
+START_UTC: 2026-10-13T05:51:45.876693+00:00
+........................................................................ [ 49%]
+........................................................................ [ 99%]
+.                                                                        [100%]
+145 passed in 1.31s
+END_UTC: 2026-10-13T05:51:47.413032+00:00
+PYTEST_EXIT_CODE: 0
+PRODUCTION_ENTRIES_CHECKED: 2096
+PRODUCTION_CHANGES: []
+
+Intervening verification failed before pytest began:
+AssertionError: candidate metadata originals still present after reported deletions.
+
+Run 2:
+METADATA_INVENTORY: 44 functions / 145 expanded cases
+START_UTC: 2026-10-13T05:54:23.466629+00:00
+........................................................................ [ 49%]
+........................................................................ [ 99%]
+.                                                                        [100%]
+145 passed in 1.31s
+END_UTC: 2026-10-13T05:54:24.971286+00:00
+PYTEST_EXIT_CODE: 0
+PRODUCTION_ENTRIES_CHECKED: 2096
+PRODUCTION_CHANGES: []
+VALIDATION_EXIT_CODE: 0
+READ_ONLY_CANDIDATE_VALIDATION: {"body_lines": 246, "candidate_hash": "ba1935603d597dcd76a903fc70e9f1c3e4a4278c3b94030727cbda3f9c3c5006", "errors": [], "ok": true, "warnings": []}
+CANDIDATE_FILES: 34
+DISTRIBUTABLE_METADATA: ['metadata/review-findings.md', 'metadata/test-cases.yaml']
+
+No test assertion or candidate-script changes. No production promotion.
+Meta-root copies exist, but original metadata removal remains a promotion blocker.

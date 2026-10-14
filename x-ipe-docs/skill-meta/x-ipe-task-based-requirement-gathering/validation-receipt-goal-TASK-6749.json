@@ -1,0 +1,18 @@
+{
+  "schema": 1, "operation": "validate", "name": "x-ipe-task-based-requirement-gathering",
+  "skill_type": "x-ipe-task-based", "ok": true, "body_lines": 253,
+  "candidate_hash": "ef41dde30051efe35394a0f69fa0f2e7713ad62562ccbcf5da3ff860884488de",
+  "errors": [], "excluded_files": {},
+  "warnings": [
+    "Uninstantiated template link: references/file-splitting.md: x-ipe-docs/requirements/requirement-details-part-{previous}.md",
+    "Uninstantiated template link: references/requirement-details-template.md: x-ipe-docs/requirements/EPIC-{nnn}/mockups/{mockup-file}"
+  ],
+  "files": {
+    "SKILL.md": "ea4726a70e5ac215879176f0111bf4e4894c8eb68c56a124cf75f017ea30b552",
+    "references/context-review.md": "0fc13a7f4d0f8a214ba11efcb156cd3b51a84fb17bf2da0369d2d2176bc7a79f",
+    "references/examples.md": "da70b81d3e42189dd8a32d504b055abd0540fc295fc3d0713f5f531e890482d2",
+    "references/file-splitting.md": "d76a1b752f00582b75502eb0083b094bf5b3d042e80586b5aeab32ce2c62902c",
+    "references/requirement-details-template.md": "74babfdcd2cc893e65839fe47afe948754de0f63f3f7b7dd722809d9e66511b8",
+    "templates/requirement-details.md": "f41892e2aa97194e048127e9f61733ed78384682b6f55507bda396519652b530"
+  }
+}

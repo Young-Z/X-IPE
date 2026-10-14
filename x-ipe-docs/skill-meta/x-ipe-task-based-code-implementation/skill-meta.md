@@ -1,333 +1,166 @@
-# ═══════════════════════════════════════════════════════════
-# SKILL META - Task-Based: Code Implementation (Orchestrator)
-# ═══════════════════════════════════════════════════════════
+# Task-Based Skill Metadata — Code Implementation
 
-# ─────────────────────────────────────────────────────────────
-# IDENTITY
-# ─────────────────────────────────────────────────────────────
+## TASK-6749 sequential candidate slice
+
+Technical-design independently reviewed and promoted first; its exact candidate/
+production parity passed before this draft. Complete implementation production
+and prework candidate inventories captured before edits. Preserve all three
+original resource paths and their AAA/coding/error/mockup/retry/batching domain
+purpose; add one integration reference, no removals. Prework entry's earlier
+board-alias migration is retained via current board-manager read-only context,
+not blindly reset from production. The initial worker was candidate-only; current
+fresh main review and explicitly authorized exact-file promotion are recorded below.
+
+Creator/general guidelines/task-based templates and lifecycle/goal contracts
+loaded. Existing raw LL-001 async propagation and LL-002 candidate-first gate
+were read and checked against current source declarations/contracts; map them
+only to runtime-syntax guidance and special-delegation gate. No lesson status,
+memory, board, Git, other source or unrelated dirty docs changed. This does not
+claim historical incident freshness or adopted/applied lesson settlement.
+
+```yaml
 skill_name: x-ipe-task-based-code-implementation
 skill_type: x-ipe-task-based
-version: "2.0.0"
-status: candidate
+version: "2.1.0"
+status: production
 created: 2026-03-01
-updated: 2026-03-30
-
-# ─────────────────────────────────────────────────────────────
-# PURPOSE
-# ─────────────────────────────────────────────────────────────
-summary: |
-  Orchestrates feature implementation by generating AAA test scenarios from specification,
-  routing to language-specific tool skills via semantic matching, and validating all Assert
-  clauses pass. Delegates to x-ipe-meta-skill-creator for skill files and mcp-builder for
-  MCP servers.
-
-triggers:
-  - "implement feature"
-  - "write code"
-  - "develop feature"
-  - "code implementation"
-
+updated: 2026-10-13
+task_id: TASK-6749
+publication_state: published
+independent_review: passed_main_reviewer
+candidate_hash: 90e610664b20308b105c9839c3bbf82a082d2d3d7b2f7525b4f7095e0d213cf0
+summary: One approved feature capability with source/outcome-to-AC-to-test traceability, sequential enabled semantic routing and honest fresh delivery evidence.
+triggers: [implement feature, write code, develop feature, code implementation]
 not_for:
-  - "x-ipe-task-based-code-refactor: for refactoring existing code"
-  - "x-ipe-task-based-bug-fix: for fixing bugs in existing code"
-  - "x-ipe-meta-skill-creator: for creating skills directly (but delegated to by this skill)"
-
-# ─────────────────────────────────────────────────────────────
-# WORKFLOW POSITION
-# ─────────────────────────────────────────────────────────────
+  - "code-refactor: restructuring without new acceptance"
+  - "bug-fix: restoration of existing expected behavior"
+  - "skill-creator: direct skill maintenance; delegated here only for approved feature skill scope"
 workflow:
   category: feature-stage
-  phase: "Code Implementation"
-  next_task_based_skill: "Feature Acceptance Test"
-  human_review: false
-
-# ─────────────────────────────────────────────────────────────
-# INTERFACE
-# ─────────────────────────────────────────────────────────────
+  phase: Code Implementation
+  next_task_based_skill:
+    - skill: x-ipe-task-based-feature-acceptance-test
+      condition: Verify implementation with acceptance tests
+  human_review: mode-aware owner boundary and explicit domain risk approval
 inputs:
   required:
-    - name: interaction_mode
-      type: boolean
-      default: false
-      description: Whether to auto-proceed to next task
-
-    - name: feature_id
+    - {name: task_id, type: string, description: existing supplied task/readiness}
+    - {name: feature_id, type: string, description: exactly one approved actual feature}
+    - name: process_preference.interaction_mode
       type: string
-      description: "Feature ID to implement"
-      validation: "must match FEATURE-\\d+-[A-Z]"
-
-    - name: program_type
-      type: string
-      description: "Implementation type from technical design"
-      validation: "one of: frontend, backend, fullstack, cli, library, skills, mcp"
-
-    - name: tech_stack
-      type: array
-      description: "Technologies used, from technical design"
-
+      default: interact-with-human
+      validation: interact-with-human | dao-represent-human-to-interact | dao-represent-human-to-interact-for-questions-in-skill
+    - {name: specification_link, type: string, description: resolved authoritative specification with source/story/ACs}
+    - {name: technical_design_link, type: string, description: resolved two-part design from context/output; not board field}
+    - {name: program_type, type: string, description: actual approved extensible lowercase type}
+    - {name: tech_stack, type: array, description: actual approved technologies and test frameworks}
   optional:
-    - name: execution_mode
-      type: string
-      default: "free-mode"
-      description: "free-mode or workflow-mode"
-
-    - name: git_strategy
-      type: string
-      default: "main-branch-only"
-      description: "Git branching strategy"
-
+    - {name: execution_mode, type: string, default: free-mode, description: lifecycle execution mode}
+    - {name: workflow, type: object, description: exact implementation action and required specification/tech-design contexts}
+    - {name: mockup_link, type: string-or-NA, description: singular legacy field; all current scoped mockups still read}
+    - {name: git_strategy, type: string, description: validated owner-only strategy context}
+    - {name: git_main_branch, type: string, description: validated owner context; no child Git}
 outputs:
   state:
-    - name: category
-      value: feature-stage
-    - name: status
-      value: completed | blocked
-    - name: next_task_based_skill
-      value: "Feature Acceptance Test"
-    - name: require_human_review
-      value: false
-    - name: interaction_mode
-      value: "${inputs.interaction_mode}"
-
+    - {name: category, value: feature-stage}
+    - {name: status, value: completed | blocked}
+    - {name: next_task_based_skill, value: original conditional Acceptance Test suggestion}
+    - {name: process_preference.interaction_mode, value: resolved exact enum}
   artifacts:
-    - name: implementation_files
-      type: directory
-      path: "src/"
-      description: "Implemented source code files"
-    - name: test_files
-      type: directory
-      path: "tests/"
-      description: "Generated test files"
-
+    - {name: implementation, type: directory, path: actual approved source/delegation folder, description: original directory-oriented task links adapted to real layout}
+    - {name: tests, type: directory, path: actual approved test folder, description: suitable original-assertion checks and affected regression}
+    - {name: impl-files, type: file-array, path: actual owned source/test/delegation files, description: separate nonempty workflow array; not output directories or design}
+    - {name: impl-folder, type: directory, path: actual browsing directory, description: one scalar directory; files may span outside it}
   data:
-    - name: aaa_scenarios
-      type: object
-      description: "Generated AAA scenarios with coverage summary"
-    - name: validation_report
-      type: object
-      description: "Aggregated pass/fail report from tool skill outputs"
-
-# ─────────────────────────────────────────────────────────────
-# ACCEPTANCE CRITERIA (MoSCoW)
-# ─────────────────────────────────────────────────────────────
+    - {name: execution_mode, type: string, description: original caller context}
+    - {name: workflow, type: object, description: original workflow name}
+    - {name: workflow_action, type: string, description: implementation not tool config key}
+    - {name: workflow_action_updated, type: boolean, description: true only verified actual/prior action write}
+    - {name: task_output_links, type: array, description: original directory links src/ and tests/ are layout examples}
+    - {name: feature_id, type: string, description: actual immutable feature identity}
+    - {name: feature_title, type: string, description: actual title}
+    - {name: feature_version, type: string, description: actual approved version}
+    - {name: feature_phase, type: string, description: Code Implementation}
 acceptance_criteria:
   must:
-    # STRUCTURE
-    - id: AC-S01
-      category: structure
-      criterion: SKILL.md exists with valid frontmatter
-      test: file_exists + yaml_parse
-      expected: name and description fields present, description mentions orchestrator
-
-    - id: AC-S02
-      category: structure
-      criterion: references/examples.md exists
-      test: file_exists
-      expected: file contains at least 4 examples
-
-    - id: AC-S03
-      category: structure
-      criterion: SKILL.md body < 500 lines
-      test: line_count
-      expected: < 500
-
-    # CONTENT
-    - id: AC-C01
-      category: content
-      criterion: All required sections present in order
-      test: section_parse
-      expected: Purpose, Important Notes, Input Parameters, DoR, Execution Flow, Execution Procedure, Output Result, DoD, Patterns, Examples
-
-    - id: AC-C02
-      category: content
-      criterion: Step 4 generates AAA scenarios (not test-generation)
-      test: content_check
-      expected: Step 4 mentions "AAA", "Arrange", "Act", "Assert" and does NOT say "INVOKE x-ipe-tool-test-generation" as primary action
-
-    - id: AC-C03
-      category: content
-      criterion: Step 5 has semantic routing to tool skills
-      test: content_check
-      expected: Step 5 mentions "x-ipe-tool-implementation-*", "semantic", "route"
-
-    - id: AC-C04
-      category: content
-      criterion: Step 5 has special-case delegations preserved
-      test: content_check
-      expected: Step 5 mentions "x-ipe-meta-skill-creator" for skills and "mcp-builder" for MCP
-
-    - id: AC-C05
-      category: content
-      criterion: Step 6 validates Assert clauses
-      test: content_check
-      expected: Step 6 mentions "Assert clauses", "pass/fail", "integration"
-
-    - id: AC-C06
-      category: content
-      criterion: Phase 1 coexistence with test-generation documented
-      test: content_check
-      expected: Important Notes mentions fallback to x-ipe-tool-test-generation
-
-    - id: AC-C07
-      category: content
-      criterion: Tool skill I/O contract in references
-      test: content_check
-      expected: implementation-guidelines.md has "tool_skill_input" and "tool_skill_output" YAML blocks
-
-    # BEHAVIOR
-    - id: AC-B01
-      category: behavior
-      criterion: Standard feature generates AAA scenarios and routes to tool skills
-      test: execution
-      expected: Step 4 produces tagged scenarios, Step 5 routes to matching skills
-
-    - id: AC-B02
-      category: behavior
-      criterion: Skills-type feature delegates to skill-creator
-      test: execution
-      expected: program_type "skills" triggers delegation in Step 5, skips Steps 4 and 6
-
-    - id: AC-B03
-      category: behavior
-      criterion: Output YAML has correct structure
-      test: yaml_validate
-      expected: category is first field, all required fields present
-
+    - {id: AC-S01, category: structure, criterion: complete original three paths plus integration reference and valid body within 1000 logical lines, test: installed validator and manifests}
+    - {id: AC-C01, category: contract, criterion: original parsed output keys/order/value types and conditional successor retained, test: exact YAML comparison including src/tests directory examples}
+    - {id: AC-C02, category: lifecycle, criterion: same supplied owner/task and no duplicate create/status/Git/route in entry or references, test: parsed procedure/init and all-resource exclusions}
+    - {id: AC-G01, category: goal, criterion: authoritative source/parent/story/AC-to-selected-means-to-original-tests map with no invented targets or activity-count surrogate, test: concrete upstream/downstream authored tables and negative mutations}
+    - {id: AC-G02, category: evidence, criterion: planned/verified delivery separate from not measured/actual cited observation, test: authored artifact negative claims; no autonomous agent or stakeholder execution claimed}
+    - {id: AC-G03, category: delta, criterion: affected-only invalidation preserves unaffected IDs/rows/assertions and dependency-bound freshness, test: authored delta and real temporary hash mutations}
+    - {id: AC-R01, category: routing, criterion: actual stages.implement.code_implementation with missing/metadata-only opt-in booleans disabled/undeclared general fallback and sequential enabled semantic matching, test: actual config/declarations plus candidate contract inspection; not autonomous routing execution}
+    - {id: AC-R02, category: delegation, criterion: skill-creator/MCP gate precedes ordinary scenario/routing and retains scoped tests/DoD/acceptance, test: parsed order and complete references; publication boundary explicit}
+    - {id: AC-T01, category: testing, criterion: original assertions/all ACs/test types retained; genuine RED/GREEN for changed behavior and baseline/regression; no live-tool RED assumption, test: candidate contract and authored scenarios plus negative checks}
+    - {id: AC-T02, category: tracing, criterion: only applicable existing infrastructure runtime functions redacted/opt-in and tested; missing infrastructure skips not mandatory setup, test: entry/reference contract inspection}
+    - {id: AC-I01, category: integration, criterion: actual implementation action with required contexts/done design and real file array/scalar browsing folder independent of directory task links, test: actual installed temporary writer/readback schema4 and real artifact checks}
+    - {id: AC-I02, category: safety, criterion: helper gaps do not imply completion; invalid arrays/keys/feature/locks preserve bytes and advanced CR status stays advanced, test: actual temporary helper rejection/permissiveness/resume/feature queries}
   should:
-    - id: AC-C08
-      category: content
-      criterion: Input Initialization subsection present
-      test: section_parse
-      expected: "### Input Initialization with <input_init> XML block"
-
-    - id: AC-C09
-      category: content
-      criterion: Failure handling documented
-      test: content_check
-      expected: implementation-guidelines.md has retry and fallback procedures
-
-    - id: AC-C10
-      category: content
-      criterion: Context budget strategy for large features
-      test: content_check
-      expected: implementation-guidelines.md mentions per-layer batching for >20 components
-
+    - {id: AC-C09, criterion: bounded one retry and integration conflict through actual mode without erasing original expectations}
+    - {id: AC-C10, criterion: complete cross-layer map retained across large-context per-layer batching}
+    - {id: AC-C11, criterion: existing coding/naming/error/mockup guidance and async/browser syntax caution retained}
   could:
-    - id: AC-C11
-      category: content
-      criterion: Mermaid diagrams in examples
-      test: content_check
-      expected: examples.md includes visual flow
-
+    - {id: AC-E01, criterion: separately authorized autonomous skill/MCP/tool routing and runtime implementation pilots}
   wont:
-    - id: AC-W01
-      criterion: Board status updates
-      reason: Handled by category skill, not task-based skill
-
-# ─────────────────────────────────────────────────────────────
-# DEPENDENCIES
-# ─────────────────────────────────────────────────────────────
+    - {id: AC-W01, criterion: unreviewed or implicit production promotion, reason: explicit user permission plus independent review and exact parity required}
+    - {id: AC-W02, criterion: real board/memory/Git/other-source/dirty-doc changes, reason: user maintenance boundary; helper fixtures use temporary projects only}
 dependencies:
   skills:
-    - name: x-ipe-workflow-task-execution
-      relationship: prerequisite
-      description: Must be learned before executing this skill
-
-    - name: x-ipe+feature+feature-board-management
-      relationship: integration
-      description: Called for feature data model query
-
-    - name: x-ipe-tool-test-generation
-      relationship: fallback
-      description: Phase 1 fallback when AAA generation fails
-
-    - name: x-ipe-meta-skill-creator
-      relationship: delegation
-      description: Delegation target for program_type "skills"
-
-    - name: mcp-builder
-      relationship: delegation
-      description: Delegation target for MCP server features
-
-    - name: x-ipe-tool-implementation-general
-      relationship: dependency
-      description: Fallback tool skill for unmapped tech stacks
-
+    - {name: x-ipe-workflow-task-execution, relationship: lifecycle, description: single owner and goal/common contracts}
+    - {name: x-ipe-tool-task-board-manager, relationship: integration, description: actual Designed/Implemented statuses and supported schema; no design-link field}
+    - {name: x-ipe-tool-x-ipe-app-interactor, relationship: integration, description: actual installed workflow helper/readback}
+    - {name: x-ipe-tool-test-generation, relationship: fallback, description: no invented expectations; full original acceptance retained}
+    - {name: x-ipe-meta-skill-creator, relationship: delegation, description: skill-file complete candidate validation and permission gate}
+    - {name: mcp-builder, relationship: delegation, description: MCP protocol/build scope before ordinary routing}
+    - {name: x-ipe-tool-implementation-general, relationship: fallback, description: always eligible safety net; insufficient means blocked}
+    - {name: x-ipe-tool-tracing-instrumentation, relationship: conditional, description: applicable existing infrastructure only}
   artifacts:
-    - path: "x-ipe-docs/requirements/FEATURE-XXX/technical-design.md"
-      description: "Technical design must exist before implementation"
-    - path: "x-ipe-docs/requirements/FEATURE-XXX/specification.md"
-      description: "Feature specification for AAA scenario generation"
-
-# ─────────────────────────────────────────────────────────────
-# TESTING
-# ─────────────────────────────────────────────────────────────
+    - {path: resolved specification and two-part technical design, description: authoritative acceptance and approved means}
+    - {path: x-ipe-docs/config/tools.json, description: actual code_implementation config}
+    - {path: x-ipe-docs/config/workflow-template.json, description: actual implementation action/contexts/tags}
 test_scenarios:
   happy_path:
-    - name: "Standard fullstack feature with AAA"
-      given: "Feature with tech_stack [Python/Flask, HTML/CSS] and specification with 3 ACs"
-      when: "Execute code-implementation skill"
-      then: "AAA scenarios generated, routed to python + html5 tool skills, all Asserts pass"
-
-    - name: "Skills-type feature delegation"
-      given: "Feature with program_type 'skills' and tech_stack [Markdown/SKILL.md]"
-      when: "Execute code-implementation skill"
-      then: "Delegates to x-ipe-meta-skill-creator, skips AAA generation and validation"
-
+    - {name: Badge mapping, given: upstream authored design with all-required two ACs, when: parse/render selected means and original checks, then: exact source/goal/AC coverage and honest planned/not measured states}
+    - {name: Actual file-array handoff, given: temporary Designed feature with done design and real source/test artifacts, when: installed writer and readback, then: schema4 file array/scalar directory and owner Implemented without task allocation}
   edge_cases:
-    - name: "AAA generation fallback"
-      given: "Specification has vague acceptance criteria"
-      when: "AAA generation fails"
-      then: "Falls back to x-ipe-tool-test-generation (Phase 1)"
-
-    - name: "No matching tool skill"
-      given: "tech_stack entry 'Rust/Actix' with no matching tool skill"
-      when: "Semantic routing runs"
-      then: "Assigns x-ipe-tool-implementation-general as fallback"
-
-    - name: "Large feature (>20 components)"
-      given: "Technical design with 25 components"
-      when: "AAA generation runs"
-      then: "Per-layer batching: backend first, then frontend"
-
+    - {name: Parent delta, given: authorized stale flag scope fixture, when: compare mappings, then: affected current-state evidence invalidated with absent row identical}
+    - {name: Relevant freshness, given: actual temporary spec/design/source/test/config/mockup bytes, when: mutate each and unrelated doc separately, then: only relevant revisions invalidate evidence}
+    - {name: No-op advanced resume, given: temporary Completed feature, when: owner action plus read-only queries, then: immutable record/status preserved}
   error_cases:
-    - name: "Tool skill fails on retry"
-      given: "Backend tool skill fails twice"
-      when: "Retry attempted"
-      then: "Preserves passing results from other skills, escalates to human"
-
-    - name: "Integration failure"
-      given: "Unit-level tool skills pass but @integration fails"
-      when: "Validation gate runs @integration scenarios"
-      then: "Reports cross-layer contract mismatch to human"
-
+    - {name: Helper permissiveness, given: pending design/absent context/missing or empty or directory file paths, when: installed writer, then: success characterized but never semantic completion}
+    - {name: Broken authored claim, given: missing/orphan/duplicate AC or wrong source/goal/empty assertion/false delivery/outcome, when: parse coverage, then: rejected}
   blocking:
-    - name: "Feature not designed"
-      given: "Feature status is 'Refined' (not 'Designed')"
-      when: "DoR check runs"
-      then: "BLOCKED with 'Feature status must be Designed'"
-
-    - name: "Technical design missing"
-      given: "No technical-design.md file"
-      when: "DoR check runs"
-      then: "BLOCKED with 'Technical design document not found'"
-
-# ─────────────────────────────────────────────────────────────
-# EVALUATION
-# ─────────────────────────────────────────────────────────────
+    - {name: Invalid helper contract, given: extra tag/folder array/invalid element/missing feature/genuinely locked stage, when: installed writer, then: nonzero and unchanged bytes}
+    - {name: Missing main review, given: current candidate-only drafting, when: release boundary reached, then: no production promotion}
 evaluation:
   self_check:
-    - "All outputs.artifacts exist"
-    - "Output YAML validates against schema"
-    - "DoD checkpoints all verified"
-    - "AAA scenarios have coverage for all ACs"
-    - "Tool skill I/O contract followed"
-
+    - Final exact commands/counts/hashes are in validation receipt and review-handoff-TASK-6749.md.
+    - Current continuation baseline was 94 passing upstream/downstream tests; final five-suite run was 379 passed, zero failed/skipped/deselected, exit 0.
+    - Prior worker reported an earlier 22-failure RED run and fixture corrections; those historical counts were not rerun or independently evidenced by this continuation.
+    - Direct tool-input YAML parsing exposed malformed mockup_link nesting despite passing substring tests; actual parse failed before correction and passed after literal editor repair. No test source or assertions changed.
+    - Six related candidate validators passed; implementation has 264 body lines, four files, zero errors/warnings. Six root metadata YAML mappings and the implementation test-case YAML parsed successfully.
+    - Actual helpers run only in temporary EPIC and legacy projects; authored tables and content checks are not autonomous routing or stakeholder evidence.
+    - Before promotion original three-file baseline matched; after authorized review/edit-tool publication exact four-file candidate parity and unchanged validator receipt passed.
   judge_agent:
-    - criterion: "Orchestrator flow quality"
-      rubric: |
-        5: All AAA scenarios correct, routing accurate, validation thorough
-        4: Minor gaps in coverage or routing
-        3: Acceptable but missing edge case scenarios
-        2: Significant routing or validation issues
-        1: Fails to generate AAA or route correctly
+    - criterion: Independent main review
+      rubric: Passed by fresh main reviewer; see review-main-TASK-6749.md and publication-receipt-goal-TASK-6749.json. No autonomous routing or stakeholder observation claimed.
+version_history:
+  - version: "2.1.0"
+    date: 2026-10-13
+    task_id: TASK-6749
+    candidate_hash: 90e610664b20308b105c9839c3bbf82a082d2d3d7b2f7525b4f7095e0d213cf0
+    changes: Independent main review and verified exact-file editor promotion of goal-oriented implementation package; original output and TDD assertions retained.
+```
+
+Candidate_ready was the prior worker handoff state. Current main review and
+explicitly authorized promotion are recorded in the separate publication receipt;
+all four production bytes match that reviewed candidate. Historical raw lessons
+and conceptual test cases remain attributed, not observed executions. Larger-task
+completion is not claimed; no board write or acceptance promotion is authorized.
+
+## R2 recovered publication history
+
+- Version 2.1.1, TASK-6749; verified 2026-10-14T04:28:27.605298+00:00.
+- Current production/candidate fingerprint: 2a7786151253ccd3d6ef0817f9e7c52a06403efcfcfbc8299279dbf8e04ed720.
+- [Recovered verification receipt](publication-receipt-TASK-6749-R2.json); prior history above remains historical, not current parity evidence.
+- Hybrid inner guidance and human completion/route boundary independently reviewed at exact R2 hash; original assertion/TDD gates retained. Prior-worker promotion time is unknown; no production replay or atomic writer journal claimed.

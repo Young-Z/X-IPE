@@ -1,0 +1,54 @@
+test_cases:
+  task_id: TASK-6749
+  source: tests/test_skill_pipeline_refactor.py
+  revision: 5a50e7b6e089205961f5ee00125745a05687ff3bdd314bbb89b1c288fcf1f61f
+  focused_total: 87
+  focused_result: all passed in final scoped and extended runs
+  evidence_kind: structural contracts plus actual installed CLI/API scenarios in temporary projects
+  not_claimed: autonomous agent authoring, grouping/MVP/dependency reasoning, human/DAO confirmation pilot or independent review
+  scenarios:
+    - id: FB-01
+      criteria: [AC-S01, AC-S02, AC-C01, AC-C02]
+      tests: [test_breakdown_deterministic_complete_and_production_preserved, test_breakdown_original_output_contract_preserved, test_breakdown_input_initialization, test_breakdown_single_owner_all_modes_and_no_stale_resources]
+      evidence: validator, exact manifests, output YAML and common-owner/link assertions
+      result: pass
+    - id: FB-02
+      criteria: [AC-D01, AC-D02, AC-D03, AC-D04]
+      tests: [test_breakdown_domain_delta_mvp_identity_dependencies, test_breakdown_templates_are_consolidated_truthful_artifacts]
+      evidence: resource/template contract assertions only; no reasoning pilot
+      result: pass
+    - id: FB-03
+      criteria: [AC-D05, AC-D06, AC-I04]
+      tests: [test_breakdown_confirmation_and_truthful_conditional_gates, test_breakdown_existing_cr_board_identity_status_and_retirement]
+      evidence: explicit human/hybrid gate; actual mutable CR preserves identity/status/spec and supported Retired record remains queryable
+      result: pass
+    - id: FB-04
+      criteria: [AC-I01, AC-I02]
+      tests: [test_breakdown_single_feature_real_cli_and_action, test_breakdown_http_read_consumer_uses_real_cli_store, test_breakdown_actual_action_and_prompt_contract]
+      evidence: single file and numeric-part artifacts, Planned readback, two keyed outputs, CLI/API envelopes, root/bundled relevant consumer parity
+      result: pass
+    - id: FB-05
+      criteria: [AC-I03, AC-I04]
+      tests: [test_breakdown_new_delta_preserves_existing_workflow_stages, test_breakdown_replay_is_characterized_not_claimed_idempotent, test_breakdown_initial_empty_features_is_blocked, test_breakdown_existing_only_pending_action_cannot_replay]
+      evidence: absent new append preserves stages; duplicate replay gap exposed; empty existing-only completion fails MISSING_FEATURES without mutation
+      result: pass
+    - id: FB-06
+      criteria: [AC-I02, AC-I04]
+      tests: [test_breakdown_invalid_deliverable_contract_preserves_state, test_breakdown_writer_semantic_gaps_require_domain_guard, test_breakdown_incomplete_prerequisites_not_helper_success, test_breakdown_helper_failures_preserve_state]
+      evidence: invalid tags/folder arrays reject; missing artifacts and pending/skipped/failed/in_progress prerequisites can pass helper but never establish domain completion; missing workflow/action and locked stage preserve bytes
+      result: pass
+    - id: FB-07
+      criteria: [AC-D02, AC-I01, AC-I04]
+      tests: [test_breakdown_board_creation_contract_rejects_invalid_fields, test_breakdown_board_duplicate_and_immutable_epic_preserve_history, test_breakdown_board_all_pages_include_retired_reservations, test_breakdown_corrupt_inventory_guard_is_required]
+      evidence: invalid schema/status, duplicate and immutable Epic rejection; retired reservations across pages; corrupt store query/create gaps characterized only in tmp
+      result: pass
+  regression_suites:
+    - tests/test_skill_pipeline_refactor.py
+    - tests/test_skill_creator_foundation.py
+    - tests/test_skill_lifecycle.py
+    - tests/test_feature_crud.py
+    - tests/test_feature_board_api.py
+    - tests/test_board_lib.py
+  extended_failure_suite: tests/test_workflow_template_sync.py
+  known_failures: two unchanged root/bundled config equality failures; exact details in evaluation-report-TASK-6749.yaml
+  historical_cases: test-cases.yaml preserved as prior evidence, not reused as a current test receipt

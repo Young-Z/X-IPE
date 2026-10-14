@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "operation": "editor-promotion",
+  "task_id": "TASK-6749",
+  "name": "x-ipe-task-based-feature-acceptance-test",
+  "publication_state": "published",
+  "permission": "Current user authorized independent review, validation and edit-tool promotion; subsequently explicitly approved candidate EOF normalization",
+  "method": "Exact-file editor promotion, no publisher apply, no board/memory/Git operations",
+  "managed_provenance": "No trusted managed manifest supplied or fabricated; this is an authorized editor transfer, not transactional publisher evidence",
+  "baseline_checked_before_edit": true,
+  "candidate_hash": "04872899595a2e65bfa11eb54024f349cf35fe812d8f59694eb451b8f57d3843",
+  "baseline": {
+    "SKILL.md": "c7f122cf92a7473acb2bf4f08c0576ccd77a69bc59a014215e70c69315a6ba97",
+    "references/detailed-procedures.md": "e0747b8dc3538d5a2ea83629b16b76567ed83fa4d33459e6b02d65a96db8ba4c",
+    "references/examples.md": "d4eca4682f2277ef1e9207d0d8e28da281586b3e636de2747116dc94f559fe26",
+    "templates/acceptance-test-cases.md": "89307e4ce3d22f2fbb1970272683f09a874844703ba3a025018a0e5ddcbe5b4e"
+  },
+  "files": {
+    "SKILL.md": "5710bfe3401fe099d7be1823e0a1aca5c79718b9e1b56206b883e3719ffd3404",
+    "references/detailed-procedures.md": "9577fa75fc674b6b5494c093356be0d6c4b76e4924bb500066324a5c038111d4",
+    "references/examples.md": "0220ecd13e842e982debb0e4c00d0e0c94c216f0a0f7a2f991ea592072a28c57",
+    "references/integration.md": "38f23a462939d0df1228c7a62dd8f90d4790cbe8ed23473f84e07794fb896630",
+    "scripts/verify_evidence.py": "9b9473189b12d1228a7b204fe73074e53e579ee03e35f643cf115f398b1c4fed",
+    "templates/acceptance-test-cases.md": "4593fe8176404ca3fec4037c1f404ab28a6e0b1d5383e300e50aa248f7549038"
+  },
+  "changed": ["SKILL.md", "references/detailed-procedures.md", "references/examples.md", "templates/acceptance-test-cases.md"],
+  "added": ["references/integration.md", "scripts/verify_evidence.py"],
+  "removed": [],
+  "byte_parity": true,
+  "independent_review": "review-main-TASK-6749.md; prior worker package reviewed by current main reviewer",
+  "tests_before_promotion": "465 passed in 24.49s; executable/test bytes unchanged by EOF normalization; affected structural validator refreshed",
+  "limits": ["Editor promotion is not atomic or journaled", "EOF and template transfer discrepancies repaired and rehashed", "Temporary contracts and authored examples, not autonomous feature execution or stakeholder observation"]
+}

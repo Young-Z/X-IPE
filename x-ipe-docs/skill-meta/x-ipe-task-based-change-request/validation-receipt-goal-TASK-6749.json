@@ -1,0 +1,20 @@
+{
+  "body_lines": 241,
+  "candidate_hash": "7e7604fbaa558da5e881ad82e1efc49bef4a27a832afc2480fa263e1423eb5c2",
+  "errors": [],
+  "excluded_files": {},
+  "files": {
+    "SKILL.md": "5203bda7c87b3547682cad2f5315d7cd066efcedd8e8558b144cda66effc7ba2",
+    "references/examples.md": "fcf36a13b1dde3f26247c34b5accbb3a56273364b8b317cfad0addc7e821a6d8",
+    "references/integration.md": "0e03e9d3fd51a872b108a2655d4a4cb41d0450ea0b6ef7c8ef4305586920f679",
+    "references/patterns.md": "231ea68f760f9b4d94dd13dc2d6ad98f3f6fb654b816a4bd1ae1f1a6bcb9d2d4",
+    "references/version-history-template.md": "f6681980e47de797118f11526d4645ad33237eb0a275fe189ca637d54521b110",
+    "templates/change-request.md": "d894f7e5ee2fa367227139256c701df102c8802eb566deb835f6b3ba75118dcb"
+  },
+  "name": "x-ipe-task-based-change-request",
+  "ok": true,
+  "operation": "validate",
+  "schema": 1,
+  "skill_type": "x-ipe-task-based",
+  "warnings": []
+}

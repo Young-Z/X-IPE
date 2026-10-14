@@ -1,0 +1,106 @@
+skill_name: x-ipe+feature+quality-board-management
+skill_type: x-ipe-task-category
+task_id: TASK-6749
+date: 2026-10-14
+publication_state: published
+independent_review: completed_by_current_main_reviewer
+candidate_hash: d0a801c33c3daff2c9d31c30c5012dc9ee067f6bd80264060c786bb73dc6a137
+validation:
+  actual_candidate_bootstrap: false
+  actual_type: x-ipe-task-category
+  actual_ok: true
+  actual_body_lines: 259
+  actual_files: 7
+  actual_errors: 0
+  actual_warnings: 0
+  actual_receipt: validation-category-TASK-6749.json
+  process_local_adaptation: false
+  installed_creator_promoted: true
+historical_validation_before_creator_fix:
+  stock_ok: false
+  stock_errors: [Invalid name or subtype identity]
+  stock_receipt: validation-stock-goal-TASK-6749.json
+  adapted_ok: true
+  adapted_body_lines: 259
+  adapted_files: 7
+  adapted_errors: 0
+  adapted_warnings: 0
+  adapted_receipt: validation-receipt-goal-TASK-6749.json
+  exception: Process-local installed validate_skill.TYPES[x-ipe-tool] set to the exact canonical legacy name; no installed helper edit or generic validation bypass; stock failure retained separately
+commands:
+  sync_regression: PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -B -m pytest -p no:cacheprovider tests/test_skill_goal_change_quality.py tests/test_skill_creator_foundation.py tests/test_goal_oriented_skills.py tests/test_skill_pipeline_refactor.py -q --tb=short
+  backend: PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -B -m pytest -p no:cacheprovider tests/test_quality_evaluation.py -q --tb=short
+  frontend: npm test -- --reporter=dot tests/frontend-js/quality-evaluation.test.js
+  contract_check: Read-only terminal Python compares original YAML input/output blocks, complete model bytes, reference prefixes, XML operations, all report section bodies/placeholders and stock/adapted validator receipts
+  scenarios: Read-only terminal Python asserts authored example mapping plus nine negative mutants, original failure envelope and actual Flask routes in TemporaryDirectory with candidate Markdown; no production evaluation report written
+fresh_runs:
+  - {name: stock identity check, ok: false, meaning: Legacy canonical plus-name cannot satisfy installed x-ipe-tool prefix; not a candidate-schema failure or stock success}
+  - {name: exact-name adapted installed validation, ok: true, files: 7, body_lines: 259, errors: 0, warnings: 0}
+  - {name: original declaration/resource checks, exit: 0, meaning: Complete input/output YAML equal; model exact bytes; five operations and XML valid; original reference contents and template sections/placeholders retained}
+  - {name: authored mapping and failure envelope, exit: 0, positive: 1, negative_mutants_rejected: 9, meaning: Authored-contract assertions only; not autonomous quality agent behavior}
+  - {name: candidate Markdown actual Flask readback, exit: 0, meaning: Exact current/history Markdown with original response fields and missing-version 404 in disposable project; not scoring or retention execution}
+  - {name: unchanged backend report suite, passed: 28, failed: 0, seconds: 0.69, exit: 0}
+  - {name: unchanged frontend report suite, files_passed: 1, passed: 10, failed: 0, duration_ms: 443, exit: 0}
+  - {name: bounded draft correction, exit: 0, meaning: Removed contradictory failed-execution-as-unavailable phrase; executed failures remain failed; fresh receipt regenerated at corrected hash}
+  - {name: final full contract and receipt recheck, exit: 0, meaning: Original input/output/model/references/template content preserved; saved stock/adapted receipts exact; metadata and every must AC mapped; production baseline and 4072 protected files unchanged; no promotion}
+  - {name: final five Python suites, passed: 425, failed: 0, skipped: 0, deselected: 0, seconds: 12.69, exit: 0}
+  - {name: final unchanged report frontend, passed: 10, files_passed: 1, duration_ms: 393, exit: 0}
+cases:
+  - {id: PKG-01, covers: [AC-S01, AC-P01], evidence: Exact original declaration/model parity; complete seven-file resource set; adapted structural and XML checks; all original report blocks retained, state: automated_contract}
+  - {id: GOAL-01, covers: [AC-G01, AC-D01], evidence: Authored source/parent/stakeholder/outcome/contribution/selection/constraints/GWT/UI/observation mapping; nine mutants rejected; bug/source/CR examples, state: authored_contract_not_agent_execution}
+  - {id: EVIDENCE-01, covers: [AC-E01], evidence: Failure envelope and explicit delivery/outcome/freshness/unknown-versus-planned boundaries; no score field emitted in example; actual candidate Markdown served unchanged, state: authored_contract_plus_actual_route_readback}
+  - {id: SERVICE-01, covers: [AC-R01], evidence: Original backend/frontend tests unchanged and passing; disposable route response keys/version/content/404 assertions, state: actual_report_service_not_scoring}
+  - {id: FRESH-01, covers: [AC-F01], evidence: Fresh adapted receipt matches corrected candidate; stock failure exact; production baseline and protected inventory unchanged; no quality publication receipt, state: candidate_only_revision_check}
+preservation:
+  original_baseline: baseline-goal-TASK-6749.json
+  production_baseline_hash: 8fd3c4caa237d08739256920deecd67af5def1378f155716eeff677e8eda81d6
+  original_files: 5
+  candidate_files: 7
+  changed: [SKILL.md, references/evaluation-principles.md, references/evaluation-procedures.md, references/quality-report-template.md]
+  unchanged: [references/quality-evaluation-data-model.yaml]
+  added: [references/examples.md, references/goal-reporting.md]
+  removed: []
+  complete_original_input_output_declaration_parity: true
+  complete_original_model_byte_parity: true
+  production_promoted: true
+  production_modified: true
+  tests_modified: false
+  application_schema_modified: false
+protected_inventory:
+  files: 4072
+  fingerprint: fb29318d7fa4c18f00c34d75c638e80881e52f451bc572999980aec86acf915b
+  unchanged: true
+  excluded: Exactly sync and quality metadata subtrees; symlinks; .git/.venv/node_modules/__pycache__/.pytest_cache/.mypy_cache/.ruff_cache/.skill-publication directories
+evidence_hashes:
+  tests/test_quality_evaluation.py: ad6b1a96cdcaccfcf908de76c25616157dc1f68aa555440320880a131fb212f0
+  tests/frontend-js/quality-evaluation.test.js: 50110bc7c04dc6a9c7b0a56d6a6d26fa2dcb410b0310e3850e038a3e05c93d02
+  src/x_ipe/routes/quality_evaluation_routes.py: 321c75dffc576ec849ccb43828d6572f7b603fff7a9331a35e0b8643f74b6f4e
+  src/x_ipe/static/js/features/quality-evaluation.js: b4322ac5819feff3e4eb892bffdde252c82443c750bec79c0a38bf352d6ee618
+limits:
+  - Actual installed category validator API/CLI passes without adaptation at final newline-normalized hash. Historical adapted/bootstrap checks above remain historical, not current evidence.
+  - Current main independent review and trusted read-only Git blob baseline resolved promotion blockers; exact patch publication receipts retain both creator caches. Two obsolete sandbox prose assertions replaced with stronger parsed current-contract checks, not skipped or weakened.
+  - No autonomous quality evaluator/scoring/retention execution, strict downstream structured-query compatibility or observed stakeholder outcome claimed.
+  - Existing fractional-status and file-size severity inconsistencies retained/disclosed for next review; no invented schema or synthetic scores.
+  - Known Markdown style diagnostics remain (MD060 original compact template tables; MD040 original procedure fences; MD047 benign metadata EOF formatting). No lint-clean claim or repeated newline-removal loop.
+  - No whole-repository all-green claim; board/memory/Git/other source not changed.
+current_review:
+  artifact: independent-review-TASK-6749.md
+  candidate_bytes_changed: false
+  creator_delta_review: current_main_independent_review
+  fresh_combined_python: {collected: 464, passed: 462, failed: 2, skipped: 0, deselected: 0, seconds: 12.90, exit: 1}
+  new_legacy_regressions: {passed: 21, failed: 0}
+  fresh_frontend: {passed: 10, files_passed: 1, duration_ms: 384, exit: 0}
+  both_followup_promotions: true
+final_patch_publication:
+  receipt: publication-receipt-goal-TASK-6749.json
+  creator_receipt: ../x-ipe-meta-skill-creator/publication-receipt-legacy-category-TASK-6749.yaml
+  original_contracts_preserved: true
+  production_candidate_byte_parity: true
+  files: 7
+  publisher_apply_used: false
+  compiled_caches_preserved_exactly: true
+  bounded_python: {passed: 464, failed: 0, seconds: 13.04}
+  frontend: {passed: 10, failed: 0, files: 1, duration_ms: 410}
+  final_normalized_revision_rerun:
+    bounded_python: {passed: 464, failed: 0, skipped: 0, deselected: 0, seconds: 13.06, exit: 0}
+    frontend: {passed: 10, failed: 0, files: 1, duration_ms: 409, exit: 0}

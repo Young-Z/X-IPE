@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "operation": "validate",
+  "name": "x-ipe+feature+quality-board-management",
+  "skill_type": "x-ipe-tool",
+  "ok": true,
+  "errors": [],
+  "warnings": [],
+  "excluded_files": {},
+  "body_lines": 259,
+  "files": {
+    "SKILL.md": "3732259b52809a63240c0e5f8f5d25ae8dac89f04ca16215a1972a9b669228a8",
+    "references/evaluation-principles.md": "a9ef85859c070ea90bebe1e6fcf7f70f3f8a54e71e0edcbdd7ed7ca1b4d84e3d",
+    "references/evaluation-procedures.md": "7ad7932b37770a047ebe13fcb7772115d2324fa0d1609d196a48932ae6f894ab",
+    "references/examples.md": "bf44b17b5bfb37391f29d21c8ec1a0a2f62876ea6fc46db62713936e65c7b0be",
+    "references/goal-reporting.md": "0b2adda1237c99d1182a7d4e1063b8a8489edec49928354b8ec7b54a82780a35",
+    "references/quality-evaluation-data-model.yaml": "4cd2911d8752875ed9f7e9661c4a3e787cf9d4889a709343c2ce3ccc1a122dbf",
+    "references/quality-report-template.md": "4f08a399166512aef0b98644321b833c8d3b04c6b3b5d04fd7ccaab00eac6d62"
+  },
+  "candidate_hash": "ea8c58acee6ef66712e557c554223889eabc33f6bcf9682e0cc26af4922eddf3"
+}

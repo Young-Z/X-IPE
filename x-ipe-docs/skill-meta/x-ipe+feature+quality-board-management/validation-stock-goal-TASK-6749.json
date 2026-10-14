@@ -1,0 +1,9 @@
+{
+  "schema": 1,
+  "operation": "validate",
+  "name": "x-ipe+feature+quality-board-management",
+  "skill_type": "x-ipe-tool",
+  "ok": false,
+  "errors": ["Invalid name or subtype identity"],
+  "warnings": []
+}

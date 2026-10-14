@@ -1,0 +1,109 @@
+schema: 1
+task_id: TASK-6749
+round: 3
+role: Test Runner
+date: '2026-10-13'
+status: tests_passed_metadata_relocation_blocked
+project_root: /Users/yzhang/Documents/projects/X-IPE
+python:
+  executable: /Users/yzhang/Documents/projects/X-IPE/.venv/bin/python
+  version: 3.12.9
+  environment: VirtualEnvironment
+  configured_before_execution: true
+test_file: tests/test_skill_creator_foundation.py
+command: >-
+  PYTHONDONTWRITEBYTECODE=1 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 /Users/yzhang/Documents/projects/X-IPE/.venv/bin/python -B -m pytest -p no:cacheprovider --noconftest tests/test_skill_creator_foundation.py -q
+working_directory: /Users/yzhang/Documents/projects/X-IPE
+isolation:
+  fixture_inspection: completed_before_execution
+  temporary_scenarios: pytest tmp_path roots resolved before use
+  repository_script_imports: candidate scripts only; no import-time publication
+  repository_bundle_reads: copied to a temporary project for creator contract validation
+  applied_publication_and_recovery: synthetic temporary projects only
+  subprocess_scenarios: sys.executable with -B, temporary cwd and project roots
+  pytest_cache: disabled via -p no:cacheprovider
+  bytecode: disabled via -B and PYTHONDONTWRITEBYTECODE=1
+  third_party_plugin_autoload: disabled via PYTEST_DISABLE_PLUGIN_AUTOLOAD=1
+  conftest_loading: disabled via --noconftest; workspace search found none
+runs:
+  - run: 1
+    purpose: Initial Round 3 execution
+    start_utc: '2026-10-13T05:51:45.876693+00:00'
+    end_utc: '2026-10-13T05:51:47.413032+00:00'
+    exit_code: 0
+    passed: 145
+    failed: 0
+    skipped: 0
+    duration_seconds_reported_by_pytest: 1.31
+    output: 145 passed in 1.31s
+    production_entries_checked: 2096
+    production_changes: []
+  - run: 2
+    purpose: Verify current state after attempted metadata relocation
+    start_utc: '2026-10-13T05:54:23.466629+00:00'
+    end_utc: '2026-10-13T05:54:24.971286+00:00'
+    exit_code: 0
+    passed: 145
+    failed: 0
+    skipped: 0
+    duration_seconds_reported_by_pytest: 1.31
+    output: 145 passed in 1.31s
+    production_entries_checked: 2096
+    production_changes: []
+preflight_failure:
+  pytest_started: false
+  result: AssertionError
+  cause: Candidate metadata originals remained after reported apply_patch deletions
+  classification: Metadata separation failure, not a failing test
+summary:
+  test_functions: 44
+  expanded_cases_per_run: 145
+  inventory_verified: AST scenario counts exactly match relocated test-cases.yaml
+  failing_test_fix_retries: 0
+  assertions_modified: false
+  candidate_scripts_modified: false
+  production_promoted: false
+  production_modified: false
+  board_git_memory_operations: none
+production_verification:
+  scope: Entire .github/skills tree, including directories, files and symlinks
+  compared: File SHA256, mode, mtime_ns, size, symlink targets and path presence
+  checked_before_and_after_each_pytest_run: true
+  checked_again_after_read_only_candidate_validation: true
+  changed_entries: []
+candidate_validation:
+  command: >-
+    PYTHONDONTWRITEBYTECODE=1 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 /Users/yzhang/Documents/projects/X-IPE/.venv/bin/python -B /Users/yzhang/Documents/projects/X-IPE/x-ipe-docs/skill-meta/x-ipe-meta-skill-creator/candidate/scripts/validate_skill.py --project-root /Users/yzhang/Documents/projects/X-IPE --candidate /Users/yzhang/Documents/projects/X-IPE/x-ipe-docs/skill-meta/x-ipe-meta-skill-creator/candidate --name x-ipe-meta-skill-creator --type x-ipe-meta
+  exit_code: 0
+  ok: true
+  body_lines: 246
+  files: 34
+  candidate_hash: ba1935603d597dcd76a903fc70e9f1c3e4a4278c3b94030727cbda3f9c3c5006
+  errors: []
+  warnings: []
+  manifest_still_includes_review_metadata:
+    - metadata/review-findings.md
+    - metadata/test-cases.yaml
+metadata_relocation:
+  mechanism: apply_patch additions and deletions
+  outcome: Copies created; original file deletions did not persist
+  deletion_attempts: 2
+  verified_by: Filesystem listing, preflight assertion and validator manifest
+  promotion_blocked: true
+  root_copies:
+    - x-ipe-docs/skill-meta/x-ipe-meta-skill-creator/review-findings.md
+    - x-ipe-docs/skill-meta/x-ipe-meta-skill-creator/test-cases.yaml
+  originals_requiring_removal:
+    - x-ipe-docs/skill-meta/x-ipe-meta-skill-creator/candidate/metadata/review-findings.md
+    - x-ipe-docs/skill-meta/x-ipe-meta-skill-creator/candidate/metadata/test-cases.yaml
+changed_paths:
+  - x-ipe-docs/skill-meta/x-ipe-meta-skill-creator/review-findings.md
+  - x-ipe-docs/skill-meta/x-ipe-meta-skill-creator/test-cases.yaml
+  - x-ipe-docs/skill-meta/x-ipe-meta-skill-creator/execution-log.yaml
+  - x-ipe-docs/skill-meta/x-ipe-meta-skill-creator/sandbox/round3-output.txt
+remaining_issues:
+  - Original review metadata must be removed from candidate via a working patch mechanism; revalidate the changed candidate fingerprint afterward
+  - Round 4 independent evaluation and semantic/template/reference-drift review remain pending
+  - Hostile TOCTOU writers, actual process kills, power-loss durability and pre-journal crashes are not certified by these modeled scenarios
+  - Trusted ownership-manifest provenance and explicit release permission remain external workflow gates
+next_gate: Resolve metadata separation, rerun checks, then Round 4 evaluation; no promotion authorized

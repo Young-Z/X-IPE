@@ -1,0 +1,21 @@
+{
+  ".github/skills/x-ipe-assistant-user-representative-Engineer/SKILL.md": "9b5345998af07821bc70a3056113b4e265c6b06e27082af8945e379a4497c4d0",
+  ".github/skills/x-ipe-meta-skill-creator/scripts/publish_skill.py": "329a7aaf6fbce6f7523d48383accf376f47deaa7fa8d2810a9caf7339ee3de53",
+  ".github/skills/x-ipe-meta-skill-creator/scripts/validate_skill.py": "21fbb19a17e3f8d80657936be66843af55fe047d910fb599831c0571dbab856f",
+  ".github/skills/x-ipe-task-based-change-request/SKILL.md": "6520238484d1796764849a3cf4aa6b33fae604586abe8c49c3382346b525b7df",
+  ".github/skills/x-ipe-task-based-code-implementation/SKILL.md": "5905d2eb578d4ddab3fc10ea072f787b4958bbbac5ab73d515169fa002360518",
+  ".github/skills/x-ipe-task-based-feature-acceptance-test/SKILL.md": "c7f122cf92a7473acb2bf4f08c0576ccd77a69bc59a014215e70c69315a6ba97",
+  ".github/skills/x-ipe-task-based-feature-closing/SKILL.md": "b49abf0c9382ab6b837317a48d88e3118f087f3fd3b35e947c0e04148dae2267",
+  ".github/skills/x-ipe-tool-task-board-manager/scripts/_task_store.py": "46507264ee67371b1f4371e59208e166b4a029d478ca9275db53ccd8f6149150",
+  ".github/skills/x-ipe-tool-task-board-manager/scripts/task_create.py": "edfd94edf6e75be3768775f2bab14c0d76cd94d4851f1a42436321c0b49d35e4",
+  ".github/skills/x-ipe-tool-task-board-manager/scripts/task_ensure.py": "94a0818e1d77cf84396a3db2db761f878e83c43c2a5d7260453984a0ea39682c",
+  ".github/skills/x-ipe-tool-task-board-manager/scripts/task_query.py": "f5352ecf32bc3e146201f682d7f3880e3d0f6fc8b42927df4ddc0080e95ca2b0",
+  ".github/skills/x-ipe-tool-x-ipe-app-interactor/scripts/workflow_get_state.py": "1715e5067efc97bf9eebb709b90291e2bfd92413b150478e62d2ed9fc621b150",
+  ".github/skills/x-ipe-tool-x-ipe-app-interactor/scripts/workflow_update_action.py": "fdf7f8ec3d706acd11ce7019cd5051df0c9ea3c2f8cc60e1751ca5d2d57953a0",
+  "src/x_ipe/static/js/features/workflow-stage.js": "caaf689bac011047abe360c5bb205ea5b9e8fb141238d3d72066b2b0c3de83af",
+  "tests/frontend-js/action-execution-modal-cr001.test.js": "e944904531bfd5bfecbb41afcf4ae50d279824f1e4d2148c67f77bd7bdb69eb7",
+  "tests/frontend-js/workflow-panel-actions.test.js": "0760785c6f5283049eefda84ec9230590357d7b3fdc4c955f6a7d31c712593a4",
+  "tests/test_skill_lifecycle.py": "092df266074e10ea6426f4ccce7f64c6118f2a0a8c1acb1abd3ded5c82f18c6b",
+  "x-ipe-docs/config/tools.json": "6df39210e203507a79023cc9c3d4aff4e93456f63f623e9b01c58a091b49e36d",
+  "x-ipe-docs/config/workflow-template.json": "ab2e1563a0d4a9246b050b7cf779c676035345e78e29d88c10a0d556e20f6db1"
+}

@@ -1,243 +1,108 @@
-# Feature Breakdown - Examples
+# Feature Breakdown Examples
 
-> Reference from SKILL.md: `See [references/examples.md](references/examples.md)`
+## Worked subgoal excerpt — same approved badge requirement
 
----
+Authored document fixture, not autonomous execution or outcome observation.
 
-## Example 1: E-Commerce Platform Feature Breakdown
+| Feature ID | Epic ID | Feature Title | Version | Brief Description | Feature Dependency |
+| --- | --- | --- | --- | --- | --- |
+| FEATURE-061-A | EPIC-061 | Status Badge | v1.0 | Read-only available/unavailable state labels | None |
 
-**Input:** User story or high-level requirement for an e-commerce platform
+| Goal ID | Parent / Source | Stakeholder | Desired Observable Outcome | Contribution / Selection | Success Evidence | Constraints / Non-goals | AC Links | Outcome State |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| US-061-A-01 | FR-061-01; explicit badge request | Operator | Recognize available versus absent current state | FEATURE-061-A supplies readable state; all-required: available and absent-state handling; alternatives: badge selected, text-only deferred/not built | planned UI scenarios for current and absent state; stakeholder observation unavailable | Read-only; no state controls | AC-061-A-01, AC-061-A-02 | not measured |
 
-### Execution Flow
+| Means | Selection | Bound / Rationale |
+| --- | --- | --- |
+| Badge | selected | Approved read-only state display; no controls |
+| Text-only panel | not selected | Alternative means, not an additional feature/dependency |
 
-```
-1. Execute Task Flow from x-ipe-workflow-task-execution skill
+The selected feature contributes to FR-061-01, rather than claiming the badge
+artifact itself is the parent's achieved outcome. No feature per layer; no new
+goal-board columns. Planned AC checks are not verified engineering delivery.
 
-2. Identify Major Capabilities:
-   - Product Management
-   - Shopping Cart
-   - Checkout & Payment
-   - User Accounts
-   - Order Management
+## Domain scenarios
 
-3. Break Down Each Capability:
+Illustrative domain scenarios, not autonomous pilot execution receipts. One
+lifecycle task/readiness owner throughout; no task create/close or successor
+execution in these examples. Actual helper tests use temporary projects only.
 
-   Product Management:
-   - FEATURE-001-A: Product Catalog Display
-   - FEATURE-001-B: Product Search & Filter
-   - FEATURE-001-C: Product Details Page
-   - FEATURE-001-D: Inventory Management
+## 1. Small single-feature registration
 
-   Shopping Cart:
-   - FEATURE-002-A: Add to Cart
-   - FEATURE-002-B: Cart Management (update qty, remove)
-   - FEATURE-002-C: Cart Persistence
+Approved EPIC-061 requirement has six badge ACs and fresh complete context review.
+Reuse what/who/why, scope and zero-conflict decision. One domain <=7 features:
+retain EPIC-061, no second Epic. FEATURE-061-A is a runnable read-only badge MVP
+with direct dependencies [] (or the actual existing prerequisite). Do not invent
+B/C simply to follow a phase scaffold. Create its Epic/Feature folders, populate
+Feature List and detail in selected requirement part, description <=50 words,
+coverage/risk and mockup N/A. Query then register one real Planned feature through
+feature_create.py --feature; verify query readback. New feature uses v1.0.
 
-   Checkout & Payment:
-   - FEATURE-003-A: Checkout Flow
-   - FEATURE-003-B: Payment Integration
-   - FEATURE-003-C: Order Confirmation
+Workflow-mode: gathering actually done with valid source artifacts. Supply
+features-list = that populated part, breakdown-folder = requirements directory,
+and --features [{id: FEATURE-061-A, name: Status Badge, depends_on: []}]. Read
+back done, both exact outputs and one unique entry with untouched prerequisites.
+No downstream refinement action is completed. Free-mode has no workflow write.
+Resume queries board/state and reuses artifacts, not another create or append.
 
-4. Define Dependencies:
+## 2. Multi-Epic new scope
 
-   ```
-   FEATURE-001-A (Catalog) 
-        ↓
-   FEATURE-002-A (Add to Cart) → FEATURE-002-B (Cart Management)
-        ↓                              ↓
-   FEATURE-002-C (Persistence) ←─────────┘
-        ↓
-   FEATURE-003-A (Checkout) → FEATURE-003-B (Payment)
-        ↓
-   FEATURE-003-C (Confirmation)
-   ```
+Intake EPIC-062 spans catalog, cart and checkout with 12 estimated units and
+fresh approved scope. Three natural domain/dependency/team clusters warrant
+three groupings. Retain 062 for catalog, allocate additional collision-checked
+063/064 with intake links after grouping decision. Each Epic has <=7 features.
+Each A is a runnable MVP (catalog listing; usable cart over catalog; minimal
+checkout over cart), not API interfaces without an outcome. B/C add scoped
+search/persistence/provider capabilities. List direct cross-Epic dependencies
+and reasons, validate DAG/topological order and preserve approved deferrals.
+Register actual new Planned IDs and real keyed artifacts; no Draft/Pending
+feature-board status, no manual Markdown board or invented batch operation.
+Return actual epic_ids/count and feature_ids/count for the scoped result only.
 
-5. Update feature status via x-ipe-tool-task-board-manager:
+## 3. Incremental CR with legacy identity
 
-   | ID | Name | Status | Dependencies | Priority |
-   |----|------|--------|--------------|----------|
-   | FEATURE-001-A | Product Catalog | Draft | None | P1 |
-   | FEATURE-001-B | Product Search | Draft | FEATURE-001-A | P2 |
-   | FEATURE-002-A | Add to Cart | Draft | FEATURE-001-A | P1 |
-   | FEATURE-003-A | Checkout Flow | Draft | FEATURE-002-C | P1 |
+Existing FEATURE-005 has completed terminal I/O; FEATURE-028-B is implemented
+settings. Intake EPIC-065 asks for one settings preference. Reuse gathered CR
+impact decisions and refresh only changed settings scope/dependencies. Preserve
+FEATURE-028-B/its original Epic, status, specification and stable ACs outside
+approved delta. Update the owning older part, not arbitrary latest part. No
+FEATURE-065-A unless a separately justified new unit is actually required.
 
-6. Create Feature Folders (under Epic):
-   - x-ipe-docs/requirements/EPIC-001/FEATURE-001-A/
-   - x-ipe-docs/requirements/EPIC-001/FEATURE-001-B/
-   - ... (one folder per feature, under parent Epic)
+Board mutable-field update preserves epic_id/status; matching resume is read-only.
+Already-done workflow breakdown with unchanged dependency graph: verify current
+populated artifacts and prior write evidence without replay. Existing state
+stages remain identical. Changed existing workflow dependencies need supported
+reconciliation or blocked output, not silent JSON edits. Pending breakdown with
+only preexisting workflow IDs cannot be safely completed by installed --features:
+it would append duplicates. Return blocked with real partial links; do not
+invent a successful workflow_action_updated flag.
 
-7. Resume Task Flow from x-ipe-workflow-task-execution skill
-```
+## 4. Genuine split with parent dedup
 
-### Output
+Approved parent FEATURE-010 has 25 ACs. Split runnable minimum listing and separate
+search/filter capabilities under the validated Epic with reserved new suffixes.
+Coverage table maps EVERY parent FR/AC to child ACs. Full coverage plus explicit
+retirement authority: remove parent from active Feature List, retain historical
+section/redirects and update board to Retired via feature_update.py. Query confirms
+history still exists. Only then parent_features_removed includes FEATURE-010.
+No archive/delete operation is invented. Partial coverage of AC-010.25 instead
+retains parent, reports dedup_gaps and does not claim full split completion.
+Existing dependent references/stages require authorized reconciliation before
+retirement; never leave dangling IDs or erase completed execution history.
 
-```yaml
-category: requirement-stage
-next_task_based_skill: Feature Refinement
-require_human_review: Yes
+## 5. Negative/action boundary cases
 
-breakdown_summary: |
-  Identified 10 features across 5 capability areas:
-  - Product Management: 4 features
-  - Shopping Cart: 3 features
-  - Checkout & Payment: 3 features
-  
-dependencies_mapped: Yes
-priority_assigned: Yes
-
-task_output_links:
-  - x-ipe-docs/planning/features/features.json
-  - x-ipe-docs/requirements/EPIC-001/FEATURE-001-A/
-  - x-ipe-docs/requirements/EPIC-001/FEATURE-001-B/
-  - ... (10 feature folders across 3 Epics)
-```
-
----
-
-## Example 2: API Integration Feature Breakdown
-
-**Input:** "Integrate with third-party shipping providers"
-
-```
-1. Analyze Scope:
-   - Single integration point, multiple providers
-   - Need abstraction layer
-
-2. Break Down:
-   - FEATURE-020-A: Shipping Provider Interface
-   - FEATURE-020-B: FedEx Integration
-   - FEATURE-020-C: UPS Integration
-   - FEATURE-020-D: USPS Integration
-   - FEATURE-020-E: Rate Comparison UI
-
-3. Define Dependencies:
-
-   FEATURE-020-A (Interface) ──┬──→ FEATURE-020-B (FedEx)
-                             ├──→ FEATURE-020-C (UPS)
-                             └──→ FEATURE-020-D (USPS)
-                                      ↓
-                             FEATURE-020-E (Rate UI)
-
-4. Output:
-   features_created: 5
-   base_dependency: FEATURE-020-A
-```
-
----
-
-## Example 3: From Change Request (NEW_FEATURE)
-
-**Input:** CR classified as NEW_FEATURE for bulk import
-
-```
-1. Receive from Change Request task:
-   - CR: "Add bulk import to product management"
-   - Classification: NEW_FEATURE
-
-2. Break Down:
-   - FEATURE-025-A: CSV Import Parser
-   - FEATURE-025-B: Import Validation Pipeline
-   - FEATURE-025-C: Import Error Handling
-   - FEATURE-025-D: Import Progress UI
-
-3. Link to Existing:
-   - All depend on FEATURE-004-A (Product Management - existing)
-
-4. Update features.json with new entries (via x-ipe-tool-task-board-manager)
-
-5. Output:
-   source: Change Request
-   features_created: 4
-   linked_to_existing: FEATURE-004-A
-```
-
----
-
-## Example 4: Granularity Guidelines
-
-**When breaking down features, ensure appropriate granularity:**
-
-### Too Coarse ❌
-```
-FEATURE-001: E-Commerce Platform
-  - Scope: Everything
-  - Problem: Impossible to estimate, test, or deliver incrementally
-```
-
-### Too Fine ❌
-```
-FEATURE-001: Add "Add to Cart" Button
-FEATURE-002: Add Cart Icon in Header
-FEATURE-003: Show Item Count in Cart Icon
-  - Problem: Too many dependencies, overhead exceeds value
-```
-
-### Just Right ✓
-```
-FEATURE-005: Add to Cart Functionality
-  - Includes: Button, API call, cart update, UI feedback
-  - Deliverable: User can add products to cart
-  - Testable: Clear acceptance criteria
-  - Estimable: 3-5 story points
-```
-
-### Sizing Guidelines
-
-| Size | Story Points | Characteristics |
-|------|--------------|-----------------|
-| Small | 1-2 | Single component, few tests |
-| Medium | 3-5 | 2-3 components, clear scope |
-| Large | 8-13 | Multiple components, consider splitting |
-| Too Large | 13+ | MUST split into smaller features |
-
----
-
-## Example 5: Parent Feature Deduplication After Split
-
-**Input:** FEATURE-001 (Product Catalog) has 25 ACs and must be split.
-
-### Execution Flow
-
-```
-1. FEATURE-001 split into:
-   - FEATURE-001-A: Product Listing (covers FR-001.1, FR-001.2, FR-001.3)
-   - FEATURE-001-B: Product Search (covers FR-001.4, FR-001.5)
-   - FEATURE-001-C: Product Filtering (covers FR-001.6, FR-001.7, FR-001.8)
-
-2. Dedup Check — Coverage Table:
-
-   | Parent FR/AC | Covered By | Status |
-   |-------------|------------|--------|
-   | FR-001.1 | FEATURE-001-A (FR-001-A.1) | ✅ Covered |
-   | FR-001.2 | FEATURE-001-A (FR-001-A.2) | ✅ Covered |
-   | FR-001.3 | FEATURE-001-A (FR-001-A.3) | ✅ Covered |
-   | FR-001.4 | FEATURE-001-B (FR-001-B.1) | ✅ Covered |
-   | FR-001.5 | FEATURE-001-B (FR-001-B.2) | ✅ Covered |
-   | FR-001.6 | FEATURE-001-C (FR-001-C.1) | ✅ Covered |
-   | FR-001.7 | FEATURE-001-C (FR-001-C.2) | ✅ Covered |
-   | FR-001.8 | FEATURE-001-C (FR-001-C.3) | ✅ Covered |
-
-3. Result: 100% coverage → Remove FEATURE-001 from:
-   - requirement-details.md (parent section removed)
-   - features.json (via feature-board-management: archive FEATURE-001)
-   - Log: "Parent FEATURE-001 fully covered by A/B/C, removed"
-
-4. Output:
-   parent_features_removed: [FEATURE-001]
-   dedup_gaps: []
-```
-
-### Partial Coverage Example
-
-```
-If FR-001.9 (Inventory Display) was NOT covered by any sub-feature:
-
-   | FR-001.9 | — | ❌ Gap |
-
-   Result: Keep FEATURE-001 with note:
-   "Partially split — uncovered: FR-001.9 (Inventory Display)"
-   Flag for human review.
-
-   parent_features_removed: []
-   dedup_gaps: [{feature: FEATURE-001, uncovered: [FR-001.9]}]
-```
+- Explicit broken/escaping/wrong-Epic source blocks; no latest-file fallback.
+- Unresolved material grouping/MVP questions go to human in human mode and
+  bounded representative in full DAO and hybrid. Human and hybrid wait for human
+  completion/route confirmation. Explicit human approval binds in every mode.
+  Clear fresh input needs neither ceremony.
+- Writer may accept absent tags/nonexistent files, skipped/pending in-stage
+  prerequisites or duplicate IDs. Exit 0 is NOT domain completion evidence.
+- Both populated features-list and scalar existing breakdown-folder must match
+  actual required tags/artifacts. Extra tags/folder arrays are real helper errors.
+- No --features or [] for initial done fails MISSING_FEATURES. Empty CR delta is
+  not license to resend existing IDs. Successful unchanged resume only reads.
+- Board corrupt/unreadable inventory is blocking: query/create permissiveness
+  must not overwrite history. Duplicate IDs are resolved by identity query, not
+  renamed replacement. Future promotion requires separate independent review.

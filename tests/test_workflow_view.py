@@ -11,30 +11,41 @@ Note: Frontend JS behavior (DOM rendering, modal interactions, panel expand/coll
       These tests focus on backend/template aspects.
 """
 import os
+import re
 import pytest
 from pathlib import Path
 
 
 class TestWorkflowNavButton:
-    """Verify the workflow mode toggle is in the index.html template."""
+    """Verify the rendered three-mode navigation, not obsolete toggle IDs."""
 
-    def test_index_has_workflow_toggle(self):
-        """AC-001: Mode toggle switch appears in top-menu."""
-        template_path = Path(__file__).parent.parent / "src" / "x_ipe" / "templates" / "index.html"
-        content = template_path.read_text(encoding="utf-8")
-        assert 'id="mode-toggle"' in content
+    @pytest.fixture
+    def page(self, tmp_path):
+        from x_ipe.app import create_app
+        app = create_app({'TESTING': True, 'PROJECT_ROOT': str(tmp_path)})
+        response = app.test_client().get('/')
+        assert response.status_code == 200
+        return response.get_data(as_text=True)
 
-    def test_workflow_toggle_has_switch(self):
-        """AC-002: Toggle uses role=switch button."""
-        template_path = Path(__file__).parent.parent / "src" / "x_ipe" / "templates" / "index.html"
-        content = template_path.read_text(encoding="utf-8")
-        assert 'id="mode-toggle-btn"' in content
+    def test_index_has_workflow_navigation(self, page):
+        """AC-001/003 plus FEATURE-058-E: workflow remains reachable beside Free/KG."""
+        menu = re.search(r'<div class="mode-btn-group"[^>]*>(.*?)</div>', page, re.DOTALL)
+        assert menu is not None
+        assert re.findall(r'id="(btn-mode-[^"]+)"', menu.group(1)) == [
+            'btn-mode-free', 'btn-mode-kg', 'btn-mode-workflow'
+        ]
 
-    def test_workflow_button_has_label(self):
-        """AC-002: Button has label text 'Workflow'."""
-        template_path = Path(__file__).parent.parent / "src" / "x_ipe" / "templates" / "index.html"
-        content = template_path.read_text(encoding="utf-8")
-        assert ">Workflow<" in content
+    def test_workflow_navigation_is_a_clickable_button(self, page):
+        """The actual button is enabled and Free alone is active initially."""
+        button = re.search(r'<button\b([^>]*id="btn-mode-workflow"[^>]*)>(.*?)</button>', page)
+        assert button is not None
+        assert 'disabled' not in button.group(1)
+        assert 'class="mode-btn"' in button.group(1)
+        assert 'class="mode-btn active" id="btn-mode-free"' in page
+
+    def test_workflow_button_has_label(self, page):
+        """AC-002: Label belongs to the Workflow button, not unrelated text."""
+        assert re.search(r'<button\b[^>]*id="btn-mode-workflow"[^>]*>Workflow</button>', page)
 
 
 class TestWorkflowModuleFiles:
@@ -95,13 +106,14 @@ class TestWorkflowScriptInclusion:
 
 
 class TestWorkflowInitHandler:
-    """Verify init.js has the workflow mode toggle handler."""
+    """Verify current navigation wiring; real click/lifecycle tests run in Vitest."""
 
     def test_init_has_workflow_handler(self):
-        """init.js registers click handler for mode-toggle-btn."""
+        """init.js registers the current Workflow button's click handler."""
         init_path = Path(__file__).parent.parent / "src" / "x_ipe" / "static" / "js" / "init.js"
         content = init_path.read_text(encoding="utf-8")
-        assert "mode-toggle-btn" in content
+        assert "document.getElementById('btn-mode-workflow')" in content
+        assert "btnModeWorkflow.addEventListener('click', switchToWorkflow)" in content
 
     def test_init_calls_workflow_render(self):
         """init.js calls workflow.render() on click."""

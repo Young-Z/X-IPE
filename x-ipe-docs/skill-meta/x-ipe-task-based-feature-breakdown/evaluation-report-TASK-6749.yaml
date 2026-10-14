@@ -1,0 +1,67 @@
+evaluation_report:
+  task_id: TASK-6749
+  skill: x-ipe-task-based-feature-breakdown
+  evaluated_on: 2026-10-13
+  scope: resumed candidate-only slice; no production publication or broader-task closure
+  publication_state: candidate_ready
+  version: "3.0.0"
+  candidate_hash: b2bf9246a51e73dde686c3c7c966b623b7d2f0ee56f7b7650404b87c17a42a32
+  validation_receipt: validation-receipt-TASK-6749.json
+  source_revisions: evidence-files-TASK-6749.json
+  execution_receipt: execution-log-TASK-6749.yaml
+  scenario_map: test-cases-TASK-6749.yaml
+  prior_requirement_promotion:
+    receipt: x-ipe-docs/skill-meta/x-ipe-task-based-requirement-gathering/promotion-receipt-TASK-6749.json
+    state: published
+    hash: fda78fe5234e0d054a4b720e0773ed30cac8f1e39a10215ce277882576ab294b
+    candidate_production_receipt_manifest_parity: true
+    modified_in_this_resume: false
+    prior_receipt_tests: {passed: 215, failed: 0, rerun_claimed: false}
+  counts:
+    entry_total_lines: 241
+    entry_body_lines: 237
+    resource_lines: 544
+    package_lines: 785
+    package_files: 8
+    production_entry_lines: 525
+    focused_collected_tests: 87
+    scoped_regressions: {passed: 383, failed: 0}
+    extended_regressions: {passed: 385, failed: 2}
+  package_delta_from_preserved_baseline:
+    added: [references/integration.md]
+    changed: [SKILL.md, references/breakdown-guidelines.md, references/examples.md, references/patterns.md, templates/features.md, templates/requirement-details.md]
+    removed: []
+    retained_unchanged: [templates/specification.md]
+  deterministic_checks:
+    validator: {ok: true, errors: 0, warnings: 0}
+    original_output_keys_order_category_conditional_successor: preserved
+    lifecycle: single common-reference owner; no child task CRUD/Git/successor execution
+    domain: stable IDs and legacy paths; real feature CRUD; vertical MVP; direct DAG; coverage/retirement/parts/mockups retained
+    list_confirmation: human/hybrid human confirmation retained; revision-bound reuse only
+    production_breakdown_matches_baseline: true
+    baseline_prework_plan_prior_log_cases_sandbox: preserved
+    root_bundled_breakdown_action_and_prompt: identical; asserted in focused tests
+  known_failures:
+    - test: tests/test_workflow_template_sync.py::TestWorkflowTemplateSync::test_templates_are_identical
+      cause: unchanged root/bundled workflow templates differ in ideation and validation stages
+      disposition: out-of-scope config synchronization; not fixed or waived
+    - test: tests/test_workflow_template_sync.py::TestCopilotPromptSync::test_prompts_are_identical
+      cause: unchanged bundled prompt has extra ui-labels key
+      disposition: out-of-scope config synchronization; not fixed or waived
+  editor_diagnostics:
+    changed_test_and_template: no errors after list-spacing correction
+    staged_entry: editor reports canonical name versus candidate folder and file-relative lookup of project-root links; installed candidate-aware validator resolves all links with zero errors/warnings
+    staged_entry_disposition: preserve canonical skill name and required root-relative links; do not rename staged package or create production resources to suppress staging diagnostics
+    retained_specification_template: preexisting Markdown formatting diagnostics; unchanged bytes preserved
+  evidence_limits:
+    - Contract assertions do not execute agent grouping/MVP/language/coverage/confirmation reasoning.
+    - Real CLI/API scenarios operate only on temporary projects; no real board or workflow action was changed.
+    - Permissive helper gaps are characterized, not mistaken for domain completion.
+    - No independent review was performed in this resume; separate reviewer must inspect current candidate and evidence.
+    - No blanket application/config compatibility or successful autonomous authoring pilot is claimed.
+  review_gate:
+    independent_review: pending_separate_review
+    required: true
+    promotion_authorized: false
+    publisher_dry_run_or_apply: not_run
+    next_action: separate independent review; resolve findings and affected evidence before any separately authorized promotion

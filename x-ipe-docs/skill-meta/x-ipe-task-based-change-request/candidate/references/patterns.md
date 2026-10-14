@@ -1,164 +1,40 @@
-# Change Request - Patterns Reference
+# Change Request — classification and critical evaluation patterns
 
-> Reference from SKILL.md: `See [references/patterns.md](references/patterns.md)`
+These patterns guide analysis, not hardcoded scoring or permission to execute.
+Inspect actual goal/source/AC/design/code/dependency/pending-CR evidence first.
 
----
+| Pattern | When | Then |
+| --- | --- | --- |
+| Enhancement CR | CSV export, pagination, email validation or dark mode within existing approved goal/boundaries | modification; approved affected docs/AC/means delta, not a new goal merely for UI/API changes |
+| New capability CR | Chat, payments, real-time notifications or mobile platform introduces independent stakeholder outcome/boundary | propose new_feature; approved requirements; actual intake/owner CR, later real allocation |
+| Scope expansion | SSO may be another login method or a separate enterprise provisioning workflow | matrix/source evidence and parent outcome decide; integration alone is not decisive |
+| Multi-feature CR | Audit logging/rate limiting/analytics or improved error handling crosses features | inspect affected callers/outcomes; enabling change may be modification, independent audit outcome may new_feature; propose split if incoherent |
+| Boundary case | Insufficient related feature or contradictory artifacts | bounded real question; no arbitrary effort points, automatic threshold or guessed newest source |
+| CR chain | Import → validation → error report | preserve original owner folder/IDs and check pending CR conflicts; classify each actual delta, not automatically new |
+| Bug report | Safari login crashes against documented behavior | return blocked CR intake and bug-fix suggestion to owner; no third CR enum or silent successor execution |
 
-## Pattern: Enhancement CR
+## Goal distinction and full pipeline
 
-**When:** CR adds capability to existing feature
-**Example:** "Add export to CSV for the existing report"
+A selected means can change without changing the parent's observable outcome.
+A new subgoal can be all-required enabling work for that same outcome; it is not
+automatically a new feature. A different stakeholder benefit may justify a new
+feature, but evaluate existing feature boundary rather than name/size/component.
+New endpoints/screens/data types are impact facts, not sufficient intent evidence.
 
-```
-1. Identify: FEATURE-005 (Reporting) exists
-2. Check: CSV export is within reporting scope
-3. Classify: MODIFICATION (adds to existing workflow)
-4. Action: Update FEATURE-005 specification
-5. Next: Feature Refinement → Technical Design
-```
+For each changed goal/subgoal, preserve source/parent, stakeholder, before/proposed
+outcome, success scenario, constraints/non-goals, all-required children or selected
+alternative, source/story/GWT AC/type and planned validation. Compare all affected
+requirement/spec/design/implementation/test/acceptance/closing/quality evidence.
+Missing evidence remains a gap; do not mandate a complete downstream rerun for
+unaffected scope or manufacture proof of unmeasured stakeholder outcome.
 
-### Real-World Scenarios
+## Decision and application
 
-| Request | Classification | Reasoning |
-|---------|---------------|-----------|
-| "Add dark mode to settings" | MODIFICATION | Settings feature exists, UI preference |
-| "Add email validation" | MODIFICATION | Registration feature exists, same flow |
-| "Add pagination to list" | MODIFICATION | List feature exists, UX improvement |
-
----
-
-## Pattern: New Capability CR
-
-**When:** CR introduces functionality not covered by any feature
-**Example:** "Add real-time notifications"
-
-```
-1. Identify: No notification feature exists
-2. Check: New data models, new UI, new service required
-3. Classify: NEW FEATURE
-4. Action: Update requirement-details.md
-5. Next: Feature Breakdown → creates FEATURE-XXX
-```
-
-### Real-World Scenarios
-
-| Request | Classification | Reasoning |
-|---------|---------------|-----------|
-| "Add chat support" | NEW_FEATURE | Entirely new capability |
-| "Add payment processing" | NEW_FEATURE | New domain, new integrations |
-| "Add mobile app" | NEW_FEATURE | New platform, new architecture |
-
----
-
-## Pattern: Scope Expansion CR
-
-**When:** CR significantly expands existing feature
-**Example:** "Extend user authentication to support SSO"
-
-```
-1. Identify: FEATURE-001 (Authentication) exists
-2. Check: SSO requires new integration, new flow, new data
-3. Classify: MODIFICATION (but major) or NEW FEATURE
-4. Decision: If SSO is a separate workflow → NEW FEATURE
-           If SSO is another login method → MODIFICATION
-5. Present to human for decision
-```
-
-### Decision Criteria
-
-| Factor | Favors MODIFICATION | Favors NEW_FEATURE |
-|--------|--------------------|--------------------|
-| Same user workflow | ✓ | |
-| Same data model | ✓ | |
-| New integration required | | ✓ |
-| Different target users | | ✓ |
-| Reuses existing UI | ✓ | |
-| New navigation/screens | | ✓ |
-
----
-
-## Pattern: Multi-Feature CR
-
-**When:** CR affects multiple existing features
-**Example:** "Add audit logging across the system"
-
-```
-1. Identify: Multiple features affected
-2. Check: Is this cross-cutting concern?
-3. Classify: Usually NEW FEATURE (infrastructure)
-4. Action: Create new feature for audit logging
-5. Note: May require updates to existing features later
-```
-
-### Cross-Cutting Concerns Examples
-
-| CR | Classification | Implementation |
-|----|---------------|----------------|
-| "Add audit logging everywhere" | NEW_FEATURE | Create logging infrastructure |
-| "Add rate limiting to all APIs" | NEW_FEATURE | Create rate limit middleware |
-| "Add analytics tracking" | NEW_FEATURE | Create analytics service |
-| "Improve error messages" | ENHANCEMENT per feature | Update each affected feature |
-
----
-
-## Pattern: Boundary Cases
-
-### When Classification is Unclear
-
-**Approach:**
-```
-1. List facts about the CR
-2. Score against classification criteria
-3. If close (within 2 points): ask human
-4. Document the decision rationale
-```
-
-### Scoring Criteria
-
-| Criteria | MODIFICATION Points | NEW_FEATURE Points |
-|----------|--------------------|--------------------|
-| Uses existing data model | +2 | |
-| Creates new data model | | +2 |
-| Same target users | +1 | |
-| Different target users | | +2 |
-| Extends existing workflow | +2 | |
-| Creates new workflow | | +2 |
-| Reuses existing UI | +1 | |
-| New UI screens | | +1 |
-| Estimated effort < 1 week | +1 | |
-| Estimated effort > 2 weeks | | +1 |
-
-**Threshold:** If difference ≤ 2, consult human for decision.
-
----
-
-## Pattern: CR Chain
-
-**When:** One CR leads to another
-**Example:** "Add bulk import" → "Add import validation" → "Add import error handling"
-
-```
-1. Identify: Initial CR creates new capability
-2. Subsequent CRs: Likely ENHANCEMENT to the first
-3. Strategy: 
-   - First CR: Create feature
-   - Follow-up CRs: Refine same feature
-4. Track: Use same feature folder for all related CRs
-```
-
-### Best Practice
-
-```
-CR-001: Add bulk import         → NEW_FEATURE (FEATURE-015)
-CR-002: Add import validation   → ENHANCEMENT to FEATURE-015
-CR-003: Add import error report → ENHANCEMENT to FEATURE-015
-```
-
-All CRs live in `x-ipe-docs/requirements/EPIC-015/FEATURE-015-A/`:
-```
-EPIC-015/FEATURE-015-A/
-├── specification.md
-├── CR-001.md  (original)
-├── CR-002.md  (enhancement)
-└── CR-003.md  (enhancement)
-```
+One consolidated exact-revision approval covers classification, conflicts and
+proposed solution. Actual human large-scope/changed-contract permission remains
+binding in full DAO. Clear current supplied approval avoids repeated confirmation.
+Changed proposal invalidates the affected decision, not every previous question.
+All target edits follow authority; minor inline versus major retirement/history
+is applied once on both paths where artifacts exist. Preserve original mockups,
+create new version, and retain unaffected IDs/bytes/evidence. No covert goal/AC
+weakening to make implementation pass. Child returns suggestions to one owner.

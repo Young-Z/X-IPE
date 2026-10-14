@@ -211,3 +211,26 @@ IF overall_score >= 8: healthy
 ELSE IF overall_score >= 5: attention_needed
 ELSE: critical
 ```
+
+## Evidence and Applicability Boundaries
+
+The original rubric above is retained. Apply each principle to inspected scope;
+record numerator/denominator, command, revision and actual violations before
+scoring. An empty violation list without evaluation is not a score of ten.
+Coverage thresholds diagnose applicable production-code gaps, not a universal
+release gate or forced infrastructure for skills/documents. Critical approved
+AC/security failures and explicitly mandatory thresholds cannot be waived.
+
+Retain original rounding/status ambiguity for fractional dimension scores as a
+reported compatibility issue; do not silently invent a rounding policy. The
+principles reference calls file-size severity Medium while its importance table
+uses Critical and the template uses High: distinguish severity from scoring
+importance, cite the applicable rubric, and disclose unresolved severity conflict.
+Do not revise source acceptance or hide these original inconsistencies.
+
+N/A in narrative means unavailable/not applicable with a reason unless inspected
+future work supports planned status. Missing intent or current evidence blocks
+the pertinent score/outcome claim; do not exclude unknown dimensions and inflate
+an aggregate, add a scoring dimension, change model enums, or fabricate a metric.
+Delivery and stakeholder outcome use document-local evidence, never these scores.
+See [goal reporting](.github/skills/x-ipe+feature+quality-board-management/references/goal-reporting.md).

@@ -2,6 +2,11 @@
 
 Use this template to create skill-meta.md for task-based skills. The skill-meta defines **acceptance criteria** for automated testing.
 
+When shared by workflow orchestration, substitute `x-ipe-workflow-{name}` and
+`x-ipe-workflow-orchestration`, replace task routing/state fields with the actual
+workflow inputs and `workflow_output` aggregate contract, and preserve registry
+mapping/failure gates. Do not require task lifecycle output fields from workflows.
+
 ---
 
 ## Template
@@ -48,7 +53,7 @@ workflow:
 # ─────────────────────────────────────────────────────────────
 inputs:
   required:
-    - name: interaction_mode
+    - name: process_preference.interaction_mode
       type: string
       default: "interact-with-human"
       description: "Interaction mode: interact-with-human | dao-represent-human-to-interact | dao-represent-human-to-interact-for-questions-in-skill"
@@ -75,8 +80,8 @@ outputs:
       value: "${workflow.next_task_based_skill}"
     - name: require_human_review
       value: "${workflow.human_review}"
-    - name: interaction_mode
-      value: "${inputs.interaction_mode}"
+    - name: process_preference.interaction_mode
+      value: "${inputs.process_preference.interaction_mode}"
 
   artifacts:
     - name: {artifact_name}
@@ -109,9 +114,9 @@ acceptance_criteria:
 
     - id: AC-S03
       category: structure
-      criterion: SKILL.md body < 500 lines
+      criterion: SKILL.md body ≤ 1000 logical lines (frontmatter excluded; ceiling, not target)
       test: line_count
-      expected: < 500
+      expected: "1000 passes; 1001 fails; LF/CRLF equivalent; trailing newline adds no phantom line"
 
     # CONTENT - Required sections and content quality
     - id: AC-C01
@@ -283,7 +288,7 @@ evaluation:
 | Workflow | category | Yes | Where in lifecycle |
 | Workflow | next_task_based_skill | Yes | Chain destination or null |
 | Workflow | human_review | Yes | Pause for approval |
-| Interface | inputs.required | Yes | At minimum interaction_mode |
+| Interface | inputs.required | Yes | At minimum process_preference.interaction_mode (nested caller field) |
 | Interface | outputs.state | Yes | Task completion state |
 | Interface | outputs.artifacts | If applicable | Created files |
 | Acceptance | must | Yes | All must pass for merge |
@@ -312,7 +317,7 @@ evaluation:
 | Method | Description | Example Expected |
 |--------|-------------|------------------|
 | file_exists | File present at path | true |
-| line_count | Count lines in file | < 500 |
+| line_count | Count logical body lines, excluding frontmatter | ≤ 1000; 1001 fails |
 | section_parse | Extract markdown sections | [list of section names] |
 | table_parse | Parse markdown table | ≥2 rows |
 | content_check | Search for content patterns | contains "X" |

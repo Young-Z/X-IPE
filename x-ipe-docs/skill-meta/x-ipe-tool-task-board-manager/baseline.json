@@ -1,0 +1,22 @@
+{
+  "SKILL.md": "17046a6c09bcb536bf21f42c0688422f7eb88e4038d36dc05a886e174ddaaaf9",
+  "scripts/__pycache__/_board_lib.cpython-312.pyc": "b1eb15231a88ac79973cecba81c29958124b5acf750d9b9b4bf51f213dd21c08",
+  "scripts/__pycache__/_board_lib.cpython-313.pyc": "6dadb86eb7c9f684518b78734f5eba0b77c721c9c2c214743f3f4fa1417d59ed",
+  "scripts/__pycache__/feature_create.cpython-312.pyc": "816ff6cc554cf8f296ee84280a9ae0d15e2f276bdbc7a76bc47349f15128d25b",
+  "scripts/__pycache__/feature_query.cpython-312.pyc": "57319ca7fca96b4ffa2bd951be4cb7a19605bf9311465b27722bc7e366b281d3",
+  "scripts/__pycache__/feature_update.cpython-312.pyc": "8730f02435f1baec0d82c48b7044e58f2a72a7fdbc3351391b4f719840f280d0",
+  "scripts/__pycache__/migrate.cpython-312.pyc": "5dbac66ad0f82395204e686c1a96bb39c2c094e19c94768163c84620de61bde5",
+  "scripts/__pycache__/task_archive.cpython-312.pyc": "ec8fdc88ad96d3495704526f5d77d09a9593c96b45f7cc8000d97c75c5f11820",
+  "scripts/__pycache__/task_create.cpython-312.pyc": "b48bd2d1e074fd4f8e1b05541be6a3f292c15626378b4970ca4f18be1be4b795",
+  "scripts/__pycache__/task_query.cpython-312.pyc": "a95582024843441378aa597ed26d9635dc70e649f1fb3530e74ee4eacda9c543",
+  "scripts/__pycache__/task_update.cpython-312.pyc": "3ec219a8666159283436a700056d9990a651100d5a56bacf0dca1761010c80e1",
+  "scripts/_board_lib.py": "9d73e3a7e8f78d4c54415e50a6fb981c38b331b23a152028de0e3053c041f7f3",
+  "scripts/feature_create.py": "2ef6a7fc25df81a8f3b1445fd425eac8938e9b63a44ea6a99cbab4f023f73bb6",
+  "scripts/feature_query.py": "b20db3305afc93057dccd7ae6b8358257452e190b5fa0f32b3db6a460a9dff9c",
+  "scripts/feature_update.py": "cc01c54e3f56fd209eb97024281b47681f13e410d8bf12c7dc8e505295c9f1d1",
+  "scripts/migrate.py": "27c91752e49f40ccaf5b125b794c925431cf37604e1c52e98cde5a1620ddeae6",
+  "scripts/task_archive.py": "c800f6a94d3bf64d8286695e964807e248d2acd1feb40296118c127c61ab1567",
+  "scripts/task_create.py": "a0db423114b1e654c4e715aaa6aca5ba0a5ee3b5a14763fbac142297b8469a08",
+  "scripts/task_query.py": "b7e3b816089795570eb64a7ad0abad10aa2e2fa9975d1a4e819dcf14dd1558b2",
+  "scripts/task_update.py": "75fbf3d5d00096e182de3d41197155951be4c9d900c16969b1cbbc2c58ff5c4d"
+}

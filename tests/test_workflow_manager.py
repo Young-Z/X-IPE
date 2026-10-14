@@ -878,15 +878,53 @@ class TestWorkflowTemplateMigration:
         assert all(item["path"] != "commit deadbee" for item in resolved["deliverables"])
 
 
-class TestWorkflowTracing:
-    """Verify tracing decorators are applied to public methods."""
+@pytest.mark.parametrize("preference,mode", [
+    ({"auto_proceed": "auto"}, "dao-represent-human-to-interact"),
+    ({"interaction_mode": "interact-with-human", "auto_proceed": "auto"}, "interact-with-human"),
+])
+def test_v1_schema_migration_preserves_normalized_settings(
+        workflow_service, sample_workflow, preference, mode):
+    """Schema migration must not discard the normalized global settings."""
+    path = workflow_service._get_workflow_path(sample_workflow)
+    state = json.loads(path.read_text())
+    state["schema_version"] = "1.0"
+    state["stages"] = state.pop("shared")
+    state.pop("features")
+    state["global"] = {"process_preference": preference, "other_setting": "keep"}
+    path.write_text(json.dumps(state))
+    loaded = workflow_service.get_workflow(sample_workflow)
+    assert loaded["schema_version"] == "2.0"
+    assert loaded["global"] == {
+        "process_preference": {"interaction_mode": mode}, "other_setting": "keep"}
+    assert json.loads(path.read_text())["global"] == loaded["global"]
 
-    def test_service_methods_have_tracing(self):
-        """All public methods of WorkflowManagerService should have @x_ipe_tracing."""
-        from x_ipe.services.workflow_manager_service import WorkflowManagerService
-        public_methods = [m for m in dir(WorkflowManagerService) if not m.startswith("_") and callable(getattr(WorkflowManagerService, m))]
+
+class TestWorkflowTracing:
+    """Verify existing runtime tracing, without forcing static validation tracing."""
+
+    @staticmethod
+    def _assert_runtime_tracing(service_class):
+        public_methods = [
+            name for name in dir(service_class)
+            if not name.startswith("_") and name != "validate_template"
+            and callable(getattr(service_class, name))
+        ]
+        assert "get_workflow" in public_methods
         for method_name in public_methods:
-            method = getattr(WorkflowManagerService, method_name)
-            # Check if method has tracing wrapper (has __wrapped__ attribute or tracing metadata)
+            method = getattr(service_class, method_name)
             assert hasattr(method, "__wrapped__") or hasattr(method, "_x_ipe_traced"), \
                 f"Method {method_name} missing @x_ipe_tracing decorator"
+
+    def test_service_methods_have_tracing(self):
+        """Runtime APIs retain tracing; static template validation is excluded."""
+        from x_ipe.services.workflow_manager_service import WorkflowManagerService
+        self._assert_runtime_tracing(WorkflowManagerService)
+
+    def test_missing_runtime_tracing_is_detected(self, monkeypatch):
+        """A real undecorated runtime method must fail the same guard."""
+        from x_ipe.services.workflow_manager_service import WorkflowManagerService
+        monkeypatch.setattr(
+            WorkflowManagerService, "get_workflow", WorkflowManagerService.get_workflow.__wrapped__
+        )
+        with pytest.raises(AssertionError, match="Method get_workflow missing"):
+            self._assert_runtime_tracing(WorkflowManagerService)

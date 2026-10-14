@@ -1,0 +1,21 @@
+{
+  "task_id": "TASK-6749",
+  "state": "published_verified",
+  "method": "user-authorized apply_patch file-scoped publication",
+  "baseline_hash": "bf80e5aa080dae4de0a95428f97a1ea58b079a31ed950149f8ee8b006cfae6e8",
+  "candidate_hash": "96f1f688853aeaac6c5bcd9bdb8dc9be97c6720b0abdbc20d4ade3f915bcdc84",
+  "added": ["references/examples.md", "scripts/_task_store.py", "scripts/task_ensure.py"],
+  "changed": ["SKILL.md", "scripts/migrate.py", "scripts/task_archive.py", "scripts/task_create.py", "scripts/task_query.py", "scripts/task_update.py"],
+  "deleted": [],
+  "protected": "All ten baseline scripts/__pycache__ files; unchanged distributables; all other paths",
+  "recovery": "independent-review.md: Recovery evidence (six verified preimage byte streams in retained transcript)",
+  "generic_publisher": "Dry-run refused unmanaged changes; --apply NOT used",
+  "board_writes": false,
+  "memory_writes": false,
+  "git_operations": false,
+  "lesson_changes": false,
+  "receipt": "publication-receipt.json",
+  "production_tests": {"passed": 364, "failed": 0, "xfailed": 0},
+  "distributable_parity": true,
+  "protected_cache_parity": true
+}

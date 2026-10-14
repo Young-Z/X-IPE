@@ -1,26 +1,36 @@
 ---
 name: x-ipe-tool-refactoring-analysis
-description: Analyze refactoring scope, expand dependencies, and evaluate code quality across 5 dimensions. Use when starting a refactoring initiative or assessing code quality gaps. Triggers on requests like "analyze for refactoring", "evaluate refactoring scope", "assess code quality".
+description: Analyze bounded refactoring scope and verified dependencies against the actual quality goal, assess five perspectives with honest evidence states, and recommend behavior-preserving improvements. Triggers on "analyze for refactoring", "evaluate refactoring scope", "assess code quality".
 ---
 
 # Refactoring Analysis Tool
 
 ## Purpose
 
-AI Agents follow this skill to analyze and expand refactoring scope, then evaluate code quality by:
-1. Checking existing quality baseline
-2. Parsing and iteratively expanding scope via dependency analysis
-3. Evaluating quality across 5 perspectives (requirements, features, tech spec, tests, tracing)
-4. Generating actionable refactoring suggestions with applicable principles
+Produce analysis-only recommendations serving the caller's actual refactoring_purpose,
+with source/parent contribution, inspected baseline, preservation boundaries,
+measured or qualitative success comparison and trade-off. Refactoring is a means,
+not stakeholder gain. Evaluate Requirements, Features, Tech Spec, Test Coverage and
+Tracing with evidence and applicability, not arbitrary numerical quality gates.
 
 ## Important Notes
 
-BLOCKING: This is a **tool skill** — it performs analysis only, no task board interaction.
-CRITICAL: Called by `x-ipe-task-based-code-refactor` as Step 1 of the refactoring workflow.
+BLOCKING: Tool operation only: no task lifecycle, registration, closure, successors,
+approval choreography or execution of refactors. No source/test/config, board, Git
+or app mutation. Write only the caller-authorized analysis report; discovery is
+inspection, not write authority. Return operation_output, not task output.
+CRITICAL: Called by x-ipe-task-based-code-refactor Step 1. A study can finish with
+missing evidence explicitly recorded; required preservation verification gaps
+block later mutation claims, not unrelated read-only analysis.
+No blanket compile or all-green/global coverage gate for skills/documents/analysis.
+No arbitrary weighted score; numeric only from measured inputs with comparable
+rubric, method, same scope and denominator. Otherwise actual null, report not measured.
 
 ## About
 
-Refactoring analysis is the foundation of safe refactoring. It discovers the true scope of changes by iteratively expanding from initial files to all related code, then evaluates how well documentation, specs, and tests align with the actual code state.
+Refactoring analysis distinguishes authorized target from inspected dependency
+closure. Goal-relevant evidence bounds discovery; it does not promise all hidden
+dependencies found. Preserve baseline facts and unknowns instead of repairing them.
 
 **Key Concepts:**
 - **Scope Expansion** — Iteratively discover related files via imports, shared interfaces, and coupling
@@ -49,7 +59,7 @@ input:
   scope:
     scope_level: "feature | custom"
     feature_id: "{FEATURE-XXX}"       # required when scope_level=feature
-    refactoring_purpose: "<why refactoring is needed>"
+    refactoring_purpose: "<named quality goal, parent contribution and comparison>"
     files: []                          # optional when scope_level=feature (auto-resolved)
     modules: []                        # optional when scope_level=feature (auto-resolved)
     description: "<user's refactoring intent>"
@@ -74,23 +84,22 @@ input:
   <field name="scope.feature_id">
     <steps>
       1. IF caller provides feature_id → use provided value
-      2. IF scope_level == "feature" AND feature_id is null → ASK human
+      2. IF scope_level == "feature" AND feature_id is null → return FEATURE_NOT_FOUND to caller
       3. IF scope_level == "custom" → set to null
     </steps>
   </field>
 
   <field name="scope.files">
     <steps>
-      1. IF scope_level == "feature" → auto-resolve from feature artifacts:
-         a. Read specification.md → extract file references
-         b. Read technical-design.md → extract component files
-         c. Collect test files referenced in technical design
-      2. IF scope_level == "custom" AND caller provides files[] → use provided list
-      3. IF scope_level == "custom" AND files[] is empty → ASK human
+      1. Retain explicit caller files; feature links may supplement inspection, not override them.
+      2. Resolve explicit selected links first, declared artifact links, unique EPIC/FEATURE then legacy feature folder. Check identity, anchors, kind/content, containment and symlink escape; explicit broken/ambiguous link blocks, not fallback.
+      3. Extract referenced component/test paths from specification/design. Custom scope needs readable files or identifiable modules; unresolved material scope returns error to caller, no tool-level human workflow.
     </steps>
   </field>
-
-  <field name="quality_baseline_path" source="default: x-ipe-docs/planning/project-quality-evaluation.md" />
+  <field name="scope.modules" source="Caller modules or verified ownership from manifests/design; never siblings by proximity" />
+  <field name="scope.refactoring_purpose"><steps>Retain actual goal/source/parent, stakeholder contribution, constraints and preservation. A missing pertinent comparison is a gap; do not invent metrics or substitute file size for intent.</steps></field>
+  <field name="scope.description" source="Caller boundaries/exclusions and study intent; no scope expansion authority" />
+  <field name="quality_baseline_path"><steps>Use exact caller path or declared default; missing default is exists=false, not failure. Validate selected path/readability/identity. Historical report is not fresh evidence without comparable method/scope/revisions.</steps></field>
 </input_init>
 ```
 
@@ -100,15 +109,15 @@ input:
 <definition_of_ready>
   <checkpoint required="true">
     <name>Scope provided</name>
-    <verification>scope_level set; if feature: feature_id exists; if custom: files[] non-empty</verification>
+    <verification>full_analysis and feature/custom identity, readable target roots/files/modules, actual purpose and report authorization resolved; missing material input returns error to caller</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>Target code accessible</name>
     <verification>All listed files/modules can be read from filesystem</verification>
   </checkpoint>
   <checkpoint required="true">
-    <name>Code compiles without errors</name>
-    <verification>Run build/lint to confirm no pre-existing failures</verification>
+    <name>Evidence applicability resolved</name>
+    <verification>Domain/risk checks available, unavailable or not applicable; baseline failures recorded, not repaired or a prerequisite to read-only study</verification>
   </checkpoint>
 </definition_of_ready>
 ```
@@ -122,77 +131,35 @@ input:
 ```xml
 <operation name="full_analysis">
   <action>
-    Phase 1 — Baseline Check:
-      1. CHECK for quality evaluation at quality_baseline_path
-      2. IF exists: READ report, EXTRACT baseline data (scores, violations, gaps)
-      3. IF not exists: SET quality_baseline.exists = false
-
-    Phase 2 — Parse & Expand Scope:
-      1. IF scope_level == "feature":
-         a. RESOLVE feature artifacts from x-ipe-docs/requirements/EPIC-XXX/FEATURE-XXX/
-         b. READ specification.md → extract file references
-         c. READ technical-design.md → extract component files, module boundaries
-         d. POPULATE files[] and modules[] from resolved artifacts
-      2. VALIDATE scope (files exist, modules identifiable)
-      3. SCOPE EXPANSION LOOP (max 10 iterations):
-         a. FOR EACH file: ANALYZE imports/dependencies
-         b. FOR EACH module: IDENTIFY sibling/parent/child modules, assess coupling
-         c. REFLECT: check hidden dependencies, config files, test files
-         d. LOG expansion (iteration, files added, reason)
-         e. REPEAT until no new items found OR iteration > 10
-
-    Phase 3 — Evaluate Quality (5 perspectives):
-      When scope_level=feature, use feature_id as primary anchor.
-      3a. Requirements: SEARCH x-ipe-docs/requirements/**/*.md, compare with code, identify gaps
-          Gap types: undocumented | unimplemented | deviated
-      3b. Features: READ specification.md, compare behavior, identify gaps
-          Gap types: missing | extra | deviated
-      3c. Tech Spec: READ technical-design.md, compare structure/interfaces/patterns
-          Gap types: structure | interface | data_model | pattern
-      3d. Test Coverage: RUN coverage tool, analyze line/branch coverage
-          Gap types: business_logic | error_handling | edge_case
-      3e. Tracing: SCAN for @x_ipe_tracing decorators, check coverage and redaction
-          Gap types: untraced | unredacted | wrong_level
-      CRITICAL: Evaluate ALL 5 perspectives even if docs missing (set status: not_found)
-
-    Phase 4 — Generate Suggestions:
-      1. CONSULT TOOL SKILLS (config-filtered):
-         a. DISCOVER: Scan .github/skills/x-ipe-tool-implementation-*/ for available tools
-         b. READ CONFIG: Read x-ipe-docs/config/tools.json → stages.validation.refactoring_analysis
-            - IF section missing/empty → config_active = false (all tools enabled)
-            - ELSE → config_active = true (opt-in filtering); force-enable general
-         c. FILTER: IF config_active → only ENABLED tools participate
-         d. FOR detected tech_stack: read matched tool's "Built-In Practices"
-      2. ANALYZE quality gaps → derive suggestion categories
-      3. SCAN code for principle violations (SRP, DRY, KISS, YAGNI, SoC)
-      4. CROSS-REFERENCE gaps against tool built-in practices:
-         - IF tool already enforces a practice → mark gap as "auto-enforced by tool"
-         - IF tool provides conventions → reference them in suggestion
-      5. PRIORITIZE into primary (MUST) and secondary (nice-to-have) principles
-      6. FORMULATE specific, measurable goals with priority and rationale
-      7. DEFINE target structure and constraints (backward compat, API stability)
-      BLOCKING: Every suggestion must trace back to a documented gap
-
-    Phase 5 — Compile Output:
-      1. CALCULATE dimension scores (1-10): score = 10 - SUM(violations × weights), clamped 1-10
-      2. DERIVE status: 8-10 = aligned, 6-7 = needs_attention, 1-5 = critical
-      3. CALCULATE overall_quality_score (weighted avg: req 0.20, feat 0.20, tech 0.20, test 0.20, tracing 0.10, code 0.10)
-      4. GENERATE report to x-ipe-docs/refactoring/analysis-{context}.md
-      5. SELF-REVIEW: check for missing content, inconsistencies
+    1. Inspect caller goal/subgoal/source/parent, constraints/non-goals and preservation/story/AC/type. Record all-required checks versus selected alternatives. Missing intent blocks pertinent outcome claims, not unrelated analysis. Recommendations are not achieved improvements or stakeholder observation.
+    2. Read scoped quality baseline; retain date, original facts/gaps/violations and provenance. Recheck changed evidence, do not treat absent report as zero score or reuse stale results as fresh.
+    3. Expand inspection using bounded frontier/visited algorithm in detailed procedures: actual imports/inverse callers/shared types/state/config/tests/docs, justified goal-risk edges, containment and unresolved external/dynamic dependencies. At most 10 passes; distinguish stable closure from capped/incomplete. Preserve actual known dependencies with their correct project paths. No write scope expansion.
+    4. Evaluate all five perspectives, including absent/not applicable states. Requirements: undocumented/unimplemented/deviated; Features: missing/extra/deviated; Tech Spec: structure/interface/data_model/pattern; Test Coverage: business_logic/error_handling/edge_case; Tracing: untraced/unredacted/wrong_level. Distinguish not_found, not_measured, not_applicable and failed from verified aligned/needs_attention/critical findings. Observe tracing_enabled/infrastructure and existing redaction, no forced setup. Run only applicable scoped checks with commands/exits/hashes; no fake coverage or repair.
+    5. Consult configuration-filtered semantically matched practice excerpts sequentially, metadata first; no full loading of all enabled tools. Use existing analysis configuration, not execution permission. Reference practices as guidance, not automatically enforced results.
+    6. Each suggestion traces an inspected gap/source/revision to caller goal/parent, baseline, selected means, success evidence, preservation and trade-off. Prioritize by actual risk and contribution, not smell totals. SOLID/DRY/KISS/YAGNI/SoC are candidate means; size alone is not a defect or useful success criterion. Behavior deviations are findings for owner, not authorization to rewrite specs or repair source.
+    7. Fill original operation_output with actual scope/purpose/baseline/findings/goals/principles/report/errors and domain fields. Numeric only from measured inputs and comparable justified rubric; otherwise null with not measured reason. No synthetic weighted aggregate or scores derived from missing docs. Generate only authorized analysis report, self-check links/scope/trace/evidence freshness and exact schema; return once to caller.
   </action>
   <constraints>
-    - BLOCKING: Scope expansion must iterate until stable (no new items) or cap at 10
+    - BLOCKING: Scope expansion must terminate stable or at 10 with incomplete frontier disclosed, never false closure
     - BLOCKING: Every suggestion must trace to a documented gap
     - CRITICAL: Constraints must include backward compatibility and API stability
     - MANDATORY: All markdown links use project-root-relative paths
   </constraints>
   <output>
-    refactoring_scope, code_quality_evaluated, refactoring_suggestion, refactoring_principle
+    operation_output with quality_baseline, refactoring_scope, code_quality_evaluated, refactoring_suggestion, refactoring_principle, report_path and errors
   </output>
 </operation>
 ```
 
 ## Output Result
+
+Preserve original operation_output keys and caller-supplied domain extensions.
+Scores are number | null, never string sentinels; percent measurements retain
+legacy percentage strings or actual null. Explicit nullable/evidence-status delta
+is documented in the complete schema; consumers rejecting it are a disclosed
+compatibility gap, not coerced success. success means the authorized analysis
+deliverable was produced, not all perspectives aligned or refactor approved.
+Missing required analysis inputs/output fails with errors and actual partial result.
 
 ```yaml
 operation_output:
@@ -200,7 +167,7 @@ operation_output:
   result:
     quality_baseline:
       exists: true | false
-      overall_score: "<1-10>"
+      overall_score: "<number 1-10 | null>"
     refactoring_scope:
       scope_level: "feature | custom"
       feature_id: "{FEATURE-XXX or null}"
@@ -210,11 +177,11 @@ operation_output:
       dependencies: [<identified dependencies>]
       scope_expansion_log: [<log entries>]
     code_quality_evaluated:
-      requirements_alignment: { score: "<1-10>", status: "<aligned|needs_attention|critical>", gaps: [] }
-      specification_alignment: { score: "<1-10>", status: "<aligned|needs_attention|critical>", gaps: [] }
-      test_coverage: { score: "<1-10>", line_coverage: "<XX%>", critical_gaps: [] }
-      code_alignment: { score: "<1-10>", file_size_violations: [], solid_assessment: {}, kiss_assessment: {} }
-      overall_quality_score: "<1-10>"
+      requirements_alignment: { score: "<number 1-10 | null>", status: "<evidence status>", gaps: [] }
+      specification_alignment: { score: "<number 1-10 | null>", status: "<evidence status>", gaps: [] }
+      test_coverage: { score: "<number 1-10 | null>", line_coverage: "<percentage string | null>", critical_gaps: [] }
+      code_alignment: { score: "<number 1-10 | null>", file_size_violations: [], solid_assessment: {}, kiss_assessment: {} }
+      overall_quality_score: "<number 1-10 | null>"
     refactoring_suggestion:
       summary: "<high-level description>"
       goals: [{ goal: "<specific goal>", priority: "<high|medium|low>", rationale: "<why>" }]
@@ -227,7 +194,10 @@ operation_output:
   errors: []
 ```
 
-**Evaluation Thresholds:** Line Coverage ≥80%, File Size ≤800 lines, Function Size ≤50 lines
+Read complete schema for five perspective records and preserved domain fields.
+Legacy quality-board thresholds (coverage 80%, files 800, functions 50) are context
+only when an applicable authoritative rubric adopts them; not universal gates,
+proof of defects, permission to split, or the separate skill body's 1,000-line cap.
 
 ## Definition of Done
 
@@ -235,19 +205,19 @@ operation_output:
 <definition_of_done>
   <checkpoint required="true">
     <name>Scope expansion completed</name>
-    <verification>Loop terminated with no new items or at iteration cap</verification>
+    <verification>Verified edges and authorized versus inspected paths; stable or capped/incomplete frontier disclosed without claiming all hidden dependencies found</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>All 5 quality perspectives evaluated</name>
-    <verification>Requirements, features, tech spec, test coverage, tracing all have status and gaps</verification>
+    <verification>Requirements, features, tech spec, test coverage, tracing each have applicability/status/gaps/evidence and unavailable versus failed disposition; numeric claims justified or null</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>Suggestions generated with principles</name>
-    <verification>refactoring_suggestion and refactoring_principle populated</verification>
+    <verification>Each useful suggestion has source/gap/goal/baseline/success/preservation/trade-off; no forced suggestion if no justified gap; retained original result contract</verification>
   </checkpoint>
   <checkpoint required="true">
     <name>Analysis report generated</name>
-    <verification>Report at x-ipe-docs/refactoring/analysis-{context}.md exists</verification>
+    <verification>Authorized report exists with current hashes, scoped evidence, missing/failed checks and outcome limits; no source mutation or task workflow</verification>
   </checkpoint>
 </definition_of_done>
 ```
@@ -256,15 +226,19 @@ operation_output:
 
 | Error | Cause | Resolution |
 |-------|-------|------------|
-| `SCOPE_EMPTY` | No files provided or resolved | Ask caller for file paths |
+| `SCOPE_EMPTY` | No readable target files/modules resolved | Return bounded missing input to caller |
 | `FEATURE_NOT_FOUND` | Feature artifacts not at expected path | Verify feature_id, check x-ipe-docs/requirements/ |
-| `CIRCULAR_DEPS` | Scope expansion exceeds 10 iterations | Warn about circular dependencies, cap scope |
-| `BUILD_FAILURE` | Code doesn't compile before analysis | Fix build errors before analysis |
+| `CIRCULAR_DEPS` | Verified cyclic edges | Retain edges and visited termination; cycle need not fail analysis |
+| `SCOPE_LIMIT` | Ten passes or approved inspection boundary leaves frontier | Report incomplete frontier; fail only if required analysis deliverable cannot be satisfied |
+| `BUILD_FAILURE` | Applicable executed check fails | Record command/exit/revision; continue read-only analysis; no source repair |
+| `EVIDENCE_UNAVAILABLE` | Required measurement/check inaccessible | Distinguish unavailable from executed failure; return limits for owner |
+| `SOURCE_INVALID` | Explicit target/link escapes, is ambiguous or unreadable | Fail pertinent analysis with actual partial evidence, no silent fallback |
+| `CONFIG_INVALID` | Selected consultation configuration is unreadable, malformed or has non-boolean tool flags | Return path/key error to caller with partial analysis; no consultation, config repair or permissive fallback |
 
 ## References
 
 | File | Purpose |
 |------|---------|
-| [references/detailed-procedures.md](.github/skills/x-ipe-tool-refactoring-analysis/references/detailed-procedures.md) | Detailed sub-steps, scoring formulas, gap definitions |
+| [references/detailed-procedures.md](.github/skills/x-ipe-tool-refactoring-analysis/references/detailed-procedures.md) | Bounded discovery, evidence, configuration and recommendation procedures |
 | [references/output-schema.md](.github/skills/x-ipe-tool-refactoring-analysis/references/output-schema.md) | Complete output data model schema |
 | [references/examples.md](.github/skills/x-ipe-tool-refactoring-analysis/references/examples.md) | Concrete usage examples |

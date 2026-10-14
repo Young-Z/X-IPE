@@ -1,3 +1,8 @@
+# Historical scenarios — superseded for TASK-6749; NOT current acceptance criteria.
+# Retained for interpreting execution-log.yaml only. Obsolete phase/line/mode
+# assertions below must not be used for the staged candidate or promotion.
+# Current scenarios: test-cases-TASK-6749.yaml; executable suite:
+# tests/test_skill_pipeline_refactor.py. Current skill-meta.md is authoritative.
 # ═══════════════════════════════════════════════════════════
 # Test Cases for x-ipe-task-based-requirement-gathering
 # Generated from skill-meta.md acceptance criteria

@@ -1,116 +1,72 @@
-# Task Execution Guideline - Examples
+# Shared lifecycle examples
 
-## Example: "Implement the user login feature"
+## Goal-aware adoption example (illustrative, not execution evidence)
 
-### Step 1: Planning
+An adopting refinement child maps source FR-061-01 to story US-061-A-01 and
+GWT AC-061-A-01/02 in its existing specification. A badge is the output;
+an operator distinguishing available from unavailable state is the intended
+outcome. Planned UI checks are not yet verified engineering delivery, and
+stakeholder outcome is not measured. An acceptance child can later verify UI
+delivery without asserting operator observation. A changed parent goal invokes
+bounded authorized CR replanning and invalidates affected evidence only.
+An unmigrated child still needs explicit adoption/ownership reconciliation.
 
-```
-Match: "implement" → Code Implementation
-Category: feature-stage
-Description: "Implement user login feature with authentication"
+## Lifecycle scenarios
 
-MANDATORY: Create tasks on board BEFORE proceeding
-→ Load x-ipe-tool-task-board-manager skill
-→ Create: TASK-001 (Code Implementation) - status: pending
-→ Create: TASK-002 (Feature Closing) - status: pending
-→ Verify all tasks visible via x-ipe-tool-task-board-manager query
-```
+## Direct bug-fix entry with supplied task
 
-### Step 2: DoR
+Human invokes a task skill with TASK-123 and existing approved context. Child
+loads workflow and common lifecycle contract, enters Orient/Plan once. The owner
+queries/ensures TASK-123 with exact original role/task_type/description; matching
+in_progress returns created=false, preserving timestamps/outputs. The entry
+returns readiness to the child, not a recursive dispatch. Child runs domain TDD
+and returns task_completion_output. Owner verifies current source/test hashes,
+records only authorized status and stops at the configured boundary. Foreign
+ownership/context blocks without changes; completed ensure never reruns work.
 
-```
-[pass] Query task board via x-ipe-tool-task-board-manager
-[pass] Find TASK-001 in Active Tasks section
-[pass] Confirm status: pending (valid for starting)
-[pass] Git repository initialized
-→ Update TASK-001 status: pending → in_progress
-```
+## Three real decision policies
 
-### Step 3: Execute
+Human mode: ask a real scope question and wait; after verified work, show outputs
+and wait for completion/next-task confirmation. No ceremonial questions for clear
+inputs. Full DAO: send bounded message_context to representative, consume
+instruction_units and execution_plan, select only an authorized successor after
+Verify/Record. Hybrid: actual within-skill questions use bounded DAO guidance;
+completion and routing wait for human confirmation, matching the current
+DAO Inner-Skill Only UI/specification. Domain-required approval remains human;
+a representative's guidance cannot supply missing scope or release authority.
+Re-read mode source before routing, including changes from DAO to human.
 
-```
-Load: x-ipe-task-based-code-implementation
-Work: Write code, tests
-Output:
-  status: completed
-  next_task_based_skill: Feature Closing
-  require_human_review: false
-  task_output_links: [src/auth/login.ts, tests/auth/login.test.ts]
-  feature_id: FEATURE-001
-  feature_phase: Code Implementation
-```
+## Small free-mode change
 
-### Step 4: Closing
+An approved small change has one linked note with scope/acceptance/design/impact
+sections and failing/passing test evidence, not four speculative future tasks.
+DoR, TDD and fresh verification still apply. Larger TASK-6749 stays in_progress
+when this slice is candidate_ready awaiting review. No app action is marked done
+or skipped; no claim that UI mandatory gates already support combined artifacts.
 
-```
-Load: x-ipe-tool-task-board-manager → Update TASK-001 to completed
-Load: x-ipe-tool-task-board-manager → Update feature status
-Output:
-  category_level_change_summary: "FEATURE-001 updated to Done Code Implementation"
-```
+## Workflow implementation action
 
-### Step 5: DoD
+Resolve app action implementation from workflowStage.ACTION_MAP; required tags
+come from workflow-template.json. Tool choice uses implement.code_implementation
+in tools.json. Pass the existing workflow.name/action and feature_id. Verify
+features[].implement.actions.implementation has done and real keyed impl-files /
+impl-folder artifacts after installed writer success. in_progress/skipped/failed,
+missing workflow, wrong feature, empty deliverables or stale design/test hashes
+block completion. Do not make prerequisite technical_design skipped to unlock it.
 
-```
-[pass] Board updated
-[pass] Feature board updated
-Output standard summary
-```
+## Dirty Git and revision freshness
 
-### Step 6: Routing
+Existing staged/untracked foreign changes are protected. Wrong configured branch
+with dirty work blocks branch switching; no stash, reset, pull or Git commit
+default. A user-approved commit is limited to explicit owned paths after index
+and diff review; foreign staged changes block it. No implicit push in DAO.
+Editing a design, implementation or test after a passing report invalidates the
+affected evidence; rerun those checks before completion or authorized routing.
 
-```
-interaction_mode = dao-represent-human-to-interact, next_task_based_skill = Feature Closing
-→ Start TASK-002 from Step 2
-```
+## Candidate review boundary
 
----
-
-## Request Matching Examples
-
-| Request Pattern | Task-Based Skill |
-|-----------------|-----------|
-| "ideate", "brainstorm", "refine idea", "analyze my idea" | Ideation |
-| "create mockup", "visualize idea", "prototype UI", "design mockup" | Idea Mockup |
-| "create architecture", "design system", "architecture diagram", "system design" | Idea to Architecture |
-| "share idea", "convert to ppt", "make presentation", "export idea" | Share Idea |
-| "new feature", "add feature" | Requirement Gathering |
-| "break down", "split features" | Feature Breakdown |
-| "refine", "clarify requirements" | Feature Refinement |
-| "design", "architecture" | Technical Design |
-| "implement", "code", "build" | Code Implementation |
-| "playground", "demo", "test manually" | Human Playground |
-| "close feature", "create PR" | Feature Closing |
-| "fix bug", "not working" | Bug Fix |
-| "refactor", "restructure", "split file", "clean up code", "improve code quality" | Code Refactor |
-| "change request", "CR", "modify feature", "update requirement" | Change Request |
-| "set up project", "initialize" | Project Initialization |
-
----
-
-## Git Strategy Detailed Rules
-
-### `main-branch-only`
-
-- Do NOT create any branches
-- All commits go directly to the main branch
-- No PRs needed — code lands on main immediately
-- `git push` pushes to main
-
-### `dev-session-based`
-
-- BLOCKING: Validate git identity before resolving branch name:
-  → Run: `git config user.name` and `git config user.email`
-  → Reject placeholder values: `"Your Name"`, `"you@example.com"`, empty, or any value matching common defaults
-  → IF placeholder detected: STOP and ask user to provide their actual git name/email
-  → Do NOT proceed with branch creation until valid identity confirmed
-- Resolve dev branch name from git identity (NOT agent nickname):
-  → Run: `git config user.name` (or `git config user.email` if user.name is empty)
-  → Sanitize: lowercase, replace spaces with hyphens, remove special chars
-  → Branch name: `dev/{sanitized_git_user_name}`
-- On first task execution, check if `dev/{git_user_name}` branch exists
-  - If not → create it from main: `git checkout -b dev/{git_user_name}`
-  - If exists → switch to it: `git checkout dev/{git_user_name}`
-- All work happens on this branch
-- On feature close → push branch, create PR targeting main
-- Branch persists across features (not deleted after PR)
+Structural validation and temporary helper tests support candidate_ready, not
+release readiness. Reviewer receives candidate hash, source/test consumer hashes,
+exact delta, limitations and deferred child/creator adoption. Review must match
+the current revision. No live child, template, app schema, board or Git mutation
+is inferred from drafting the common contract.

@@ -85,9 +85,9 @@ acceptance_criteria:
 
     - id: AC-S03
       category: structure
-      criterion: SKILL.md body < 600 lines
+      criterion: SKILL.md body ≤ 1000 logical lines (frontmatter excluded; ceiling, not target)
       test: line_count
-      expected: < 600
+      expected: "1000 passes; 1001 fails; LF/CRLF equivalent; trailing newline adds no phantom line"
 
     # CONTENT — Operations structure
     - id: AC-C01

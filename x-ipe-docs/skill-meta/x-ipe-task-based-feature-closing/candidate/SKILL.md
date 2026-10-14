@@ -1,396 +1,174 @@
 ---
 name: x-ipe-task-based-feature-closing
-description: Close completed feature and create pull request. Use when feature is implemented, tested, and ready to ship. Provides procedures for final verification, PR creation, and documentation. Triggers on requests like "close feature", "create PR", "ship feature".
+description: Close one implemented and accepted feature with source-goal/subgoal/AC-to-current-evidence verification, truthful delivery and outcome gaps, proportionate independent review and bounded documentation corrections. Release or PR work requires explicit authority. Use when a feature is ready for final verification or authorized release. Triggers on requests like "close feature", "create PR", "ship feature".
 ---
 
 # Task-Based Skill: Feature Closing
 
 ## Purpose
 
-Close a completed feature and ship it by:
-1. Verifying all acceptance criteria are met
-2. Reviewing code to sync documentation artifacts (specification, technical design, tests)
-3. Updating project files (e.g., README) if needed
-4. Running refactoring analysis scoped to the feature
-5. Creating a pull request with proper description
-6. Outputting completion summary with refactoring recommendations
-
----
+Close one approved feature, not merely finish activities:
+1. Verify goals → subgoals → all scoped ACs → actual current acceptance evidence.
+2. Distinguish verified engineering delivery from observed benefits and outcome gaps.
+3. Review only relevant risks and correct documentation that would mislead a reader.
+4. Return original outputs and bounded release/next-feature recommendations to one owner.
 
 ## Important Notes
 
-BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skill.
+BLOCKING: Load `x-ipe-workflow-task-execution` and the
+[common lifecycle contract](.github/skills/x-ipe-workflow-task-execution/references/lifecycle.md).
+Direct entry calls Orient/Plan for supplied task/original context without recursively dispatching
+this skill; normal entry reuses readiness. One feature only, one owner for
+registration, task/category/feature/app updates, Git and the single next boundary.
+No child task creation, duplicate completion, successor execution or auto playground.
 
-**Note:** If Agent does not have skill capability, go to `.github/skills/` folder to learn skills. SKILL.md is the entry point.
+BLOCKING: Adopt the [goal contract](.github/skills/x-ipe-workflow-task-execution/references/goal-contract.md)
+in the existing closing report. Preserve source/parent/story/subgoal IDs,
+Given/When/Then criteria, original assertions and test types, all-required branches
+and bounded selected alternatives. No invented goals/KPIs/targets/manual observation,
+stakeholder approval or achieved benefits. Actual stakeholder/context observation
+is distinct from passing tests, fixtures, document review or DAO guidance.
+Outcome not measured is an explicit gap, not automatic failed delivery. Missing
+intent blocks only the pertinent claim; label legacy so-that inference with anchor.
 
-**BLOCKING: Single Feature Only.** This skill operates on exactly ONE feature at a time. Do NOT batch or combine multiple features in a single execution. If multiple features need processing, run this skill separately for each feature.
+CRITICAL: Reuse fresh suitable acceptance evidence with same relevant hashes and
+current environment; not run twice just because closing follows acceptance.
+Hash/coverage consistency is necessary, not semantic proof. Inspect actual
+execution/review artifacts and original assertions; stale/partial/blocked evidence
+blocks affected delivery, rerun only changed or unproven dependent scope through
+authorized acceptance capability. UI requires actual browser navigation/feature
+trigger/console/all assertions, not source/jsdom review or invented manual GWT type.
+API/CLI/library/integration/structured evidence retains applicable actual boundaries.
 
-IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-interact"`, NEVER stop to ask the human. Instead, call `x-ipe-assistant-user-representative-Engineer` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
+CRITICAL: No automatic commit, push, PR, branch switch, stash/reset or broad staging.
+Uncommitted delivery may close when approved scope is engineering-only. Explicit
+release scope without permission/evidence is blocked, not silently waived. DAO
+cannot grant release or human approval. Respect existing Git strategy and dirty
+baseline; owner alone performs separately authorized exact-path operations.
 
----
+Read [integration](.github/skills/x-ipe-task-based-feature-closing/references/integration.md),
+[report scaffold](.github/skills/x-ipe-task-based-feature-closing/templates/closing-report.md),
+and [examples](.github/skills/x-ipe-task-based-feature-closing/references/examples.md).
+Keep both original [PR](.github/skills/x-ipe-task-based-feature-closing/references/templates/pr-template.md)
+and [changelog](.github/skills/x-ipe-task-based-feature-closing/references/templates/changelog-template.md)
+templates. Instantiate only actual authorized applicable facts; legacy playground
+checkbox is N/A without explicit request, not mandatory new work or fake tested state.
 
 ## Input Parameters
 
 ```yaml
 input:
-  # Task attributes (from task board)
   task_id: "{TASK-XXX}"
   task_based_skill: "x-ipe-task-based-feature-closing"
-
-  # Execution context (passed by x-ipe-workflow-task-execution)
-  execution_mode: "free-mode | workflow-mode"  # default: free-mode
+  execution_mode: "free-mode | workflow-mode"
   workflow:
-    name: "N/A"  # workflow name, default: N/A
-    extra_context_reference:  # optional, default: N/A for all refs
+    name: "N/A"
+    action: "feature_closing"
+    extra_context_reference:
       specification: "path | N/A | auto-detect"
       refactor-report: "path | N/A | auto-detect"
-
-  # Task type attributes
   category: "feature-stage"
   next_task_based_skill:
     - skill: "x-ipe-task-based-feature-refinement"
-      condition: "Start next feature from backlog"
+      condition: "Start the next unstarted feature from backlog. Continue the feature-by-feature pipeline (refinement → design → implementation → testing → closing)."
   process_preference:
     interaction_mode: "{from input process_preference.interaction_mode}"
   feature_phase: "Feature Closing"
-
-  # Required inputs
   feature_id: "{FEATURE-XXX}"
   feature_title: "{title}"
   feature_version: "{version}"
-
-  # Git strategy (from .x-ipe.yaml, passed by workflow)
   git_strategy: "main-branch-only | dev-session-based"
   git_main_branch: "{auto-detected}"
-  git_dev_branch: "dev/{git_user_name}"  # Only for dev-session-based; derived from `git config user.name` (sanitized: lowercase, spaces→hyphens)
-
-  # Context (from previous task or project)
+  git_dev_branch: "dev/{git_user_name}"
   specification_path: "x-ipe-docs/features/{FEATURE-XXX}/specification.md"
-  test_results: "all passing"
-
-  # Optional tools (end-user toggles)
+  test_results: "{actual acceptance report and revision evidence; legacy all passing not proof}"
   optional_tools:
-    readme_updator: false  # when true, invoke x-ipe-tool-readme-updator in Phase 3
+    readme_updator: false
 ```
 
 ### Input Initialization
 
 ```xml
 <input_init>
-  <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
-  <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
-  <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
-  <field name="process_preference.interaction_mode" source="from caller (x-ipe-workflow-task-execution) or default 'interact-with-human'" />
-  <field name="feature_id" source="previous task (Acceptance Test or Code Refactor) output OR task board OR human input">
-    <steps>
-      1. IF previous task was "Feature Acceptance Test" → use previous task output's feature_id field
-      2. ELIF previous task was "Code Refactor" → use previous task output's feature_id field
-      3. ELIF task board has feature_id in task data → use it
-      4. ELSE → IF interaction_mode == "dao-represent-human-to-interact": derive from workflow context or x-ipe-assistant-user-representative-Engineer; ELSE: ask human for feature_id
-    </steps>
-  </field>
-  <field name="feature_title" source="feature specification OR features.md">
-    <steps>
-      1. Query feature board for feature_id → extract title
-      2. ELIF x-ipe-docs/features/{feature_id}/specification.md exists → extract title from header
-      3. ELSE → IF interaction_mode == "dao-represent-human-to-interact": derive from feature_id context; ELSE: ask human
-    </steps>
-  </field>
-  <field name="feature_version" source="features.md OR default '1.0.0'">
-    <steps>
-      1. Query feature board for feature_id → extract version
-      2. ELIF not found → default to "1.0.0"
-    </steps>
-  </field>
-  <field name="git_strategy" source=".x-ipe.yaml configuration">
-    <steps>
-      1. Read .x-ipe.yaml → extract git.strategy value
-      2. Expected values: "main-branch-only" | "dev-session-based"
-    </steps>
-  </field>
-  <field name="git_main_branch" source="auto-detect from git">
-    <steps>
-      1. Run: git symbolic-ref refs/remotes/origin/HEAD → extract branch name
-      2. Fallback: "main"
-    </steps>
-  </field>
-  <field name="git_dev_branch" source="derived from git config user.name (sanitized)">
-    <steps>
-      1. Run: git config user.name → sanitize (lowercase, spaces→hyphens, remove special chars)
-      2. Branch name: dev/{sanitized_git_user_name}
-      3. Only used when git_strategy == "dev-session-based"
-    </steps>
-  </field>
-  <field name="specification_path" source="auto-detect from feature folder">
-    <steps>
-      1. Check x-ipe-docs/features/{feature_id}/specification.md
-      2. IF exists → use path
-      3. ELSE → check x-ipe-docs/requirements/{feature_id}/specification.md (legacy)
-    </steps>
-  </field>
-  <field name="optional_tools.readme_updator" source="end-user toggle, default false">
-    <steps>
-      1. IF caller provides optional_tools.readme_updator → use value
-      2. ELSE → default to false (skip README update)
-    </steps>
-  </field>
+  <field name="task_id" source="existing supplied lifecycle task/readiness; no new ID" />
+  <field name="task_based_skill" source="canonical skill and authorized caller" />
+  <field name="execution_mode" source="lifecycle; default free-mode" />
+  <field name="workflow.name" source="exact lifecycle identity or N/A" />
+  <field name="workflow.action"><steps>Resolve ACTION_MAP/template feature_closing, per-feature validation; conflicting explicit action blocks.</steps></field>
+  <field name="workflow.extra_context_reference"><steps>Preserve selected specification and optional refactor-report in either mode; required specification must resolve. No closing-report output tag invented.</steps></field>
+  <field name="category" source="feature-stage; exactly one feature" />
+  <field name="next_task_based_skill" source="original conditional backlog suggestion only; owner authorizes successor" />
+  <field name="process_preference.interaction_mode"><steps>Exact lifecycle enum/source: interact-with-human, dao-represent-human-to-interact, dao-represent-human-to-interact-for-questions-in-skill. Human asks human and waits within skill; full DAO and hybrid use bounded message_context, instruction_units and execution_plan. Human and hybrid require human completion/route confirmation; full DAO selects only authorized successors. Clear inputs need neither; explicit human approval binds in every mode.</steps></field>
+  <field name="feature_phase" source="Feature Closing" />
+  <field name="feature_id"><steps>Prior actual acceptance/refactor output or explicit authorized identity; owner read-only feature query verifies unique matching record, never fabricate from title.</steps></field>
+  <field name="feature_title"><steps>Actual feature record then scoped specification header; mismatch blocks pertinent claim, no invented title.</steps></field>
+  <field name="feature_version"><steps>Actual feature record/approved source revision, retain existing identity/history; do not invent version when missing.</steps></field>
+  <field name="specification_path"><steps>Explicit selected specification first, declared path/previous output/board specification_link next. Only absent/N/A/auto uses unique owning EPIC/FEATURE or legacy FEATURE folder. Broken/wrong-feature explicit links block, no newest-file fallback. Validate regular nonsymlink file/root/content/source identity.</steps></field>
+  <field name="test_results"><steps>Actual owning acceptance-test-cases.md/previous report plus source/spec/both design parts/actual implementation_files/tests/config/mockups/interfaces/environment/evidence dependencies. Selected refactor-report if present must be real current owning file, not acceptance or design substitute. Legacy all passing string cannot prove delivery. Inspect authoritative original AC/types/assertions and complete actual evidence.</steps></field>
+  <field name="git_strategy" source="approved lifecycle .x-ipe.yaml policy; main-branch-only or dev-session-based, no implicit release permission" />
+  <field name="git_main_branch" source="owner's verified configured/local identity; ambiguity blocks branch-sensitive release, no assumed checkout" />
+  <field name="git_dev_branch" source="owner's actual sanitized Git identity only for dev-session-based; never agent nickname" />
+  <field name="optional_tools.readme_updator"><steps>Literal caller true enables optional updater; default false. Load actual declared operation only for needed authorized README corrections, same-task no duplicate lifecycle.</steps></field>
 </input_init>
 ```
-
----
 
 ## Definition of Ready
 
 ```xml
 <definition_of_ready>
-  <checkpoint required="true">
-    <name>Code implementation complete</name>
-    <verification>All implementation code committed (on main if main-branch-only, on dev/{git_user_name} if dev-session-based)</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Feature status is "Implemented"</name>
-    <verification>Query feature board - status must be "Implemented"</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>All tests passing</name>
-    <verification>Run test suite - zero failures</verification>
-  </checkpoint>
+  <checkpoint required="true"><name>Identity and scope</name><verification>One supplied task/readiness/owner/feature, protected dirty baseline and engineering versus release authority known.</verification></checkpoint>
+  <checkpoint required="true"><name>Implemented and accepted capability</name><verification>Feature status Implemented or Tested with real complete current acceptance evidence; authorized Completed resume preserves advanced status. No compulsory commit, push, merge or duplicate test suite.</verification></checkpoint>
+  <checkpoint required="true"><name>Authoritative sources</name><verification>Source/parent/story/subgoal/all ACs/assertions/types, spec/both design parts/implementation inventory/mockups and actual relevant evidence resolve; gaps explicit.</verification></checkpoint>
+  <checkpoint required="true"><name>Workflow and review readiness</name><verification>Actual action/template/runtime contexts/tags and preceding mandatory gates verified; proportionate required independent review available or completion blocked. Free-mode needs no app write.</verification></checkpoint>
 </definition_of_ready>
 ```
 
----
-
 ## Execution Flow
 
-| Phase | Steps | Action | Gate |
-|-------|-------|--------|------|
-| 1. 博学之 — Study Broadly | 1.1 | Verify all acceptance criteria are met | All criteria met |
-| 2. 审问之 — Inquire Thoroughly | 2.1 | Subagent reviews code against spec, design, tests | Review complete |
-| 3. 慎思之 — Think Carefully | 3.1, 3.2 | Update project files, run refactoring analysis | Files updated, analysis complete |
-| 4. 明辨之 — Discern Clearly | 4.1 | Push to main or create PR based on git strategy | Shipped |
-| 5. 笃行之 — Practice Earnestly | 5.1 | Output completion summary with refactoring recommendations | Summary delivered |
-| 继续执行 | 6.1 | Decide Next Action | Next action decided |
-| 继续执行 | 6.2 | Execute Next Action | Execution started |
-
-BLOCKING: Phase 1 to Phase 2 is BLOCKED if any acceptance criterion is not met. STOP and report to human.
-
----
+| Phase | Step | Action | Gate |
+| --- | --- | --- | --- |
+| 1. 博学之 — Study Broadly | 1.1 | Trace acceptance and reuse current evidence | Every original scoped assertion supported |
+| 2. 审问之 — Inquire Thoroughly | 2.1 | Review relevant risk and misleading docs | No concealed delivery gap |
+| 3. 慎思之 — Think Carefully | 3.1 | Apply bounded documentation corrections | Relevant evidence refreshed, no scope drift |
+| 4. 明辨之 — Discern Clearly | 4.1 | Resolve release authority and actual app contract | Honest release and completion disposition |
+| 5. 笃行之 — Practice Earnestly | 5.1 | Report delivery/outcome and return owner handoff | Original output, one lifecycle boundary |
 
 ## Execution Procedure
 
 ```xml
 <procedure name="feature-closing">
-  <!-- CRITICAL: Both DoR/DoD check elements below are MANDATORY -->
   <execute_dor_checks_before_starting/>
-  <schedule_dod_checks_with_sub_agent_before_starting/>
-
-  <phase_1 name="博学之 — Study Broadly">
-    <step_1_1>
-      <name>Verify Acceptance Criteria</name>
-      <action>
-        1. Read acceptance criteria from feature specification
-        2. Check each criterion against implementation
-        3. IF Technical Scope includes [Frontend] or [Full Stack]:
-           Also verify UI against linked mockups — layout matches design, all UI elements present, interactions work as shown, visual styling is consistent, document any approved deviations.
-           TIP: Use Chrome DevTools MCP with multi-session mode to perform UI validation (navigate pages, take screenshots, inspect elements, verify interactions). Chrome must be launched with `--user-data-dir` (dedicated profile) or the MCP server configured with `--user-data-dir` or `--isolated=true` to avoid conflicts with existing Chrome sessions.
-        4. Document verification results in table format (see references/examples.md)
-        5. Flag any unmet criteria
-      </action>
-      <constraints>
-        - BLOCKING: If ANY criterion is not met, present options: (a) address gap, (b) modify criterion, (c) defer
-          Response source (based on interaction_mode):
-          IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-            → Resolve via x-ipe-assistant-user-representative-Engineer
-          ELSE (interact-with-human/dao-represent-human-to-interact-for-questions-in-skill):
-            → Ask human for decision
-        - BLOCKING: Do NOT proceed to step_2_1 until all criteria are verified
-        - CRITICAL (manual/stop_for_question): Present unmet criteria to human with options
-        - CRITICAL (auto): Resolve unmet criteria via x-ipe-assistant-user-representative-Engineer
-      </constraints>
-      <output>Acceptance criteria verification table with status and evidence</output>
-    </step_1_1>
-  </phase_1>
-
-  <phase_2 name="审问之 — Inquire Thoroughly">
-    <step_2_1>
-      <name>Code-to-Docs Review</name>
-      <action>
-        1. Launch a sub-agent to perform a constructive critique of the implemented code
-        2. The sub-agent compares actual code against:
-           - Feature specification (x-ipe-docs/features/{FEATURE-XXX}/specification.md)
-           - Technical design (x-ipe-docs/features/{FEATURE-XXX}/technical-design.md)
-           - Test cases (test files referenced in technical design)
-        3. For each artifact, the sub-agent identifies:
-           - Behavioral differences: code does something the doc doesn't describe, or vice versa
-           - Missing coverage: code paths or edge cases not reflected in tests
-           - Stale references: renamed functions, changed APIs, removed parameters
-        4. Sub-agent produces a change report with concrete suggestions per artifact
-        5. Apply necessary updates to specification, technical design, and test files so they accurately reflect the shipped code
-        6. Skip trivial or cosmetic differences — only update when the doc would mislead a future reader
-      </action>
-      <constraints>
-        - CRITICAL: This is a constructive review, not a refactoring step — do NOT change implementation code
-        - CRITICAL: Only update docs/tests to match what the code actually does, not the other way around
-        - MANDATORY: Use a sub-agent for the review to get an independent perspective
-      </constraints>
-      <output>Change report listing updated artifacts and what changed in each</output>
-    </step_2_1>
-  </phase_2>
-
-  <phase_3 name="慎思之 — Think Carefully">
-    <step_3_1>
-      <name>Update Project Files</name>
-      <action>
-        1. IF optional_tools.readme_updator == true:
-           → Invoke x-ipe-tool-readme-updator with:
-             operation: "update_readme"
-             config.feature_context: { feature_id, feature_title }
-           → Tool identifies, verifies, and documents run/test commands in README
-        2. ELSE: Update README manually if feature is user-facing
-        3. Update API docs if endpoints were added/changed
-        4. Ensure complex logic has code comments
-        5. Verify all feature doc artifacts are present in x-ipe-docs/features/{FEATURE-XXX}/
-      </action>
-      <constraints>
-        - CRITICAL: All user-facing changes must be documented in README
-      </constraints>
-      <output>Updated project files</output>
-    </step_3_1>
-
-    <step_3_2>
-      <name>Refactoring Analysis</name>
-      <action>
-        1. Launch a sub-agent to execute x-ipe-tool-refactoring-analysis with:
-           - initial_refactoring_scope:
-               scope_level: "feature"
-               feature_id: "{feature_id}"
-               refactoring_purpose: "Optimize technical design and code maintainability based on best coding practices at project-wide level"
-        2. The sub-agent resolves feature files from x-ipe-docs/features/{feature_id}/
-        3. Sub-agent performs scope expansion, quality evaluation, and generates suggestions
-        4. Collect the analysis result:
-           - overall_quality_score
-           - refactoring_suggestion (goals, priorities)
-           - key gaps identified
-        5. Store analysis result for inclusion in Output Summary (step_5_1)
-      </action>
-      <constraints>
-        - CRITICAL: This is analysis only — do NOT execute any refactoring in this step
-        - CRITICAL: The sub-agent should complete the full refactoring-analysis skill but stop at output (do NOT proceed to improve-code-quality or code-refactor)
-        - NOTE: If analysis finds no actionable suggestions, record "no refactoring needed" and proceed
-      </constraints>
-      <output>Refactoring analysis result with quality score and suggestions</output>
-    </step_3_2>
-  </phase_3>
-
-  <phase_4 name="明辨之 — Discern Clearly">
-    <step_4_1>
-      <name>Create Pull Request (conditional)</name>
-      <action>
-        IF git_strategy == "main-branch-only":
-          1. CRITICAL: Do NOT create any branches — code is already on main
-          2. Ensure agent is on {git_main_branch}: git checkout {git_main_branch}
-          3. Stage and commit any remaining changes on {git_main_branch}
-          4. Push to main: git push origin {git_main_branch}
-          5. Skip PR creation — no PR needed for main-branch-only
-          6. Log: "Strategy is main-branch-only — pushed directly to {git_main_branch}, no PR created"
-
-        ELSE IF git_strategy == "dev-session-based":
-          1. Resolve dev branch name:
-             → Run: git config user.name (or git config user.email if user.name is empty)
-             → Sanitize: lowercase, replace spaces with hyphens, remove special chars
-             → Branch name: dev/{sanitized_git_user_name}
-          2. Stage all feature changes
-          3. Push dev branch to remote: git push origin dev/{git_user_name}
-          4. Create PR from dev/{git_user_name} → {git_main_branch}
-          5. Use PR template from references/templates/pr-template.md
-          6. Title format: feat: [Feature Name] - [Brief Description]
-          7. Link feature ID and design doc in PR description
-          8. Include testing checklist status
-      </action>
-      <constraints>
-        - BLOCKING (dev-session-based only): PR description must not be empty
-        - CRITICAL: PR must be scoped to single feature
-        - CRITICAL (dev-session-based): Branch name MUST use git user identity, NOT agent nickname
-        - BLOCKING (main-branch-only): Do NOT create branches or PRs
-      </constraints>
-      <output>Pull request URL and number (dev-session-based) or push confirmation (main-branch-only)</output>
-    </step_4_1>
-  </phase_4>
-
-  <phase_5 name="笃行之 — Practice Earnestly">
-    <step_5_1>
-      <name>Output Summary</name>
-      <action>
-        1. IF execution_mode == "workflow-mode":
-           a. Run the workflow update script via bash (`python3 .github/skills/x-ipe-tool-x-ipe-app-interactor/scripts/workflow_update_action.py`) with:
-              - workflow_name: {from context}
-              - action: "feature_closing"
-              - status: "done"
-              - feature_id: {feature_id}
-              - deliverables: {"closing-report": "{path}"}
-           b. Log: "Workflow action status updated to done"
-        2. Compile completion summary (see references/examples.md for template)
-        3. Include: deliverables, files changed, criteria status, PR link
-        4. Include refactoring analysis results:
-           - Overall quality score from analysis
-           - IF refactoring suggestions exist: list top suggestions with priority
-           - IF overall_quality_score < 7: flag "Refactoring recommended" with summary of key improvements
-           - IF overall_quality_score >= 7: note "Code quality is acceptable, optional improvements listed"
-        5. Present summary with clear recommendation on whether refactoring is needed
-        6. IF refactoring_score < 7: flag "Refactoring recommended"
-
-          Completion gate (based on interaction_mode):
-          IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-            → Auto-proceed after DoD verification, log refactoring recommendation via x-ipe-assistant-user-representative-Engineer
-          ELSE (interact-with-human/dao-represent-human-to-interact-for-questions-in-skill):
-            → Ask human to acknowledge summary
-      </action>
-      <output>Feature completion summary with refactoring recommendation delivered to human</output>
-    </step_5_1>
-  </phase_5>
-
-  <phase_6 name="继续执行（Continue Execute）">
-    <step_6_1>
-      <name>Decide Next Action</name>
-      <action>
-        Collect the full context and task_completion_output from this skill execution.
-
-        IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-          → Invoke x-ipe-assistant-user-representative-Engineer with:
-            type: "routing"
-            completed_skill_output: {full task_completion_output YAML from this skill}
-            next_task_based_skill: "{from output}"
-            context: "Skill completed. Study the context and full output to decide best next action."
-          → DAO studies the complete context and decides the best next action
-        ELSE (interact-with-human):
-          → Present next task suggestion to human and wait for instruction
-      </action>
-      <constraints>
-        - BLOCKING (manual): Human MUST confirm or redirect before proceeding
-        - BLOCKING (auto): Proceed after DoD verification; auto-select next task via DAO
-      </constraints>
-      <output>Next action decided with execution context</output>
-    </step_6_1>
-    <step_6_2>
-      <name>Execute Next Action</name>
-      <action>
-        Based on the decision from Step 6.1:
-        1. Load the target task-based skill's SKILL.md
-        2. Generate an execution plan from the skill's Execution Flow table
-        3. Start execution from the skill's first phase/step
-      </action>
-      <constraints>
-        - MUST load the skill before executing — do not skip skill loading
-        - Execution follows the target skill's procedure, not this skill's
-      </constraints>
-      <output>Next task execution started</output>
-    </step_6_2>
-  </phase_6>
-
+  <phase_1 name="博学之 — Study Broadly"><step_1_1><name>Verify Goal-to-Current-Acceptance Evidence</name><action>
+    1. Read approved source/parent/subgoal/story frame, all scoped ACs and original assertions/types/constraints; map through actual source files/acceptance TCs/results/hashes in closing report. Preserve stable GWT IDs and every all-required clause; alternatives are selected means, not extra backlog mandates.
+    2. Independently resolve relevant dependencies/current hashes, exact feature/environment/tool config and actual execution/review provenance. Reuse existing acceptance helper for consistency when appropriate; no duplicate helper/schema, expected inputs never copied from claimed pass. Same relevant hashes and suitable current semantic evidence mean reuse, not run twice. Timestamp/count/receipt/all passing strings insufficient.
+    3. UI actual isolated authorized browser path/trigger/console/all original assertions/current mockup evidence required; source/jsdom not UI proof. Backend requests, CLI subprocess exit/streams/files, library public API, integration setup/state/cleanup and structured complete-package plus required executable scenarios retain original types/boundaries. Changed live environment invalidates reuse even if files match.
+    4. Failed/missing/stale/blocked/partial/unrun assertions block delivery. Return bounded rerun/fix/CR decision to owner; no implementation fix or AC alteration here. Authorized delta invalidates affected dependent tests/review/outcome; preserve unaffected IDs/history/independent evidence with rationale. No retrofitting old criteria to manufacture green.
+    5. Record verified engineering delivery only with complete actual suitable evidence; stakeholder outcome not measured unless cited actual stakeholder/context observation matches source scenario/current revision. Fixtures/tests/approval/DAO not observed benefit; qualitative scenario/gap suffices, no invented KPI or stakeholder approval.
+  </action><output>Full goal/subgoal/AC/evidence map, justified reuse and explicit gaps</output></step_1_1></phase_1>
+  <phase_2 name="审问之 — Inquire Thoroughly"><step_2_1><name>Proportionate Code-to-Docs and Risk Review</name><action>
+    1. Compare relevant actual implementation/spec/both design parts/tests/report/current mockups and consumer contracts. For low-risk bounded cosmetic/docs work, deterministic plus self-review with rationale suffices; meaningful workflow/executable/safety/public-contract change requires independent review. Reuse fresh independent review at same revision/scope, not a compulsory second reviewer. Missing required review blocks completion, not drafting.
+    2. Identify concrete misleading references, API/run instructions or omitted documentation of already approved behavior. Ignore harmless cosmetics. Behavioral code-versus-AC contradiction is a delivery defect, not documentation drift. Never modify AC/tests to match faulty code without an approved CR and fresh downstream validation; no implementation or refactoring here.
+    3. Write bounded change report with actual review provenance, risk/scope/hash, gaps and dispositions. Human asks only genuine decisions and waits; full DAO and hybrid consume message_context/instruction_units/execution_plan, cannot invent approval or authorize scope/release.
+  </action><output>Actual proportionate review and bounded misleading-doc delta</output></step_2_1></phase_2>
+  <phase_3 name="慎思之 — Think Carefully"><step_3_1><name>Correct Only Misleading Documentation</name><action>
+    1. Update authorized owned spec explanatory material/design/test documentation/README/API/changelog only where current approved behavior would otherwise mislead. Preserve original AC assertions, protected dirty docs/history; no blanket rewrite or compulsory every-file update. No needed change is a valid documented disposition.
+    2. If needed and optional updater true, use actual declared README operation within same task/readiness; otherwise bounded manual documentation correction. Original PR/changelog templates remain available; no unrequested playground or fictional release/checklist facts.
+    3. Any relevant doc/test/code/config/intent change invalidates affected evidence/review; independently rehash and rerun only affected/dependent checks via authorized test capability, preserving unaffected evidence; no compulsory refactoring analysis or fabricated score/suggestions. Existing current quality/refactor evidence may inform recommendation; unavailable assessment is N/A, not acceptable quality proof.
+  </action><output>Necessary documentation delta or no-change rationale, refreshed affected evidence</output></step_3_1></phase_3>
+  <phase_4 name="明辨之 — Discern Clearly"><step_4_1><name>Resolve Release and Workflow Contract</name><action>
+    1. Separate engineering closure from release. Default no commit/push/PR; owner executes only explicitly authorized exact paths with protected staged/unstaged baseline, actual branch/identity and strategy. No broad staging, dirty branch switch/stash/reset, implicit network or auto commit. Main-branch-only no new branch/PR; dev-session-based real identity, scoped meaningful PR description/test/feature/design links only if authorized. Required release without authority blocks release-scope completion; engineering-only may close uncommitted, release gap explicit.
+    2. Workflow-mode owner inspects actual ACTION_MAP/template/runtime and matching state: feature_closing under validation, required specification, optional refactor-report. Verify current acceptance and preceding mandatory implementation/validation gates done, not skipped; writer success alone insufficient. Current code_refactor mandatory remains a blocker until legitimate evidenced fulfillment or separately authorized later integration migration; no fake skip/done/report or invented need/churn.
+    3. Current feature_closing deliverables [] means owner uses deliverables {} with exact matching action/feature/status done readback, once, only after domain/gate evidence. Keep closing report as task artifact/task_output_links, NOT pretend closing-report tag. If a later approved template declares tags, resolve exact real paths and validate runtime before writing, not silently edit config here. Free-mode no app write; current verified done resume read-only, no replay.
+    4. Change-request optional closing-report may be absent: preserve report task link for explicit handoff; required specification still resolves. No invented app tag, automatic discovery or claim that app extracts the task artifact. No application/config edits in this skill migration.
+  </action><output>Engineering/release disposition and actual owner action mapping or blocker</output></step_4_1></phase_4>
+  <phase_5 name="笃行之 — Practice Earnestly"><step_5_1><name>Report and Return One Owner Handoff</name><action>
+    1. Complete existing closing report with source/parent/subgoal/AC/assertion/type/current evidence, reused versus rerun checks, review/docs delta, actual release state and explicit outcome gaps. Counts/activities are diagnostics, not achieved goals; no invented observations or human acknowledgment.
+    2. Return exact task_completion_output fields and original conditional next-feature suggestion. Keep refactoring_analysis compatibility fields; actual assessed results only, N/A/no assessment with empty suggestions when unavailable, no score threshold or compulsory analysis. Populate task_output_links only actual report/owning folder/existing assessment/authorized PR or release evidence, never fictional pushed to main or missing analysis path.
+    3. One lifecycle owner alone verifies required category/app/readback/release-scope gates then marks feature Completed and task completed once via real board adaptation. Feature Implemented or Tested accepted only with actual full evidence; Completed resume read-only/preserved. Blocked/stale scope never Completed; larger partial candidate slice never falsely closes task. Board/task/output schemas unchanged.
+    4. Owner re-reads mode once at boundary: human and hybrid require human review and completion/route confirmation; hybrid uses DAO only within skill; full DAO bounded guidance and only authorized routing. Explicit required human approval remains binding in every mode; no stakeholder approval invented. Suggest next actual unstarted feature only within authority; no successor task/skill execution by child, no automatic human playground.
+  </action><output>Original output and truthful report, current gates/owner next boundary</output></step_5_1></phase_5>
 </procedure>
 ```
-
----
 
 ## Output Result
 
@@ -400,7 +178,7 @@ task_completion_output:
   status: completed | blocked
   next_task_based_skill:
     - skill: "x-ipe-task-based-feature-refinement"
-      condition: "Start next feature from backlog"
+      condition: "Start the next unstarted feature from backlog. Continue the feature-by-feature pipeline (refinement → design → implementation → testing → closing)."
   process_preference:
     interaction_mode: "{from input process_preference.interaction_mode}"
   execution_mode: "{from input}"
@@ -420,64 +198,47 @@ task_completion_output:
     top_suggestions: ["{summary of key suggestions}"]
 ```
 
----
+Exact legacy output schema/keys/order/nested types/conditional successor retained;
+placeholder links are illustrative, not mandatory fictional artifacts. Runtime
+list contains only actual artifact/release links, including closing report.
+Unassessed compatibility: overall_quality_score string N/A, refactoring_recommended
+false means no evidenced recommendation (NOT quality verified), top_suggestions [].
+Report records not assessed and inspected limits. Actual assessment retains genuine
+score/recommendation/suggestions; do not fabricate it to fill compatibility fields.
+No new workflow_action/goal/outcome/release keys; report carries domain evidence and
+owner lifecycle dynamic context records matching app write/readback separately.
 
 ## Definition of Done
 
-CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
-
 ```xml
 <definition_of_done>
-  <checkpoint required="true">
-    <name>Acceptance criteria verified</name>
-    <verification>Verification table shows all criteria met with evidence</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Code-to-docs review completed</name>
-    <verification>Sub-agent reviewed code against specification, technical design, and tests; necessary updates applied</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Project files updated</name>
-    <verification>README and other project files updated where applicable</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Refactoring analysis completed</name>
-    <verification>Sub-agent ran refactoring analysis on feature scope; results stored for summary</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>PR created or code pushed to main</name>
-    <verification>If dev-session-based: PR exists with title, description, linked feature, and checklist; branch name uses git user identity. If main-branch-only: code pushed to main, no branches or PRs created.</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Summary provided to human</name>
-    <verification>Completion summary with deliverables, files, PR link, and refactoring recommendation presented</verification>
-  </checkpoint>
+  <checkpoint required="true"><name>Full current acceptance</name><verification>Every scoped source/parent/subgoal/AC/GWT/original assertion/type linked to actual suitable current evidence; reuse justified, stale/unproven checks blocked or rerun.</verification></checkpoint>
+  <checkpoint required="true"><name>Honest delivery and outcome</name><verification>Delivery separate from not measured/cited actual stakeholder observation; qualitative scenario and outcome gaps explicit, no invented benefits or approval.</verification></checkpoint>
+  <checkpoint required="true"><name>Proportionate review and docs</name><verification>Required independent review current or low-risk rationale; only misleading authorized docs corrected, no code fix/AC relaxation without approved CR; affected evidence revalidated.</verification></checkpoint>
+  <checkpoint required="true"><name>Authority and action mapping</name><verification>Engineering/release scope distinguished, authorized release evidence or explicit gap; actual template/runtime contexts/gates/empty-tag mapping and readback, no pretend tag or mandatory gate bypass.</verification></checkpoint>
+  <checkpoint required="true"><name>Original single-owner return</name><verification>Original output/compatibility fields and actual report links; owner alone verified Completed/task lifecycle boundary, no duplicate board/Git/routing/automatic playground or compulsory analysis.</verification></checkpoint>
 </definition_of_done>
 ```
-
-MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution` to continue the task execution flow.
-
----
 
 ## Patterns & Anti-Patterns
 
 | Pattern | When | Then |
-|---------|------|------|
-| All Criteria Met | Every AC passes | Review docs → update files → refactoring analysis → create PR → summary |
-| Criteria Not Met | One or more AC fail | STOP → report to human with options (address/modify/defer) → wait for guidance |
-| Minor Issues Found | Criteria met with minor fixable issues | Fix inline → re-verify → review docs → continue to PR (flag refactoring) |
+| --- | --- | --- |
+| Fresh full acceptance | Same dependencies/environment/assertions | Reuse actual evidence, not duplicate testing |
+| UI evidence unavailable | Source-only or missing browser proof | Block UI-dependent delivery, not fictional manual type |
+| Delivery verified, benefit unobserved | Source scenario lacks real observation | Explicit not measured gap, no fabricated approval |
+| Bounded docs correction | Approved behavior documented misleadingly | Small delta and affected revalidation, no AC downgrade |
+| Empty app outputs | Actual closing template/runtime declares no tags | deliverables {}, report task artifact, optional CR context absent |
 
-| Anti-Pattern | Why Bad | Do Instead |
-|--------------|---------|------------|
-| PR without testing | Broken code merged | Ensure all tests pass first |
-| Empty PR description | Reviewer cannot understand changes | Use PR template from references/ |
-| Skipping criteria check | Incomplete feature shipped | Verify each criterion with evidence |
-| Giant multi-feature PR | Hard to review and revert | Keep PR scoped to single feature |
-| Creating feature branches in main-branch-only mode | Unnecessary complexity, violates strategy | BLOCKING: Check git_strategy BEFORE any branch operations; if main-branch-only, stay on main |
-| Using agent nickname for dev branch name | Branch not tied to git identity | Use `git config user.name` (sanitized) for dev branch name, NOT agent nickname |
-
----
+| Anti-Pattern | Consequence | Correction |
+| --- | --- | --- |
+| Rewrite AC to match faulty code | Concealed product defect | Block and propose bounded fix/approved CR |
+| Push/PR by default or broad staging | Foreign dirty work released | Explicit authority, exact paths, owner only |
+| Compulsory second test/refactor review | Activity churn, fabricated scores | Current justified reuse/proportionate review |
+| Invent closing-report app tag | Runtime rejection or false done claim | Actual extract tags and readback, empty mapping valid |
+| Tests/DAO mean observed benefits | False stakeholder success | Separate delivery from explicit outcome gap |
 
 ## Examples
 
-See [references/examples.md](.github/skills/x-ipe-task-based-feature-closing/references/examples.md) for concrete execution examples, verification templates, and human communication templates.
+See [authored cases and templates](.github/skills/x-ipe-task-based-feature-closing/references/examples.md)
+and [actual consumer boundaries](.github/skills/x-ipe-task-based-feature-closing/references/integration.md).

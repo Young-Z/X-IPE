@@ -15,6 +15,9 @@ import re
 import json
 import pytest
 from pathlib import Path
+from tests.test_architecture_draw_skill import (
+    frontmatter, linked_resource, operation_contract, section, tool_flags, yaml_contract,
+)
 
 
 # ============================================================================
@@ -91,13 +94,7 @@ class TestSkillMdContent:
     def test_skill_md_has_frontmatter(self, skill_md_content):
         """SKILL.md has YAML frontmatter with name and description"""
         assert skill_md_content is not None, "SKILL.md not found"
-        assert skill_md_content.startswith('---'), "Missing YAML frontmatter start"
-        
-        # Check frontmatter has name
-        assert 'name: x-ipe-tool-architecture-dsl' in skill_md_content, "Missing skill name in frontmatter"
-        
-        # Check frontmatter has description
-        assert 'description:' in skill_md_content, "Missing description in frontmatter"
+        frontmatter(skill_md_content, 'x-ipe-tool-architecture-dsl')
     
     def test_skill_md_has_overview_section(self, skill_md_content):
         """SKILL.md has Overview section (or equivalent intro)"""
@@ -108,12 +105,14 @@ class TestSkillMdContent:
         ]), "Missing Overview section"
     
     def test_skill_md_has_workflow_section(self, skill_md_content):
-        """SKILL.md has Workflow section (or generation steps)"""
-        assert skill_md_content is not None, "SKILL.md not found"
-        # v2: Uses "Module View Generation" and "Landscape View Generation" as workflow
-        assert any(term in skill_md_content for term in [
-            '## Workflow', '# Workflow', 'Module View Generation', 'Landscape View Generation'
-        ]), "Missing Workflow section"
+        """Actual operations retain executable instructions, constraints and output."""
+        nodes = operation_contract(skill_md_content, {
+            'generate_module_view', 'generate_landscape_view', 'refine_dsl', 'lint',
+        })
+        for node in nodes.values():
+            assert 'lint_dsl.py' in node.findtext('action')
+        declared = yaml_contract(skill_md_content, 'Input Parameters', 'input')['operation']
+        assert set(declared.split(' | ')) == set(nodes) - {'lint'}
     
     def test_skill_md_has_when_to_use_section(self, skill_md_content):
         """SKILL.md has When to Use section"""
@@ -175,10 +174,7 @@ class TestGrammarReference:
     @pytest.fixture
     def grammar_content(self, skill_dir):
         """Read grammar.md content"""
-        grammar_md = skill_dir / 'references' / 'grammar.md'
-        if grammar_md.exists():
-            return grammar_md.read_text()
-        return None
+        return linked_resource(skill_dir / 'SKILL.md', '.github/skills/x-ipe-tool-architecture-dsl/references/grammar.md')
     
     # --- Core Elements (AC-2.x) ---
     
@@ -442,6 +438,39 @@ class TestConfigIntegration:
         value = ideation_phase.get('x-ipe-tool-architecture-dsl')
         assert isinstance(value, bool), \
             f"x-ipe-tool-architecture-dsl should be boolean, got {type(value)}"
+
+
+def test_dsl_required_layout_resource(skill_dir):
+    layout = linked_resource(skill_dir / 'SKILL.md', '.github/skills/x-ipe-tool-architecture-dsl/references/layout-principles.md')
+    assert '### P3: Cols Sum to 12' in layout
+    assert '### P4: Nested Grid for Components' in layout
+
+
+def test_dsl_linked_v2_example_and_current_tool_routes(skill_dir):
+    example = linked_resource(skill_dir / 'SKILL.md', '.github/skills/x-ipe-tool-architecture-dsl/examples/module-view-v2.dsl')
+    assert re.search(r'^@startuml module-view\s*$', example, re.M)
+    assert re.search(r'^@enduml\s*$', example, re.M)
+    assert re.search(r'^grid\s+12\s*x\s*\d+', example, re.M)
+    config = json.loads((skill_dir.parents[2] / 'x-ipe-docs/config/tools.json').read_text())
+    for phase in ('ideation', 'architecture'):
+        assert tool_flags(config, 'ideation', phase)['x-ipe-tool-architecture-dsl'] is True
+
+
+def test_dsl_linter_reference_is_a_real_resource(skill_dir):
+    """Existence/declared CLI contract only; not a fabricated renderer run."""
+    content = (skill_dir / 'SKILL.md').read_text()
+    lint = operation_contract(content, {'generate_module_view', 'generate_landscape_view', 'refine_dsl', 'lint'})['lint']
+    path = re.search(r'python3\s+(\S+/scripts/lint_dsl\.py)\s+\{file\}\s+--format json', lint.findtext('action'))
+    assert path
+    script = (skill_dir.parents[2] / path[1]).resolve()
+    assert script.is_relative_to(skill_dir.parents[2]) and script.is_file()
+
+
+def test_dsl_missing_named_operation_is_detected(skill_dir):
+    content = (skill_dir / 'SKILL.md').read_text()
+    corrupt = content.replace('<operation name="refine_dsl">', '<operation name="unrelated">')
+    with pytest.raises(AssertionError, match='Missing operation'):
+        operation_contract(corrupt, {'generate_module_view', 'generate_landscape_view', 'refine_dsl', 'lint'})
 
 
 # ============================================================================

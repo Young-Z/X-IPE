@@ -1,0 +1,52 @@
+task_id: TASK-6749
+date: 2026-10-13
+python: .venv/bin/python
+python_version: 3.12.9
+candidate_hash: c5795f9fb351c0670f5a3de2b0e340348a95f30f218c7945d2fb22c95313d116
+evidence_revisions: evidence-files.json
+runs:
+  - command: .venv/bin/python -B -m pytest -q -p no:cacheprovider tests/test_skill_pipeline_refactor.py
+    exit: 0
+    passed: 43
+    failed: 0
+    seconds: 0.33
+    candidate_revision: 820c45bdb48c40bc92694c388f997c8a06fb5f677598b775e49d9db3f0bac45d
+    freshness: all 43 rerun in final combined 163 after Markdown-only fixes
+    evidence_type: 35 contract checks and 8 installed CLI temporary-project scenarios
+  - command: .venv/bin/python -B -m pytest -q -p no:cacheprovider tests/test_skill_pipeline_refactor.py tests/test_feature_052a.py tests/test_tools_config.py tests/test_prompt_config.py
+    exit: 0
+    passed: 163
+    failed: 0
+    seconds: 1.09
+    evidence_type: focused requirement/helper/tool/prompt regressions; includes previous 43, not additive
+  - command: .venv/bin/python -B .github/skills/x-ipe-meta-skill-creator/scripts/validate_skill.py --project-root "$PWD" --candidate "$PWD/x-ipe-docs/skill-meta/x-ipe-task-based-requirement-gathering/candidate" --name x-ipe-task-based-requirement-gathering --type x-ipe-task-based
+    exit: 0
+    result: validation-receipt.json
+    errors: 0
+    warnings: 2 uninstantiated template links
+  - check: Pylance syntax and editor diagnostics for new test file
+    result: no syntax errors and no reported editor errors
+  - check: Exact fresh validator receipt equals staged JSON; live package equals pre-work baseline
+    result: passed
+  - check: Current metadata YAML, exact string interaction enum input and current scenario identity
+    result: passed
+  - check: Final Markdown heading/list/table spacing and terminal newlines
+    result: fixed; affected candidate receipt regenerated and all focused tests rerun
+earlier_failed_runs:
+  - result: 39 passed and 4 failed
+    cause: editing layer retained old tails after delete/add; obsolete lifecycle and links correctly rejected
+    disposition: removed legacy tails, no tests weakened
+  - result: 37 passed and 6 failed
+    cause: template cleanup retained old partial form; safety text assertion had grammatical mismatch
+    disposition: exact template patch restored missing domain fields; assertion changed do to does only
+  - result: post-regression preservation snippet rejected valid boolean output flags
+    disposition: corrected check to parsed interaction-mode input string specifically; test suite remained passing
+  - result: preservation snippet found old scenario metadata still present
+    disposition: explicitly mark legacy scenarios archival and add current test-cases-TASK-6749.yaml
+limitations:
+  - No independent review performed; main next is required before promotion.
+  - No production app workflow updated; real helper executions use temporary cwd/projects only.
+  - No agent conflict judgment, user questioning, authoring/splitting or routing pilot simulated.
+  - No repository-wide suite, acceptance UI, performance or global coverage claim.
+  - Existing helper accepts missing tags/files in characterized case; source deliberately unchanged.
+promotion: not attempted

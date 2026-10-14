@@ -2,6 +2,12 @@
 
 This document contains detailed templates and examples for creating technical design documents.
 
+The generic authentication examples below illustrate interfaces/data/diagrams,
+not mandatory scope or permission to add JWT/refresh/rate limiting. Instantiate
+only approved requirements. Replace every placeholder with actual project-root
+paths; do not copy nonexistent sample dependencies into a delivered design.
+Component names below describe planned means, not proof of implementation.
+
 ---
 
 ## Document Template
@@ -18,6 +24,23 @@ This document contains detailed templates and examples for creating technical de
 > **Purpose:** Quick reference for AI agents navigating large projects.
 > **📌 AI Coders:** Focus on this section for implementation context.
 
+### Scope & Boundaries
+
+{One authoritative feature, actual program_type/tech_stack, constraints/non-goals,
+source specification and approved delta; preserve existing language/IDs.}
+
+### Outcome / Goal Frame
+
+| Goal ID | Parent / Source | Stakeholder | Desired Observable Outcome | Contribution / Selection | Success Evidence | Constraints / Non-goals | AC Links | Outcome State |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| {existing FR/US ID} | {exact parent/source anchor; inferred only for legacy explicit so-that} | {actual stakeholder} | {source outcome} | {enabling rationale; all-required or selected alternative} | {qualitative scenario or justified measure} | {approved constraints} | {stable scoped AC IDs} | {not measured or cited actual observation} |
+
+### Design Options and Tradeoffs
+
+| Means | Selection | Goal / AC / Constraint Rationale |
+| --- | --- | --- |
+| {component/pattern} | {selected/rejected/deferred} | {why this serves approved outcome; alternatives are not scope} |
+
 ### Key Components Implemented
 
 | Component | Responsibility | Scope/Impact | Tags |
@@ -29,8 +52,8 @@ This document contains detailed templates and examples for creating technical de
 
 | Dependency | Source | Design Link | Usage Description |
 |------------|--------|-------------|-------------------|
-| `UserRepository` | FEATURE-001 | [technical-design.md](../EPIC-001/FEATURE-001-A/technical-design.md) | Query user records for credential validation |
-| `ConfigManager` | Foundation | [config.md](../../architecture/technical-designs/config.md) | Load JWT secret and token expiry settings |
+| `UserRepository` | {owning feature} | [dependency design]({dependency_design_path}) | Query user records only if required by specification |
+| `ConfigManager` | Foundation | [configuration design]({configuration_design_path}) | Load approved authentication settings |
 
 ### Major Flow
 
@@ -48,6 +71,12 @@ token = auth.login(email="user@test.com", password="secure")
 api.set_auth_header(token.access_token)
 response = api.get("/protected-resource")
 ```
+
+### Tool Capability Summary
+
+{Actual type/stack, technical_design configuration and _extra_instruction;
+enabled/matched/excluded tools and consulted relevant practices. Consultation
+only, not execution or binding availability-driven document format.}
 
 ---
 
@@ -77,10 +106,18 @@ sequenceDiagram
 
 (Content varies based on whether this is API, CLI, frontend, etc.)
 
+### Algorithms and State Transitions
+
+{Inputs, invariants, ordered decisions/transforms, outputs, concurrency/failure
+handling and complexity only where relevant; justified by scoped acceptance.}
+
 ### Implementation Steps
 
 1. **{Layer}:** [Tasks]
 2. **{Layer}:** [Tasks]
+
+{Use actual source_code_path/test_code_path, existing interfaces and module sizes;
+extract new functionality if current + new exceeds 800 lines. No code execution.}
 
 ### Edge Cases & Error Handling
 
@@ -88,6 +125,43 @@ sequenceDiagram
 |----------|-------------------|
 | Invalid password | 401 Unauthorized |
 | Rate limit exceeded | 429 Too Many Requests |
+
+### Goal / Acceptance / Design / Validation Coverage
+
+| Source / Parent Goal | Story / Subgoal | AC ID | Component / Flow | Interface / Data / Algorithm | Planned Validation | Delivery State | Outcome State |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| {authoritative source/parent} | {existing story/subgoal} | {stable leaf AC} | {justified selected means} | {specific contract section} | {test type, concrete input/result and source/test path} | {planned; actual revision-bound delivery only if evidenced} | {not measured or cited observation} |
+
+### Outcome Scenario and Evidence Gaps
+
+{Stakeholder/context, observable conditions and result from authoritative goal;
+known evidence/owner or unavailable observation. No invented KPI or claim that
+design/test approval proves stakeholder benefit.}
+
+### Test Plan
+
+{Map every scoped AC to concrete unit/integration/UI/API checks and outcome
+scenario. Preserve specification test types. Include edge/error/regression
+checks, actual test paths, planned commands and inputs/results; no fake pass.}
+
+### Mockup-to-Component Mapping
+
+{For frontend/fullstack, open every current provided/linked mockup and map visual
+elements/layout/spacing/colors/states/events/accessibility/responsiveness to
+components and acceptance. N/A with scope rationale otherwise. Mockup is visual
+source of truth within approved specification scope; resolve conflicts.}
+
+### Security, Tracing and Observability
+
+{Existing infrastructure and INFO/DEBUG boundaries, sensitive parameter/log
+redaction, error handling without secrets, opt-in/config behavior and planned
+checks; N/A rationale when inapplicable. No instrumentation during design.}
+
+### Delta and Evidence Invalidation
+
+{Authorized CR/parent/means delta, affected goals/AC/contracts/dependencies,
+affected design/test/outcome evidence and exact downstream reruns; preserve
+unaffected IDs/bytes/history/evidence. No-op resume does not rewrite history.}
 
 ---
 
@@ -120,7 +194,7 @@ Add at top of document after header when design evolves:
 ### Purpose
 Enable AI agents to quickly understand and reference designs across large projects.
 
-> **📌 Note for AI Coders:** Focus primarily on Part 1 for implementation. Part 2 is supplementary for complex scenarios.
+> **📌 Note for AI Coders:** Read both parts before implementation. Part 1 summarizes intent and means; Part 2 supplies the required detailed contracts and validation plan, independent of tool availability.
 
 ### Required Elements
 
@@ -136,8 +210,8 @@ Enable AI agents to quickly understand and reference designs across large projec
 
 | Dependency | Source | Design Link | Usage Description (≤50 words) |
 |------------|--------|-------------|-------------------------------|
-| `AuthService` | FEATURE-001 | [technical-design.md](../EPIC-001/FEATURE-001-A/technical-design.md) | Used for user authentication before accessing protected endpoints |
-| `DatabaseManager` | Foundation | [database.md](../../architecture/technical-designs/database.md) | Provides connection pooling and query execution |
+| `AuthService` | {owning feature} | [dependency design]({dependency_design_path}) | Used only if approved authentication scope requires it |
+| `DatabaseManager` | Foundation | [database design]({database_design_path}) | Reuse established connection pooling/query contract |
 
 ### Format Guidelines
 
@@ -165,6 +239,9 @@ Detailed guide for developers to understand and implement the design.
 | API/Interface Specs | Endpoints, CLI commands, function signatures |
 | Implementation Steps | Ordered tasks to build the feature |
 | Edge Cases | Error handling, boundary conditions |
+| Algorithms and Test Plan | Required scoped decisions/state transitions and AC-mapped planned checks |
+| Goal Coverage and Outcome Scenario | Required source/parent/story/AC-to-means validation mapping and honest evidence gaps |
+| Security, Tracing and Observability | Applicable existing patterns/redaction/opt-in/test plan, or explicit N/A |
 
 ### Format Guidelines
 

@@ -1,0 +1,81 @@
+{
+  "schema": 1,
+  "task_id": "TASK-6749",
+  "name": "x-ipe-task-based-feature-refinement",
+  "version": "1.0.0",
+  "version_basis": "First recorded complete publication; retain initial external metadata version, no earlier production version invented",
+  "date": "2026-10-13",
+  "publication_state": "published",
+  "method": "Editor-only publication recovery: apply_patch and replacement fallback; installed publisher dry-run only, no apply",
+  "review": "evaluation-goal-promotion-TASK-6749.md",
+  "validation_receipt": "validation-receipt-goal-recovery-TASK-6749.json",
+  "baseline_hash": "df22cd0e7c750ee170dfc9f541968f07a79eac54076d20fd1c17a9b16ea3a30d",
+  "managed_provenance": "Original four-file baseline.json independently reviewed in evaluation-goal-promotion-TASK-6749.md; matches baseline-goal-TASK-6749.json and historical evidence-files baseline_hash. Not a newly adopted live inventory or a Git clean claim",
+  "baseline_files": {
+    "SKILL.md": "4ebd2959ac7c879929cba2132da111b102a776451649b74d641e33af3928bb5d",
+    "references/examples.md": "9f4df4483060e8218a3e0ee600aeaef80f32bf63e56835032a8111082e2bcc71",
+    "references/specification-template.md": "41db5352d3f125f2e4c757382f7389b8a51c71d2e76f1dcabeddc5cc2c56ad7a",
+    "references/specification-writing-guide.md": "012239fd507385c10061d35ee13293fe1c99f999936235be1882a96d65f53f10"
+  },
+  "recovery_start_hash": "f93b734151c62e41e780c134491a3b4c212362742085fbd2da5c38c5bb8b2f10",
+  "recovery_start_files": {
+    "SKILL.md": "c23f52d489403b49118f7d8434033b5f05386185e6073272d380e44908652ba7",
+    "references/examples.md": "7b613f54531f1930bbb0d19c53f8eb46401ca897d05f429cb50313b20f15ecfb",
+    "references/integration.md": "91fcf15c4e743fcd94954d8b3c6b7a1a42c3e04e143d8cdab2d69ff914c09435",
+    "references/specification-template.md": "41db5352d3f125f2e4c757382f7389b8a51c71d2e76f1dcabeddc5cc2c56ad7a",
+    "references/specification-writing-guide.md": "012239fd507385c10061d35ee13293fe1c99f999936235be1882a96d65f53f10"
+  },
+  "recovery_diagnosis": "Installed entry and examples contained reviewed candidate prefixes followed by legacy tails; integration already matched; scaffold and guide still matched original baseline. Goal text presence did not establish parity",
+  "candidate_hash": "094644928517509cd6818629cb00ce5ab9908829c18dcdd32dfaf241b6d48ccc",
+  "production_hash": "094644928517509cd6818629cb00ce5ab9908829c18dcdd32dfaf241b6d48ccc",
+  "files": {
+    "SKILL.md": "72588caeb5b03174be9627928ae211011b94ce200d4e4628761d2853799bb599",
+    "references/examples.md": "8c1bb76446cd89116632dbec8e9b296a1056bc70881261c2ee69c82f29862f93",
+    "references/integration.md": "91fcf15c4e743fcd94954d8b3c6b7a1a42c3e04e143d8cdab2d69ff914c09435",
+    "references/specification-template.md": "39afd1a5b53c3921975f3812ee6348fdc01dfe1e4f256005a9d4ec6ecc0360aa",
+    "references/specification-writing-guide.md": "5d5067da8eaef32176cf2849060ce21e245362e2614c9d6355ed89aa0ab549d4"
+  },
+  "added": ["references/integration.md"],
+  "changed": ["SKILL.md", "references/examples.md", "references/specification-template.md", "references/specification-writing-guide.md"],
+  "removed": [],
+  "recovery_changed": ["SKILL.md", "references/examples.md", "references/specification-template.md", "references/specification-writing-guide.md"],
+  "candidate_changes": [],
+  "byte_parity": true,
+  "validation": {"ok": true, "body_lines": 228, "errors": [], "warning_count": 3},
+  "settlement_dry_run": {"ok": true, "state": "dry_run", "baseline_hash": "094644928517509cd6818629cb00ce5ab9908829c18dcdd32dfaf241b6d48ccc", "managed_manifest": "baseline.json", "added": [], "changed": [], "removed": [], "protected_count": 5, "limit": "Post-recovery no-op plan; not a replay of the interrupted original publication"},
+  "baseline_tests": {
+    "command": ".venv/bin/python -m pytest tests/test_goal_oriented_skills.py tests/test_skill_pipeline_refactor.py tests/test_skill_lifecycle.py -q",
+    "passed": 160, "failed": 2, "exit": 1, "seconds": 6.08,
+    "failures": [
+      "tests/test_goal_oriented_skills.py::test_fresh_production_baseline_complete_candidate_and_original_output[x-ipe-task-based-feature-refinement]",
+      "tests/test_skill_pipeline_refactor.py::test_refinement_complete_validator_structure_and_protected_live"
+    ],
+    "cause": "Actual incomplete refinement publication without a parity receipt; neither test nor baseline evidence weakened"
+  },
+  "pre_settlement_tests": {"passed": 160, "failed": 0, "deselected": 2, "seconds": 6.05, "limit": "Only the two receipt-dependent baseline checks deselected before receipt settlement; full unfiltered rerun pending"},
+  "post_settlement_tests": {
+    "state": "passed",
+    "command": ".venv/bin/python -m pytest tests/test_goal_oriented_skills.py tests/test_skill_pipeline_refactor.py tests/test_skill_lifecycle.py -q",
+    "passed": 162, "failed": 0, "deselected": 0, "exit": 0, "seconds": 6.38,
+    "suite_counts": {"goal": 22, "pipeline": 113, "lifecycle": 27}
+  },
+  "installed_validation": {"ok": true, "method": "Exact installed bytes in isolated temporary canonical candidate mirror; actual external resource bytes copied for link validation", "files": 5, "body_lines": 228, "errors": [], "warning_count": 3, "candidate_and_receipt_parity": true},
+  "upstream_readiness": {"ready_packages": 4, "package_files": 25, "candidate_validations_passed": 4, "installed_validations_passed": 4, "matching_goal_receipts": 4, "placeholder_warnings_per_package_set": 5, "downstream_started": false},
+  "test_hashes": {
+    "tests/test_goal_oriented_skills.py": "3b8b0a3a0f10a0a6ef2dcbf04bda607b915cf23e2c644da79336f28e16c47131",
+    "tests/test_skill_pipeline_refactor.py": "151eb395eb34682e72a0681693e13f162509178e5ab39c983d4aab63b65729a9",
+    "tests/test_skill_lifecycle.py": "092df266074e10ea6426f4ccce7f64c6118f2a0a8c1acb1abd3ded5c82f18c6b"
+  },
+  "dependencies": {
+    "workflow_hash": "89ddfa5a1abd55dca9a5e16177340c806fa194e575e5c3cd58396fa8e40d4764",
+    "requirement_hash": "c020a439d33be6e4653d954d644ed183b01ca05ce7cb6a0adaed1ee0a41ab6e0",
+    "breakdown_hash": "9cae32f8fb61fafbec7cfc712a91626b2ae05e34df2f86ae3ac05ad690f20fdc",
+    "goal_contract_sha256": "fd007a0f946ee3ccf60507f88c898358de9ea045b18de6446b65079d62911074",
+    "lifecycle_sha256": "e56f30d30d16b8bc8d5d2c489e05873904cb12705285ea74d9de38bb5d6efeb9"
+  },
+  "dependency_order": 4,
+  "historical_evidence": "Retained original goal validation receipt and candidate-only metadata; they describe earlier staged-link revisions, not this current approved manifest. Prior 307-test/foundation results are historical, not a new run",
+  "recovery": "Non-atomic editor replacements; preferred delete/add retained tails and required exact replacement fallback; indentation corrected and fresh hashes verified. No publisher apply, lock, automatic backup, or rollback guarantee",
+  "outcome_limit": "Reviewed artifact/helper contracts only; no autonomous authoring or stakeholder-observation pilot, downstream adoption, or application-wide migration claim",
+  "excluded_work": ["board", "memory", "git", "user documents", "new downstream"]
+}

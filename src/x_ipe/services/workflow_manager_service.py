@@ -36,6 +36,28 @@ INTERACTION_MODES = (
     "dao-represent-human-to-interact-for-questions-in-skill",
 )
 
+LEGACY_MAP = {
+    "manual": "interact-with-human",
+    "auto": "dao-represent-human-to-interact",
+    "stop_for_question": "dao-represent-human-to-interact-for-questions-in-skill",
+}
+LEGACY_KEY_MAP = {"auto_proceed": "interaction_mode"}
+
+
+def _normalize_process_preference(preference: dict, *, default: bool = False) -> dict:
+    """Copy and migrate supported legacy settings; explicit current keys win."""
+    normalized = dict(preference)
+    for legacy_key, current_key in LEGACY_KEY_MAP.items():
+        if legacy_key in normalized:
+            legacy_value = normalized.pop(legacy_key)
+            normalized.setdefault(current_key, legacy_value)
+    if default:
+        normalized.setdefault("interaction_mode", "interact-with-human")
+    mode = normalized.get("interaction_mode")
+    if isinstance(mode, str):
+        normalized["interaction_mode"] = LEGACY_MAP.get(mode, mode)
+    return normalized
+
 
 def _load_workflow_template(project_root: str = None) -> dict:
     """Load workflow template from x-ipe-docs/config/workflow-template.json."""
@@ -261,9 +283,10 @@ class WorkflowManagerService:
                         if feats:
                             feature_count = len(feats)
                             break
-                interaction_mode = (state.get("global", {})
-                                    .get("process_preference", {})
-                                    .get("interaction_mode", "interact-with-human"))
+                preference = _normalize_process_preference(
+                    state.get("global", {}).get("process_preference", {}), default=True
+                )
+                interaction_mode = preference["interaction_mode"]
                 results.append({
                     "name": state.get("name", f.stem),
                     "created": state.get("created"),
@@ -301,12 +324,12 @@ class WorkflowManagerService:
         # Merge process_preference if provided
         pp = settings.get("process_preference")
         if pp:
+            pp = _normalize_process_preference(pp)
             mode = pp.get("interaction_mode")
-            if mode is not None:
-                if mode not in INTERACTION_MODES:
+            if "interaction_mode" in pp:
+                if not isinstance(mode, str) or mode not in INTERACTION_MODES:
                     return {"success": False, "error": "INVALID_VALUE",
                             "message": f"interaction_mode must be one of: {INTERACTION_MODES}"}
-                pp["interaction_mode"] = mode
 
             state["global"].setdefault("process_preference", {})
             state["global"]["process_preference"].update(pp)
@@ -952,8 +975,15 @@ class WorkflowManagerService:
         except json.JSONDecodeError:
             return {"success": False, "error": "CORRUPTED_STATE",
                     "message": f"Workflow '{name}' has corrupted state — manual repair required"}
+        # FEATURE-044-E: migrate on read without writing solely for settings.
+        # Any subsequent action/settings write persists the canonical keys/values.
+        global_settings = state.setdefault("global", {})
+        global_settings["process_preference"] = _normalize_process_preference(
+            global_settings.get("process_preference", {}), default=True
+        )
         if state.get("schema_version") != "2.0" and "stages" in state:
             state = self._migrate_v1_to_v2(state)
+            state["global"] = global_settings
             self._write_state(name, state)
         if self._migrate_sync_feature_actions(state):
             self._write_state(name, state)

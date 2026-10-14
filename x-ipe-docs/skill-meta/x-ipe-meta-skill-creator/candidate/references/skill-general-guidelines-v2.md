@@ -19,7 +19,8 @@ rule: Only add context it doesn't already have
 guidelines:
   - challenge_each_paragraph: "Does this justify its token cost?"
   - prefer: examples over verbose explanations
-  - max_skill_lines: 500
+  - max_skill_body_lines: 1000  # All X-IPE subtypes; frontmatter excluded; ceiling, not target
+  - counting: "Logical lines including blanks; LF/CRLF equivalent; trailing newline adds no phantom line; 1000 passes, 1001 fails"
 ```
 
 ## Principle 2: Degrees of Freedom
@@ -65,7 +66,7 @@ loading_levels:
   level_2:
     content: SKILL.md body
     when_loaded: When skill triggers
-    token_budget: <500 lines (600 for x-ipe-tool type)
+    line_ceiling: "≤1000 logical body lines for every X-IPE subtype; not a target"
     
   level_3:
     content: Bundled resources (scripts/, references/, templates/)
@@ -167,7 +168,7 @@ principle:
 
 when_to_apply:
   validation:
-    use_when: DoD checking, quality gates, or acceptance criteria need unbiased evaluation
+    use_when: Meaningful workflow, executable, safety, or public-contract changes need independent evaluation
     why: Validator should not be influenced by the builder's context
     example: "Spawn sub-agent to validate DoD after implementation"
 
@@ -216,22 +217,23 @@ principle:
     Systematic gap analysis revealed that while AI agent skills excel at
     execution (笃行之, 10/10), they systematically underrepresent inquiry
     (审问之, 3/10), reflection (慎思之, 3/10), and discernment (明辨之, 1/10).
-    The 5-phase method provides a mandatory structural backbone ensuring
-    every task-based skill considers the full learning cycle.
+    The learning method supplies useful cognitive activities, not a compulsory
+    five-phase ceremony. Retain domain-specific inquiry and verification while
+    combining activities when the scope is simple and understood.
 
 phases:
-  1_study:    { chinese: "博学之", english: "Study Broadly", mandatory: true }
-  2_inquire:  { chinese: "审问之", english: "Inquire Thoroughly", mandatory: false }
-  3_think:    { chinese: "慎思之", english: "Think Carefully", mandatory: false }
-  4_discern:  { chinese: "明辨之", english: "Discern Clearly", mandatory: false }
-  5_practice: { chinese: "笃行之", english: "Practice Earnestly", mandatory: true }
+  1_study:    { chinese: "博学之", english: "Study Broadly", required_activity: true }
+  2_inquire:  { chinese: "审问之", english: "Inquire Thoroughly", required_activity: context_dependent }
+  3_think:    { chinese: "慎思之", english: "Think Carefully", required_activity: context_dependent }
+  4_discern:  { chinese: "明辨之", english: "Discern Clearly", required_activity: context_dependent }
+  5_practice: { chinese: "笃行之", english: "Practice Earnestly", required_activity: true }
 
 rules:
-  - "Phase 1 and Phase 5 are NEVER skippable"
-  - "Phases 2-4 may use <skip reason='...' /> when genuinely non-applicable"
-  - "Phase names always bilingual (Chinese + English)"
-  - "Phase order fixed: 1→2→3→4→5, no reordering"
-  - "interaction_mode in Phase 2: agent self-resolves via x-ipe-assistant-user-representative-Engineer (not skipped)"
+  - "Context gathering and execution verification are required activities, not mandatory named phases"
+  - "Inquiry/reflection/discernment may combine with other steps or be omitted with rationale"
+  - "Existing phase templates remain valid; keep bilingual names/order when using that scaffold"
+  - "Short workflows may use flat steps without duplicating an overview and five named phases"
+  - "Resolve genuine questions under existing interaction-mode policy; no forced DAO call for clear inputs"
 
 applies_to: x-ipe-task-based skills only (not tool, meta, or workflow-orchestration)
 
@@ -245,9 +247,9 @@ mapping_guidance:
       - "Choose approach → Phase 4 (Discern)"
       - "Write code / create file → Phase 5 (Practice)"
   - challenge: "My skill only has 2 steps"
-    rule: "Phase 1 gets context gathering, Phase 5 gets execution. Phases 2-4 skip."
+    rule: "Use context then execution/verification steps; retaining the phase scaffold is optional."
   - challenge: "interaction_mode mode and Phase 2?"
-    rule: "Agent self-resolves via x-ipe-assistant-user-representative-Engineer. Phase 2 is not skipped."
+    rule: "Preserve all three interaction modes; use representative only when policy routes an actual decision to it."
 ```
 
 ## Skill Types
@@ -264,10 +266,10 @@ skill_types:
       
   x-ipe-task-category:
     purpose: Orchestration skill that is called when all related task-based skills in a category finish their work
-    naming_convention: "x-ipe-{category}-{operation-name}"
+    naming_convention: "x-ipe+{category}+{name}"
     examples:
-      - x-ipe-tool-task-board-manager
-      - x-ipe-tool-task-board-manager
+      - x-ipe+feature-stage+release
+      - x-ipe+all+completion
       
   x-ipe-tool:
     purpose: Utility functions and tool integrations
@@ -275,13 +277,13 @@ skill_types:
     examples:
       - x-ipe-tool-pdf
       - x-ipe-tool-pptx
-      - x-ipe-x-ipe-tool-frontend-design
+      - x-ipe-tool-frontend-design
 
   x-ipe-workflow-orchestration:
     purpose: Multi-step workflow coordination across skill types
     naming_convention: "x-ipe-workflow-{name}"
     examples:
-      - x-ipe-workflow-x-ipe-workflow-task-execution
+      - x-ipe-workflow-task-execution
 
   x-ipe-meta:
     purpose: Skills used to create, validate, or manage other skills
@@ -355,7 +357,9 @@ CRITICAL: Only XML elements defined in the template below are allowed. Do NOT in
 
 CRITICAL: Each step MUST have exactly ONE `<action>` block containing ALL actions. Do NOT split actions into separate blocks (e.g., `<branch>`). Conditional logic (IF/THEN/ELSE) belongs inline within the `<action>` numbered list.
 
-MANDATORY: For **x-ipe-task-based** skills, use the **phase-based variant** (Pattern 1b below). For other skill types, use the flat step variant (Pattern 1a).
+Task-based skills may use the existing phase variant or concise flat steps. Preserve task input/output, domain gates, and lifecycle routing; this guideline does not authorize deleting those contracts. Other types normally use flat steps or operations.
+
+Independent review is required for meaningful workflow, executable, safety, or public-contract changes; cosmetic/document-only updates may use deterministic checks plus documented self-review. Legacy `schedule_dod_checks_with_sub_agent_before_starting` tags below mean schedule a reviewer when risk warrants one, not force a new agent for every operation. Example DAGs are optional decomposition patterns.
 
 ### Pattern 1a: Flat Steps (tool, meta, workflow-orchestration, task-category skills)
 
@@ -363,7 +367,7 @@ MANDATORY: For **x-ipe-task-based** skills, use the **phase-based variant** (Pat
 
 ```xml
 <procedure name="{procedure_name}">
-  <!-- CRITICAL: Both DoR/DoD check elements below are MANDATORY -->
+  <!-- Check DoR; schedule independent DoD review when semantic risk warrants it. -->
   <execute_dor_checks_before_starting/>
   <schedule_dod_checks_with_sub_agent_before_starting/>
   
@@ -432,7 +436,7 @@ See examples in this folder:
 
 ### Pattern 1b: Phase-Based Steps (x-ipe-task-based skills ONLY)
 
-MANDATORY: All x-ipe-task-based skills MUST use this phase-based structure. See Principle 6 for rationale.
+OPTIONAL: Use this phase-based scaffold when it clarifies the domain procedure. See Principle 6 for proportional learning activities; flat procedures retain the same domain contracts.
 
 See the [x-ipe-task-based.md template](.github/skills/x-ipe-meta-skill-creator/templates/x-ipe-task-based.md) for the full phase-based procedure template with `<phase_N>` → `<step_N_M>` hierarchy.
 
@@ -450,7 +454,7 @@ CRITICAL: Only XML elements defined in the template below are allowed. Do NOT in
 
 ```xml
 <functions>
-  <!-- CRITICAL: Both DoR/DoD check elements below are MANDATORY -->
+  <!-- Check DoR; schedule independent DoD review when semantic risk warrants it. -->
   <execute_dor_checks_before_starting/>
   <schedule_dod_checks_with_sub_agent_before_starting/>
   

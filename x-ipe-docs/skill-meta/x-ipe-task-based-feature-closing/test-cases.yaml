@@ -1,0 +1,113 @@
+skill_name: x-ipe-task-based-feature-closing
+task_id: TASK-6749
+date: 2026-10-13
+publication_state: published
+independent_review: completed_main_reviewer
+candidate_hash: 9d5a17709cb1f911fd32fa3eb07b338c43eccbafeb064836debaa8485e77fee4
+scope: closing authored package coverage and actual temporary consumer contracts; not autonomous feature closing
+fresh_runs:
+  - name: five focused suites once
+    passed: 501
+    failed: 2
+    skipped: 0
+    deselected: 0
+    seconds: 31.61
+    exit: 1
+    suites:
+      - tests/test_skill_goal_downstream.py
+      - tests/test_goal_oriented_skills.py
+      - tests/test_skill_pipeline_refactor.py
+      - tests/test_skill_lifecycle.py
+      - tests/test_skill_creator_foundation.py
+    findings:
+      - New handoff assertion was whitespace-sensitive across a Markdown line wrap.
+      - Existing lifecycle assertion required obsolete pre-promotion acceptance input wording.
+  - name: affected corrections only
+    passed: 2
+    failed: 0
+    skipped: 0
+    deselected: 0
+    seconds: 0.17
+    exit: 0
+    tests:
+      - tests/test_skill_goal_downstream.py::test_closing_readiness_records_bind_current_receipt_without_claiming_review
+      - tests/test_skill_lifecycle.py::test_known_deliverable_mismatches_are_recorded_not_waived
+    corrections: whitespace-normalized handoff; stronger actual promoted implementation-array versus both-parts design input assertions
+readiness:
+  distinct_tests_covered: 503
+  passing_unaffected: 501
+  passing_after_correction: 2
+  unresolved_test_failures: 4
+  full_suite_repeated: true
+  full_single_run_green_claimed: true
+  prepublication_final_hash_run: 503 passed in 31.74s; exit 0; no skipped/deselected
+  prior_independent_consolidated_run: 503 passed in 31.46s; exit 0
+  scope: all five focused suites together; not repository-wide pytest
+  postpublication_suite: 499 passed, 4 failed in 31.33s; exit 1; zero skips/deselections; unchanged excluded tests
+  postpublication_stale_assertions:
+    - tests/test_skill_goal_downstream.py::test_closing_complete_inventory_output_schema_and_lifecycle requires original unpromoted baseline
+    - tests/test_skill_goal_downstream.py::test_closing_metadata_receipt_and_no_promotion requires candidate_ready and pending review
+    - tests/test_skill_goal_downstream.py::test_closing_readiness_records_bind_current_receipt_without_claiming_review requires candidate_ready
+    - tests/test_skill_lifecycle.py::test_known_deliverable_mismatches_are_recorded_not_waived requires obsolete closing-report tag forbidden by actual template
+cases:
+  - id: PKG-01
+    covers: [AC-S01, AC-C01, AC-L01, AC-D01, AC-Q01, AC-A01]
+    evidence: six-file validator; four original paths and byte-identical PR/changelog; parsed original output/key order and input path contracts; docs/release/single-owner policies
+    state: passed_automated_contract
+  - id: GOAL-01
+    covers: [AC-G01, AC-G02]
+    evidence: badge and seven all-type upstream mappings rendered in existing report; seven badge false-claim negatives and seven all-type omitted-clause negatives
+    state: passed_authored_artifact_checks
+  - id: REUSE-01
+    covers: [AC-E01]
+    evidence: existing read-only acceptance consistency API/current-input mutation rejection; explicit semantic/provenance limits and affected-only revalidation contracts
+    state: passed_temporary_helper_and_contract_checks
+  - id: REVIEW-01
+    covers: [AC-R01]
+    evidence: independent final reviewer inspected all six files and actual consumers; review-main-TASK-6749.md bound to final candidate hash
+    state: passed_independent_package_review
+  - id: APP-01
+    covers: [AC-I01, AC-I02, AC-I03]
+    evidence: actual temporary CLI/runtime empty dictionary success and bogus-tag rejection; exact feature/context/status readback; Implemented/Tested/Completed preservation; locked/wrong-feature failures; optional CR report absence
+    state: passed_temporary_consumer_execution
+validation:
+  ok: true
+  files: 6
+  body_lines: 240
+  errors: 0
+  warnings: 0
+  receipt: validation-receipt-goal-TASK-6749.json
+preservation:
+  acceptance_publication_and_live_candidate_parity: six_files_exact_verified
+  closing_live: six_files_exact_candidate_parity_verified; two replacements, two additions, no removals
+  original_pr_changelog_templates: byte_identical
+  protected_files: 2790
+  protected_fingerprint: 1cb707da3052091b46113e981ab79a3b3033ea1be832ac83097ddec7e7718056
+  authorized_additional_test_delta: tests/test_skill_lifecycle.py obsolete acceptance assertion only
+  original_snapshot_reconstructed_readonly: exact_2790_file_fingerprint_matches
+  unchanged_protected_files: 2789
+  unchanged_protected_fingerprint: 75dec736c7215fc337a7ab59ff129729d5b2070c7e2e56b3cf6bff8a3ec4f9d4
+  current_test_hashes:
+    tests/test_skill_goal_downstream.py: 019c738f884abf3998ea1ab3f0abe0e0dd190be652759b772c76dd029d6282e6
+    tests/test_skill_lifecycle.py: 1a75d4820b9f3499830ffbfed93984efa432bd56503f736a0f5a9e360947af5c
+  board_memory_git_operations: none
+  existing_assertions_weakened: false
+  final_reviewer_protected_files: 2852
+  final_reviewer_protected_fingerprint: 61c5153e5c44f3a87c0302534b9396c119ccf01411382a4a5c8140738211f25f
+  final_reviewer_protected_unchanged: true
+publication:
+  method: authorized exact-file editor transfer; non-atomic, no publisher apply or fabricated managed provenance
+  receipt: publication-receipt-goal-TASK-6749.json
+  review: review-main-TASK-6749.md
+  byte_parity: true
+  formatting_corrections: missing terminal newline on candidate integration and closing-report scaffold only
+  transfer_repairs: editor add retained legacy suffix; removed suffix and three legacy lines, corrected live EOF; exact parity then passed
+limits:
+  - Final postpublication suite is not green; four stale assertions remain in excluded unchanged tests, not candidate behavioral regressions.
+  - Independent package review and exact-parity editor publication do not mean autonomous feature closing, project release or observed benefit.
+  - Authored all-type tables are not actual fictional UI/API/library/CLI execution or stakeholder observation.
+  - Existing acceptance helper consistency cannot authenticate logs, discover omitted dependencies or prove semantic sufficiency.
+  - Disposable board/workflow fixture operations are not actual project board or feature completion.
+  - Current mandatory code_refactor remains a workflow blocker; no app/config gate migration or invented tag.
+  - Actual closing report belongs in task_output_links; current action outputs [] use deliverables {}.
+  - No real release, autonomous closing pilot or larger TASK-6749 completion claimed.

@@ -45,7 +45,9 @@ def runner():
 def initialized_project(temp_project):
     """Create a pre-initialized project with .x-ipe.yaml."""
     config_path = temp_project / '.x-ipe.yaml'
-    config_path.write_text('skills: ".github/skills"\n\ncli: "copilot"\n\nlanguage: "en"\n')
+    config_path.write_text(yaml.safe_dump({
+        'paths': {'skills': '.github/skills'}, 'cli': 'copilot', 'language': 'en',
+    }))
     (temp_project / '.github').mkdir(parents=True, exist_ok=True)
     (temp_project / '.github' / 'copilot-instructions.md').write_text('# EN Instructions')
     return temp_project
@@ -166,7 +168,7 @@ class TestCopilotInstructionsExtraction:
     """ScaffoldManager.copy_copilot_instructions(language=...) tests."""
 
     def test_extracts_en_section(self, temp_project):
-        """copy_copilot_instructions(language='en') writes English content."""
+        """CR-001: copy the complete selected EN resource, without markers."""
         from x_ipe.core.scaffold import ScaffoldManager
 
         scaffold = ScaffoldManager(temp_project)
@@ -174,13 +176,13 @@ class TestCopilotInstructionsExtraction:
         scaffold.copy_copilot_instructions(language='en')
 
         target = temp_project / '.github' / 'copilot-instructions.md'
-        if target.exists():
-            content = target.read_text()
-            assert '---LANG:en---' not in content
-            assert '---LANG:zh---' not in content
+        source = Path(__file__).resolve().parents[1] / 'src/x_ipe/resources/copilot-instructions-en-no-dao.md'
+        assert target.is_file()
+        assert target.read_bytes() == source.read_bytes()
+        assert '---LANG:' not in target.read_text()
 
     def test_extracts_zh_section(self, temp_project):
-        """copy_copilot_instructions(language='zh') writes Chinese content."""
+        """CR-001: copy the complete selected ZH resource, without markers."""
         from x_ipe.core.scaffold import ScaffoldManager
 
         scaffold = ScaffoldManager(temp_project)
@@ -188,14 +190,14 @@ class TestCopilotInstructionsExtraction:
         scaffold.copy_copilot_instructions(language='zh')
 
         target = temp_project / '.github' / 'copilot-instructions.md'
-        if target.exists():
-            content = target.read_text()
-            assert '---LANG:en---' not in content
-            assert '---LANG:zh---' not in content
-            assert '使用指南' in content or 'Copilot' in content
+        source = Path(__file__).resolve().parents[1] / 'src/x_ipe/resources/copilot-instructions-zh-no-dao.md'
+        assert target.is_file()
+        assert target.read_bytes() == source.read_bytes()
+        assert '---LANG:' not in target.read_text()
+        assert target.read_bytes() != source.with_name('copilot-instructions-en-no-dao.md').read_bytes()
 
-    def test_zh_contains_keyword_mapping(self, temp_project):
-        """Chinese instructions include skill keyword mapping table."""
+    def test_zh_contains_dynamic_skill_discovery(self, temp_project):
+        """Current instructions route from discovered YAML metadata, not a keyword table."""
         from x_ipe.core.scaffold import ScaffoldManager
 
         scaffold = ScaffoldManager(temp_project)
@@ -203,13 +205,27 @@ class TestCopilotInstructionsExtraction:
         scaffold.copy_copilot_instructions(language='zh')
 
         target = temp_project / '.github' / 'copilot-instructions.md'
-        if target.exists():
-            content = target.read_text()
-            assert '优化创意' in content
-            assert 'x-ipe-task-based-ideation' in content
+        assert target.is_file()
+        content = target.read_text()
+        assert '.github/skills/x-ipe-task-based-*/SKILL.md' in content
+        assert '.github/skills/x-ipe-assistant-*/SKILL.md' in content
+        assert 'frontmatter' in content
+        # Validate the schema actually consumed by dynamic discovery. No fixed
+        # list of task names or Chinese trigger phrases belongs in this test.
+        skills_root = Path(__file__).resolve().parents[1] / '.github/skills'
+        skills = sorted(skills_root.glob('x-ipe-task-based-*/SKILL.md'))
+        assert skills
+        for skill in skills:
+            text = skill.read_text()
+            assert text.startswith('---\n'), skill
+            metadata = yaml.safe_load(text.split('---', 2)[1])
+            assert isinstance(metadata, dict), skill
+            assert metadata['name'] == skill.parent.name
+            assert isinstance(metadata['description'], str), skill
+            assert metadata['description'].strip(), skill
 
     def test_en_does_not_contain_zh_keywords(self, temp_project):
-        """English instructions do not contain Chinese keyword mappings."""
+        """EN selects EN guidance, not the ZH template or a static routing table."""
         from x_ipe.core.scaffold import ScaffoldManager
 
         scaffold = ScaffoldManager(temp_project)
@@ -217,9 +233,11 @@ class TestCopilotInstructionsExtraction:
         scaffold.copy_copilot_instructions(language='en')
 
         target = temp_project / '.github' / 'copilot-instructions.md'
-        if target.exists():
-            content = target.read_text()
-            assert '优化创意' not in content
+        resources = Path(__file__).resolve().parents[1] / 'src/x_ipe/resources'
+        assert target.is_file()
+        assert target.read_bytes() == (resources / 'copilot-instructions-en-no-dao.md').read_bytes()
+        assert target.read_bytes() != (resources / 'copilot-instructions-zh-no-dao.md').read_bytes()
+        assert '.github/skills/x-ipe-task-based-*/SKILL.md' in target.read_text()
 
 
 # ============================================================================
@@ -290,10 +308,12 @@ class TestInitLangIntegration:
         assert result.exit_code == 0
 
         config_path = temp_project / '.x-ipe.yaml'
-        if config_path.exists():
-            with open(config_path) as f:
-                config = yaml.safe_load(f)
-            assert config.get('language') == 'zh'
+        assert config_path.is_file()
+        config = yaml.safe_load(config_path.read_text())
+        assert isinstance(config, dict)
+        assert config['language'] == 'zh'
+        assert config['cli'] == 'copilot'
+        assert config['paths']['skills'] == '.github/skills'
 
     def test_init_with_lang_en(self, runner, temp_project):
         """x-ipe init --lang en passes language to scaffold."""
@@ -328,7 +348,8 @@ class TestUpgradeLangIntegration:
              patch('x_ipe.cli.main._resolve_cli_selection', return_value='copilot'):
             result = runner.invoke(cli, [
                 '--project', str(initialized_project),
-                'upgrade', '--lang', 'zh'
-            ])
+                'upgrade', '--lang', 'zh', '--no-mcp'
+            ], input='1\n')
+            assert result.exit_code == 0, (result.output, result.exception)
             mock_resolve.assert_called_once_with('zh')
             mock_switch.assert_called_once()

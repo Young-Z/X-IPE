@@ -14,6 +14,7 @@ TDD Approach: All tests written before implementation.
 import os
 import shutil
 import tempfile
+import importlib
 from pathlib import Path
 from unittest.mock import patch, MagicMock
 
@@ -56,10 +57,10 @@ def temp_adapters_yaml():
     run_args: ""
     inline_prompt_flag: "--prompt"
     prompt_format: '{command} {inline_prompt_flag} "{escaped_prompt}"'
-    instructions_file: ".opencode/instructions.md"
+    instructions_file: "Agents.md"
     skills_folder: ".opencode/skills/"
     mcp_config_path: "opencode.json"
-    mcp_config_format: "project"
+    mcp_config_format: "nested"
     detection_command: "opencode"
   claude-code:
     display_name: "Claude Code CLI"
@@ -84,6 +85,16 @@ def temp_adapters_yaml():
 def runner():
     """Click CLI test runner."""
     return CliRunner()
+
+
+@pytest.fixture
+def instruction_adapter(temp_adapters_yaml, monkeypatch):
+    """Use a known registry, not a cwd overlay or an installed CLI."""
+    module = importlib.import_module('x_ipe.services.cli_adapter_service')
+    service = module.CLIAdapterService(config_file_path=temp_adapters_yaml)
+    assert service.get_adapter('opencode').instructions_file == 'Agents.md'
+    monkeypatch.setattr(module, 'CLIAdapterService', lambda: service)
+    return service
 
 
 # ============================================================================
@@ -351,40 +362,39 @@ class TestScaffoldConfigFile:
 class TestMCPPathResolution:
     """Bug fix: init MCP merge uses active CLI's path, not hardcoded copilot."""
 
-    def test_init_mcp_uses_opencode_path(self, runner, temp_project):
+    def test_init_mcp_uses_opencode_path(self, runner, temp_project, instruction_adapter):
         """When CLI is opencode, MCP merge target defaults to opencode.json."""
         import json
-        from src.x_ipe.cli.main import cli
+        module = importlib.import_module('x_ipe.cli.main')
+        scaffold_module = importlib.import_module('x_ipe.core.scaffold')
 
         # Set up MCP source
-        mcp_dir = temp_project / ".github" / "copilot"
+        mcp_dir = temp_project / "fake_mcp_resource"
         mcp_dir.mkdir(parents=True, exist_ok=True)
         mcp_config = {"mcpServers": {"test-server": {"command": "test"}}}
         (mcp_dir / "mcp-config.json").write_text(json.dumps(mcp_config))
 
-        with patch("x_ipe.cli.main.CLIAdapterService") as MockService:
-            mock_svc = MockService.return_value
-            adapter = MagicMock()
-            adapter.name = "opencode"
-            adapter.mcp_config_path = "opencode.json"
-            adapter.mcp_config_format = "project"
-            adapter.skills_folder = ".opencode/skills/"
-            adapter.instructions_file = ".opencode/instructions.md"
-            mock_svc.get_adapter.return_value = adapter
-            mock_svc.list_adapters.return_value = [adapter]
-            mock_svc.detect_installed_clis.return_value = ["opencode"]
-            mock_svc.is_installed.return_value = True
+        original_resource_path = scaffold_module.ScaffoldManager._get_resource_path
+        def resource_path(scaffold, name):
+            return mcp_dir if name == 'copilot' else original_resource_path(scaffold, name)
 
-            # Run init with --cli opencode, confirm MCP merge
-            result = runner.invoke(
-                cli,
-                ["-p", str(temp_project), "init", "--cli", "opencode"],
-                input="y\n" + str(temp_project / "opencode.json") + "\n",
-            )
-            # If MCP merge happened, target should be opencode.json not ~/.copilot/...
-            if (temp_project / "opencode.json").exists():
-                config = json.loads((temp_project / "opencode.json").read_text())
-                assert "mcp" in config
+        with patch.object(module, 'CLIAdapterService', return_value=instruction_adapter) as service_factory:
+            with patch.object(scaffold_module.ScaffoldManager, '_get_resource_path', resource_path):
+                # Explicit language, then accept exactly one server and the
+                # default path. Supplying a path would conceal a wrong default.
+                result = runner.invoke(
+                    module.cli,
+                    ['-p', str(temp_project), 'init', '--cli', 'opencode', '--lang', 'en'],
+                    input='y\n\n',
+                )
+        assert result.exit_code == 0, (result.output, result.exception)
+        assert service_factory.called
+        target = temp_project / 'opencode.json'
+        assert target.is_file()
+        config = json.loads(target.read_text())
+        assert config['mcp'] == {'test-server': {'type': 'local', 'command': ['test'], 'enabled': True}}
+        assert not (temp_project / '.copilot/mcp-config.json').exists()
+        assert not (temp_project / '.github/copilot/mcp-config.json').exists()
 
 
 # ============================================================================
@@ -516,15 +526,18 @@ class TestCLISpecificSkillsCopy:
 class TestCLISpecificInstructions:
     """copy_copilot_instructions(cli_name=...) targets CLI-specific path."""
 
-    def test_instructions_opencode_targets_opencode_path(self, temp_project):
-        """copy_copilot_instructions(cli_name='opencode') creates .opencode/instructions.md."""
+    def test_instructions_opencode_targets_opencode_path(self, temp_project, instruction_adapter):
+        """OpenCode writes the registry-authorized root Agents.md, not Codex AGENTS.md."""
         from x_ipe.core.scaffold import ScaffoldManager
 
         scaffold = ScaffoldManager(temp_project)
         scaffold.copy_copilot_instructions(cli_name='opencode')
 
-        target = temp_project / ".opencode" / "instructions.md"
-        assert target in scaffold.created
+        target = temp_project / "Agents.md"
+        assert scaffold.created == [target]
+        source = Path(__file__).resolve().parents[1] / 'src/x_ipe/resources/templates/instructions-template-no-dao.md'
+        assert target.read_bytes() == source.read_bytes()
+        assert not (temp_project / ".opencode" / "instructions.md").exists()
         assert not (temp_project / ".github" / "copilot-instructions.md").exists()
 
     def test_instructions_claude_code_targets_claude_path(self, temp_project):
@@ -548,29 +561,34 @@ class TestCLISpecificInstructions:
         assert not (temp_project / ".opencode" / "instructions.md").exists()
         assert not (temp_project / ".claude" / "instructions.md").exists()
 
-    def test_instructions_opencode_skips_if_exists(self, temp_project):
+    def test_instructions_opencode_skips_if_exists(self, temp_project, instruction_adapter):
         """copy_copilot_instructions(cli_name='opencode') skips if already exists."""
         from x_ipe.core.scaffold import ScaffoldManager
 
-        target = temp_project / ".opencode" / "instructions.md"
-        target.parent.mkdir(parents=True)
+        target = temp_project / "Agents.md"
         target.write_text("# Existing")
+        legacy = temp_project / '.opencode' / 'instructions.md'
+        legacy.parent.mkdir()
+        legacy.write_text('# Legacy must remain untouched')
 
         scaffold = ScaffoldManager(temp_project)
         scaffold.copy_copilot_instructions(cli_name='opencode')
 
-        assert target in scaffold.skipped
+        assert scaffold.skipped == [target]
+        assert scaffold.created == []
         assert target.read_text() == "# Existing"
+        assert legacy.read_text() == '# Legacy must remain untouched'
 
-    def test_instructions_opencode_dry_run_no_file(self, temp_project):
+    def test_instructions_opencode_dry_run_no_file(self, temp_project, instruction_adapter):
         """copy_copilot_instructions(cli_name='opencode') in dry_run doesn't write."""
         from x_ipe.core.scaffold import ScaffoldManager
 
         scaffold = ScaffoldManager(temp_project, dry_run=True)
         scaffold.copy_copilot_instructions(cli_name='opencode')
 
-        assert not (temp_project / ".opencode" / "instructions.md").exists()
-        assert (temp_project / ".opencode" / "instructions.md") in scaffold.created
+        assert list(temp_project.iterdir()) == []
+        assert scaffold.created == [temp_project / "Agents.md"]
+        assert scaffold.skipped == []
 
 
 # ============================================================================

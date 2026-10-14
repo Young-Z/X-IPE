@@ -1,0 +1,33 @@
+task_id: TASK-6749
+skill_name: x-ipe-tool-task-board-manager
+candidate_hash: 96f1f688853aeaac6c5bcd9bdb8dc9be97c6720b0abdbc20d4ade3f915bcdc84
+runner: verify_candidate.py
+new_scenarios: tests/test_registration.py
+cases:
+  - {id: registration, scenario: Bootstrap auto ID and explicit compatibility, evidence: test_auto_bootstrap_and_explicit_compatibility, result: pass}
+  - {id: reservation, scenario: All-date live/archive/orphan/index high water, evidence: test_reserves_all_dates_archives_and_orphans, result: pass}
+  - {id: resume, scenario: Supplied ID repeated ensure without writes or reopening, evidence: test_resume_old_completed_preserves_outputs_routing_timestamps, result: pass}
+  - {id: ownership, scenario: Exact existing role and context reject foreign/blank/case mismatches, evidence: test_ensure_rejects_existing_ownership_context, result: pass}
+  - {id: caller, scenario: No omitted ID or blank caller owner in ensure, evidence: test_ensure_blank_caller_cannot_claim_unassigned, result: pass}
+  - {id: all-date, scenario: Old in-progress owner beyond first page and description nickname false positives, evidence: test_all_date_complete_pagination_exact_role_and_readonly, result: pass}
+  - {id: statuses, scenario: Every canonical status plus aliases after type validation, evidence: test_create_update_canonical_statuses, result: pass}
+  - {id: corruption, scenario: Malformed JSON never reset or hidden by ownership query, evidence: test_corrupt_state_never_reset, result: pass}
+  - {id: interruption, scenario: Failed index commit reserves orphan but blocks silent resume, evidence: test_index_failure_reserves_orphan_and_blocks_resume, result: pass}
+  - {id: daily-format, scenario: Both API list and CRUD object daily forms plus legacy string entries, evidence: test_historical_list_daily_string_index_and_api_get, result: pass}
+  - {id: archive-race, scenario: Recheck archived destination under daily lock, evidence: test_archive_rechecks_collision_inside_daily_lock, result: pass}
+  - {id: migration, scenario: Cross-date/archive duplicate avoidance and original timestamps, evidence: test_migration_cross_date_duplicates_and_timestamps, result: pass}
+  - {id: parallel-create, scenario: 12 auto creates across 3 dates, evidence: test_concurrent_auto_allocations_different_dates, result: pass}
+  - {id: parallel-ensure, scenario: 9 same-ID ensures across 3 dates create once, evidence: test_concurrent_ensure_same_id_multiple_dates, result: pass}
+  - {id: parallel-explicit, scenario: 6 explicit-ID collisions produce one success, evidence: test_concurrent_explicit_create_collision, result: pass}
+  - {id: mixed-writers, scenario: Update/archive/ensure/migrate/creates overlap without reversed locks, evidence: test_mixed_update_archive_create_ensure_migration, result: pass}
+  - {id: actual-api, scenario: Task list and feature HTTP routes consume candidate outputs, evidence: test_candidate_output_compatible_with_actual_http_api, result: pass}
+  - {id: http-get, scenario: HTTP task-get reads CLI object daily envelopes, evidence: test_http_get_reads_cli_envelope, result: pass}
+  - {id: production-interop, scenario: Actual production writer HTTP get in temporary root, evidence: test_production_writer_http_get_compatibility, result: pass}
+  - {id: http-index-formats, scenario: Fourteen dual-format/index/fallback/service/HTTP regressions, evidence: TestServiceGetTask.test_get_reads_daily_formats_and_safe_index_fallback, result: pass}
+  - {id: interrupted-update, scenario: Ensure rejects status/timestamp disagreement without mutation, evidence: test_ensure_rejects_interrupted_update_index, result: pass}
+  - {id: single-index-corruption, scenario: Query/update reject corrupt existing indexes with structured failures, evidence: test_single_operations_corrupt_index_fail_structured, result: pass}
+  - {id: examples, scenario: 11 documented CLI commands executed in temporary project, evidence: test_documented_examples_execute_in_temporary_project, result: pass}
+results:
+  candidate: {passed: 364, failed: 0, xfailed: 0}
+  production: {passed: 364, failed: 0, xfailed: 0}
+  frontend: {files: 51, passed: 1016, failed: 0}

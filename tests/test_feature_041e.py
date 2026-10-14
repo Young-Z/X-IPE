@@ -459,21 +459,31 @@ class TestRuntimeValidation:
         )
         assert result is True
 
-    def test_missing_key_warns(self, service):
-        """Instance missing a template tag should log warning but not fail hard."""
-        result = service.validate_action_deliverables(
-            "compose_idea",
-            {"raw-ideas": "idea.md"}  # missing ideas-folder
+    def test_missing_key_warns(self, service, sample_workflow, caplog):
+        """CR-003 AC-041E-04c: partial deliverables warn without blocking."""
+        deliverables = {"raw-ideas": "idea.md"}  # missing ideas-folder
+        assert service.validate_action_deliverables("compose_idea", deliverables) is True
+        assert "missing deliverable tags: {'ideas-folder'}" in caplog.text
+        result = service.update_action_status(
+            sample_workflow, "compose_idea", "done", deliverables=deliverables
         )
-        assert result is False  # validation fails but doesn't raise
+        assert result["success"] is True
+        action = service.get_workflow(sample_workflow)["shared"]["ideation"]["actions"]["compose_idea"]
+        assert action["status"] == "done"
+        assert action["deliverables"] == deliverables
 
-    def test_extra_keys_accepted(self, service):
-        """Instance with extra keys beyond template should be accepted."""
-        result = service.validate_action_deliverables(
-            "compose_idea",
-            {"raw-ideas": "idea.md", "ideas-folder": "ideas/", "extra-key": "bonus.md"}
+    def test_extra_keys_rejected_without_mutation(self, service, sample_workflow, caplog):
+        """TASK-6749 retains the safe allowlist despite the spec's superset edge case."""
+        deliverables = {"raw-ideas": "idea.md", "ideas-folder": "ideas/", "extra-key": "bonus.md"}
+        before = service._get_workflow_path(sample_workflow).read_bytes()
+        assert service.validate_action_deliverables("compose_idea", deliverables) is False
+        assert "unexpected deliverable tags: {'extra-key'}" in caplog.text
+        result = service.update_action_status(
+            sample_workflow, "compose_idea", "done", deliverables=deliverables
         )
-        assert result is True
+        assert result["success"] is False
+        assert result["error"] == "INVALID_DELIVERABLES"
+        assert service._get_workflow_path(sample_workflow).read_bytes() == before
 
     def test_legacy_list_skips_validation(self, service):
         """Legacy list format should skip keyed validation."""

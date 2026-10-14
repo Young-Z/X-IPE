@@ -1,0 +1,32 @@
+{
+  "task_id": "TASK-6749",
+  "scope": "four sequential goal-oriented candidates only; no promotion",
+  "review": "awaiting main independent reviewer; no independent review claimed",
+  "tests": {
+    "command": ".venv/bin/python -B -m pytest -q -p no:cacheprovider tests/test_goal_oriented_skills.py tests/test_skill_pipeline_refactor.py tests/test_skill_lifecycle.py tests/test_skill_creator_foundation.py",
+    "exit_code": 0, "passed": 303, "failed": 0,
+    "limits": "Authored and rendered artifacts, descriptive guidance and temporary helper compatibility; not autonomous goal seeking or observed stakeholder outcomes."
+  },
+  "test_and_validator_sha256": {
+    "tests/test_goal_oriented_skills.py": "a47d1d4144c1844192ac38eb45f42aab69a274c45e928ecc26b9d4dbcff0e2d6",
+    "tests/test_skill_pipeline_refactor.py": "7bdf33bbcc1c3bfc0c7c0ceeceea5c1bc9bf92f17c8728a8e654c2f598cb266a",
+    "tests/test_skill_lifecycle.py": "092df266074e10ea6426f4ccce7f64c6118f2a0a8c1acb1abd3ded5c82f18c6b",
+    "tests/test_skill_creator_foundation.py": "684b1678b2c052f0fc5359ac34bd525ae7c7392caa187d5c84600107c75f6625",
+    ".github/skills/x-ipe-meta-skill-creator/scripts/validate_skill.py": "21fbb19a17e3f8d80657936be66843af55fe047d910fb599831c0571dbab856f"
+  },
+  "read_only_sample_sha256": {
+    "x-ipe-docs/requirements/EPIC-047/FEATURE-047-A/specification.md": "3dbb34aa61f1a21694474f342ea0b9077a88a6eff5aa53ed457f9cc16c0503d6",
+    "x-ipe-docs/requirements/EPIC-059/FEATURE-059-C/specification.md": "b5e125d5182151b9ae21b9f68797ac0b1ce63c3c348bbdc79bba78118849cdf0",
+    "x-ipe-docs/requirements/EPIC-059/FEATURE-059-C/CR-003.md": "9b963d026788b7c4c1bec53bd8d6e1807fdc43e491dbc874ebb76af5a687f1eb"
+  },
+  "inspected_downstream_sha256": {
+    ".github/skills/x-ipe-task-based-technical-design/SKILL.md": "4e1e57aa17780d8bac8b9e2d17389e3372336623c08a3d3e7865ddec93a077e5",
+    ".github/skills/x-ipe-task-based-code-implementation/SKILL.md": "5905d2eb578d4ddab3fc10ea072f787b4958bbbac5ab73d515169fa002360518",
+    ".github/skills/x-ipe-task-based-feature-acceptance-test/SKILL.md": "c7f122cf92a7473acb2bf4f08c0576ccd77a69bc59a014215e70c69315a6ba97",
+    ".github/skills/x-ipe-task-based-feature-closing/SKILL.md": "b49abf0c9382ab6b837317a48d88e3118f087f3fd3b35e947c0e04148dae2267",
+    ".github/skills/x-ipe-task-based-change-request/SKILL.md": "6520238484d1796764849a3cf4aa6b33fae604586abe8c49c3382346b525b7df",
+    ".github/skills/x-ipe-task-based-bug-fix/SKILL.md": "91ee6598edd1956b0291fecda74aae0dd0a4a30ba20b955b5947973e82f95264",
+    ".github/skills/x-ipe-task-based-code-refactor/SKILL.md": "512e4c9458f91e32d58b49c424aeb8e9df97fd7f5960ec10ff4ae36ccde8efff",
+    ".github/skills/x-ipe+feature+quality-board-management/SKILL.md": "a07401a8d632320f07f2fc19603f1a1de3e0f3d36c17154f064544cfabb9aab0"
+  }
+}

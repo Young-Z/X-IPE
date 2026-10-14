@@ -160,10 +160,19 @@ class TestComposeIdeaModalCSS:
         content = (CSS_FEATURES / "compose-idea-modal.css").read_text()
         assert "1051" in content
 
-    def test_css_has_80vw_width(self):
-        """AC-002: Modal width is 80vw (4/5 viewport)."""
+    def test_css_has_standard_modal_dimensions(self):
+        """Current shared modal pattern: FEATURE-049-D AC-049-D-02a.
+
+        The old 80vw assertion was never FEATURE-037-A's ~720px AC-002.
+        Check the dialog declarations, not a number in an unrelated rule/comment.
+        """
         content = (CSS_FEATURES / "compose-idea-modal.css").read_text()
-        assert "80vw" in content
+        content = re.sub(r"/\*.*?\*/", "", content, flags=re.DOTALL)
+        rule = re.search(r"\.compose-modal\s*\{([^}]+)\}", content)
+        assert rule is not None
+        assert re.search(r"\bwidth\s*:\s*90vw\s*;", rule.group(1))
+        assert re.search(r"\bheight\s*:\s*90vh\s*;", rule.group(1))
+        assert re.search(r"\bmax-height\s*:\s*90vh\s*;", rule.group(1))
 
 
 # ============================================================================
@@ -461,24 +470,22 @@ class TestIdeaUploadAPI:
     @pytest.fixture
     def app_client(self, temp_project_dir):
         """Create Flask test client."""
-        try:
-            from src.app import create_app
-            app = create_app({
-                "PROJECT_ROOT": temp_project_dir,
-                "TESTING": True,
-                "SETTINGS_DB_PATH": os.path.join(temp_project_dir, "test_settings.db")
-            })
-            with app.test_client() as client:
-                yield client
-        except ImportError:
-            pytest.skip("App not importable yet (TDD)")
+        from src.app import create_app
+        app = create_app({
+            "PROJECT_ROOT": temp_project_dir,
+            "TESTING": True,
+            "SETTINGS_DB_PATH": os.path.join(temp_project_dir, "test_settings.db")
+        })
+        with app.test_client() as client:
+            yield client
 
     def test_ideas_tree_returns_json(self, app_client):
         """AC-024: GET /api/ideas/tree returns folder tree as JSON."""
         response = app_client.get("/api/ideas/tree")
         assert response.status_code == 200
         data = response.get_json()
-        assert isinstance(data, (list, dict))
+        assert data["success"] is True
+        assert data["tree"] == []
 
     def test_ideas_upload_with_target_folder(self, app_client, temp_project_dir):
         """AC-026: POST /api/ideas/upload with target_folder creates idea."""
@@ -492,7 +499,19 @@ class TestIdeaUploadAPI:
             data=data,
             content_type="multipart/form-data"
         )
-        assert response.status_code in (200, 201)
+        assert response.status_code == 200
+        result = response.get_json()
+        assert result["success"] is True
+        assert result["folder_path"] == "x-ipe-docs/ideas/wf-001-test-idea"
+        uploaded = Path(temp_project_dir) / result["folder_path"] / "idea.md"
+        assert uploaded.read_text() == "# Test Idea\n\nContent here"
+
+    def test_upload_without_files_rejected_without_creating_folder(self, app_client, temp_project_dir):
+        """Invalid submission must not create an empty deliverable folder."""
+        response = app_client.post("/api/ideas/upload", data={"target_folder": "wf-001-empty"})
+        assert response.status_code == 400
+        assert response.get_json()["success"] is False
+        assert not (Path(temp_project_dir) / "x-ipe-docs/ideas/wf-001-empty").exists()
 
     def test_ideas_upload_creates_folder_with_wf_prefix(self, app_client, temp_project_dir):
         """AC-024: Uploaded idea creates folder matching wf-NNN-{name} pattern."""

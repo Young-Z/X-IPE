@@ -1,0 +1,111 @@
+schema: 1
+task_id: TASK-6749
+sequential_step: 3
+skill_name: x-ipe-tool-task-board-manager
+skill_type: x-ipe-tool
+publication_state: published
+promoted: true
+candidate_hash: 96f1f688853aeaac6c5bcd9bdb8dc9be97c6720b0abdbc20d4ade3f915bcdc84
+baseline_hash: bf80e5aa080dae4de0a95428f97a1ea58b079a31ed950149f8ee8b006cfae6e8
+creator:
+  version: 1.2.0
+  installed_tree_equals_published_receipt: true
+  installed_hash: d548972671b39a8a7a0940fe30fa6d7e143b68ba32e8919b4192c640c14bca39
+  validator: .github/skills/x-ipe-meta-skill-creator/scripts/validate_skill.py
+  candidate_bootstrap_override: false
+validation:
+  cli_exit_code: 0
+  api_ok: true
+  exact_receipt: validation-receipt.json
+  errors: []
+  warnings: []
+  body_lines: 216
+  candidate_files: 13
+delta:
+  added: [references/examples.md, scripts/_task_store.py, scripts/task_ensure.py]
+  changed: [SKILL.md, scripts/migrate.py, scripts/task_archive.py, scripts/task_create.py, scripts/task_query.py, scripts/task_update.py]
+  byte_identical: [scripts/_board_lib.py, scripts/feature_create.py, scripts/feature_query.py, scripts/feature_update.py]
+  source_paths_removed: []
+  protected_generated_cache_files_preserved: 10
+  candidate_generated_cache_files: 0
+  cache_deletions_approved: false
+  production_baseline_exact_before_publication: true
+  managed_distributable_parity: true
+  whole_tree_parity: false
+tests:
+  command: PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -B x-ipe-docs/skill-meta/x-ipe-tool-task-board-manager/verify_candidate.py
+  modules: Candidate or --production sources preloaded by exact absolute origin; compatibility and registration origins checked after collection.
+  isolation: Temporary project roots; -B, PYTHONDONTWRITEBYTECODE=1, no pytest cache; no real board mutation.
+  first_run: {passed: 331, failed: 1, reason: inherited HTTP task-get object-envelope incompatibility}
+  historical_original_candidate_run: {passed: 341, failed: 0, xfailed: 1}
+  review_failing_regressions_before_fix: {passed: 343, failed: 21}
+  fresh_candidate_run: {passed: 364, failed: 0, xfailed: 0, seconds: 5.11, exit_code: 0}
+  actual_production_run: {passed: 364, failed: 0, xfailed: 0, seconds: 5.00, exit_code: 0}
+  candidate_rerun_after_promotion: {passed: 364, failed: 0, xfailed: 0, seconds: 4.98, exit_code: 0}
+  frontend_run: {files: 51, passed: 1016, failed: 0}
+  collected: 364
+  existing_suite_passed: 297
+  original_existing_cases: 283
+  new_http_regressions: 14
+  registration_passed: 67
+  strict_expected_failures: 0
+  per_file:
+    test_board_lib.py: 47
+    test_task_crud.py: 58
+    test_feature_crud.py: 40
+    test_migrate.py: 38
+    test_task_board_api.py: 50
+    test_feature_board_api.py: 37
+    test_task_board_page.py: 15
+    test_feature_board_page.py: 12
+    test_registration.py: 67
+  process_concurrency:
+    automatic_multi_date_creates: 12
+    same_id_multi_date_ensures: 9
+    explicit_id_collision_creates: 6
+    mixed_writers: 8
+    observed_timeouts_or_deadlocks: 0
+    bounds: Cooperative processes only; 20-second test completion bound, not hostile-writer/power-loss certification.
+  documented_commands: 11
+  test_sha256: 458d35dafd2661cc06d5c0e8a07d8fdafcff2f69ac1d7dfc3206912622a7141f
+  runner_sha256: e03b8ca7346d112e698ef78ccc9bb36b6263c4e7f6c190b5c7fd25bb2911bf69
+review:
+  independent_additional_subagent_available: false
+  independent_review_completed: true
+  independent_review: independent-review.md
+  independence_boundary: Fresh session reviews previous author candidate; reviewer fixes evidenced by tests, not claimed second-reviewer approval.
+  self_review: self-review.md
+  self_review_is_independent: false
+publication:
+  generic_publisher_apply_executed: false
+  editor_promotion_executed: true
+  publisher_dry_run_executed: true
+  publisher_dry_run_result: Refused unmanaged source changes, correctly; not bypassed with fabricated prior manifest.
+  reason: User-authorized apply_patch-only file-scoped publication preserves protected caches; 13 managed distributables match validated candidate exactly.
+  managed_inventory: Old managed.json stays empty; published-manifest.json is actual new publication inventory, not retroactive baseline adoption.
+  receipt: publication-receipt.json
+  journal: publication-journal.json
+  version_history_modified: true
+  version: Published initial metadata 1.0.0 after verified promotion.
+  production_files: 23
+  production_full_hash: 94f1cfd0d6810d8de53beb2003cc5d80ffdd9aa8605f5b68d9d2939268c4e557
+blockers: []
+known_gaps:
+  - No additional subagent review available; fresh-session independent review completed, corrections verified by regression tests.
+  - Historical baseline alone does not establish ownership; file-scoped publication uses explicit current user authorization.
+  - Ten generated production caches are unchanged and excluded from distributables; no deletion or whole-tree equality claimed.
+  - External retained transcript contains verified six-file preimage backup; preserve it until durable release backup exists.
+  - Per-file atomic replace is not a daily/index crash-atomic transaction. Orphans block ensure rather than triggering silent repair.
+preservation:
+  board_edits: false
+  memory_writes: false
+  git_operations: false
+  unrelated_source_edits: false
+  authorized_app_source_fix: src/x_ipe/services/task_board_service.py
+  authorized_app_test_fix: tests/test_task_board_api.py
+  legacy_wrappers_retained: true
+  live_skill_edits: true
+  lesson_status_changes: false
+  lesson_manager_and_LL_hashes_unchanged: true
+  permitted_paths: Reviewed candidate/metadata, nine explicitly authorized live skill paths, narrow app service/API test corrections.
+next_action: Return promoted status and counts to lifecycle owner; no board, memory, git or historical lesson mutation.

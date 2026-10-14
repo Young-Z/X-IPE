@@ -1,0 +1,17 @@
+{
+  ".github/skills/x-ipe-meta-skill-creator/SKILL.md": "ac21f35b8d9a5cc17b95cb33cf44d7e3a6660b573e0aea5f7b5ae4d0be45f305",
+  ".github/skills/x-ipe-meta-skill-creator/scripts/validate_skill.py": "21fbb19a17e3f8d80657936be66843af55fe047d910fb599831c0571dbab856f",
+  ".github/skills/x-ipe-tool-x-ipe-app-interactor/scripts/_lib.py": "40cd86d614e26c6b71b7a8d63f4920aeacd85eb918445c545828da38ad5a10d3",
+  ".github/skills/x-ipe-tool-x-ipe-app-interactor/scripts/workflow_get_state.py": "1715e5067efc97bf9eebb709b90291e2bfd92413b150478e62d2ed9fc621b150",
+  ".github/skills/x-ipe-tool-x-ipe-app-interactor/scripts/workflow_update_action.py": "fdf7f8ec3d706acd11ce7019cd5051df0c9ea3c2f8cc60e1751ca5d2d57953a0",
+  ".github/skills/x-ipe-workflow-task-execution/SKILL.md": "903ebceae22cb3a1fd7667f2503fd20ff2cc8005b003dcfc83c115fdce477d0a",
+  ".github/skills/x-ipe-workflow-task-execution/references/lifecycle.md": "191ccb1d4752d345590171a3cb7d8516992df47b85e67418e5d024d777373e38",
+  "src/x_ipe/static/js/features/workflow-stage.js": "caaf689bac011047abe360c5bb205ea5b9e8fb141238d3d72066b2b0c3de83af",
+  "tests/test_feature_052a.py": "0d3ff4cdba0bcf729b562d191520d7ed2ba39f285b8a518fcbef614fb582f4ed",
+  "tests/test_prompt_config.py": "0e57dc955cb5d93c7c2730820bce39701b734f0809d317e88927d61b0ded02fb",
+  "tests/test_skill_pipeline_refactor.py": "7eb0092834528ef5a7201d860470fd3628e03a1b021328dcd308edf15d904110",
+  "tests/test_tools_config.py": "6b4c3fe640a12b62749625cbb66cc722c78c56501915d6b9a2696e7336975406",
+  "x-ipe-docs/config/copilot-prompt.json": "02c89bf193e0c30fbc6cc8cbf7096790e0335ee4339acb9e8add5d6c47749895",
+  "x-ipe-docs/config/tools.json": "6df39210e203507a79023cc9c3d4aff4e93456f63f623e9b01c58a091b49e36d",
+  "x-ipe-docs/config/workflow-template.json": "ab2e1563a0d4a9246b050b7cf779c676035345e78e29d88c10a0d556e20f6db1"
+}

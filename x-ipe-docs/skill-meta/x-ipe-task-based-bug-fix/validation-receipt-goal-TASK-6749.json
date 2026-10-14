@@ -1,0 +1,18 @@
+{
+  "body_lines": 258,
+  "candidate_hash": "72e377126dbd984e21186d513de7358941b7a69ec3aea3f2841995c909990b6c",
+  "errors": [],
+  "excluded_files": {},
+  "files": {
+    "SKILL.md": "f6f50f233a950a40433b5558782a8a452f64667c04846aa2a6a3693978481944",
+    "references/examples.md": "b22bee7666d17fa49bd93c148be8c9f70acf7b7d3dd0bce2862f3bae6615e179",
+    "references/integration.md": "ab2c53a4fbe7a0483ff74c7c22cb21a7898a5d95c2a1f4541c512809a4a2e5ef",
+    "templates/bug-report.md": "2d36ac86872e6e3727d429b6b025a05d86c58af6e0b983f6e2d641a84174b889"
+  },
+  "name": "x-ipe-task-based-bug-fix",
+  "ok": true,
+  "operation": "validate",
+  "schema": 1,
+  "skill_type": "x-ipe-task-based",
+  "warnings": []
+}

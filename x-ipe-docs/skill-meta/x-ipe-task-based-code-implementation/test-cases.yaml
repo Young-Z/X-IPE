@@ -1,3 +1,7 @@
+# Conceptual agent-execution scenarios remain not_run. Actual pytest evidence
+# (authored artifacts and temporary installed helpers) is separate in the handoff.
+task_id: TASK-6749
+publication_state: candidate_ready
 test_cases:
   - id: TC-001
     name: "Standard fullstack feature with AAA"
@@ -5,7 +9,7 @@ test_cases:
     given: "Feature with tech_stack [Python/Flask, HTML/CSS] and specification with 3 ACs"
     when: "Execute code-implementation skill"
     then: "AAA scenarios generated, routed to python + html5 tool skills, all Asserts pass"
-    acceptance_criteria: [AC-B01]
+    acceptance_criteria: [AC-G01, AC-R01, AC-T01]
     status: not_run
 
   - id: TC-002
@@ -13,8 +17,8 @@ test_cases:
     type: happy_path
     given: "Feature with program_type 'skills' and tech_stack [Markdown/SKILL.md]"
     when: "Execute code-implementation skill"
-    then: "Delegates to x-ipe-meta-skill-creator, skips AAA generation and validation"
-    acceptance_criteria: [AC-B02, AC-C04]
+    then: "Delegates before normal scenarios/routing with same readiness; retains scoped structured checks/DoD and later acceptance; no implicit promotion"
+    acceptance_criteria: [AC-R02, AC-C02, AC-T01]
     status: not_run
 
   - id: TC-003
@@ -22,8 +26,8 @@ test_cases:
     type: edge_case
     given: "Specification has vague acceptance criteria"
     when: "AAA generation fails"
-    then: "Falls back to x-ipe-tool-test-generation (Phase 1)"
-    acceptance_criteria: [AC-C06]
+    then: "Safety-net test-generation preserves approved ACs/assertions; unresolved vague expectations block instead of inventing targets"
+    acceptance_criteria: [AC-T01, AC-G01]
     status: not_run
 
   - id: TC-004
@@ -31,8 +35,8 @@ test_cases:
     type: edge_case
     given: "tech_stack entry 'Rust/Actix' with no matching tool skill"
     when: "Semantic routing runs"
-    then: "Assigns x-ipe-tool-implementation-general as fallback"
-    acceptance_criteria: [AC-C03]
+    then: "Enabled semantic matching selects general fallback; insufficient fallback blocks affected scope"
+    acceptance_criteria: [AC-R01]
     status: not_run
 
   - id: TC-005
@@ -40,7 +44,7 @@ test_cases:
     type: edge_case
     given: "Technical design with 25 components"
     when: "AAA generation runs"
-    then: "Per-layer batching: backend first, then frontend"
+    then: "Full cross-layer AC/assertion map retained before sequential per-layer backend/frontend batches, with all original types/regression"
     acceptance_criteria: [AC-C10]
     status: not_run
 
@@ -49,7 +53,7 @@ test_cases:
     type: error_case
     given: "Backend tool skill fails twice"
     when: "Retry attempted"
-    then: "Preserves passing results from other skills, escalates to human"
+    then: "Preserves passing results, blocks affected delivery, resolves bounded question through actual mode without weakening assertions"
     acceptance_criteria: [AC-C09]
     status: not_run
 
@@ -58,8 +62,8 @@ test_cases:
     type: error_case
     given: "Unit-level tool skills pass but @integration fails"
     when: "Validation gate runs @integration scenarios"
-    then: "Reports cross-layer contract mismatch to human"
-    acceptance_criteria: [AC-C05]
+    then: "Reports bounded mismatch through actual mode; approved contract changes update affected design/evidence and rerun checks"
+    acceptance_criteria: [AC-T01, AC-G03]
     status: not_run
 
   - id: TC-008
@@ -68,7 +72,7 @@ test_cases:
     given: "Feature status is 'Refined' (not 'Designed')"
     when: "DoR check runs"
     then: "BLOCKED with 'Feature status must be Designed'"
-    acceptance_criteria: [AC-B01]
+    acceptance_criteria: [AC-I02]
     status: not_run
 
   - id: TC-009
@@ -77,5 +81,41 @@ test_cases:
     given: "No technical-design.md file"
     when: "DoR check runs"
     then: "BLOCKED with 'Technical design document not found'"
-    acceptance_criteria: [AC-B01]
+    acceptance_criteria: [AC-I01]
+    status: not_run
+
+  - id: TC-010
+    name: "Implementation file-array and scalar browsing directory"
+    type: helper_contract
+    given: "Temporary EPIC or legacy feature with done design, required contexts and real owned source/test files"
+    when: "Installed writer sets implementation done and state is read back"
+    then: "Exact impl-files array and scalar impl-folder, schema4, real files may span outside browsing folder; output directory links separate"
+    acceptance_criteria: [AC-I01, AC-C01]
+    status: automated_fixture_only
+
+  - id: TC-011
+    name: "Permissive writer not domain completion"
+    type: helper_contract
+    given: "Pending design/absent context and missing/empty/directory file values"
+    when: "Installed writer accepts these values"
+    then: "Characterize helper gap, never claim semantics or alter source helpers"
+    acceptance_criteria: [AC-I02]
+    status: automated_fixture_only
+
+  - id: TC-012
+    name: "Outcome/AC/assertions and affected-only revisions"
+    type: authored_artifact
+    given: "Real upstream authored new/delta mappings and temporary revision files"
+    when: "Render/parse actual scaffold and mutate relevant inputs"
+    then: "All ACs/source/goal/means/test expectations retained; reject false outcomes/delivery; relevant hashes invalidate evidence only"
+    acceptance_criteria: [AC-G01, AC-G02, AC-G03]
+    status: automated_fixture_only
+
+  - id: TC-013
+    name: "Tracing infrastructure absent"
+    type: edge_case
+    given: "No existing tracing module or only skill/config/test changes"
+    when: "Tracing applicability is considered"
+    then: "Justified skip; no mandatory setup every task or implicit scope expansion"
+    acceptance_criteria: [AC-T02]
     status: not_run

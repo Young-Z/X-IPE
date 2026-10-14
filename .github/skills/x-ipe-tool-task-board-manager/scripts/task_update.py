@@ -17,6 +17,7 @@ from _board_lib import (
     EXIT_FILE_NOT_FOUND,
     EXIT_VALIDATION_ERROR,
     TASK_SCHEMA_V1,
+    VALID_TASK_STATUSES,
     atomic_read_json,
     atomic_write_json,
     exit_with_error,
@@ -25,6 +26,7 @@ from _board_lib import (
     resolve_data_path,
     with_file_lock,
 )
+from _task_store import index_file, read_daily, read_index
 
 _IMMUTABLE_FIELDS = {"task_id", "created_at"}
 
@@ -51,9 +53,6 @@ def main(argv: list[str] | None = None) -> None:
     # Strip auto-managed field
     updates.pop("last_updated", None)
 
-    if "status" in updates:
-        updates["status"] = normalize_task_status(updates["status"])
-
     if not updates:
         exit_with_error(EXIT_VALIDATION_ERROR, "EMPTY_UPDATES", "No update fields provided")
 
@@ -63,7 +62,7 @@ def main(argv: list[str] | None = None) -> None:
             exit_with_error(EXIT_VALIDATION_ERROR, "IMMUTABLE_FIELD",
                             f"Cannot update immutable field: {field}")
 
-    # Validate field types against schema
+    # Validate field types against schema before normalizing status
     field_defs = {k: v for k, v in TASK_SCHEMA_V1.items() if not k.startswith("_")}
     for key, value in updates.items():
         if key not in field_defs:
@@ -73,22 +72,26 @@ def main(argv: list[str] | None = None) -> None:
             exit_with_error(EXIT_VALIDATION_ERROR, "TYPE_ERROR",
                             f"Field '{key}' expected {expected.__name__}, got {type(value).__name__}")
 
+    if "status" in updates:
+        updates["status"] = normalize_task_status(updates["status"])
+        if updates["status"] not in VALID_TASK_STATUSES:
+            exit_with_error(EXIT_VALIDATION_ERROR, "INVALID_STATUS", "Unknown task status")
+
     tasks_dir = resolve_data_path("tasks")
     index_path = tasks_dir / "tasks-index.json"
 
     # Read index to find task file
-    idx_result = atomic_read_json(index_path)
-    if not idx_result["success"]:
+    if not index_path.exists():
         exit_with_error(EXIT_FILE_NOT_FOUND, "INDEX_NOT_FOUND",
                         "Task index not found — no tasks created yet")
 
-    index_data = idx_result["data"]
-    entries = index_data.get("entries", {})
+    index_data = read_index(tasks_dir)
+    entries = index_data["entries"]
     if args.task_id not in entries:
         exit_with_error(EXIT_FILE_NOT_FOUND, "TASK_NOT_FOUND",
                         f"Task {args.task_id} not found in index")
 
-    daily_name = entries[args.task_id]["file"]
+    daily_name = index_file(entries[args.task_id])
     daily_path = tasks_dir / daily_name
     now = datetime.now(timezone.utc).isoformat()
 
@@ -99,9 +102,9 @@ def main(argv: list[str] | None = None) -> None:
             exit_with_error(EXIT_FILE_NOT_FOUND, "DAILY_FILE_NOT_FOUND",
                             f"Daily file {daily_name} not found")
 
-        daily_data = result["data"]
+        daily_data, daily_tasks = read_daily(daily_path)
         task_idx = None
-        for i, t in enumerate(daily_data.get("tasks", [])):
+        for i, t in enumerate(daily_tasks):
             if t.get("task_id") == args.task_id:
                 task_idx = i
                 break
@@ -111,17 +114,19 @@ def main(argv: list[str] | None = None) -> None:
                             f"Task {args.task_id} not found in {daily_name}")
 
         # Merge updates + auto-set last_updated
-        task = daily_data["tasks"][task_idx]
+        task = daily_tasks[task_idx]
         task.update(updates)
         task["last_updated"] = now
 
         with with_file_lock(tasks_dir / "tasks-index.json.lock", timeout=args.lock_timeout):
+            index_data = read_index(tasks_dir)
+            entry = index_data["entries"].get(args.task_id)
+            if entry is None or index_file(entry) != daily_name:
+                exit_with_error(EXIT_VALIDATION_ERROR, "INCONSISTENT_BOARD", "Task index changed")
+            index_data["entries"][args.task_id] = {
+                "file": daily_name, "status": task["status"], "last_updated": now,
+            }
             atomic_write_json(daily_path, daily_data)
-
-            idx_result = atomic_read_json(index_path)
-            index_data = idx_result["data"] if idx_result["success"] else index_data
-            index_data["entries"][args.task_id]["status"] = task["status"]
-            index_data["entries"][args.task_id]["last_updated"] = now
             atomic_write_json(index_path, index_data)
 
     updated_fields = list(updates.keys()) + ["last_updated"]

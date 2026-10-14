@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "operation": "editor-promotion",
+  "task_id": "TASK-6749",
+  "name": "x-ipe-task-based-code-implementation",
+  "publication_state": "published",
+  "permission": "Current user explicitly authorized independent implementation review, fresh verification, then exact-file promotion via edit tools",
+  "method": "Reviewed exact-file editor delta; no publisher --apply, board, memory or Git operations",
+  "managed_provenance": "No prior trusted managed manifest supplied or fabricated. Explicitly authorized editor promotion, not a transactional publisher receipt.",
+  "baseline_checked_before_edit": true,
+  "candidate_hash": "90e610664b20308b105c9839c3bbf82a082d2d3d7b2f7525b4f7095e0d213cf0",
+  "baseline": {
+    "SKILL.md": "5905d2eb578d4ddab3fc10ea072f787b4958bbbac5ab73d515169fa002360518",
+    "references/examples.md": "05bc5a60c6c28f91eb32be13620f07fd501784e0348a4316accf653a80c8a180",
+    "references/implementation-guidelines.md": "cd168da1244e3ec9f1053add380ac79e03be4f792b68711c9356f9ddcc462eb2"
+  },
+  "files": {
+    "SKILL.md": "97d0689bf28d56b331175fa326af776b1f65bedd8f70b13fe4d510509462696f",
+    "references/examples.md": "66f8868069cb0a5c9358438c36bf964fe1ba081f3ffb2b9a22f20421a290021d",
+    "references/implementation-guidelines.md": "1b336dc66dc26930b40abb68e81fda76d0fad4bead3646f57315c9c482f6b0c8",
+    "references/integration.md": "e2cdbe911d8f01f21826a46510d20405f1b9fe5841a5d1ee8982ede29fbbfb05"
+  },
+  "added": ["references/integration.md"],
+  "changed": ["SKILL.md", "references/examples.md", "references/implementation-guidelines.md"],
+  "removed": [],
+  "byte_parity": true,
+  "independent_review": "Fresh main reviewer inspected prior worker's complete package, exact tool/config/action/output consumers, all original assertion/TDD contracts, and 20 hash-bound review inputs; no blocking candidate findings",
+  "tests_before_promotion": "379 passed in five unfiltered suites; exit 0, no failed/skipped/deselected",
+  "limits": [
+    "Editor promotion is not atomic or journaled; no publisher backup/recovery guarantee claimed",
+    "Duplicate-path patch rejected without applying; whole-entry editor replacement used",
+    "Guidelines promotion introduced two indentation differences; exact parity check failed, bounded repair then four-file byte equality and unchanged validation receipt passed",
+    "Authored mappings/content checks are not autonomous tool routing or observed stakeholder outcome; actual CLI helper evidence uses temporary projects"
+  ]
+}

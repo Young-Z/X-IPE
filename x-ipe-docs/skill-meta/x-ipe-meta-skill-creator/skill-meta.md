@@ -1,3 +1,5 @@
+# Skill Metadata: x-ipe-meta-skill-creator
+
 ```yaml
 # ═══════════════════════════════════════════════════════════
 # SKILL META - x-ipe-meta-skill-creator
@@ -8,18 +10,28 @@
 # ─────────────────────────────────────────────────────────────
 skill_name: x-ipe-meta-skill-creator
 skill_type: x-ipe-meta
-version: "1.1.0"
-status: candidate
+version: "1.3.0"
+status: published
 created: 2026-02-05
-updated: 2026-03-06
+updated: 2026-10-14
 implementation_path: .github/skills/x-ipe-meta-skill-creator/
+created_from: .github/skills/x-ipe-meta-skill-creator/templates/skill-meta-x-ipe-meta.md
+draft_task: TASK-6749
+draft_round: 1
+draft_role: Meta & Draft Creator
+bootstrap_procedure: "OLD creator: four rounds; this delivery is Round 1 only"
+validation_state: "Current R2 installed API/CLI, full manifest and test evidence validated in publication-receipt-TASK-6749-R2.json; older evaluation/drafting fields below are historical provenance, not current evidence"
+publication_state: "Published exact independently reviewed R2 creator candidate via authorized per-file apply_patch; 33 distributables match, two unmanaged caches preserved; see publication-receipt-TASK-6749-R2.json. Prior receipts retained unchanged; real lesson settlement excluded/pending."
+cleanup_policy: "Creator-only metadata root excludes exactly review-findings.md and test-cases.yaml after persistent editing-tool deletion failure; authoritative copies remain outside candidate"
+compatibility_scope: "Actual creator bundle templates and existing nested caller contract; no application workflow modernization or blanket runtime compatibility"
+version_history_policy: "Advanced to 1.3.0 only after verified R2 production parity and saved-receipt validation; prior history entries retained unchanged"
 
 # ─────────────────────────────────────────────────────────────
 # PURPOSE
 # ─────────────────────────────────────────────────────────────
 purpose: |
-  Guide for creating effective X-IPE skills with complete template coverage, 
-  sub-agent DAG workflow, and validation against skill-general-guidelines-v2.
+  Create/update complete template-derived candidates with deterministic validation,
+  risk-based independent review, bounded lesson adoption, and manifest-safe publication.
 
 target_skill_types:
   - x-ipe-task-based
@@ -28,6 +40,8 @@ target_skill_types:
   - x-ipe-meta
   - x-ipe-task-category
   - x-ipe-dao
+  - x-ipe-knowledge
+  - x-ipe-assistant
 
 triggers:
   - "create a new skill"
@@ -65,11 +79,11 @@ inputs:
     - name: skill_name
       type: string
       description: Name of skill to create/manage
-      validation: "lowercase, hyphens, 1-64 chars"
+      validation: "Canonical subtype prefix, lowercase hyphens; legacy category x-ipe+ names and exact existing Engineer assistant identity allowed; 1-64 chars"
     - name: skill_type
       type: string
       description: Type of skill
-      validation: "x-ipe-task-based | x-ipe-tool | x-ipe-workflow-orchestration | x-ipe-meta | x-ipe-task-category | x-ipe-dao"
+      validation: "x-ipe-task-based | x-ipe-tool | x-ipe-workflow-orchestration | x-ipe-meta | x-ipe-task-category | x-ipe-dao | x-ipe-knowledge | x-ipe-assistant"
     - name: user_request
       type: string
       description: Description of what the skill should do
@@ -85,13 +99,13 @@ outputs:
     - name: skill_package
       type: directory
       path: ".github/skills/{skill_name}/"
-      description: Complete skill with SKILL.md and bundled resources
-      created_from: "candidate/templates/{skill_type}.md"
+      description: Complete published package only after permission and verified promotion; Round 1 output is candidate/
+      created_from: ".github/skills/x-ipe-meta-skill-creator/templates/{mapped_template} (reviewed creator candidate override only during bootstrap)"
     - name: skill_meta
       type: file
       path: "x-ipe-docs/skill-meta/{skill_name}/skill-meta.md"
       description: Skill specification with acceptance criteria
-      created_from: "candidate/templates/skill-meta-{skill_type}.md"
+      created_from: ".github/skills/x-ipe-meta-skill-creator/templates/{mapped_meta_template} (reviewed creator candidate override only during bootstrap)"
 
   state:
     - name: status
@@ -107,12 +121,12 @@ acceptance_criteria:
     # STRUCTURE - File organization
     - id: AC-M01
       category: structure
-      criterion: All 6 template files exist in templates/ folder
+      criterion: All eight subtype mappings retain complete SKILL and metadata templates
       test: file_exists
       expected: |
         x-ipe-task-based.md, x-ipe-tool.md, x-ipe-workflow-orchestration.md,
-        x-ipe-meta.md, x-ipe-dao.md, skill-meta-x-ipe-task-based.md,
-        skill-meta-x-ipe-dao.md (and peers)
+        x-ipe-meta.md, x-ipe-dao.md, x-ipe-knowledge.md, x-ipe-assistant.md,
+        all seven skill-meta subtype templates (workflow shares task-based)
     
     - id: AC-M02
       category: structure
@@ -122,9 +136,9 @@ acceptance_criteria:
 
     - id: AC-M03
       category: structure
-      criterion: SKILL.md body under 500 lines
+      criterion: All X-IPE SKILL.md bodies ≤ 1000 logical lines, frontmatter excluded (ceiling, not target)
       test: line_count
-      expected: "wc -l < 500"
+      expected: "1000 passes; 1001 fails; blank lines included; LF/CRLF and trailing-newline behavior equivalent"
 
     # CONTENT - Required sections and quality
     - id: AC-M04
@@ -154,21 +168,52 @@ acceptance_criteria:
     # BEHAVIOR - Execution produces correct results
     - id: AC-M08
       category: behavior
-      criterion: Sub-agent DAG defined with parallel groups and model hints
+      criterion: Risk-based independent review for meaningful workflow, executable, or safety-policy changes
       test: structure_validation
-      expected: "parallel_groups with merge points and haiku/sonnet hints"
+      expected: "One independent reviewer where required; cosmetic exception documented; no fixed four-agent requirement after promotion"
 
     - id: AC-M09
       category: behavior
-      criterion: Every step output has corresponding DoD checkpoint
+      criterion: Final deliverables and safety gates are covered by bounded DoR/DoD checkpoints
       test: content_comparison
-      expected: "<output> tags map to <step_output> tags in DoD"
+      expected: "DoR ≤ 5; DoD ≤ 10; grouped checks cover complete resources, validation, review, publication, records"
 
     - id: AC-M10
       category: behavior
-      criterion: Created skill has complete step output coverage in DoD
+      criterion: Validator preserves subtype contracts and resolves candidate-self versus project-external resources
       test: content_comparison
-      expected: "Created skill's outputs all have DoD checkpoints"
+      expected: "Required subtype sections; tool/knowledge operation outputs not forced into task_completion_output; broken local links block"
+
+    - id: AC-M11
+      category: safety
+      criterion: Baseline and reviewed candidate fingerprints reject concurrent modification
+      test: temporary_project_transaction
+      expected: "Nonzero JSON failure without discarding target edits"
+    - id: AC-M12
+      category: safety
+      criterion: Managed manifest protects preexisting dirty, deleted, and unmanaged resources
+      test: temporary_project_transaction
+      expected: "Only identical protected bytes retained; no ownership inferred from current baseline"
+    - id: AC-M13
+      category: safety
+      criterion: Complete add/change/remove manifest and exact reviewed deletion list
+      test: temporary_project_transaction
+      expected: "Resource deletion requires trusted managed hash plus explicit review; no blind recursive deletion"
+    - id: AC-M14
+      category: safety
+      criterion: Same-name canonical paths, symlink/traversal/special-node protection, dry-run default
+      test: temporary_project_transaction
+      expected: "Invalid roots blocked; dry-run changes no files; explicit --apply required"
+    - id: AC-M15
+      category: safety
+      criterion: Staged byte comparison, journaled swap, retained backup, and recoverable interrupted publication
+      test: temporary_project_fault_injection
+      expected: "Rollback restores baseline or explicitly blocks on unexpected edits; production never recursively deleted"
+    - id: AC-M16
+      category: behavior
+      criterion: Lesson application requires publication plus verification evidence
+      test: independent_review
+      expected: "LL-001 mapping planned in metadata; historical raw status unchanged in Round 1"
 
   should:
     - id: AC-S01
@@ -216,14 +261,14 @@ acceptance_criteria:
 
     - id: AC-C03
       category: behavior
-      criterion: Sub-agent model hints prefer haiku for simple, sonnet for complex
+      criterion: Proportional reviewer/decomposition choices avoid unnecessary handoffs
       test: content_check
-      expected: "Cost efficiency applied"
+      expected: "Review by semantics and risk, not line count, step count, or hardcoded model"
 
   wont:
     - id: AC-W01
-      criterion: Runtime code generation
-      reason: "Skills provide guidance, not executable code"
+      criterion: Application feature generation or historical lesson migration in this creator update
+      reason: "Candidate helper scripts are in scope; unrelated runtime and lesson maintenance are not"
 
 # ─────────────────────────────────────────────────────────────
 # DEPENDENCIES
@@ -232,11 +277,11 @@ dependencies:
   skills:
     - name: x-ipe-meta-lesson-learned
       relationship: integration
-      description: Check for accumulated feedback before updates
+      description: Bounded relevant selection; settle after publication only; no compulsory incident-history loading
 
   artifacts:
-    - path: "x-ipe-docs/skill-meta/.templates/skill-creation-best-practice/references/"
-      description: "Guideline v2 and reference files"
+    - path: ".github/skills/x-ipe-meta-skill-creator/references/skill-general-guidelines-v2.md"
+      description: "Candidate-local self-reference before promotion"
 
   # ═══════════════════════════════════════════════════════════
   # TEMPLATE MAPPING
@@ -254,6 +299,8 @@ dependencies:
       x-ipe-meta: x-ipe-meta.md
       x-ipe-task-category: x-ipe-workflow-orchestration.md  # Same structure
       x-ipe-dao: x-ipe-dao.md
+      x-ipe-knowledge: x-ipe-knowledge.md
+      x-ipe-assistant: x-ipe-assistant.md
 
   skill_meta_templates:
     description: "skill-meta.md templates - use to create acceptance criteria"
@@ -264,6 +311,8 @@ dependencies:
       x-ipe-meta: skill-meta-x-ipe-meta.md
       x-ipe-workflow-orchestration: skill-meta-x-ipe-task-based.md  # Same structure
       x-ipe-dao: skill-meta-x-ipe-dao.md
+      x-ipe-knowledge: skill-meta-x-ipe-knowledge.md
+      x-ipe-assistant: skill-meta-x-ipe-assistant.md
 
 # ─────────────────────────────────────────────────────────────
 # TEMPLATE USAGE PROCEDURE
@@ -275,12 +324,12 @@ template_usage:
   
   step_2:
     action: "Load SKILL.md template"
-    source: "candidate/templates/{skill_templates.mapping[skill_type]}"
+    source: ".github/skills/x-ipe-meta-skill-creator/templates/{skill_templates.mapping[skill_type]} (creator candidate override during authorized bootstrap only)"
     output: "SKILL.md scaffold"
   
   step_3:
     action: "Load skill-meta.md template"  
-    source: "candidate/templates/{skill_meta_templates.mapping[skill_type]}"
+    source: ".github/skills/x-ipe-meta-skill-creator/templates/{skill_meta_templates.mapping[skill_type]} (creator candidate override during authorized bootstrap only)"
     output: "skill-meta.md scaffold"
   
   step_4:
@@ -290,7 +339,7 @@ template_usage:
   
   step_5:
     action: "Validate against guideline-v2"
-    reference: "references/1. skill-general-guidelines-v2.md"
+    reference: "candidate/references/skill-general-guidelines-v2.md"
     output: "Validation result"
 
 # ─────────────────────────────────────────────────────────────
@@ -319,10 +368,10 @@ test_scenarios:
       then: "Section order matches template structure"
 
   edge_cases:
-    - name: "Complex skill requires sub-agents"
-      given: "5+ step skill request"
+    - name: "Meaningful safety change requires independent review"
+      given: "Executable publisher or workflow-contract change"
       when: "Execute skill creator"
-      then: "DAG workflow applied"
+      then: "Independent review required before publication; no fixed agent count"
 
   error_cases:
     - name: "Invalid skill type"
@@ -342,10 +391,11 @@ test_scenarios:
 evaluation:
   self_check:
     - "All template files exist"
-    - "Line count < 500"
+    - "Logical body line count ≤ 1000; 1000 pass / 1001 fail, newline variants"
     - "Section order validated"
     - "Keyword vs emoji check passed"
-    - "DoD covers all step outputs"
+    - "Bounded checkpoints cover final deliverables and safety gates"
+    - "Candidate resource hashes, baseline/managed manifests, deletion review, path safety, and exact byte parity"
 
   judge_agent:
     - criterion: "Quality of execution procedure clarity"
@@ -368,13 +418,13 @@ evaluation:
 # PASS CRITERIA
 # ─────────────────────────────────────────────────────────────
 pass_criteria:
-  must_pass_rate: 100%   # All 10 MUST criteria pass
-  should_pass_rate: 80%  # At least 4 of 4 SHOULD criteria pass
+  must_pass_rate: 100%   # All 16 MUST criteria pass; not yet executed
+  should_pass_rate: 80%  # At least 4 of 5 SHOULD criteria pass
   could_pass_rate: 0%    # Optional, no minimum
   
   overall_pass:
     condition: "must_pass_rate == 100% AND should_pass_rate >= 80%"
-    then: "Merge to production"
+    then: "Review fresh dry-run manifest and permission before explicit publication; Round 1 cannot promote"
     else: "Iterate (max 3 attempts) or escalate"
 
 # ─────────────────────────────────────────────────────────────
@@ -391,6 +441,62 @@ validation_matrix:
   - { criterion: AC-M08, test_type: structure_validation, automated: true, human_review: true }
   - { criterion: AC-M09, test_type: content_comparison, automated: true, human_review: false }
   - { criterion: AC-M10, test_type: content_comparison, automated: true, human_review: false }
+  - { criterion: AC-M11-M15, test_type: temporary_project_safety, automated: true, human_review: true }
+  - { criterion: AC-M16, test_type: evidence_review, automated: partial, human_review: true }
   - { criterion: AC-S01-S04, test_type: content_analysis, automated: partial, human_review: true }
   - { criterion: AC-C01-C03, test_type: manual_review, automated: false, human_review: true }
 ```
+
+## Round 1 Design Application and Handoff
+
+Derived from the existing meta metadata template's identity, interface, acceptance,
+dependencies, scenario, and evaluation sections; historical version fields and
+the separate version-history file remain unchanged. Current criteria above
+supersede earlier DAG/model-hint requirements, not historical claims.
+
+### Baseline Resource Review
+
+- Initial production/candidate path inventories match: 29 files, including all
+  14 subtype/metadata templates and 14 reference files. No resource removals proposed.
+- Preexisting tracked content differences in the entry and seven templates are
+  preserved except explicitly scoped policy/delta edits. Candidate is not blindly
+  refreshed from production. All unrelated dirty knowledge packages remain untouched.
+- New resources: validator, publisher, and validation/publication reference.
+- Future publication must capture/review baseline hashes and trusted managed hashes.
+  This Round 1 records design, not a fabricated validation/publication receipt.
+
+### Selected Lesson Mapping
+
+- Scoped lesson: x-ipe-meta-skill-creator / LL-001.
+- Observed gap: resource created directly in production after merge bypassed candidate.
+- Candidate safeguards: complete manifest; candidate-self links; managed/removal guards;
+  post-swap byte parity; no post-merge resource writes.
+- Planned verification: missing self resource rejected; complete resource publication;
+  unmanaged protection; byte parity.
+- Disposition: selected for this candidate; historical `raw` remains unchanged.
+  Not applied or verified.
+
+LL-001 has historical evidence but no modern validity/expiry record. Selection is
+based on its verified resource-bypass cause and this safety scope, not assumed
+freshness. No historical migration, date reset, pruning, or applied claim occurs.
+
+### Scenarios for Rounds 2–3 (Planned, Not Executed)
+
+| Scenario | Expected evidence |
+| --- | --- |
+| New skill | Empty baseline/managed maps; valid tool contract without task routing fields; dry-run no writes, explicit publish complete bytes |
+| Small existing update | Preserve unchanged resources and metadata; targeted delta; trusted manifest; cosmetic reviewer exception only when semantics unchanged |
+| Missing resource | Self production link must fail against candidate even if production still has that resource; external root links checked separately |
+| Body boundary | 999/1000 pass, 1001 fail, frontmatter excluded, blank lines counted, LF/CRLF and final-newline variants; malformed frontmatter/identity fail |
+| Interrupted merge | Fault hook at staged/backed_up/installed; exceptions roll back; process interruption leaves journal/lock for explicit recovery; verify before/after bytes |
+| Concurrent modified target | Baseline drift, between-stage mutation, noncooperating swap changes rejected; recovery refuses to overwrite new edits |
+| Deletion and unmanaged protection | Exact removal review required; managed clean removal allowed; dirty/unmanaged/deleted target changes blocked; no recursive production deletion |
+| Path and CLI safety | Traversal, symlink ancestors/resources, hard links, special nodes, wrong-name target rejected; JSON receipts and nonzero failure status |
+| Freshness and lessons | Candidate hash mutation invalidates evidence; failed publish cannot mark lesson applied; history unchanged until successful promotion |
+
+### Next Gate
+
+Independent Round 2 reflection must review parser coverage, ownership provenance,
+filesystem fault/recovery behavior, lifecycle/config compatibility, and all retained
+template differences. Generate tests then execute only in temporary projects in
+Round 3. Round 4 evaluates must/should results before any promotion decision.

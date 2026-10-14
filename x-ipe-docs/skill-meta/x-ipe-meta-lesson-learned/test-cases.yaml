@@ -1,0 +1,46 @@
+task_id: TASK-6749
+date: '2026-10-13'
+test_file: tests/test_lesson_management.py
+isolation: All queues, task fixtures, receipt artifacts and lifecycle mutations use pytest tmp_path.
+first_run:
+  passed: 77
+  failed: 1
+  elapsed_seconds: 0.93
+  failure: test_lock_contention_and_noncooperating_revision matched intentionally retained .lesson-ops.lock as leaked temporary file.
+  correction: Assert the stable lock is the only .lesson-* file; no implementation behavior was changed for this failure.
+final_run:
+  command: PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -B -m pytest -q -p no:cacheprovider tests/test_lesson_management.py
+  passed: 100
+  failed: 0
+  elapsed_seconds: 1.30
+  exit_code: 0
+review_run:
+  initial_existing_suite: {passed: 85, failed: 0}
+  before_repairs: {passed: 87, failed: 13}
+  added_cases: 15
+  installed_helper_and_template: {passed: 100, failed: 0, elapsed_seconds: 1.28}
+  installed_method: Read-only in-process pytest collection plugin replaces module ops/SCRIPT/CANDIDATE with installed package; all mutations remain tmp_path.
+  test_sha256: 19abc002dcec74a1ea4ae66e6c918fe0a4d14c0fb2f5b4c79c6ccc209b8fc211
+  regression_coverage:
+    - Unknown truth with no invented correction; whitespace dedup; actual legacy critical backlink.
+    - Applied owned replay after later publication; repeated owned plan unchanged; failed merge preserves/releases plan.
+    - No terminal/plan time rewind; subsecond grace boundary; TTL/review/terminal chronology protection.
+    - Duplicate YAML keys and malformed plan/evidence protected without rewrite.
+    - Relevant expired critical cleanup notice without expired selection or irrelevant notice.
+groups:
+  - criteria: [AC-M03, AC-M04]
+    coverage: Admission evidence/reason, unknown truth, harmless/covered/no-retention, finite override, bounded dedup/recurrence, pending cap.
+  - criteria: [AC-M05, AC-S02]
+    coverage: UTC boundary, read-only bytes, relevance, five summaries, scoped IDs, critical overflow, 14/90-day review notices.
+  - criteria: [AC-M06]
+    coverage: Existing owned task/candidate, plan mapping, release expiry, complete production hashes, relevant passing test, idempotent replay, regression.
+  - criteria: [AC-M07]
+    coverage: Dry-run no writes, default WIP protection, explicit revision-bound preservation, retirement/grace, critical handoff/backlink/owner recheck, monotonic ID after purge.
+  - criteria: [AC-M08]
+    coverage: Legacy raw/reviewed/incorporated/applied/unknown protected, malformed timestamps/status/IDs, unsafe links/paths, concurrency, atomic injected failure.
+  - criteria: [AC-S01]
+    coverage: Bundled template in temporary installed project; real CLI capture/select/settle planned+applied/prune preview+apply and nonzero failure JSON.
+not_claimed:
+  - Full repository regression suite or external consumer/instruction integration.
+  - Historical migration or real production lesson changes; only skill package was promoted.
+  - Empirical optimality of TTL/budget defaults or cryptographic evidence authenticity.

@@ -8,7 +8,7 @@ Quick reference for choosing the right skill type when creating or categorizing 
 
 | Skill Type | Structure | Caller | State Model | When to Use |
 |---|---|---|---|---|
-| `x-ipe-task-based` | Phase backbone (博学之→笃行之) | Human / workflow | Internal — skill owns its state | User-facing project lifecycle workflows |
+| `x-ipe-task-based` | Flat steps or phase scaffold | Human / workflow | Lifecycle-owned task, domain execution context | User-facing project lifecycle workflows |
 | `x-ipe-task-category` | Workflow orchestration | Category completion triggers | Aggregation — collects child outputs | Grouping related task completions |
 | `x-ipe-tool` | Scripts + Operations | Any skill / agent | Stateless — caller manages context | Utility functions and integrations |
 | `x-ipe-workflow-orchestration` | Multi-skill coordination | Workflow triggers | Orchestration — manages child skills | Cross-skill pipelines |
@@ -23,11 +23,11 @@ Quick reference for choosing the right skill type when creating or categorizing 
 
 ### task-based (`x-ipe-task-based-*`)
 
-**Structure:** Full phase backbone (博学之 → 审问之 → 慎思之 → 明辨之 → 笃行之) with Phase 0 (board registration) and Phase 6 (continue execution).
+**Structure:** Flat steps or the existing phase scaffold (博学之 → 审问之 → 慎思之 → 明辨之 → 笃行之). Required activities are context gathering, domain execution and verification; named inquiry/reflection phases are proportional, not compulsory ceremony. Preserve domain gates and routing when simplifying.
 
 **Invocation:** Auto-discovered via `x-ipe-task-based-*/SKILL.md` scan. Matched to user requests by trigger keywords in description.
 
-**State:** Internal — the skill owns its execution state and manages task board entries.
+**State:** The lifecycle supplies the task and manages registration/board transitions. Reuse its task ID; do not create duplicate entries. Domain results retain `category`, `next_task_based_skill`, and nested `process_preference.interaction_mode` for the existing caller. This creator update does not modernize the entire application lifecycle.
 
 **When to use:** End-to-end project lifecycle workflows triggered by human requests. Examples: feature refinement, technical design, code implementation, bug fixing.
 
@@ -46,6 +46,12 @@ Quick reference for choosing the right skill type when creating or categorizing 
 **When to use:** Category-level orchestration when a group of related tasks finish. Example: all features in an epic complete → trigger release orchestration.
 
 **Naming:** `x-ipe+{category}+{name}` (e.g., `x-ipe+feature-stage+all`)
+
+**Exact legacy exception:** `x-ipe+feature+quality-board-management` remains a
+category identity but exposes the established reporting Operations + `<operation>`
+and `operation_output`, not child-completion workflow output. Updates preserve
+that package's domain scaffold and validate as `x-ipe-task-category`. The exception
+does not apply to new/lookalike categories or make the name a tool alias.
 
 ---
 
@@ -127,6 +133,6 @@ Quick reference for choosing the right skill type when creating or categorizing 
 
 **Status:** Deprecated. Use `x-ipe-assistant` instead.
 
-**Migration:** Rename `x-ipe-dao-{name}` → `x-ipe-assistant-{name}`. The template structure is identical.
+**Migration:** New human representatives use `x-ipe-assistant-{name}`. Rename existing DAO identities only under separately authorized migration; preserve their contracts otherwise.
 
-**Backward compatibility:** Existing `x-ipe-dao-*` skills continue to function. The skill-creator redirects `x-ipe-dao` type selection to the `x-ipe-assistant` template.
+**Backward compatibility:** Existing `x-ipe-dao-*` skills continue to function. Explicit legacy DAO selection uses `x-ipe-dao.md` and `skill-meta-x-ipe-dao.md`; it is not silently redirected. Assistant selection uses the assistant pair.

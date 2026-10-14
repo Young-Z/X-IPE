@@ -28,6 +28,7 @@ from _board_lib import (  # noqa: E402
     resolve_data_path,
     with_file_lock,
 )
+from _task_store import commit_task, inventory, prepare_task, read_index
 
 # ── Constants ────────────────────────────────────────────────────────
 
@@ -221,65 +222,46 @@ def _date_from_iso(iso_str: str) -> str:
 
 
 def write_tasks_json(tasks: list[dict], dry_run: bool = False) -> dict:
-    """Write tasks to daily JSON files + index. Returns summary stats."""
+    """Write daily tasks with CRUD lock order and cross-date ID reservation."""
     tasks_dir = resolve_data_path("tasks")
     stats = {"total": len(tasks), "files_written": 0, "skipped_duplicates": 0}
-
     if dry_run:
-        # Group by date to show what would happen
         by_date: dict[str, int] = {}
-        for t in tasks:
-            date_key = _date_from_iso(t["last_updated"])
-            by_date[date_key] = by_date.get(date_key, 0) + 1
+        for task in tasks:
+            key = _date_from_iso(task["last_updated"])
+            by_date[key] = by_date.get(key, 0) + 1
         stats["daily_breakdown"] = by_date
         return stats
 
-    tasks_dir.mkdir(parents=True, exist_ok=True)
-
-    # Group tasks by date
+    # Validate before locking/writing; retain historical timestamps.
+    prepared = []
+    for task in tasks:
+        current = prepare_task(task, task["last_updated"], allow_auto=False)
+        current["created_at"] = task["created_at"]
+        prepared.append(current)
     by_date_tasks: dict[str, list[dict]] = {}
-    for t in tasks:
-        date_key = _date_from_iso(t["last_updated"])
-        by_date_tasks.setdefault(date_key, []).append(t)
+    for task in prepared:
+        key = _date_from_iso(task["last_updated"])
+        by_date_tasks.setdefault(key, []).append(task)
 
-    index_path = tasks_dir / "tasks-index.json"
-    lock_path = tasks_dir / "tasks-index.json.lock"
-
-    with with_file_lock(lock_path, timeout=30):
-        # Read or create index
-        if index_path.exists():
-            result = atomic_read_json(index_path)
-            index = result["data"] if result["success"] else {"_version": "1.0", "version": "1.0", "entries": {}}
-        else:
-            index = {"_version": "1.0", "version": "1.0", "entries": {}}
-
-        for date_key, date_tasks in by_date_tasks.items():
-            filename = f"tasks-{date_key}.json"
-            filepath = tasks_dir / filename
-            file_lock = tasks_dir / f"{filename}.lock"
-
-            with with_file_lock(file_lock, timeout=30):
-                # Read existing or create new
-                if filepath.exists():
-                    result = atomic_read_json(filepath)
-                    existing = result["data"] if result["success"] else {"_version": "1.0", "tasks": []}
-                else:
-                    existing = {"_version": "1.0", "tasks": []}
-
-                existing_ids = {t["task_id"] for t in existing["tasks"]}
-
+    tasks_dir.mkdir(parents=True, exist_ok=True)
+    for key, date_tasks in by_date_tasks.items():
+        filename = f"tasks-{key}.json"
+        with with_file_lock(tasks_dir / f"{filename}.lock", timeout=30):
+            with with_file_lock(tasks_dir / "tasks-index.json.lock", timeout=30):
+                index = read_index(tasks_dir)
+                reserved, _ = inventory(tasks_dir, index)
                 for task in date_tasks:
-                    if task["task_id"] in existing_ids:
+                    if task["task_id"] in reserved:
                         stats["skipped_duplicates"] += 1
                         continue
-                    existing["tasks"].append(task)
-                    index["entries"][task["task_id"]] = filename
-
-                atomic_write_json(filepath, existing)
+                    commit_task(tasks_dir, filename, task, index)
+                    reserved.add(task["task_id"])
                 stats["files_written"] += 1
-
-        atomic_write_json(index_path, index)
-
+    if not prepared:
+        with with_file_lock(tasks_dir / "tasks-index.json.lock", timeout=30):
+            index = read_index(tasks_dir)
+            atomic_write_json(tasks_dir / "tasks-index.json", index)
     return stats
 
 
@@ -326,7 +308,7 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--tasks", action="store_true", help="Migrate tasks only")
     group.add_argument("--features", action="store_true", help="Migrate features only")
-    group.add_argument("--all", action="store_true", help="Migrate both tasks and features")
+    group.add_argument("--all", action="store_true", help="Migrate both")
     parser.add_argument("--dry-run", action="store_true", help="Validate and show plan without writing")
     return parser.parse_args(argv)
 

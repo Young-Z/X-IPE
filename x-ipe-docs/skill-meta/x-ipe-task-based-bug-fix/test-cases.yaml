@@ -1,0 +1,136 @@
+skill_name: x-ipe-task-based-bug-fix
+task_id: TASK-6749
+date: 2026-10-13
+publication_state: published
+independent_review: passed_inherited_candidate_review
+candidate_hash: 72e377126dbd984e21186d513de7358941b7a69ec3aea3f2841995c909990b6c
+scope: Reviewed four-file bug package promoted via authorized edit tools; root metadata and dedicated change-quality tests; no application bug fixed
+fresh_runs:
+  - name: before bug candidate drafting
+    passed: 39
+    failed: 12
+    seconds: 1.18
+    exit: 1
+    meaning: 37 CR contracts plus real disposable red/green and installed-helper rejection pass; 12 authored candidate/metadata gaps fail, not application TDD
+  - name: first complete candidate without readiness metadata
+    passed: 49
+    failed: 2
+    seconds: 1.10
+    exit: 1
+    findings: duplicate phrase mutation hit prose rather than table; readiness metadata not yet drafted
+  - name: focused six-suite current candidate before historical fencing
+    passed: 550
+    failed: 4
+    seconds: 32.28
+    exit: 1
+    meaning: all 51 dedicated tests pass; same four inherited closing/lifecycle failures
+  - name: historical fencing follow-up
+    passed: 549
+    failed: 5
+    seconds: 32.28
+    exit: 1
+    finding: editor added six indentation spaces before historical closing fence; strict original hash detected it; spaces removed without weakening assertion
+  - name: final six-suite current candidate and test revision
+    passed: 550
+    failed: 4
+    seconds: 32.30
+    skipped: 0
+    deselected: 0
+    exit: 1
+    suites: [tests/test_skill_goal_change_quality.py, tests/test_skill_goal_downstream.py, tests/test_goal_oriented_skills.py, tests/test_skill_pipeline_refactor.py, tests/test_skill_lifecycle.py, tests/test_skill_creator_foundation.py]
+    dedicated_tests: 51 passed; zero dedicated failures
+    failures:
+      - tests/test_skill_goal_downstream.py::test_closing_complete_inventory_output_schema_and_lifecycle
+      - tests/test_skill_goal_downstream.py::test_closing_metadata_receipt_and_no_promotion
+      - tests/test_skill_goal_downstream.py::test_closing_readiness_records_bind_current_receipt_without_claiming_review
+      - tests/test_skill_lifecycle.py::test_known_deliverable_mismatches_are_recorded_not_waived
+    regression: identical four inherited failures; their tests and source unchanged; no repository-wide all-green claim
+  - name: blank-handoff recovery inherited baseline
+    passed: 51
+    failed: 0
+    seconds: 1.11
+    exit: 0
+    meaning: inherited candidate already complete; do not overwrite candidate or protected tree
+  - name: blank-handoff recovery strengthened current six-suite run
+    passed: 550
+    failed: 4
+    seconds: 32.82
+    skipped: 0
+    deselected: 0
+    exit: 1
+    suites: [tests/test_skill_goal_change_quality.py, tests/test_skill_goal_downstream.py, tests/test_goal_oriented_skills.py, tests/test_skill_pipeline_refactor.py, tests/test_skill_lifecycle.py, tests/test_skill_creator_foundation.py]
+    failures:
+      - tests/test_skill_goal_downstream.py::test_closing_complete_inventory_output_schema_and_lifecycle
+      - tests/test_skill_goal_downstream.py::test_closing_metadata_receipt_and_no_promotion
+      - tests/test_skill_goal_downstream.py::test_closing_readiness_records_bind_current_receipt_without_claiming_review
+      - tests/test_skill_lifecycle.py::test_known_deliverable_mismatches_are_recorded_not_waived
+    meaning: identical four inherited failures; no skipped tests or assertion weakening
+  - name: blank-handoff recovery final focused verification
+    passed: 51
+    failed: 0
+    seconds: 1.18
+    exit: 0
+    meaning: frozen original output and actual original fixture action plus source/test hash checks pass; candidate unchanged
+readiness:
+  dedicated: 51 passed at final test revision, including actual behavioral fixture and installed helper rejection
+  independent_review: passed inherited-candidate review; see review-findings-TASK-6749.md
+  publication: authorized edit-tools; exact live/candidate parity; no publisher apply or atomic transaction claim
+  actual_sample: temporary fixture red 1 failed 2 passed, green 3 passed unchanged tests; not application bug repair
+revision_inputs:
+  tests/test_skill_goal_change_quality.py: 42d6de7cba28a6a9ca7aaa903803075257f812a6956ddf3ec070225b778259c8
+  x-ipe-docs/config/tools.json: 6df39210e203507a79023cc9c3d4aff4e93456f63f623e9b01c58a091b49e36d
+  x-ipe-docs/config/workflow-template.json: ab2e1563a0d4a9246b050b7cf779c676035345e78e29d88c10a0d556e20f6db1
+  src/x_ipe/static/js/features/workflow-stage.js: caaf689bac011047abe360c5bb205ea5b9e8fb141238d3d72066b2b0c3de83af
+  .github/skills/x-ipe-tool-implementation-python/SKILL.md: 061a3c6462452ad94b50b46f7095871e552ca2a105759f8101354eb16768778e
+  .github/skills/x-ipe-workflow-task-execution/references/goal-contract.md: fd007a0f946ee3ccf60507f88c898358de9ea045b18de6446b65079d62911074
+  .github/skills/x-ipe-workflow-task-execution/references/lifecycle.md: e56f30d30d16b8bc8d5d2c489e05873904cb12705285ea74d9de38bb5d6efeb9
+validation:
+  ok: true
+  files: 4
+  body_lines: 258
+  errors: 0
+  warnings: 0
+  receipt: validation-receipt-goal-TASK-6749.json
+reinspection:
+  candidate_changed: false
+  cr_parity: exact six-file live/candidate/publication manifests; candidate and baseline fingerprints match; current validator receipt equals saved receipt
+  bug_parity: exact live two-file baseline; current four-file candidate validator receipt equals saved receipt; no publication receipt
+  dedicated_command: PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -B -m pytest -p no:cacheprovider tests/test_skill_goal_change_quality.py -q --tb=short
+  six_suite_command: PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -B -m pytest -p no:cacheprovider tests/test_skill_goal_change_quality.py tests/test_skill_goal_downstream.py tests/test_goal_oriented_skills.py tests/test_skill_pipeline_refactor.py tests/test_skill_lifecycle.py tests/test_skill_creator_foundation.py -q --tb=short
+  syntax: Pylance syntax and editor errors checks report no errors
+  independent_review: pending main reviewer; recovery verification is not promotion approval
+cases:
+  - id: PKG-01
+    covers: [AC-S01, AC-S02, AC-L01, AC-E01]
+    evidence: installed root validator and XML; frozen original output, complete resources, historical metadata SHA256 and reviewed exact-byte publication receipt
+    state: automated_contract
+  - id: GOAL-01
+    covers: [AC-G01, AC-G02, AC-C01, AC-C02, AC-D01, AC-B02]
+    evidence: authored restoration table rendered in disposable bug scaffold; negative constraint/source/type/outcome mutations; original token/guest examples and domain gates
+    state: textual_contract_not_actual_application_execution
+  - id: AUTH-01
+    covers: [AC-A01]
+    evidence: three modes and actual human changed-contract boundary in entry; no repeated confirmation
+    state: textual_contract_not_actual_approval
+  - id: BEHAVIOR-01
+    covers: [AC-B01]
+    evidence: dedicated test actually executes original temporary Python token action True before fix and False after; red exit 1 (behavioral equality assertion 1 failed 2 preserved checks passed), then minimal predicate fix, green exit 0 (3 passed), distinct source SHA256 and identical test SHA256 before/after
+    state: actual_disposable_fixture_execution_not_repo_auth_fix
+  - id: CONSUMER-01
+    covers: [AC-I01, AC-I02, AC-I03]
+    evidence: real UI/template/config and Python fix interface; installed helper unknown bug_fix action nonzero with exact unchanged temp state; browser/tracing/routing policies separately textual
+    state: actual_helper_and_configuration_checks_not_autonomous_routing_or_browser
+preservation:
+  production_manifest: baseline-goal-TASK-6749.json
+  original_candidate_manifest: prework-candidate-goal-TASK-6749.json
+  original_metadata_sha256: 9cd7d3037abbd1bb44a8654b2ebd0ea4a7acaf7b3fe31f53e9a07227862c7611
+  resource_removals: []
+  original_assertions_weakened: false
+  production_promoted: true
+  board_memory_git_mutations: none
+limits:
+  - Review is independent of inherited drafter; no spawned subagent or autonomous skill execution claimed.
+  - Miniature fixture is real red/green execution but not application auth bug fix or observed stakeholder gain.
+  - Textual source/mode/conflict/design/browser/routing gates do not prove autonomous agent decisions or real browser invocation.
+  - Current enabled bug tool route is not supported app action; production/config consumers unchanged.
+  - No full repository green or broader TASK-6749 closure claimed; earlier unrelated closing/lifecycle failures retained.

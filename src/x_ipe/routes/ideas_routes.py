@@ -668,16 +668,8 @@ def _convert_msg(file_path):
 
 @x_ipe_tracing(level='DEBUG')
 def _sanitize_converted_html(content):
-    """Strip dangerous elements from converted HTML using BeautifulSoup."""
-    from bs4 import BeautifulSoup
-    soup = BeautifulSoup(content, 'html.parser')
-    for tag in soup.find_all(['script', 'iframe', 'object', 'embed']):
-        tag.decompose()
-    for tag in soup.find_all(True):
-        for attr in list(tag.attrs):
-            if attr.lower().startswith('on'):
-                del tag[attr]
-    return str(soup)
+    """Use the shared conversion sanitizer at the ideas preview boundary."""
+    return sanitize_converted_html(content)
 
 
 @ideas_bp.route('/api/ideas/file', methods=['GET'])

@@ -1,57 +1,61 @@
 # Feature Breakdown: Patterns & Anti-Patterns
 
-### Pattern: Clear Requirements
+## Pattern: Fresh clear requirements / one feature
 
-**When:** Well-documented requirements exist
-**Then:**
-```
-1. Read requirement-details.md thoroughly
-2. Identify natural feature boundaries
-3. Apply MVP-first principle
-4. Document dependencies between features
-```
+**When:** Approved source findings still match current revisions.
+**Then:** Reuse scope and acceptance; record grouping, one runnable MVP, coverage
+and real direct dependencies. Populate the selected Feature List and details;
+register/query a real Planned feature and verify both workflow artifacts when
+applicable. No artificial split, second intake Epic or duplicate lifecycle task.
 
-### Pattern: Vague Requirements
+## Pattern: Material ambiguity
 
-**When:** Requirements are ambiguous or incomplete
-**Then:**
-```
-1. Ask clarifying questions to human
-2. Document assumptions made
-3. Start with minimal feature set
-4. Flag areas needing more detail
-```
+**When:** Scope, MVP value, overlap or delivery priority is genuinely unresolved.
+**Then:** Ask the human in human mode; use bounded representative guidance
+in full DAO and hybrid per the common lifecycle. Record the answer and its revisions.
+Human and hybrid require human completion/route confirmation. Explicit human
+approval binds in every mode.
+Do not convert an assumption into approval. Confirm the final list is complete
+before refinement under the retained domain gate; no successor execution here.
 
-### Pattern: Large Scope
+## Pattern: Large multi-domain scope
 
-**When:** Requirement covers many features
-**Then:**
-```
-1. Group by domain/functionality
-2. Identify MVP core (first feature)
-3. Create feature hierarchy
-4. Limit initial breakdown to 5-7 features
-```
+**When:** Approved requirements need more than seven features or multiple clusters.
+**Then:** Group by domains/dependencies/team boundaries before assigning IDs.
+Reuse intake Epic and justify additional collision-checked groups, with a
+vertical runnable MVP per new Epic and <=7 features per Epic. Cover EVERY source
+FR/AC or explicitly approved deferral; never truncate the overall list to seven.
 
-### Pattern: Feature Split with Parent Dedup
+## Pattern: Incremental CR / unchanged resume
 
-**When:** A parent feature is split into sub-features (e.g., FEATURE-001 → A, B, C)
-**Then:**
-```
-1. After splitting, compare parent FRs against union of sub-feature FRs
-2. If 100% covered → remove parent from board and requirement-details
-3. If partial → keep parent, flag uncovered FRs for human review
-4. Use feature-board-management for all board changes
-```
+**When:** Existing legacy/new features are affected by an approved narrow delta.
+**Then:** Update only owning rows/details and authorized board fields. Preserve
+IDs/Epic/status/specifications/unrelated parts and feature-stage history. Matching
+resume reads rather than creates/appends. Existing workflow graph changes need
+supported authorized reconciliation or a blocked partial result.
 
-### Anti-Patterns
+## Pattern: Genuine split with parent dedup
 
-| Anti-Pattern | Why Bad | Do Instead |
-|--------------|---------|------------|
-| Too many features | Overwhelming, hard to track | Limit to 5-7 features max |
-| Features too granular | Micromanagement | Combine related functions |
-| MVP not first | Critical path unclear | Always start with runnable MVP |
-| Circular dependencies | Impossible to implement | Ensure DAG structure |
-| Manual board updates | Inconsistent state | Use feature-board-management skill |
-| Vague feature titles | Unclear scope | Use specific, action-oriented names |
-| Keeping duplicate parent | Redundant tracking, confusing | Remove parent if fully covered by sub-features |
+**When:** A parent needs splitting along independently deliverable boundaries.
+**Then:** Map every parent FR/AC to child ACs. Partial coverage keeps the parent
+active and reports dedup_gaps. Full coverage PLUS explicit retirement authority
+permits Retired via feature_update.py and removal from the active breakdown with
+history/redirects retained. Verify both before parent_features_removed; do not
+delete a board record. Reconcile incoming dependencies before retirement.
+
+## Anti-Patterns
+
+| Anti-Pattern | Consequence | Correction |
+| --- | --- | --- |
+| Duplicate lifecycle/routing | Multiple tasks or unapproved successors | Return once to common lifecycle owner |
+| Interface-only MVP | No runnable user/core outcome | Vertical minimum, then enhancements |
+| Truncate large scope | Lost requirements | Regroup and record coverage/approved deferrals |
+| Renumber legacy features | Broken references/history | Reserve new suffixes; preserve existing identity |
+| Transitive/self/circular edges | Misleading or impossible order | Direct reasons and validated combined DAG |
+| Reset existing features to Planned | Lost progress | Only new records Planned; approved mutable CR delta |
+| Remove parent automatically | Lost coverage/history | Full coverage, authority, Retired readback and redirects |
+| Replay workflow feature payload | Duplicate IDs and reset stages | Query first; absent new entries only |
+| Writer success treated as completion | False done despite missing artifacts/gates | Exact artifact and prerequisite readback |
+
+See [integration](.github/skills/x-ipe-task-based-feature-breakdown/references/integration.md)
+for installed CLI shapes, corrupt-store guards and append-only limitations.

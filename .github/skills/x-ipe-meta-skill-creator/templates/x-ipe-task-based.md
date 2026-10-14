@@ -33,6 +33,23 @@ description: {Brief description of what this task type does}. Use when {trigger 
 
 BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skill.
 
+Load [common lifecycle](.github/skills/x-ipe-workflow-task-execution/references/lifecycle.md)
+and [goal contract](.github/skills/x-ipe-workflow-task-execution/references/goal-contract.md).
+Reuse supplied task/readiness; direct entry calls Orient/Plan once and returns
+here without recursively dispatching this child. One lifecycle owner handles
+registration/status, Git, app/feature persistence and successor boundary. Agree
+one writer for any declared domain action; no duplicate child/owner writes.
+This child returns full original output, not automatic next-task execution.
+
+For new/changed scope, map source/parent/stakeholder → goal/subgoal → stable
+story/leaf Given/When/Then AC/type → planned then actual revision-bound checks
+in existing artifacts. Define contribution, constraints, all-required children
+versus selected bounded alternatives, and concrete qualitative or justified
+measured success. Preserve IDs/assertions/types; legacy explicit so-that inference
+is labeled with source. Missing intent blocks only the pertinent claim. Separate
+engineering delivery from observed stakeholder outcome; unobserved is not measured.
+No new board/output/action fields, mandatory graph or invented stakeholder approval.
+
 **Note:** If Agent does not have skill capability, go to `.github/skills/` folder to learn skills. SKILL.md is the entry point.
 
 ---
@@ -54,7 +71,7 @@ input:
   category: "{standalone | feature-stage | requirement-stage | ideation-stage}"
   next_task_based_skill: "{Next Task-Based Skill | null}"
 
-  # Process preference (3-mode interaction system)
+  # Process preference (3-mode auto-proceed system)
   process_preference:
     interaction_mode: "interact-with-human | dao-represent-human-to-interact | dao-represent-human-to-interact-for-questions-in-skill"  # default: interact-with-human
 
@@ -75,7 +92,7 @@ BLOCKING: All input fields with non-trivial initialization MUST be documented he
 ```xml
 <input_init>
   <!-- Standard fields (auto-populated by workflow) -->
-  <field name="task_id" source="task-board-management (auto-generated)" />
+  <field name="task_id" source="existing task supplied by x-ipe-workflow-task-execution; do not create a duplicate" />
   <field name="execution_mode" source="x-ipe-workflow-task-execution" />
   <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
   <field name="category" derive="Read from this skill's Output Result `category` field" />
@@ -96,7 +113,6 @@ BLOCKING: All input fields with non-trivial initialization MUST be documented he
 
 ## Definition of Ready
 
-CRITICAL: DoR at most 5 checkpoints. DoD at most 10 checkpoints. Keep only the most critical checks.
 ```xml
 <definition_of_ready>
   <checkpoint required="true">
@@ -126,10 +142,9 @@ CRITICAL: DoR at most 5 checkpoints. DoD at most 10 checkpoints. Keep only the m
 | 4. 明辨之 (Discern Clearly) | — | SKIP | {skip reason} | — |
 | 5. 笃行之 (Practice Earnestly) | 5.1 | {Step Name} | {Execute core work} | {gate condition} |
 | | 5.2 | Complete | Verify DoD | DoD validated |
-| 6. 继续执行 | 6.1 | Decide Next Action | DAO-assisted next task decision | Next action decided |
-| 6. 继续执行 | 6.2 | Execute Next Action | Load skill, generate plan, execute | Execution started |
+| Return | — | Owner handoff | Full output/evidence and conditional next suggestions | Owner verifies and decides boundary once |
 
-BLOCKING: All 5 phases MUST appear in the table. Skipped phases use `—` for Step and Gate.
+Use this phase scaffold when it clarifies the domain workflow; a short task may combine learning activities into flat steps. Preserve its input/output and lifecycle contracts. Skipped phases use `—` for Step and Gate when retaining the scaffold.
 BLOCKING: {Additional rule that must not be skipped}
 
 ### Phase Definitions (5-Phase Learning Method — 博学之，审问之，慎思之，明辨之，笃行之)
@@ -141,14 +156,13 @@ BLOCKING: {Additional rule that must not be skipped}
 | 3 | 慎思之 (Shènsī) | Think Carefully | Reflect on trade-offs and risks | Analyze alternatives, assess risk, evaluate impact |
 | 4 | 明辨之 (Míngbiàn) | Discern Clearly | Make informed decisions | Choose approach, document rationale, resolve conflicts |
 | 5 | 笃行之 (Dǔxíng) | Practice Earnestly | Execute with discipline | Implement, test, verify, deliver, commit |
-| 6 | 继续执行（Continue Execute） | Route and Execute | Decide next task, then load and execute | DAO-assisted decision + execution plan generation |
 
 **Phase Rules:**
-- Phase 1 (博学之) and Phase 5 (笃行之) are NEVER skippable.
-- Phases 2, 3, 4 may use `<skip reason="..." />` when genuinely non-applicable.
-- Phase names MUST always be bilingual (Chinese + English).
-- Phase order is fixed: 1 → 2 → 3 → 4 → 5. No reordering.
-- interaction_mode "dao-represent-human-to-interact" in Phase 2: agent self-resolves via `x-ipe-assistant-user-representative-Engineer` (not skipped).
+
+- Context gathering and verification of execution remain required activities, not mandatory named phases.
+- Inquiry, reflection, and discernment may be combined or omitted with a reason when non-applicable.
+- When using this scaffold, retain bilingual names and its existing phase order.
+- Resolve genuine questions through the caller's explicit current interaction policy; do not force a DAO call for clear inputs. Human asks human; full DAO and hybrid use bounded representative guidance within skill. Hybrid retains human completion/route confirmation; full DAO selects only authorized successors. Explicit human authority remains binding in every mode. Preserve all three enums and report conflicting child wording rather than silently invert actual UI/specification behavior.
 
 **Common Skip Reasons:**
 
@@ -164,7 +178,7 @@ BLOCKING: {Additional rule that must not be skipped}
 
 ```xml
 <procedure name="{skill-name}">
-  <!-- CRITICAL: Both DoR/DoD check elements below are MANDATORY -->
+  <!-- Check DoR; schedule independent DoD review when semantic risk warrants it. -->
   <execute_dor_checks_before_starting/>
   <schedule_dod_checks_with_sub_agent_before_starting/>
 
@@ -190,10 +204,13 @@ BLOCKING: {Additional rule that must not be skipped}
       <name>{Step Name}</name>
       <action>
         1. {Question assumptions, probe gaps, challenge inputs}
-        2. IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-             Invoke x-ipe-assistant-user-representative-Engineer to self-resolve
-           ELSE:
-             Ask human for clarification
+        2. No actual question or unresolved decision → do not invoke DAO or ask ceremonially.
+           IF process_preference.interaction_mode IN ["dao-represent-human-to-interact", "dao-represent-human-to-interact-for-questions-in-skill"]:
+             Invoke x-ipe-assistant-user-representative-Engineer using existing message_context;
+             consume operation_output.result.instruction_units and execution_plan for bounded guidance.
+           ELSE IF process_preference.interaction_mode == "interact-with-human":
+             Ask human for clarification and wait.
+           ELSE: Block invalid mode; never guess or override caller policy.
       </action>
       <output>{Clarified requirements / resolved ambiguities}</output>
     </step_2_1>
@@ -246,55 +263,14 @@ BLOCKING: {Additional rule that must not be skipped}
       <action>
         1. Verify all DoD checkpoints
         2. Output task completion summary
-        3. Mode-aware review gate:
-           IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-             Skip human review. If any open questions remain, invoke
-             x-ipe-assistant-user-representative-Engineer to resolve them autonomously.
-           ELIF process_preference.interaction_mode == "dao-represent-human-to-interact-for-questions-in-skill" OR "interact-with-human":
-             Present results to human and wait for approval.
+        3. Return current evidence, actual failures/review gaps and full original
+           output to the same lifecycle owner. Explicit required human authority
+           remains binding in every mode; representative guidance is not approval.
+           No board/Git/successor execution here. Owner handles the boundary once.
       </action>
       <output>Task completion output</output>
     </step_5_N_complete>
   </phase_5>
-
-  <!-- CONTINUE EXECUTE (always last phase — handles next task transition): -->
-  <phase_6 name="继续执行（Continue Execute）">
-    <step_6_1>
-      <name>Decide Next Action</name>
-      <action>
-        Collect the full context and task_completion_output from this skill execution.
-
-        IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-          → Invoke x-ipe-assistant-user-representative-Engineer with:
-            type: "routing"
-            completed_skill_output: {full task_completion_output YAML from this skill}
-            next_task_based_skill: "{from output}"
-            context: "Skill completed. Study the context and full output to decide best next action."
-          → DAO studies the complete context and decides the best next action
-        ELSE (manual):
-          → Present next task suggestion to human and wait for instruction
-      </action>
-      <constraints>
-        - BLOCKING (manual): Human MUST confirm or redirect before proceeding
-        - BLOCKING (auto): Proceed after DoD verification; auto-select next task via DAO
-      </constraints>
-      <output>Next action decided with execution context</output>
-    </step_6_1>
-    <step_6_2>
-      <name>Execute Next Action</name>
-      <action>
-        Based on the decision from Step 6.1:
-        1. Load the target task-based skill's SKILL.md
-        2. Generate an execution plan from the skill's Execution Flow table
-        3. Start execution from the skill's first phase/step
-      </action>
-      <constraints>
-        - MUST load the skill before executing — do not skip skill loading
-        - Execution follows the target skill's procedure, not this skill's
-      </constraints>
-      <output>Next task execution started</output>
-    </step_6_2>
-  </phase_6>
 
 </procedure>
 ```
@@ -325,7 +301,7 @@ task_completion_output:
 
 ## Definition of Done
 
-CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
+CRITICAL: Validate DoD deterministically where possible. Require independent review for meaningful workflow, executable, safety, or public-contract changes; document a lightweight self-review rationale for cosmetic/document-only work.
 
 ```xml
 <definition_of_done>
@@ -380,7 +356,7 @@ See [references/examples.md](references/examples.md) for concrete execution exam
 
 ### Line Limit
 
-CRITICAL: SKILL.md body MUST stay under 500 lines.
+CRITICAL: SKILL.md body MUST be ≤ 1000 logical lines, excluding frontmatter. Exactly 1000 passes and 1001 fails; LF/CRLF and a trailing newline count consistently. This is a ceiling, not a target.
 
 **Keep in SKILL.md:**
 - Purpose, Input Parameters, DoR, DoD (core structure)
@@ -433,7 +409,7 @@ task_based_skill_skills:
 
 | Category | Description | Board Skill |
 |----------|-------------|-------------|
-| standalone | No board tracking | None |
-| feature-stage | Updates feature board | feature-board-management |
-| requirement-stage | Updates requirement board | requirement-board-management |
-| ideation-stage | Updates ideation board | ideation-board-management |
+| standalone | No category-specific board; lifecycle task tracking still applies | x-ipe-tool-task-board-manager via lifecycle |
+| feature-stage | Feature lifecycle/category outputs | x-ipe-tool-task-board-manager via lifecycle |
+| requirement-stage | Requirement/category outputs; preserve domain persistence contracts | Delegate to lifecycle; no invented board |
+| ideation-stage | Ideation/category outputs; preserve domain persistence contracts | Delegate to lifecycle; no invented board |

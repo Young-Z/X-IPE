@@ -1,0 +1,716 @@
+schema: 1
+task_id: TASK-6749
+round: 6
+role: Final independent review and explicitly authorized editor-tool promotion
+date: '2026-10-13'
+historical_bootstrap: old_creator_four_round_process_step_8
+status: published
+candidate_ready: true
+overall_pass: true
+overall_pass_scope: Scoped creator acceptance, fresh independent review and verified publication; not whole-application compatibility
+publication_state: published
+publication_authorized: true
+scope:
+  - Creator-only final review and exact promotion of the validated publishable manifest
+  - Actual pre-promotion candidate validator API/CLI and publisher dry-run
+  - Authorized per-file editor-tool promotion; no live script apply/recovery or atomic transaction claimed
+  - Pre/post 163-test runs; installed helper verification; exact 32-file production/candidate byte parity
+  - Root metadata receipt, review and successful v1.2.0 history after parity
+  - Unrelated dirty work preserved; no board/memory, commits, push or mirrors
+historical_round5_scope:
+  - Reconcile actual bundled template/reference contracts and add real-scaffold tests
+  - Creator-only cleanup fallback with explicit excluded root and exact file allowlist
+  - Actual repository candidate validator API and CLI plus publisher apply=false
+  - All apply and recovery tests run only under resolved pytest temporary roots
+  - No production promotion, board, Git, memory, lesson or version-history operations
+  - Historical evidence below is retained under historical_* keys, not current receipts
+
+inputs:
+  candidate: x-ipe-docs/skill-meta/x-ipe-meta-skill-creator/candidate
+  metadata: x-ipe-docs/skill-meta/x-ipe-meta-skill-creator/skill-meta.md
+  scenarios: x-ipe-docs/skill-meta/x-ipe-meta-skill-creator/test-cases.yaml
+  historical_review: x-ipe-docs/skill-meta/x-ipe-meta-skill-creator/review-findings.md
+  historical_log: x-ipe-docs/skill-meta/x-ipe-meta-skill-creator/execution-log.yaml
+  historical_output: x-ipe-docs/skill-meta/x-ipe-meta-skill-creator/sandbox/round3-output.txt
+  original_tests: tests/test_skill_creator_foundation.py
+  targeted_tests: x-ipe-docs/skill-meta/x-ipe-meta-skill-creator/sandbox/test_round4_review.py
+  bundle_tests: x-ipe-docs/skill-meta/x-ipe-meta-skill-creator/sandbox/test_bundle_contracts.py
+  current_semantic_review: x-ipe-docs/skill-meta/x-ipe-meta-skill-creator/sandbox/creator-contract-review.md
+
+historical_test_evidence:
+  python: /Users/yzhang/Documents/projects/X-IPE/.venv/bin/python
+  python_version: 3.12.9
+  environment_configured: true
+  isolation:
+    bytecode_disabled: true
+    third_party_plugin_autoload_disabled: true
+    pytest_cache_disabled: true
+    conftest_disabled: true
+    apply_and_recovery_tests: synthetic_resolved_pytest_temporary_projects_only
+    real_candidate_validation: read_only_actual_repository_tree
+  original_inventory:
+    functions: 44
+    expanded_cases: 145
+    method: AST literal list/tuple element counts multiplied for stacked parametrization
+    exact_scenario_name_and_count_match: true
+  round3_log_verification:
+    recorded_runs: 2
+    passed_each: 145
+    failed_each: 0
+    exit_code_each: 0
+    sandbox_output_agrees: true
+    historical_candidate_hash: ba1935603d597dcd76a903fc70e9f1c3e4a4278c3b94030727cbda3f9c3c5006
+    receipt_freshness: historical_only_after_round4_template_change
+  independent_original_run:
+    command: >-
+      PYTHONDONTWRITEBYTECODE=1 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 /Users/yzhang/Documents/projects/X-IPE/.venv/bin/python -B -m pytest -p no:cacheprovider --noconftest tests/test_skill_creator_foundation.py -q
+    exit_code: 0
+    passed: 145
+    failed: 0
+    observed_output: 145 passed in 1.26s
+  targeted_regression:
+    name: test_task_metadata_preserves_three_mode_string_contract
+    initial_fixture_error: YAML indentation error in evaluator test; corrected before assessing candidate
+    failing_before_fix: "AssertionError: assert 'boolean' == 'string'; 1 failed in 0.03s"
+    candidate_fix: Restore string type, interact-with-human default and all three interaction modes
+    modified_candidate_path: templates/skill-meta-x-ipe-task-based.md
+    publisher_and_validator_code_changed: false
+  final_combined_run:
+    command: >-
+      PYTHONDONTWRITEBYTECODE=1 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 /Users/yzhang/Documents/projects/X-IPE/.venv/bin/python -B -m pytest -p no:cacheprovider --noconftest tests/test_skill_creator_foundation.py x-ipe-docs/skill-meta/x-ipe-meta-skill-creator/sandbox/test_round4_review.py -q
+    observed_runs: 2
+    exit_code_each: 0
+    passed_each: 146
+    failed_each: 0
+    observed_output_each: 146 passed in 1.28s
+    interpretation: Original 145 cases plus one Round 4 regression; no assertion weakening
+  evaluator_counting_correction:
+    issue: An intermediate evidence wrapper incorrectly used literal_eval on parametrization lists containing skill() calls
+    effect: Test run and dry-runs completed, but later inventory/preservation assertions in that wrapper did not execute
+    resolution: Use list/tuple AST element counts; repeat final tests, inventory and preservation assertions successfully
+
+historical_actual_validator:
+  command: >-
+    PYTHONDONTWRITEBYTECODE=1 /Users/yzhang/Documents/projects/X-IPE/.venv/bin/python -B x-ipe-docs/skill-meta/x-ipe-meta-skill-creator/candidate/scripts/validate_skill.py --project-root /Users/yzhang/Documents/projects/X-IPE --candidate /Users/yzhang/Documents/projects/X-IPE/x-ipe-docs/skill-meta/x-ipe-meta-skill-creator/candidate --name x-ipe-meta-skill-creator --type x-ipe-meta
+  cli_exit_code: 0
+  api_and_cli_receipts_equal: true
+  ok: true
+  body_lines: 246
+  file_count: 34
+  candidate_hash: 20e580645c9f3cf19013471da2e90ae27c4b560e78ff806f48a3fc2e7705657c
+  errors: []
+  warnings: []
+  dor_checkpoints: 4
+  dod_checkpoints: 6
+  limitations:
+    - A validator pass does not detect distributable review metadata or instructional contradictions
+    - Core entry section order is checked, not the full section-order rubric for all bundled templates
+    - Nonempty description and bounded tag checks are not trigger-quality or XML/schema validation
+    - No real workflow/config compatibility, remote URL fetching, anchors, hostile writer or power-loss certification
+  files:
+    SKILL.md: bda93dd0e7bbfb009c6341f1efc1c03f1a201927de1f56beb242cb4a67dcc263
+    metadata/review-findings.md: 1855745861b087fcbc55285093b16d305575bbefe7e95ee74aef3170ccfb3c51
+    metadata/test-cases.yaml: 6430b512fc5c8be4d0ff3b7830e0532f49fb7928ad860ff74ed5d4eb0f1ec251
+    references/10. example-gate-conditions.md: 12d65e9e2ef22d9fbaa2a427d557e20151afda8753cf9b19dbe0bce05c55ff04
+    references/11. reference-quality-standards.md: 232a13ab411119f1da53fa495a4eb1a8f4103906d8bb699bf45a25dc7fce9abd
+    references/12. reference-production-patterns.md: 994274b8fd456a2b075abec511ee9b696cbe79415bbdc7764f61f53c27dbcce9
+    references/2. reference-section-order.md: be57f4e8f4feb1ef1e292552a26dc5770670f106dfe48a38c59eea684c5e4c8c
+    references/3. example-step-based-code-review.md: 3fae0316a74c5fcf8ea41c2e439a2aea4306c44b62417ba8817206cf8d0fdc92
+    references/4. example-step-based-feature-implementation.md: 35a4b468c8ea98c035cd19bce235e8811b0cdffbc723c3ddbc9f5fc33859fd56
+    references/5. example-function-based-validation.md: 8468a8949c2eaba97dcc05dcaa96b36987df42cd36dce21811d673a57b0dcc32
+    references/6. example-function-based-analysis.md: 8b9bf60ee37e8075e6d13fcd29899513d5c6648445b44e16480f945dd6f132e1
+    references/7. example-task-io-code-implementation.md: 4cbe0f971fde59de2750ebfe6f2b18f89f4580cb4fbe51f9b2526209dd85e591
+    references/8. example-structured-summary.md: 7d7a8024be5cee66e83bc22499201b413fe7b0a23ddb20f10962427bbb3218d8
+    references/9. example-dor-dod.md: f63f14dd06284bd7b229bee30edfaee56b84785fe01708d60b3c0acebb3361e2
+    references/examples.md: a6f962390cd57abbecff392b1e4e005138f3f818403b2d98d376ed5f5efb7efa
+    references/skill-general-guidelines-v2.md: eeda601bd792c7f7dd374e9ff41b09dac8381654ac5f5bc5301da42e2da2f915
+    references/skill-type-comparison.md: f5a8de7ee983109f484b4e59385a0b1a33120615be0e07ba6db4b3c8e9c828d9
+    references/validation-publication.md: 06e1e092138bae4a02d539aa568f76481320dcfff1554b6f5607c502af0f60d7
+    scripts/publish_skill.py: 743177d28badf53011b5804395527bde05ac9b98f65fc3acb2d198d9b5869fda
+    scripts/validate_skill.py: 4bbcf68657dc3bf37ea1dc4d6ed67314513a1d3e0d3a7a06d55edc62ed8aa00d
+    templates/skill-meta-x-ipe-assistant.md: b60fde49a9d9907258865ae426c0b6dfaea3381b8b727a76be4e61f0c1463a7d
+    templates/skill-meta-x-ipe-dao.md: e1e773c15a6a9eaaccc6d2d358307be633e83c760226e2208a3cd80f1a548e0f
+    templates/skill-meta-x-ipe-knowledge.md: 911634d3fbd64f4b9fb0722afeb6587fbbc811cc3f9bd80a23c10aadf5ce5368
+    templates/skill-meta-x-ipe-meta.md: ba27f030f17cf2d2f9aebe6a4a4cfd3841791f7c8800269d92f0a38bd92eb165
+    templates/skill-meta-x-ipe-task-based.md: 796574c437838eaf07114a9aa104b59c35aec07337182caaea02ecf87bd9e642
+    templates/skill-meta-x-ipe-task-category.md: 7c1203f45773fcb77f5744e1767eb473d5c4d0c878664bc8bcbb71ca103260f9
+    templates/skill-meta-x-ipe-tool.md: 56756ff6181229e69df5be3542f5f3b87ce27d78604a78ffa9d631634be168bc
+    templates/x-ipe-assistant.md: e1156358ea385722a31e79adcd2965804669f90f316319f12c0a0da0f2e71c7c
+    templates/x-ipe-dao.md: 5b39bb857f240f69f908aa11f8559c357f2dfc440b79e23216c5afeed28d4d8f
+    templates/x-ipe-knowledge.md: b9fec4c112449c759e4b62b70da260b3d9f8a508fe4e571e1c043219a05fafd3
+    templates/x-ipe-meta.md: 5f401704880e4260e3cd32976a8b27ca9a12cb4f413bebbfb5201a650967c489
+    templates/x-ipe-task-based.md: fc207a53956476aeb6fd842d8db4eea3e3fb415e235d0dade3054bf8a672af31
+    templates/x-ipe-tool.md: 71b5425e57daaef64c5ae773ef0815a20c33288537db69d9213a84fcc8d035b1
+    templates/x-ipe-workflow-orchestration.md: f6c5cd09c8bb1043b6dbb692d1ccd68a595471ab7bbb051179f508cbd6ea9569
+
+historical_acceptance_evaluation:
+  counting_rule: Count each AC once; passing cases do not substitute for missing semantic evidence
+  thresholds:
+    must_required_passes: 16
+    should_required_passes: 4
+  counts:
+    must: {total: 16, passed: 14, failed: 1, missing: 1}
+    should: {total: 5, passed: 5, failed: 0, missing: 0}
+  must_threshold_met: false
+  should_threshold_met: true
+  percentage_policy: No inferred percentages; counts below are derived from explicit criterion outcomes
+  must:
+    - id: AC-M01
+      status: pass
+      evidence: All eight mappings resolve to seven distinct SKILL templates and seven metadata templates; actual files and copied-bundle test verified
+    - id: AC-M02
+      status: fail
+      evidence: Workflow template places Skill Registry before Output Result/DoD, contrary to its own declared reference-after-verification order; task-category mapping uses workflow procedure but section-order reference requires Operations
+    - id: AC-M03
+      status: pass
+      evidence: Actual entry has 246 body lines; 12 boundary cases cover 999/1000/1001, LF/CRLF and final-newline variants
+    - id: AC-M04
+      status: pass
+      evidence: Five concrete Example headings exist; historical instructions require reconciliation separately
+    - id: AC-M05
+      status: pass
+      evidence: Creator entry uses importance keywords and no prohibited emoji signals; copied-bundle assertion passes
+    - id: AC-M06
+      status: pass
+      evidence: Actual frontmatter name matches folder and description includes create/update trigger phrases; malformed identity/frontmatter scenarios pass
+    - id: AC-M07
+      status: pass
+      evidence: Important Notes explicitly BLOCKING-loads general guidelines; actual self resource resolves in candidate
+    - id: AC-M08
+      status: pass
+      evidence: Meaningful changes require independent review; documented cosmetic exception exists; Round 2 and this separate Round 4 evaluation supply review, not release permission
+    - id: AC-M09
+      status: pass
+      evidence: Four DoR/six DoD checkpoints; grouped final checks cover scope/resources, contracts, behavior, review, publication and records across five steps
+    - id: AC-M10
+      status: missing
+      evidence: Bounded validator and link cases pass; actual tool/knowledge/assistant output blocks retained. Full real subtype contract compatibility is not proven; task-category metadata still supplies invalid naming/legacy board contract and conflicting Operations versus procedure expectations
+      passing_subset: Candidate-self versus project-external links, exact block names, routing fields and synthetic eight-subtype fixtures
+      missing: Reviewed real-template/consumer contract evidence, especially category naming and lifecycle/config routing
+    - id: AC-M11
+      status: pass
+      evidence: Baseline/candidate/staged/concurrent recovery scenarios reject drift and preserve edits under modeled/cooperative boundaries
+    - id: AC-M12
+      status: pass
+      evidence: Dirty/unmanaged/deleted managed cases pass; real API rejects empty ownership and accepts clean tracked-source provenance without silently adopting ownership
+    - id: AC-M13
+      status: pass
+      evidence: Complete delta and exact deletion-list cases pass; actual dry-run enumerates five additions/seventeen changes/zero removals
+    - id: AC-M14
+      status: pass
+      evidence: Canonical root, identity, traversal, symlink, hardlink, FIFO and default-read-only CLI scenarios pass; real dry-run leaves production/staging untouched
+    - id: AC-M15
+      status: pass
+      evidence: Staged byte parity, retained backup, rollback/replay and journal/fault scenarios pass; no claim of actual process-kill or power-loss certification
+    - id: AC-M16
+      status: pass
+      evidence: LL-001 mapping remains planned and historical raw status/hash unchanged; candidate requires production revision plus relevant verification before applied status
+  should:
+    - {id: AC-S01, status: pass, evidence: Actual creator entry follows CONTEXT-DECISION-ACTION-VERIFY-REFERENCE order; separate template violations are charged to AC-M02}
+    - {id: AC-S02, status: pass, evidence: Entry is 246 body lines and delegates detailed validation/publication recovery to references}
+    - {id: AC-S03, status: pass, evidence: Actual DoR/DoD are closed XML blocks with four/six checkpoints}
+    - {id: AC-S04, status: pass, evidence: Creator inputs and parameterized paths use brace-variable syntax}
+    - {id: AC-S05, status: pass, evidence: Input Initialization subsection and input_init block are present under Input Parameters}
+  optional:
+    - {id: AC-C01, status: missing, evidence: Complete bidirectional task-based consumer compatibility was not executed}
+    - {id: AC-C02, status: pass, evidence: Selected lesson mapping and bounded lesson policy explicitly documented}
+    - {id: AC-C03, status: pass, evidence: Review chosen by semantics/risk, not fixed agents or step count}
+
+historical_independent_dod:
+  old_bootstrap_creator:
+    - {checkpoint: Planning Complete, status: pass, evidence: Existing template-derived metadata identifies subtype/mappings/examples/resource plan}
+    - {checkpoint: Candidate Created, status: pass_with_blocker, evidence: All planned resources present, but duplicated review metadata remains distributable}
+    - {checkpoint: Validation Passed, status: blocked, evidence: Tests pass but AC-M02 fails and AC-M10 remains missing}
+    - {checkpoint: Merged with Parity, status: deferred_by_scope, evidence: Promotion forbidden; real production parity intentionally not asserted}
+    - {checkpoint: SKILL.md Structure Valid, status: pass, evidence: Actual 246-line body also meets old 500-line ceiling; frontmatter/order/triggers reviewed}
+    - {checkpoint: DoR/DoD Within Limits, status: pass, evidence: Four/six checkpoints}
+    - {checkpoint: Step Outputs Covered, status: pass, evidence: Five candidate step outputs mapped to grouped scope/contracts/behavior/review/publication/records checkpoints}
+    - {checkpoint: Cross-References Valid, status: partial, evidence: Local links pass actual validator; complete subtype/consumer semantics remain missing}
+    - {checkpoint: Input Initialization Present, status: pass, evidence: Explicit subsection and field resolution block}
+    - {checkpoint: Examples Documented, status: pass_with_blocker, evidence: Five examples, but retained unsafe/stale instructions need reconciliation}
+  proposed_candidate_creator:
+    - {checkpoint: Scope and resources, status: blocked, evidence: Metadata duplication and retained template/reference contradictions}
+    - {checkpoint: Contracts valid, status: partial, evidence: Actual bounded validator passes; real semantic compatibility not complete}
+    - {checkpoint: Behavior evidenced, status: pass, evidence: Applicable modeled foundation tests 145 plus targeted regression 1 pass}
+    - {checkpoint: Review proportionate, status: pass, evidence: Independent Round 2 and Round 4 review with explicit findings}
+    - {checkpoint: Publication honest, status: pass, evidence: Dry-run only; blocked outcome and no promotion/parity claim}
+    - {checkpoint: Records accurate, status: pass, evidence: Historical Round 1-3 records preserved; this report records newer evidence; lesson/history unchanged}
+
+historical_judge_agent:
+  evaluator: Round 4 role, separate from draft author and test runner
+  rubric_source: skill-meta.md evaluation.judge_agent
+  scores:
+    - criterion: Quality of execution procedure clarity
+      score: 3
+      maximum: 5
+      reason: Main entry is clear but linked examples/type comparison/template instructions materially conflict with it
+    - criterion: Acceptance criteria completeness
+      score: 4
+      maximum: 5
+      reason: Broad foundation and safety coverage; real full-template/consumer evidence and cleanup criterion remain incomplete
+  release_decision: blocked; rubric scores do not override must criteria or authorization
+
+historical_findings:
+  - id: R4-F01
+    severity: blocker
+    status: unresolved
+    title: Review metadata still distributed in candidate
+    paths: [metadata/review-findings.md, metadata/test-cases.yaml]
+    evidence: Root copies byte-identical before cleanup; both remain in filesystem and final 34-file validator/dry-run manifest
+    attempted_remediation: Batch apply_patch deletion then one individual retry; reported success did not persist. No terminal deletion/editing attempted
+    required_action: Main must resolve deletion mechanism, verify filesystem and validator manifest absence, then refresh candidate receipt and dry-run
+    expected_after_only_cleanup: 32 files, three new production resources, zero production removals; final fingerprint must be recomputed, not guessed
+  - id: R4-F02
+    severity: correctness
+    status: fixed_and_verified
+    title: Task metadata interaction mode incorrectly typed as boolean
+    path: templates/skill-meta-x-ipe-task-based.md
+    fix: Restore string/default/three-mode description to match creator entry and actual task template
+    evidence: Specific failing assertion before fix; one targeted regression and all original 145 tests pass afterward
+  - id: R4-F03
+    severity: blocker
+    status: unresolved
+    title: Full template order/type contract conflicts
+    evidence:
+      - Workflow template places Skill Registry before Output Result and DoD despite its declared reference-after-verification order
+      - Category selects workflow procedure while section-order reference describes category Operations
+      - Category metadata identity x-ipe-{category}-{operation-name} and example x-ipe-x-ipe+all+task-board-management conflict with creator/validator x-ipe+ prefix
+      - Category metadata continues to specify legacy Markdown board CRUD rather than clear category orchestration contract
+    required_action: Adjudicate category contract and reconcile real templates/references; add actual-template tests and re-evaluate AC-M02/AC-M10, not only synthetic fixtures
+  - id: R4-F04
+    severity: blocker
+    status: unresolved
+    title: Retained active instructional contradictions
+    evidence:
+      - examples.md still instructs recursive-copy merge, legacy subtype/template paths and incorporated lesson status
+      - skill-type-comparison.md still requires full task phases/skill-owned board state and DAO redirection inconsistent with new candidate mappings
+      - validation-publication.md still labels helpers not yet scenario-tested; historical draft text is not a current evidence pointer
+    required_action: Reconcile guidance or label it explicitly historical/non-executable at the affected reference; entry-level illustrative warning alone does not reconcile authority
+  - id: R4-F05
+    severity: evidence_gap
+    status: missing
+    title: Real lifecycle/config and operation-schema compatibility evidence
+    evidence: Minimal synthetic eight-type tests plus copied creator validation do not execute actual subtype consumers; no blanket compatibility claim made
+    required_action: Target relevant real templates/consumer routing or obtain explicit scoped compatibility decision before publication
+
+historical_publication_dry_run:
+  invocation: publish(project_root, candidate, name, 'x-ipe-meta', baseline, managed, expected_candidate_hash, reviewed_deletions=(), apply=False)
+  actual_apply: false
+  empty_ownership_probe:
+    ok: false
+    errors: [Refusing to change/delete dirty or unmanaged production files]
+    interpretation: Correctly refuses inventing ownership from current baseline
+  tracked_source_probe:
+    ok: true
+    state: dry_run
+    name: x-ipe-meta-skill-creator
+    baseline_hash: ca9c61885f463a9ec296225af096f85fc9849ccc3a73b3f99cd3b80f517221e8
+    candidate_hash: 20e580645c9f3cf19013471da2e90ae27c4b560e78ff806f48a3fc2e7705657c
+    proposed_files_source: actual_validator.files
+    added:
+      - metadata/review-findings.md
+      - metadata/test-cases.yaml
+      - references/validation-publication.md
+      - scripts/publish_skill.py
+      - scripts/validate_skill.py
+    changed:
+      - SKILL.md
+      - references/11. reference-quality-standards.md
+      - references/12. reference-production-patterns.md
+      - references/2. reference-section-order.md
+      - references/skill-general-guidelines-v2.md
+      - templates/skill-meta-x-ipe-assistant.md
+      - templates/skill-meta-x-ipe-dao.md
+      - templates/skill-meta-x-ipe-knowledge.md
+      - templates/skill-meta-x-ipe-meta.md
+      - templates/skill-meta-x-ipe-task-based.md
+      - templates/skill-meta-x-ipe-task-category.md
+      - templates/skill-meta-x-ipe-tool.md
+      - templates/x-ipe-dao.md
+      - templates/x-ipe-meta.md
+      - templates/x-ipe-task-based.md
+      - templates/x-ipe-tool.md
+      - templates/x-ipe-workflow-orchestration.md
+    removed: []
+    protected: []
+    reviewed_deletions: []
+    is_release_approval: false
+  manifest_provenance:
+    source_commit: eba31134078af8bfea70dcc8a25e24ccdf1409f9
+    source_method: Read git ls-tree commit and git cat-file blob bytes; SHA256 independently calculated per regular tracked file
+    regular_tracked_files: 29
+    live_files: 29
+    current_live_equals_tracked_source: true
+    hash_both: ca9c61885f463a9ec296225af096f85fc9849ccc3a73b3f99cd3b80f517221e8
+    dirty_or_unmanaged_live_paths: []
+    managed_provenance: Reviewed clean tracked-source inventory, NOT copied current hashes or fabricated last-release ownership
+    pre_work_saved_manifest: missing
+    baseline_timing: Round 4 current snapshot, corroborated by exact committed bytes; not falsely represented as historical pre-work receipt
+    first_migration_gate: Main must accept clean tracked-source provenance and review all existing candidate deltas before publication
+    cli_manifest_files_written: false
+    baseline_files: &clean_tracked_source
+      SKILL.md: bb8069adebe6daaf118c1855a1dfec2b6ffdab1e4c32bf41a0e5b2dd4d0ce13a
+      references/10. example-gate-conditions.md: 12d65e9e2ef22d9fbaa2a427d557e20151afda8753cf9b19dbe0bce05c55ff04
+      references/11. reference-quality-standards.md: 3ffdebcc74acb3cc0240a8e2f0f04da3fb78c01c05844e4a80eab9b82de9a7db
+      references/12. reference-production-patterns.md: af2244b2641408f12cef41fc59c14ef61e2c9054806f441d5267fb79f769710c
+      references/2. reference-section-order.md: cc10ab0eeb188057b0df59cc786a24e626a9d9c317714ce62700baede245ce2c
+      references/3. example-step-based-code-review.md: 3fae0316a74c5fcf8ea41c2e439a2aea4306c44b62417ba8817206cf8d0fdc92
+      references/4. example-step-based-feature-implementation.md: 35a4b468c8ea98c035cd19bce235e8811b0cdffbc723c3ddbc9f5fc33859fd56
+      references/5. example-function-based-validation.md: 8468a8949c2eaba97dcc05dcaa96b36987df42cd36dce21811d673a57b0dcc32
+      references/6. example-function-based-analysis.md: 8b9bf60ee37e8075e6d13fcd29899513d5c6648445b44e16480f945dd6f132e1
+      references/7. example-task-io-code-implementation.md: 4cbe0f971fde59de2750ebfe6f2b18f89f4580cb4fbe51f9b2526209dd85e591
+      references/8. example-structured-summary.md: 7d7a8024be5cee66e83bc22499201b413fe7b0a23ddb20f10962427bbb3218d8
+      references/9. example-dor-dod.md: f63f14dd06284bd7b229bee30edfaee56b84785fe01708d60b3c0acebb3361e2
+      references/examples.md: a6f962390cd57abbecff392b1e4e005138f3f818403b2d98d376ed5f5efb7efa
+      references/skill-general-guidelines-v2.md: 61ca3663962a58402c8c72eb28c621373ae6e0a0b2b858dc609508346d5ce17f
+      references/skill-type-comparison.md: f5a8de7ee983109f484b4e59385a0b1a33120615be0e07ba6db4b3c8e9c828d9
+      templates/skill-meta-x-ipe-assistant.md: 5f10e494242e306dfe47cc1025f8120a7c66e0981fdc62bd56b5424327a120cc
+      templates/skill-meta-x-ipe-dao.md: b9b999f7227f8aa562f9c709fe821e328c47f0e3577f2d3513b91fc2623424bd
+      templates/skill-meta-x-ipe-knowledge.md: 410cd2fa954cae78770b05c28daa197337ff15df666990f4ad9592150c76db9f
+      templates/skill-meta-x-ipe-meta.md: 0218d9dab0732aafe78c745a0ab66413c4e444bc016e05be7ee404976c9283eb
+      templates/skill-meta-x-ipe-task-based.md: 9aa881902b0df5af1992fcd304de1f8b0026e3f8d5702757c78d638aed2394f7
+      templates/skill-meta-x-ipe-task-category.md: fcae21ac998f20d42f40879a32a722c35aa34f3d0973943b74c58d861dbc0fa9
+      templates/skill-meta-x-ipe-tool.md: 45f1358e1c01dd58415b6d30306c2f6760ec8486a910e9dcbd98eec3a469b80f
+      templates/x-ipe-assistant.md: e1156358ea385722a31e79adcd2965804669f90f316319f12c0a0da0f2e71c7c
+      templates/x-ipe-dao.md: eeafee2578a31b75a2bed9d85522dd4cb2fc682524c2df9d698ec7698913b821
+      templates/x-ipe-knowledge.md: b9fec4c112449c759e4b62b70da260b3d9f8a508fe4e571e1c043219a05fafd3
+      templates/x-ipe-meta.md: c3aadbb7e07db5f8446e284528b83ff4af6975f4f3610d2ec36c6bbd82b2397b
+      templates/x-ipe-task-based.md: a883e12ba5a9bd32d8a3b73b69908e6eae8009c464475c9190a1e32c336190db
+      templates/x-ipe-tool.md: 471fe0efb9726a8c6753944c27f8492ab0b65da5af3bef3142f7dba5cbe9a855
+      templates/x-ipe-workflow-orchestration.md: fe2a94a77c69adf20efea4b59e09c8b546f315fca8c68c8d2948fcc4a434c25d
+    managed_files: *clean_tracked_source
+
+safe_manifest_handoff:
+  export_cli: No dedicated baseline/managed export subcommand exists in current scripts
+  baseline_api: manifest(tree_bytes(project_root / '.github/skills' / name, project_root))
+  candidate_api: validate(project_root, candidate, name, skill_type); use receipt.files and receipt.candidate_hash
+  fingerprint_api: fingerprint(path_to_sha256_mapping)
+  managed_api: Trusted prior publication inventory or independently SHA256-hashed reviewed clean tracked blobs; never baseline-copy ownership
+  serialization: JSON object with exact package-relative file keys and lowercase SHA256 values, not whole receipt/report
+  approved_export_source: publication_dry_run.manifest_provenance.baseline_files and managed_files; historical reviewed source rechecked against current production, still subject to source-provenance acceptance before apply
+  location: Keep exported JSON maps and validation/dry-run receipts outside candidate; Main owns authorized file creation
+  publisher_cli_required_flags:
+    - --project-root
+    - --name
+    - --candidate
+    - --type
+    - --baseline
+    - --managed
+    - --candidate-hash
+  deletion_flags: Repeat --delete-reviewed only for exact production removals; currently none. Explicit candidate metadata exclusion is not a production deletion
+  apply_policy: Omit --apply for review; only Main may decide to apply after blockers, fresh evidence and explicit permission are resolved
+  restart_policy: Reviewed manifest/hash must still equal current trees; any cleanup/other edit invalidates this candidate fingerprint
+  first_migration_policy: Reconstruct missing historical baseline only with documented committed-source evidence and authorization; do not silently refresh drift away
+  recover_policy: CLI --recover is separate; verify stopped publisher and matching lock/journal/backup before any authorized recovery apply
+
+historical_preservation:
+  production_entries_checked: 2096
+  final_test_and_read_only_checks_changed_entries: []
+  production_hash_modes_mtime_size_and_links_unchanged: true
+  publication_store_unchanged: true
+  no_live_apply_or_recover_apply: true
+  history_sha256: e187762283590de644eeadc9ff1c87c1b33b5e277bf0da66a261df1b10106a75
+  lesson_sha256: 2eecf147d7c70d2f24523e28fcfdb0a76f0ad9f0f18828e9008e2c97a74ad667
+  history_and_lesson_match_initial_observation: true
+  editor_diagnostics:
+    targeted_python_test: no_errors
+    modified_template: Existing MD060 table formatting diagnostics outside changed field; unchanged table lines, not candidate contract errors
+  changed_paths:
+    - x-ipe-docs/skill-meta/x-ipe-meta-skill-creator/candidate/templates/skill-meta-x-ipe-task-based.md
+    - x-ipe-docs/skill-meta/x-ipe-meta-skill-creator/sandbox/test_round4_review.py
+    - x-ipe-docs/skill-meta/x-ipe-meta-skill-creator/evaluation-report.yaml
+  unsuccessful_requested_deletions:
+    - x-ipe-docs/skill-meta/x-ipe-meta-skill-creator/candidate/metadata/review-findings.md
+    - x-ipe-docs/skill-meta/x-ipe-meta-skill-creator/candidate/metadata/test-cases.yaml
+
+historical_handoff:
+  decision: blockers
+  owner: Main
+  next_actions:
+    - Resolve actual duplicate removal without terminal file editing; verify candidate manifest excludes both files
+    - Reconcile template/reference authority and actual category/schema contracts; add targeted actual-template evidence
+    - Re-run original and targeted tests plus actual validator after every candidate change
+    - Produce outside-bundle JSON baseline/managed maps using reviewed provenance; recheck exact current trees
+    - Review fresh complete dry-run manifest and explicit permission before any Main-owned promotion
+  unsupported_certifications:
+    - Hostile noncooperating pathname TOCTOU writers
+    - Power-loss durability, seamless directory exchange, and actual process-kill/pre-journal crash recovery
+    - Whole-project compatibility or application regression coverage
+
+test_evidence:
+  python: /Users/yzhang/Documents/projects/X-IPE/.venv/bin/python
+  python_version: 3.12.9
+  environment_configured: true
+  command: >-
+    PYTHONDONTWRITEBYTECODE=1 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 /Users/yzhang/Documents/projects/X-IPE/.venv/bin/python -B -m pytest -p no:cacheprovider --noconftest tests/test_skill_creator_foundation.py x-ipe-docs/skill-meta/x-ipe-meta-skill-creator/sandbox/test_round4_review.py x-ipe-docs/skill-meta/x-ipe-meta-skill-creator/sandbox/test_bundle_contracts.py -q
+  final_run: {exit_code: 0, passed: 163, failed: 0, observed_output: 163 passed in 1.63s}
+  preceding_same_candidate_run: {exit_code: 0, passed: 163, failed: 0, observed_output: 163 passed in 1.60s}
+  final_run_phase: post_promotion
+  preceding_run_phase: pre_promotion
+  historical_round5_final_run: {exit_code: 0, passed: 163, failed: 0, observed_output: 163 passed in 1.65s}
+  historical_round5_preceding_run: {exit_code: 0, passed: 163, failed: 0, observed_output: 163 passed in 1.66s}
+  counts: {foundation_cases: 145, prior_sandbox_regression: 1, real_bundle_cases: 17, total: 163}
+  real_bundle_failing_before: {passed: 7, failed: 7, total: 14}
+  added_after_initial_reproduction:
+    - Other skill metadata is never excluded
+    - Unsafe nodes inside excluded root still fail
+    - Flattened task mode cannot satisfy nested caller contract
+  assertions_preserved:
+    - Foundation bootstrap assertion replaced by reusable no-drafting-promotion boundary plus absence of task-specific release notes
+    - Foundation task fixture and sandbox metadata selector updated to existing nested caller shape, not flattened mode
+    - New contract tests compare complete real scaffold section order to all eight declared reference contracts
+    - New tests instantiate actual scaffolds, preserving operation/assistant domain contracts
+    - Creator-copy temporary apply proves byte parity and absence of metadata; real production API never applied
+  wrapper_corrections:
+    - Real task output has dynamic placeholder keys; test instantiates only those keys before YAML parsing
+    - Evidence wrapper incorrectly assumed excluded remnants equal outside historical records; equality failed after tests and dry-run, with no production writes
+    - Repeated wrapper printed distinct hashes and verified production snapshot unchanged; no byte-identical-copy claim retained
+  isolation:
+    bytecode_disabled: true
+    third_party_plugin_autoload_disabled: true
+    pytest_cache_disabled: true
+    conftest_disabled: true
+    real_candidate_and_live_publisher: Read-only validation and dry-run; actual promotion uses authorized editor tools only
+    apply_and_recovery: temporary_projects_only
+
+actual_validator:
+  schema: 1
+  operation: validate
+  name: x-ipe-meta-skill-creator
+  skill_type: x-ipe-meta
+  command: >-
+    PYTHONDONTWRITEBYTECODE=1 /Users/yzhang/Documents/projects/X-IPE/.venv/bin/python -B x-ipe-docs/skill-meta/x-ipe-meta-skill-creator/candidate/scripts/validate_skill.py --project-root /Users/yzhang/Documents/projects/X-IPE --candidate /Users/yzhang/Documents/projects/X-IPE/x-ipe-docs/skill-meta/x-ipe-meta-skill-creator/candidate --name x-ipe-meta-skill-creator --type x-ipe-meta
+  cli_exit_code: 0
+  api_and_cli_receipts_equal: true
+  ok: true
+  errors: []
+  warnings: []
+  body_lines: 246
+  physical_file_count: 34
+  file_count: 32
+  dor_checkpoints: 4
+  dod_checkpoints: 6
+  candidate_hash: d548972671b39a8a7a0940fe30fa6d7e143b68ba32e8919b4192c640c14bca39
+  excluded_files: &excluded_review_artifacts
+    metadata/review-findings.md: 1855745861b087fcbc55285093b16d305575bbefe7e95ee74aef3170ccfb3c51
+    metadata/test-cases.yaml: 6430b512fc5c8be4d0ff3b7830e0532f49fb7928ad860ff74ed5d4eb0f1ec251
+  files: &current_candidate_manifest
+    SKILL.md: ac21f35b8d9a5cc17b95cb33cf44d7e3a6660b573e0aea5f7b5ae4d0be45f305
+    references/10. example-gate-conditions.md: 12d65e9e2ef22d9fbaa2a427d557e20151afda8753cf9b19dbe0bce05c55ff04
+    references/11. reference-quality-standards.md: 232a13ab411119f1da53fa495a4eb1a8f4103906d8bb699bf45a25dc7fce9abd
+    references/12. reference-production-patterns.md: 83871a9e477872cc3011b62c5ffc8b057117300b5c73205308b7a1a4e02b10c1
+    references/2. reference-section-order.md: 1b54e25b4e6fb6de1ac02c0ff5cf6eecb916e1fc06b2b36f103899ff61c72748
+    references/3. example-step-based-code-review.md: 3fae0316a74c5fcf8ea41c2e439a2aea4306c44b62417ba8817206cf8d0fdc92
+    references/4. example-step-based-feature-implementation.md: 35a4b468c8ea98c035cd19bce235e8811b0cdffbc723c3ddbc9f5fc33859fd56
+    references/5. example-function-based-validation.md: 8468a8949c2eaba97dcc05dcaa96b36987df42cd36dce21811d673a57b0dcc32
+    references/6. example-function-based-analysis.md: 8b9bf60ee37e8075e6d13fcd29899513d5c6648445b44e16480f945dd6f132e1
+    references/7. example-task-io-code-implementation.md: 4cbe0f971fde59de2750ebfe6f2b18f89f4580cb4fbe51f9b2526209dd85e591
+    references/8. example-structured-summary.md: 7d7a8024be5cee66e83bc22499201b413fe7b0a23ddb20f10962427bbb3218d8
+    references/9. example-dor-dod.md: 329814a7c237fc034a8273b9f3956e4c8fc2010b1c94c27e4745d046fc7026f3
+    references/examples.md: bf60f472cceb134b6bebf2e54c1242a52c882ec7758ecbb3546330247a9a512c
+    references/skill-general-guidelines-v2.md: 9dabb2d1de193220d5c9646c883cbb5fee37f42c76e1c0baff223cb8536c6a5f
+    references/skill-type-comparison.md: 8ee5a24af6a678612dde770f544a624ef98cbf63289576c8a9ffd2e4798a46b1
+    references/validation-publication.md: cfc1391af7fe7e3c256cbb3b769441c95716d2fee00d4a00a34e58110fd4d8af
+    scripts/publish_skill.py: 329a7aaf6fbce6f7523d48383accf376f47deaa7fa8d2810a9caf7339ee3de53
+    scripts/validate_skill.py: 21fbb19a17e3f8d80657936be66843af55fe047d910fb599831c0571dbab856f
+    templates/skill-meta-x-ipe-assistant.md: b60fde49a9d9907258865ae426c0b6dfaea3381b8b727a76be4e61f0c1463a7d
+    templates/skill-meta-x-ipe-dao.md: e1e773c15a6a9eaaccc6d2d358307be633e83c760226e2208a3cd80f1a548e0f
+    templates/skill-meta-x-ipe-knowledge.md: 911634d3fbd64f4b9fb0722afeb6587fbbc811cc3f9bd80a23c10aadf5ce5368
+    templates/skill-meta-x-ipe-meta.md: ba27f030f17cf2d2f9aebe6a4a4cfd3841791f7c8800269d92f0a38bd92eb165
+    templates/skill-meta-x-ipe-task-based.md: dacb27a311487b2d2309625895e0d1d389a4fc72b00028548614cb8e643b8bc8
+    templates/skill-meta-x-ipe-task-category.md: ef04686440b7b23e44bcbcb5aa851637d13c923bbb49c460247c5d5f9072c86a
+    templates/skill-meta-x-ipe-tool.md: 56756ff6181229e69df5be3542f5f3b87ce27d78604a78ffa9d631634be168bc
+    templates/x-ipe-assistant.md: e1156358ea385722a31e79adcd2965804669f90f316319f12c0a0da0f2e71c7c
+    templates/x-ipe-dao.md: 5b39bb857f240f69f908aa11f8559c357f2dfc440b79e23216c5afeed28d4d8f
+    templates/x-ipe-knowledge.md: b9fec4c112449c759e4b62b70da260b3d9f8a508fe4e571e1c043219a05fafd3
+    templates/x-ipe-meta.md: 5f401704880e4260e3cd32976a8b27ca9a12cb4f413bebbfb5201a650967c489
+    templates/x-ipe-task-based.md: aad668151b567802c0f8d0135ba41c92e653de8f5f2eda935a3a4c24780152ef
+    templates/x-ipe-tool.md: 71b5425e57daaef64c5ae773ef0815a20c33288537db69d9213a84fcc8d035b1
+    templates/x-ipe-workflow-orchestration.md: a810d84bf5c3ef45e512b6eb4f22d6d1810b51dc8c4cfb99de5230248a8f9ae6
+  limitations:
+    - Bounded structural/resource validation does not certify whole application lifecycle/config semantics
+    - Actual-template tests supplement validator section-order checks; not every domain scenario is executed
+    - Narrow creator review exclusion is explicit; physical deletion did not succeed
+    - No hostile-writer, power-loss or actual process-kill certification
+
+acceptance_evaluation:
+  counting_rule: Count each creator AC once; actual-template evidence replaces missing structural/schema subset; no blanket consumer certification
+  thresholds: {must_required_passes: 16, should_required_passes: 4}
+  counts:
+    must: {total: 16, passed: 16, failed: 0, missing: 0}
+    should: {total: 5, passed: 5, failed: 0, missing: 0}
+  must_threshold_met: true
+  should_threshold_met: true
+  must:
+    - {id: AC-M01, status: pass, evidence: Eight mappings retain actual seven SKILL and seven metadata scaffolds; eight real-scaffold validator cases pass}
+    - {id: AC-M02, status: pass, evidence: Complete real-scaffold headings equal reference order for all eight types; workflow registry follows DoD and category uses procedure}
+    - {id: AC-M03, status: pass, evidence: Actual body 246 lines; original 12 newline/boundary cases pass}
+    - {id: AC-M04, status: pass, evidence: Five examples retained with current subtype identities and permission-safe publication guidance}
+    - {id: AC-M05, status: pass, evidence: Creator entry keyword/no-emoji importance assertion passes}
+    - {id: AC-M06, status: pass, evidence: Actual name/frontmatter/triggers plus foundation identity/frontmatter cases pass}
+    - {id: AC-M07, status: pass, evidence: Explicit BLOCKING guidelines load retained; self resources resolve inside candidate}
+    - {id: AC-M08, status: pass, evidence: Risk-based review retained and tested; earlier findings resolved; fresh final independent review completed before explicitly authorized creator-only promotion}
+    - {id: AC-M09, status: pass, evidence: Four DoR and six DoD grouped checkpoints cover owned outputs and boundaries}
+    - {id: AC-M10, status: pass, evidence: Actual eight subtype scaffolds validate; operation and assistant contracts retained; existing nested caller shape and board service verified read-only; broken-link and flattened-mode negative cases pass}
+    - {id: AC-M11, status: pass, evidence: Foundation target/candidate/stage concurrency and recovery protection scenarios pass}
+    - {id: AC-M12, status: pass, evidence: Dirty/unmanaged/deleted managed scenarios pass; initial empty Git diffs and independently hashed committed blobs confirm accepted clean tracked-source provenance; unrelated dirty work preserved}
+    - {id: AC-M13, status: pass, evidence: Real complete dry-run has 3 additions 20 changes 0 removals; foundation exact-deletion checks pass}
+    - {id: AC-M14, status: pass, evidence: Canonical path and unsafe-node cases pass; narrow exclusion cannot hide unexpected metadata or symlinks; real publisher default remains read-only}
+    - {id: AC-M15, status: pass, evidence: Temporary transaction/recovery and stage parity tests pass; actual authorized editor promotion verifies all 32 bytes-equivalent files; no live script apply or atomic swap claimed}
+    - {id: AC-M16, status: pass, evidence: Lesson publication-plus-verification policy retained; planned mapping and historical raw lesson/history unchanged}
+  should:
+    - {id: AC-S01, status: pass, evidence: Creator and all real subtype scaffolds follow declared cognitive section order}
+    - {id: AC-S02, status: pass, evidence: 246-line creator delegates detail to references}
+    - {id: AC-S03, status: pass, evidence: Closed bounded DoR/DoD blocks validated}
+    - {id: AC-S04, status: pass, evidence: Parameterized inputs and procedures retain brace-variable syntax}
+    - {id: AC-S05, status: pass, evidence: Input Initialization and input_init block retained and validated}
+  optional:
+    - {id: AC-C01, status: missing, evidence: Whole bidirectional task-based consumer compatibility intentionally not executed}
+    - {id: AC-C02, status: pass, evidence: Bounded selected lesson policy retained}
+    - {id: AC-C03, status: pass, evidence: Proportionate review/decomposition policy retained; no fixed agent count}
+
+findings:
+  - {id: R4-F01, status: resolved_by_authorized_fallback, evidence: Physical files remain; validator/publisher exclude exact creator review artifacts and reject unknown metadata resources; 32-file actual manifest and temporary stage verified}
+  - {id: R4-F02, status: fixed_and_verified, evidence: Three-mode string/default preserved and aligned to nested caller field}
+  - {id: R4-F03, status: fixed_and_verified, evidence: Full real-template order/category naming/completion schema and delegated JSON board contract tested}
+  - {id: R4-F04, status: fixed_and_verified, evidence: Unsafe merge/stale subtype/lesson/DAO/type guidance reconciled; release candidate no task-specific bootstrap notes}
+  - {id: R4-F05, status: resolved_for_creator_scope, evidence: Real subtype/caller evidence supplied; whole-application modernization and runtime config compatibility explicitly excluded}
+
+historical_round5_semantic_review:
+  artifact: x-ipe-docs/skill-meta/x-ipe-meta-skill-creator/sandbox/creator-contract-review.md
+  current_reviewer: Same agent performing blocker reconciliation
+  earlier_independent_reviews: Historical Round 2 and Round 4 findings retained above
+  new_independent_review_executed: false
+  release_gate: Fresh independent pre-publication review plus explicit permission still required
+  verdict: Ready for scoped candidate handoff; no production approval
+
+semantic_review:
+  artifact: x-ipe-docs/skill-meta/x-ipe-meta-skill-creator/final-independent-review.md
+  current_reviewer: GitHub Copilot fresh final-review execution, independent of prior drafting and blocker reconciliation
+  additional_subagent_spawned: false
+  new_independent_review_executed: true
+  reviewed_candidate_hash: d548972671b39a8a7a0940fe30fa6d7e143b68ba32e8919b4192c640c14bca39
+  release_gate: Satisfied by fresh review, clean committed-source baseline, real tests/validator/dry-run and explicit user authorization
+  verdict: Pass for scoped creator publication
+  blocking_findings: []
+
+publication_dry_run:
+  invocation: publish(project_root, candidate, name, 'x-ipe-meta', baseline, managed, expected_candidate_hash, reviewed_deletions=(), apply=False)
+  ok: true
+  state: dry_run
+  actual_apply: false
+  baseline_hash: ca9c61885f463a9ec296225af096f85fc9849ccc3a73b3f99cd3b80f517221e8
+  candidate_hash: d548972671b39a8a7a0940fe30fa6d7e143b68ba32e8919b4192c640c14bca39
+  files: *current_candidate_manifest
+  excluded_files: *excluded_review_artifacts
+  added: [references/validation-publication.md, scripts/publish_skill.py, scripts/validate_skill.py]
+  changed:
+    - SKILL.md
+    - references/11. reference-quality-standards.md
+    - references/12. reference-production-patterns.md
+    - references/2. reference-section-order.md
+    - references/9. example-dor-dod.md
+    - references/examples.md
+    - references/skill-general-guidelines-v2.md
+    - references/skill-type-comparison.md
+    - templates/skill-meta-x-ipe-assistant.md
+    - templates/skill-meta-x-ipe-dao.md
+    - templates/skill-meta-x-ipe-knowledge.md
+    - templates/skill-meta-x-ipe-meta.md
+    - templates/skill-meta-x-ipe-task-based.md
+    - templates/skill-meta-x-ipe-task-category.md
+    - templates/skill-meta-x-ipe-tool.md
+    - templates/x-ipe-dao.md
+    - templates/x-ipe-meta.md
+    - templates/x-ipe-task-based.md
+    - templates/x-ipe-tool.md
+    - templates/x-ipe-workflow-orchestration.md
+  removed: []
+  protected: []
+  reviewed_deletions: []
+  is_release_approval: false
+  release_authorization_record: promotion-receipt.yaml authorization; a dry-run itself is not permission
+  manifest_provenance:
+    source: Fresh initial Git status/diffs and independently SHA256-hashed committed blobs corroborate the historical Round 4 clean tracked-source receipt
+    current_live_equals_historical_inventory: true
+    baseline_files: *clean_tracked_source
+    managed_files: *clean_tracked_source
+    regular_files: 29
+    baseline_timing: Historical reviewed snapshot rechecked exactly; not relabeled as a missing pre-work receipt
+    ownership_policy: Clean committed-source provenance accepted for this authorized first migration; never inferred by copying current baseline
+
+  historical_round5_preservation:
+  production_entries_checked_in_final_guarded_run: 2095
+  production_snapshot_diff: {}
+  final_guarded_run_hash_modes_mtime_size_and_links_unchanged: true
+  creator_production_manifest_matches_initial_and_historical: true
+  no_live_apply_or_recover_apply: true
+  no_board_git_or_memory_operations: true
+  history_sha256: e187762283590de644eeadc9ff1c87c1b33b5e277bf0da66a261df1b10106a75
+  lesson_sha256: 2eecf147d7c70d2f24523e28fcfdb0a76f0ad9f0f18828e9008e2c97a74ad667
+  physical_metadata_deletion_succeeded: false
+  physical_metadata_remains_disclosed_and_excluded: true
+  external_historical_records_are_not_byte_identical_copies: true
+  editor_python_diagnostics: no_errors_at_last_check
+
+promotion:
+  receipt: x-ipe-docs/skill-meta/x-ipe-meta-skill-creator/promotion-receipt.yaml
+  receipt_sha256: f4e40bfc29d3afc89fa9fb199f0edea6a9a948fe97a7b11a9c0ffbc5557bd831
+  independent_review_sha256: 7699caab47e574115c66bee1d1c0fccfd2f0e4ff6ecfce5aa819e50724de0327
+  successful_history_sha256: e2e6a814ef7cddaa1a5a940da2cb876b922c2bb4845e8c0affaf62aba23152fa
+  state: published
+  version: 1.2.0
+  method: Authorized apply_patch and complete entry replacement through insert-edit tool
+  actual_script_apply: false
+  atomic_transaction_claimed: false
+  initial_production_clean: true
+  initial_baseline_hash: ca9c61885f463a9ec296225af096f85fc9849ccc3a73b3f99cd3b80f517221e8
+  candidate_hash: d548972671b39a8a7a0940fe30fa6d7e143b68ba32e8919b4192c640c14bca39
+  production_hash: d548972671b39a8a7a0940fe30fa6d7e143b68ba32e8919b4192c640c14bca39
+  production_files: 32
+  byte_parity: true
+  production_body_lines: 246
+  delta: {added: 3, changed: 20, removed: 0, unchanged: 9}
+  production_metadata_root_absent: true
+  installed_validator_api_cli_equal: true
+  installed_publisher_read_only_noop: true
+  history_updated_after_parity: true
+
+preservation:
+  outside_scope_files: 6450
+  outside_scope_hash_before_and_after: 2ae24d2e2f12906776033bde1336bbf26f0fcbb0d57cc65ec4995f590ef261d7
+  unrelated_dirty_work_preserved: true
+  candidate_unchanged: true
+  original_test_sha256_unchanged: 684b1678b2c052f0fc5359ac34bd525ae7c7392caa187d5c84600107c75f6625
+  raw_lesson_sha256_unchanged: 2eecf147d7c70d2f24523e28fcfdb0a76f0ad9f0f18828e9008e2c97a74ad667
+  no_board_or_memory_operations: true
+  git_read_only_inspection: true
+  no_commits_push_or_mirrors: true
+  no_repository_script_apply_or_recovery: true
+  publication_store_created: false
+  editor_diagnostics: No errors in installed entry and both helpers
+
+handoff:
+  decision: completed
+  publication_state: published
+  publication_authorized: true
+  candidate_hash: d548972671b39a8a7a0940fe30fa6d7e143b68ba32e8919b4192c640c14bca39
+  blocking_creator_findings: []
+  satisfied_pre_publication_gates:
+    - Fresh independent review of final candidate completed before promotion
+    - Accepted clean committed-source managed provenance and full 3-addition 20-change zero-removal dry-run
+    - Explicit current user release permission and fresh unchanged baseline/candidate receipts
+  promotion_receipt: x-ipe-docs/skill-meta/x-ipe-meta-skill-creator/promotion-receipt.yaml
+  unresolved_issues: []
+  manifest_api:
+    physical_inventory: tree_bytes(folder, project_root)
+    publishable_inventory: candidate_bytes(candidate, project_root, skill_name)
+    baseline: manifest(tree_bytes(project_root / '.github/skills' / skill_name, project_root))
+    candidate: validate(project_root, candidate, skill_name, skill_type); use files and candidate_hash
+    fingerprint: fingerprint(path_to_sha256_mapping)
+    managed: Trusted prior publication inventory or reviewed historical source; never silently adopt baseline as ownership
+    serialization: JSON object of exact package-relative paths to lowercase SHA256; export outside candidate only
+  unsupported_certifications:
+    - Whole application lifecycle/config modernization or blanket runtime compatibility
+    - Hostile pathname writers and power-loss durability
+    - Actual process-kill/pre-journal crash recovery

@@ -1,0 +1,24 @@
+evaluation_report:
+  task_id: TASK-6749
+  evaluated_on: 2026-10-13
+  skill: x-ipe-task-based-feature-breakdown
+  publication_state: published
+  version: 3.1.0
+  independent_review: independent-review-TASK-6749.md
+  validation_receipt: validation-receipt-promotion-TASK-6749.json
+  publication_receipt: promotion-receipt-TASK-6749.json
+  prior_evidence: preserved as historical; original candidate receipt invalidated only by XML correction
+  actual_correction: raw less-than operators escaped in XML procedure and DoD; unchanged semantics
+  focused_command: PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -B -m pytest -q -p no:cacheprovider tests/test_skill_pipeline_refactor.py tests/test_skill_creator_foundation.py tests/test_skill_lifecycle.py tests/test_feature_crud.py tests/test_feature_board_api.py tests/test_board_lib.py
+  focused_result: {passed: 385, failed: 0, seconds: 5.78}
+  candidate_hash: bb6482e2e3915fbe2e9806b42510253bc6851ea923509f398b0af581ed28669c
+  byte_parity: {files: 8, identical: true}
+  baseline_concurrency_check: passed before first production edit
+  publication_mechanics: edit tools only; nontransactional, no publisher lock/swap/backup claimed
+  known_failures:
+    - Initial extended callback-token-discovery run had one unrelated failure; not investigated or fixed.
+    - Prior config-sync failures remain outside scope, not reclassified as success.
+  limits:
+    - Parsed domain/structure invariants and real temporary helper tests are not autonomous agent decision pilots.
+    - No board, memory, Git or unrelated source changes; no broader task closure claimed.
+  next: draft feature-refinement candidate only; independent reviewer required before its promotion

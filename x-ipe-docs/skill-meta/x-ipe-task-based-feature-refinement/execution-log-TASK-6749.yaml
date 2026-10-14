@@ -1,0 +1,55 @@
+execution_log:
+  task_id: TASK-6749
+  skill: x-ipe-task-based-feature-refinement
+  executed_on: 2026-10-13
+  interpreter: .venv/bin/python; Python 3.12.9
+  scope: authorized sequential candidate-only slice after verified breakdown promotion; no board registration
+  plan: plan-TASK-6749.md
+  source_revisions: evidence-files-TASK-6749.json
+  breakdown_boundary:
+    published_version: 3.1.0
+    receipt: x-ipe-docs/skill-meta/x-ipe-task-based-feature-breakdown/promotion-receipt-TASK-6749.json
+    exact_parity: eight files; bb6482e2e3915fbe2e9806b42510253bc6851ea923509f398b0af581ed28669c
+    postpublication_pipeline: {passed: 89, failed: 0, seconds: 1.95}
+  corrections:
+    - Removed retained duplicate child routing, stale Markdown board references and contradictory ID/folder gate.
+    - Replaced timestamp-only mockup precedence with scope/content/revision decisions.
+    - Completed existing scaffold/guide with version-CR and acceptance traceability; no redundant shipped metadata.
+    - Initial validator found three retained fake mockup resource links; converted to explicit scaffold placeholders, no production resources created.
+    - Cleared retained guide/integration Markdown formatting diagnostics.
+  final_validation:
+    command: .venv/bin/python -B .github/skills/x-ipe-meta-skill-creator/scripts/validate_skill.py --project-root "$PWD" --candidate "$PWD/x-ipe-docs/skill-meta/x-ipe-task-based-feature-refinement/candidate" --name x-ipe-task-based-feature-refinement --type x-ipe-task-based
+    exit: 0
+    receipt: validation-receipt-TASK-6749.json
+    ok: true
+    errors: []
+    warnings: three explicit uninstantiated mockup scaffold links; not missing real resources
+  final_focused_run:
+    command: PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -B -m pytest -q -p no:cacheprovider tests/test_skill_pipeline_refactor.py tests/test_skill_creator_foundation.py tests/test_skill_lifecycle.py tests/test_feature_crud.py tests/test_feature_board_api.py tests/test_board_lib.py
+    exit: 0
+    passed: 407
+    failed: 0
+    duration_seconds: 7.79
+    test_file_hash: cff7740f79383e8aa12ca38c4f41855fe418c30f9b43f8da0053d9892a1c1ba5
+  evidence_limits:
+    - Fixture specification content is authored test data, not an LLM/refinement generator execution.
+    - Structural/domain assertions are not autonomous question/scope/language/mockup decision pilots.
+    - Real helper CRUD/action writes occur in pytest temporary projects only.
+    - Broader initial callback-token discovery failure and prior config-sync failures are out of scope, not passing claims.
+  editor_diagnostics: touched guide, integration and pipeline tests have no errors after cleanup
+  final_evidence_verification:
+    saved_validator_equals_fresh_result: true
+    source_hashes_verified: 15
+    root_metadata_yaml_valid: true
+    pipeline_cases_collected: 111
+    collection_command: PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -B -m pytest tests/test_skill_pipeline_refactor.py --collect-only -q -p no:cacheprovider
+    breakdown_eight_file_byte_parity: true
+    breakdown_archival_sandbox_and_records_preserved: true
+    refinement_production_four_file_baseline: unchanged
+  outcome:
+    publication_state: candidate_ready
+    independent_review: pending_separate_reviewer
+    promotion_attempted: false
+    production_baseline_unchanged: true
+    production_version_history_bump: none
+    board_memory_git_other_source_mutations: none

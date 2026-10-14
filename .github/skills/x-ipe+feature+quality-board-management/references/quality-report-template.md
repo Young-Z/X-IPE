@@ -10,13 +10,13 @@
 ## Contents
 
 - [Executive Summary](#executive-summary)
+- [Evaluation Principles](#evaluation-principles)
 - [Feature-by-Feature Evaluation](#feature-by-feature-evaluation)
 - [Violation Details by Feature](#violation-details-by-feature)
 - [Files Approaching Threshold](#files-approaching-threshold)
 - [Priority Gaps Summary](#priority-gaps-summary)
 - [Recommendations](#recommendations)
 - [Appendix: Detailed Metrics](#appendix-detailed-metrics)
-- [Evaluation Principles](#evaluation-principles)
 - [Status Legend](#status-legend)
 
 ---
@@ -47,142 +47,10 @@
 - {key_finding_2}
 - {key_finding_3}
 
----
-
-## Feature-by-Feature Evaluation
-
-### Overview Table
-
-| Feature ID | Feature Name | Score | Status | Req | Spec | Test | Code | Tracing | Security | Gaps |
-|------------|--------------|-------|--------|-----|------|------|------|---------|----------|------|
-| {feature_id} | {feature_name} | {score}/10 | {status_icon} | {req_score}/10 | {spec_score}/10 | {test_score}/10 | {code_score}/10 | {tracing_score}/10 | {security_score}/10 | {gap_count} |
-
-**Score-to-Status Mapping:**
-- 8-10: ✅ aligned (green)
-- 6-7: ⚠️ needs_attention (yellow)
-- 1-5: ❌ critical (red)
-- N/A: 📋 planned (gray)
-
----
-
-## Violation Details by Feature
-
-> This section lists specific violations per feature, organized by evaluation category.
-
-### {feature_id}: {feature_name}
-
-#### Requirements Violations
-
-| Violation | Severity | Details |
-|-----------|----------|---------|
-| {violation_type} | {severity} | {details} |
-
-*No violations* (if none)
-
-#### Specification Violations
-
-| Violation | Severity | Details |
-|-----------|----------|---------|
-| {violation_type} | {severity} | {details} |
-
-*No violations* (if none)
-
-#### Test Coverage Violations
-
-| Violation | Severity | Details |
-|-----------|----------|---------|
-| {violation_type} | {severity} | {details} |
-
-*No violations* (if none)
-
-#### Code Alignment Violations
-
-| Violation | Severity | Details |
-|-----------|----------|---------|
-| {violation_type} | {severity} | {details} |
-
-*No violations* (if none)
-
-#### Tracing Coverage Violations
-
-| Violation | Severity | Details |
-|-----------|----------|---------|
-| {violation_type} | {severity} | {details} |
-
-*No violations* (if none)
-
-#### Security Violations
-
-| Violation | Severity | Details |
-|-----------|----------|---------|
-| {violation_type} | {severity} | {details} |
-
-*No violations* (if none)
-
----
-
-<!-- Repeat "### {feature_id}" section for each feature with violations -->
-
----
-
-## Files Approaching Threshold
-
-> These files should be monitored - consider refactoring before they exceed limits.
-
-| File | Lines | Threshold | Buffer | Feature |
-|------|-------|-----------|--------|---------|
-| {file_path} | {lines} | {threshold} | {buffer} lines | {feature_id} |
-
----
-
-## Priority Gaps Summary
-
-### 🔴 High Priority
-
-| # | Feature | Category | Description |
-|---|---------|----------|-------------|
-| {n} | {feature_id} | {category} | {description} |
-
-### 🟡 Medium Priority
-
-| # | Feature | Category | Description |
-|---|---------|----------|-------------|
-| {n} | {feature_id} | {category} | {description} |
-
-### 🟢 Low Priority
-
-| # | Feature | Category | Description |
-|---|---------|----------|-------------|
-| {n} | {feature_id} | {category} | {description} |
-
----
-
-## Recommendations
-
-| Priority | Category | Action | Affected Features |
-|----------|----------|--------|-------------------|
-| {n} | {category} | {action} | {feature_list} |
-
----
-
-## Appendix: Detailed Metrics
-
-### Coverage by Feature
-
-| Feature | Requirements | Specification | Test Coverage | Code Alignment | Tracing | Security | Overall |
-|---------|--------------|---------------|---------------|----------------|---------|----------|---------|
-| {feature_id} | {req_score}/10 | {spec_score}/10 | {test_score}/10 | {code_score}/10 | {tracing_score}/10 | {security_score}/10 | {overall}/10 |
-
-**Score-to-Status Mapping:**
-- 8-10: ✅ aligned
-- 6-7: ⚠️ needs_attention
-- 1-5: ❌ critical
-
-### Gap Distribution by Feature
-
-| Feature | Requirements | Specification | Test Coverage | Code Alignment | Total Gaps |
-|---------|--------------|---------------|---------------|----------------|------------|
-| {feature_id} | {req_gaps} | {spec_gaps} | {test_gaps} | {code_gaps} | {total} |
+<!-- Add source/parent goal and AC evidence, engineering delivery and stakeholder
+outcome states here as narrative. Keep the original API/model fields unchanged.
+Unmeasured is not failed, planned or achieved. No score without actual rubric
+inputs; missing numeric evidence returns EVALUATION_INCOMPLETE, not invented data. -->
 
 ---
 
@@ -287,6 +155,157 @@
 | Auth/Authz | Required | Protected routes must have proper authentication/authorization |
 | Injection Prevention | Required | SQL injection and XSS prevention measures in place |
 | Sensitive Data Handling | Required | Encryption/hashing for sensitive data |
+
+---
+
+## Feature-by-Feature Evaluation
+
+### Overview Table
+
+| Feature ID | Feature Name | Score | Status | Req | Spec | Test | Code | Tracing | Security | Gaps |
+|------------|--------------|-------|--------|-----|------|------|------|---------|----------|------|
+| {feature_id} | {feature_name} | {score}/10 | {status_icon} | {req_score}/10 | {spec_score}/10 | {test_score}/10 | {code_score}/10 | {tracing_score}/10 | {security_score}/10 | {gap_count} |
+
+**Score-to-Status Mapping:**
+- 8-10: ✅ aligned (green)
+- 6-7: ⚠️ needs_attention (yellow)
+- 1-5: ❌ critical (red)
+- N/A: 📋 planned (gray)
+
+---
+
+## Violation Details by Feature
+
+> This section lists specific violations per feature, organized by evaluation category.
+
+### {feature_id}: {feature_name}
+
+#### Requirements Violations
+
+| Violation | Severity | Details |
+|-----------|----------|---------|
+| {violation_type} | {severity} | {details} |
+
+*No violations* (if none)
+
+#### Specification Violations
+
+| Violation | Severity | Details |
+|-----------|----------|---------|
+| {violation_type} | {severity} | {details} |
+
+*No violations* (if none)
+
+#### Test Coverage Violations
+
+| Violation | Severity | Details |
+|-----------|----------|---------|
+| {violation_type} | {severity} | {details} |
+
+*No violations* (if none)
+
+#### Code Alignment Violations
+
+| Violation | Severity | Details |
+|-----------|----------|---------|
+| {violation_type} | {severity} | {details} |
+
+*No violations* (if none)
+
+#### Tracing Coverage Violations
+
+| Violation | Severity | Details |
+|-----------|----------|---------|
+| {violation_type} | {severity} | {details} |
+
+*No violations* (if none)
+
+#### Security Violations
+
+| Violation | Severity | Details |
+|-----------|----------|---------|
+| {violation_type} | {severity} | {details} |
+
+*No violations* (if none)
+
+---
+
+<!-- Repeat "### {feature_id}" section for each feature with violations -->
+<!-- Populate Details with the existing source/parent/goal/subgoal, stakeholder,
+observable outcome, deliverable contribution, all-required/selected alternative,
+constraints/non-goals, story/AC GWT and test type, actual checks/date/revision and
+separate delivery/outcome states. No observed outcome inferred from test passes.
+Do not say No violations for an unevaluated category. -->
+
+---
+
+## Files Approaching Threshold
+
+> These files should be monitored - consider refactoring before they exceed limits.
+
+| File | Lines | Threshold | Buffer | Feature |
+|------|-------|-----------|--------|---------|
+| {file_path} | {lines} | {threshold} | {buffer} lines | {feature_id} |
+
+---
+
+## Priority Gaps Summary
+
+### 🔴 High Priority
+
+| # | Feature | Category | Description |
+|---|---------|----------|-------------|
+| {n} | {feature_id} | {category} | {description} |
+
+### 🟡 Medium Priority
+
+| # | Feature | Category | Description |
+|---|---------|----------|-------------|
+| {n} | {feature_id} | {category} | {description} |
+
+### 🟢 Low Priority
+
+| # | Feature | Category | Description |
+|---|---------|----------|-------------|
+| {n} | {feature_id} | {category} | {description} |
+
+---
+
+## Recommendations
+
+| Priority | Category | Action | Affected Features |
+|----------|----------|--------|-------------------|
+| {n} | {category} | {action} | {feature_list} |
+
+<!-- Recommendations reference actual gaps and approved parent contribution;
+retain original refactoring_suggestions fields. Missing observation may propose
+an owner/scenario, not a fabricated measured success or extra acceptance gate. -->
+
+---
+
+## Appendix: Detailed Metrics
+
+### Coverage by Feature
+
+| Feature | Requirements | Specification | Test Coverage | Code Alignment | Tracing | Security | Overall |
+|---------|--------------|---------------|---------------|----------------|---------|----------|---------|
+| {feature_id} | {req_score}/10 | {spec_score}/10 | {test_score}/10 | {code_score}/10 | {tracing_score}/10 | {security_score}/10 | {overall}/10 |
+
+**Score-to-Status Mapping:**
+- 8-10: ✅ aligned
+- 6-7: ⚠️ needs_attention
+- 1-5: ❌ critical
+
+### Gap Distribution by Feature
+
+| Feature | Requirements | Specification | Test Coverage | Code Alignment | Total Gaps |
+|---------|--------------|---------------|---------------|----------------|------------|
+| {feature_id} | {req_gaps} | {spec_gaps} | {test_gaps} | {code_gaps} | {total} |
+
+<!-- Record actual commands/results, timestamps, source/test/doc/config hashes,
+measurement denominator, rubric inputs and retained historical evidence limits
+here in prose. No arbitrary percentage progress, coverage or synthetic score.
+N/A without future-work evidence is unavailable, not schema status planned. -->
 
 ---
 

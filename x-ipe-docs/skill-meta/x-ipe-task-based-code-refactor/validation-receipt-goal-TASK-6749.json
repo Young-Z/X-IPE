@@ -1,0 +1,19 @@
+{
+  "body_lines": 270,
+  "candidate_hash": "10be4133be03f6c4c1a654c17232ed6e3edd0d23c32b0717ff980056c9232e3e",
+  "errors": [],
+  "excluded_files": {},
+  "files": {
+    "SKILL.md": "6c9b968402ce7972c1f4eec9c7de22b352b21351465a9bd88cc50c74e20aab63",
+    "references/examples.md": "61db094d36e08a2a640f085c5e0d8d80108c1c208394e72311044df72d485c6d",
+    "references/integration.md": "ed3f27c7fab5268efad701a73ac73a778db1fb14b0f422d6edf60e79d6c0b111",
+    "references/refactoring-techniques.md": "4b8fdd7e2ad93743e74e221693c2f953be9e02d006a813d47025234df38c0422",
+    "templates/refactor-report.md": "d0c4d285d8318cec21c7b85a2085167e156df220ac14ebb1121fe8c8a12e66a4"
+  },
+  "name": "x-ipe-task-based-code-refactor",
+  "ok": true,
+  "operation": "validate",
+  "schema": 1,
+  "skill_type": "x-ipe-task-based",
+  "warnings": []
+}

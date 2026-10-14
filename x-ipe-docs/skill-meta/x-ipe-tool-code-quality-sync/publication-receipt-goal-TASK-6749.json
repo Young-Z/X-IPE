@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "task_id": "TASK-6749",
+  "name": "x-ipe-tool-code-quality-sync",
+  "date": "2026-10-14",
+  "publication_state": "published",
+  "method": "authorized_edit_tools",
+  "atomic": false,
+  "baseline_hash": "7a1d4b305d74bc129edd5eb8ce0a705fc08c2da19fce45ad4b0e10fd202f3efc",
+  "previous_reviewed_candidate_hash": "71216a960fbbc21cd967a89b2a9447e23590d341cb0ebbbe490da6b8e0ef517d",
+  "candidate_hash": "a9e1adf0066f237d4600b78be44f9ba205afba2fd9af3514488fc49768074753",
+  "independent_review": "passed_final_revision_review",
+  "formatting_disposition": "Adopted one existing production EOF LF in each of SKILL.md and references/examples.md; removing that byte reconstructs the previously reviewed hashes. No fourth production-removal retry.",
+  "byte_parity": true,
+  "files": {
+    "SKILL.md": "8e3cf72ae97d3187797a3710cd787a610d7b4fa6f6f668729c1392359c56d0e0",
+    "references/detailed-procedures.md": "01ed1648c4a6411799ac268a7366dc56a999a7314a9eee3dc743c496d9e7ae60",
+    "references/examples.md": "cd273f4943d8e265ef78a844fb11503c49666d9d17cc0c462bd45e3f210f7d30",
+    "references/output-schema.md": "16b04449d8908d7069df967bb1d224903879c508c2b85306ddb261904141d89d",
+    "templates/validation-report.md": "ade9a14c555cbd29da9a54039a43cf19650343a75c323cf7574cad8bded96ebd"
+  },
+  "changed": ["SKILL.md", "references/examples.md"],
+  "added": ["references/detailed-procedures.md", "references/output-schema.md", "templates/validation-report.md"],
+  "removed": [],
+  "final_verification": {
+    "fresh_validation_receipt_parity": true,
+    "production_candidate_byte_parity": true,
+    "python_tests": {"passed": 425, "failed": 0, "seconds": 12.69, "exit": 0},
+    "report_frontend_tests": {"passed": 10, "failed": 0, "duration_ms": 393, "exit": 0},
+    "scope": "Five named Python suites and one quality-view frontend file; not whole repository"
+  },
+  "recovery_record": "recovery-goal-TASK-6749.md",
+  "limitations": ["Non-atomic patch publication; no lock/journal/swap guarantees", "Strict-consumer integration and stakeholder outcome not verified"]
+}

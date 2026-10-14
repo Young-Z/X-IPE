@@ -1,372 +1,141 @@
-# Feature Breakdown Guidelines Reference
-
-This document contains detailed guidelines, examples, and rules for feature breakdown. Referenced from SKILL.md.
-
----
-
-## Feature Sizing Guidelines
-
-### Complexity Evaluation Heuristics
-
-Before identifying features, evaluate the proposed feature's complexity using these heuristics:
-
-**AC Count Thresholds:**
-
-| AC Count | Action | Rationale |
-|----------|--------|-----------|
-| Under 10 | Likely single feature | Small enough to refine, design, implement in one pass |
-| 10-20 | Evaluate | Split if ACs span multiple distinct capabilities or layers |
-| Over 20 | MUST split | Too large for a single feature — split along natural boundaries |
-
-**Scope Dimension Assessment:**
-
-| Dimension | Question | Split Signal |
-|-----------|----------|-------------|
-| Technical layers | How many layers touched? (service, API, CLI, UI, config) | 3+ layers = consider split |
-| AC groups | Are ACs organized into distinct groups? | Groups map to sub-features |
-| New files | How many new files/modules estimated? | 5+ new files = consider split |
-| User capabilities | How many distinct user-facing capabilities? | Each capability = potential feature |
-| Dependency depth | Is there a clear foundation vs consumer pattern? | Foundation should be separate MVP |
-
-**Natural Split Boundary Patterns:**
-
-| Pattern | Description | Example |
-|---------|-------------|---------|
-| Foundation + Consumers | Core service used by multiple higher-level features | Registry (foundation) → Init, Translation, Migration (consumers) |
-| Pipeline stages | Sequential processing stages | Parse → Validate → Transform → Deploy |
-| Per-variant | Same pattern applied to different targets | Copilot adapter, OpenCode adapter, Claude adapter |
-| Read vs Write | Query/display separated from mutation/creation | Config API (read) vs Config Migration (write) |
-
-### Too Large (Split)
-
-Examples of features that need splitting:
-- "Complete E-Commerce System" → Split into Cart, Payment, Shipping, etc.
-- "User Management" → Split into Registration, Profile, Settings, etc.
-- "Full Admin Dashboard" → Split into User Admin, Content Admin, Analytics, etc.
-
-### Good Size
-
-Features appropriately scoped:
-- "Shopping Cart Management"
-- "Payment Processing with Stripe"
-- "Email Notification System"
-- "User Profile Management"
-- "JWT Authentication"
-
-### Too Small (Combine)
-
-Features that should be combined:
-- "Add to Cart Button" → Part of Shopping Cart feature
-- "Validate Email Format" → Part of User Registration feature
-- "Display Error Message" → Part of Form Validation feature
-
----
-
-## Feature ID Assignment Rules
-
-### ID Format
-
-```
-Epic: EPIC-{NNN}
-Feature: FEATURE-{NNN}-{X}
-```
-
-Where NNN is a zero-padded 3-digit number matching the parent Epic (001, 002, etc.)
-and X is an uppercase letter suffix (A, B, C, ...).
-
-Rules:
-1. Feature {NNN} ALWAYS matches parent Epic {NNN}
-2. Suffix assigned alphabetically: first feature = A, second = B
-3. Scan x-ipe-docs/requirements/ for highest existing EPIC-{NNN} to determine next number
-4. ⛔ NEVER use `EPIC-{NNN}` as a Feature ID — they are separate concepts. Epic IDs identify grouping containers; Feature IDs identify deliverable units of work.
-
-### Assignment Rules
-
-1. **Sequential Assignment** - IDs assigned in order of creation
-2. **No Gaps** - Do not skip numbers
-3. **No Reuse** - Deleted features keep their IDs
-4. **Part-Specific Ranges** - When using parts, each part covers a range:
-   - Part 1: EPIC-001 to EPIC-011
-   - Part 2: EPIC-012 to EPIC-017
-   - etc.
-
-### Continuation Numbering
-
-When adding features to an existing set:
-```
-1. Query feature board for highest existing FEATURE-XXX
-2. Start new features at next number
-3. Example: If FEATURE-011 exists, next is FEATURE-012
-```
-
----
-
-## Priority Matrix
-
-### Priority Levels
-
-| Priority | Description | Typical Features |
-|----------|-------------|------------------|
-| P0 (Critical) | MVP must-have | Core loop, auth, primary workflow |
-| P1 (High) | Important for launch | Secondary workflows, error handling |
-| P2 (Medium) | Nice to have | Convenience features, polish |
-| P3 (Low) | Future consideration | Advanced features, optimizations |
-
-### Priority Assignment Criteria
-
-1. **User Impact** - How many users affected? How severely?
-2. **Business Value** - Revenue, retention, or growth impact
-3. **Technical Risk** - Complex features may need early start
-4. **Dependencies** - Features blocking others get higher priority
-
----
-
-## Feature Naming Conventions
-
-### Good Names
-
-- **Specific:** "JWT Authentication" not "Login"
-- **Action-oriented:** "User Profile Management" not "User Profile"
-- **Technology-agnostic (usually):** "Payment Processing" not "Stripe Integration"
-- **Clear scope:** "Order History Display" not "Orders"
-
-### Bad Names
-
-- **Too vague:** "User Stuff", "Main Feature"
-- **Too technical:** "REST API Controller Layer"
-- **Too broad:** "Everything Users Need"
-- **Ambiguous:** "Processing", "Handler", "Manager"
-
----
-
-## Version Numbering
-
-| Version | When to Use |
-|---------|-------------|
-| v1.0 | Initial feature implementation |
-| v1.1, v1.2 | Minor enhancements, bug fixes |
-| v2.0 | Major redesign or rewrite |
-
-**Note:** Most breakdown features will be v1.0.
-
----
-
-## Feature Dependency Patterns
-
-### Sequential Dependencies
-
-```
-FEATURE-001: User Authentication (no deps)
-    └── FEATURE-002: User Profile (depends on FEATURE-001)
-            └── FEATURE-003: User Settings (depends on FEATURE-002)
-```
-
-### Parallel with Shared Dependency
-
-```
-                    ┌── FEATURE-002: User Service (depends on FEATURE-001)
-FEATURE-001: Database Layer ──┤
-                    └── FEATURE-003: Product Service (depends on FEATURE-001)
-```
-
-### Multiple Dependencies
-
-```
-FEATURE-001: Authentication (no deps) ──┐
-                                        ├── FEATURE-003: Admin Panel
-FEATURE-002: Authorization (no deps) ───┘
-```
-
-### Dependency Rules
-
-1. **No Circular Dependencies** - A cannot depend on B if B depends on A
-2. **Foundation First** - Core/shared features have no dependencies
-3. **Clear Reason** - Document why dependency exists
-4. **Minimal Dependencies** - Only list direct dependencies, not transitive
-5. **DAG Structure** - Dependency graph must be a Directed Acyclic Graph
-
----
-
-## Mockup Processing Details
-
-### Auto-Detection Procedure
-
-```
-1. IF mockup_list is NOT provided or empty:
-   a. Check if requirement came from an Idea (look for idea folder reference)
-   b. IF idea folder exists:
-      - Scan: x-ipe-docs/ideas/{idea-folder}/mockups/
-      - IF mockups found → Auto-populate mockup_list from found files
-      - Notify: "Found {N} mockups in idea folder, processing..."
-   
-2. IF mockup_list is STILL empty after auto-detection:
-   - Log: "No mockups found - skipping mockup processing"
-   - Proceed to Step 3
-```
-
-### File Operations Example
-
-```yaml
-# Input mockup_list
-mockup_list:
-  - mockup_name: "main-dashboard"
-    mockup_list: "x-ipe-docs/ideas/Draft Idea - 01232026/mockup.html"
-  - mockup_name: "settings-panel"
-    mockup_list: "x-ipe-docs/ideas/Draft Idea - 01232026/mockups/settings.html"
-
-# Result: Files created
-x-ipe-docs/requirements/EPIC-001/mockups/main-dashboard.html
-(Shared at Epic level — Features reference via ../mockups/)
-x-ipe-docs/requirements/EPIC-001/FEATURE-001-A/mockups/ → NOT used (mockups are at Epic level)
-```
-
-### Linking Mockups in Documents
-
-**Location 1:** `x-ipe-docs/requirements/requirement-details.md`
-
-**Location 2:** `x-ipe-docs/requirements/{FEATURE-ID}/specification.md`
-
-**Format:**
-```markdown
-## Linked Mockups
-
-| Mockup Function Name | Mockup List |
-|---------------------|-------------|
-| main-dashboard | [main-dashboard.html](EPIC-001/mockups/main-dashboard.html) |
-| settings-panel | [settings-panel.html](EPIC-001/mockups/settings-panel.html) |
-```
-
-### Mockup Rules
-
-- If mockup_list is N/A or empty, skip mockup processing
-- Use relative paths from the document location
-- Preserve original file extension when copying
-- Create mockups folder only if mockup_list has items
-
----
-
-## Part File Management
-
-### When Parts Exist
-
-| Action | Target |
-|--------|--------|
-| Read requirements | Current active part (highest number) |
-| Write Feature List | Current active part |
-| Update Index | requirement-details-index.md |
-
-### Part File Structure
-
-```markdown
-# Requirement Details - Part {X}
-
-> Continued from: [requirement-details-part-{X-1}.md](requirement-details-part-{X-1}.md)  
-> Created: MM-DD-YYYY
-
----
-
-## Feature List
-
-| Feature ID | Epic ID | Feature Title | Version | Brief Description | Feature Dependency |
-|------------|---------|---------------|---------|-------------------|-------------------|
-| FEATURE-012-A | EPIC-012 | Design Themes | v1.0 | Theme folder structure | FEATURE-011-A |
-
----
-
-## Linked Mockups
-
-| Mockup Function Name | Feature | Mockup List |
-|---------------------|---------|-------------|
-| themes-toolbox | FEATURE-012-A | [themes-toolbox.html](EPIC-012/mockups/themes-toolbox.html) |
-
----
-
-## Feature Details (Continued)
-
-### FEATURE-012-A: Design Themes
-[Feature details...]
-```
-
-### Index File Structure
-
-```markdown
-# Requirement Details Index
-
-> Last Updated: MM-DD-YYYY
-
-## Parts Overview
-
-| Part | File | Features Covered | Lines |
-|------|------|------------------|-------|
-| 1 | [Part 1](requirement-details-part-1.md) | EPIC-001 to EPIC-011 | ~420 |
-| 2 | [Part 2](requirement-details-part-2.md) | EPIC-012 to EPIC-017 | ~415 |
-```
-
-**⚠️ IMPORTANT:** Index file contains ONLY Parts Overview table. NO Feature List in index - each part has its own.
-
----
-
-## Feature Details Template
-
-```markdown
-### {FEATURE-NNN-X}: {Feature Title}
-
-**Version:** v{X.Y}  
-**Brief Description:** [1-2 sentence description]
-
-**Acceptance Criteria:**
-- [ ] Criterion 1
-- [ ] Criterion 2
-- [ ] Criterion 3
-
-**Dependencies:**
-- {FEATURE-ID}: [Why needed]
-- None (if no dependencies)
-
-**Technical Considerations:**
-- [Key technical decisions or constraints]
-- [Performance requirements]
-- [Security considerations]
-```
-
-### Template Rules
-
-- Keep brief description under 50 words
-- List 3-7 acceptance criteria per feature
-- Note dependencies using Feature IDs
-- Technical considerations are hints for design
-
----
-
-## Integration with Feature Board Management
-
-This skill **MUST** call the feature-board-management skill to create features on the board.
-
-### Why Integration Matters
-
-1. **Creates centralized tracking** - Single source of truth at x-ipe-docs/requirements/features.md
-2. **Initializes status** - All features start with status "Planned"
-3. **Enables queries** - Other skills can query feature board for Feature Data Model
-4. **Supports lifecycle** - Board tracks features through all phases
-
-### Call Format
-
-```
-CALL x-ipe+feature+feature-board-management skill:
-  operation: create_or_update_features
-  features:
-    - feature_id: FEATURE-001-A
-      epic_id: EPIC-001
-      title: User Authentication
-      version: v1.0
-      description: JWT-based user authentication
-      dependencies: []
-    - feature_id: FEATURE-001-B
-      epic_id: EPIC-001
-      title: User Profile  
-      version: v1.0
-      description: User profile management
-      dependencies: [FEATURE-001-A]
-```
-
-**See:** `skills/x-ipe+feature+feature-board-management/SKILL.md` for full operation details
+# Feature breakdown domain guidelines
+
+## Context reuse and delta
+
+Reuse Requirement Gathering's source/parts/index SHA256 coverage, scope decisions,
+conflict resolutions, acceptance, risks, language and mockup findings. Compare
+current inventory and revisions, including board/workflow changes and impacted
+legacy/new feature edges. Refresh only changed/affected facts; missing coverage
+requires establishing a baseline. A timestamp or prior completed flag is not
+fresh semantic evidence. Scope/priority uncertainty is a real question, not a
+mandatory repeated interview. Human asks the human; full DAO and hybrid use the
+common representative contract with bounded authority. Human and hybrid require
+human completion/route confirmation. Explicit human approval binds in every mode.
+No child routing.
+
+| Path | Required work | What stays stable |
+| --- | --- | --- |
+| Single clear feature | One runnable unit, ACs, direct dependencies, actual registration and artifacts | No artificial split or repeated research |
+| Standard new | Domain clusters, grouping rationale, coverage, MVP and enhancements | Approved requirement findings |
+| Incremental CR | Affected rows/FRs/ACs/dependencies and supported integration changes only | Existing IDs, Epic, status, specs and unrelated documents |
+
+## Epic grouping decision matrix
+
+Assess feature count, domain diversity, dependency clusters and team boundaries
+before assigning new features. Reuse the intake Epic for a single grouping.
+Additional Epic allocation is a scoped grouping decision, not mandatory at every
+task. Allocate highest reserved Epic number + 1 across folders/headers/board;
+recheck collisions and never overwrite another grouping or renumber history.
+
+| Scope signals | Recommendation | Rationale |
+| --- | --- | --- |
+| 1 domain, <=7 features | Single Epic | Cohesive responsibility and manageable delivery |
+| 2-3 domains, 8-15 features | 2-3 Epics | Separate natural responsibilities/dependency clusters |
+| 4+ domains or >15 features | Multiple Epics | Keep each grouping coherent and <=7 features |
+| Borderline, e.g. 2 domains/7 features | Document cohesion/coupling/team trade-off | No blind count-based regrouping |
+
+Use 5-7 as the maximum planning range, never a minimum requiring padding.
+Do not truncate a large requirement to seven features: record all covered or
+explicitly deferred scope, regroup when necessary. New allocated Epics link back
+to the intake. Existing CR features retain original Epic membership.
+
+## Sizing and separation
+
+Apply the [goal contract](.github/skills/x-ipe-workflow-task-execution/references/goal-contract.md).
+Each new/changed feature deliverable contributes a subgoal with stable parent
+requirement/source, stakeholder, outcome scenario, constraints and GWT AC links.
+Internal enabling work needs a credible contribution chain. Legacy explicit
+story so-that goals remain inferred/source-labeled; ambiguity blocks the relevant
+claim, not rewrites of history. No fixed minimum or three-goal cap.
+
+| AC count per proposed feature | Action |
+| --- | --- |
+| Under 10 | Likely one feature, if one coherent deliverable |
+| 10-20 | Evaluate distinct capabilities, outcome contributions and testable value |
+| More than 20 | MUST split along natural boundaries |
+
+Assess 3+ technical layers, 5+ estimated files, distinct user capabilities,
+AC groups and foundation/consumer depth as signals, not automatic split mandates.
+Single Responsibility, Independence, Deliverable Value and Reasonable Size apply.
+Aim for 3-7 concise ACs without inventing criteria or discarding required cases.
+Descriptions <=50 words; technical/security/performance hints belong in details.
+
+Natural boundaries: runnable foundation + consumers, processing stages with useful
+outcomes, variants, or read vs write capabilities. Do not split into buttons,
+validation messages or bare controller layers. First new feature per Epic is
+Minimum Runnable Feature (MVP): a testable vertical minimum user/core outcome.
+A bare interface with no runnable use is not an MVP. Enhancements add separable
+value; necessary error/security paths remain in the MVP. CR does not replace a
+stable existing MVP. Existing shared prerequisites may be cross-Epic/legacy.
+
+## IDs, versions, names and folders
+
+- New EPIC-{nnn} and FEATURE-{nnn}-{X}: zero-padded Epic number matches exactly;
+  uppercase suffix A, B, C... within that Epic. EPIC IDs never fill Feature ID rows.
+- Inventory documents, folders, board (all pages/statuses) and retired/history
+  reservations before assigning. Continue after the highest reserved suffix;
+  do not reuse retired/deleted IDs or fill historic gaps. Recheck at write time.
+- Preserve legacy FEATURE-{nnn} identifiers and existing legacy FEATURE folders.
+  New features reside at x-ipe-docs/requirements/EPIC-{nnn}/FEATURE-{nnn}-{X}/.
+  Do not silently migrate legacy folders, immutable board epic_id or stable IDs.
+- New version v1.0; approved additive delta v1.1/v1.2, redesign v2.0. Do not bump
+  every feature during CR or reset advanced statuses to Planned.
+- Names are specific, action-oriented and scoped: Cart Management rather than
+  Button, User Stuff or Everything. Grouping containers are not feature units.
+
+## Dependency rules and priority
+
+Distinguish all-required subgoals/prerequisites from alternative means. Select and
+bound a means with rationale; do not instantiate a feature for every option or
+split one feature per technical layer. Board dependencies encode actual selected
+prerequisites only; alternatives stay in existing details. An enabling subgoal
+may be indirect but must explain how it supports its parent's scenario.
+
+Use only direct Feature-ID dependencies with reasons. Sequential, parallel shared
+foundation and multiple-predecessor patterns are valid; cross-Epic and legacy IDs
+remain unchanged. Validate all references, no self edge, no circular dependencies,
+and the DAG over changed plus existing impacted edges. Foundations first;
+provide topological delivery order, not an invented edge for workflow sequencing.
+Retired targets require an approved replacement mapping, never dangling links.
+P0 = runnable MVP/core blockers; P1 = launch; P2 = convenience; P3 = future.
+Document user/business value, risk and dependencies; priorities are document
+fields, not unsupported feature-board JSON fields.
+
+## Document, mockup and part rules
+
+Feature List and all scoped detail sections live in the selected owning
+requirement-details file/part, never only in index. Explicit valid affected-part
+selection precedes highest numeric active-part fallback; reconcile index/all parts
+and inspect older impacted features. CR does not regenerate or re-split stable
+parts. Free-mode direct request must become real populated requirement artifacts.
+Keep original REQ ID if supplied; Epic-only input does not invent a REQ identity.
+
+Each detail includes title/version, <=50-word description, ACs with coverage,
+direct dependencies/reasons, technical considerations and applicable mockups.
+Consolidation is required; individual feature.md/specification files are not
+breakdown deliverables. Retained specification template is downstream-only.
+Index contains Parts Overview with actual file links, coverage and line counts;
+Feature List stays in parts. Requested EN/ZH prose is preserved, not IDs or tags.
+
+Mockup list uses mockup_name/mockup_link (not mockup_list inside each entry).
+Prefer explicit/upstream links, then selected Epic/mockups, then linked idea only.
+Keep shared Epic mockups and preserve extensions; verify URLs/content where
+required; copy only authorized missing local files. N/A means no false mockup
+claim. All generated links are project-root-relative, never ../mockups/ or ./.
+Do not overwrite foreign bytes or unnecessarily create per-feature mockup copies.
+
+## Parent split coverage and history
+
+For an actual split compare every parent FR/AC against the union of child FR/ACs
+with a coverage table and recorded rationale. Preserve stable identifiers and
+inbound references; unrelated features are not split as a CR side effect.
+Partial coverage: retain parent active with uncovered IDs in dedup_gaps; material
+missing coverage blocks a completed split claim until resolved. Full coverage:
+only with explicit approved retirement may the parent leave the active list,
+retain historical text/redirects, and board status become Retired through actual
+feature_update.py. No feature_archive or delete operation exists. Report
+parent_features_removed as removal from active breakdown, not erasure of history,
+only after both document and board changes are verified. No auto deletion.
+
+See [actual integration](.github/skills/x-ipe-task-based-feature-breakdown/references/integration.md)
+for schema, resume, append-only limitations and current helper evidence boundaries.

@@ -1,0 +1,19 @@
+{
+  "task_id": "TASK-6749",
+  "publication_state": "published",
+  "promoted": true,
+  "production_baseline_exact_before_publication": true,
+  "baseline_hash": "bf80e5aa080dae4de0a95428f97a1ea58b079a31ed950149f8ee8b006cfae6e8",
+  "candidate_hash": "96f1f688853aeaac6c5bcd9bdb8dc9be97c6720b0abdbc20d4ade3f915bcdc84",
+  "candidate_files": 13,
+  "production_files": 23,
+  "source_paths_retained": true,
+  "unchanged_source_byte_parity": true,
+  "production_candidate_whole_tree_parity": false,
+  "managed_distributable_parity": true,
+  "protected_generated_files": 10,
+  "protected_generated_hashes_equal_baseline": true,
+  "production_full_hash": "94f1cfd0d6810d8de53beb2003cc5d80ffdd9aa8605f5b68d9d2939268c4e557",
+  "test_sha256": "458d35dafd2661cc06d5c0e8a07d8fdafcff2f69ac1d7dfc3206912622a7141f",
+  "runner_sha256": "e03b8ca7346d112e698ef78ccc9bb36b6263c4e7f6c190b5c7fd25bb2911bf69"
+}

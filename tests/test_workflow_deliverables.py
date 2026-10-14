@@ -720,16 +720,38 @@ class TestArrayBackwardCompat:
         """Looking up 'raw-ideas' falls back to 'raw-idea' in old instances."""
         name = "compat-test"
         service.create_workflow(name)
-        # Simulate old-format instance with singular tag
-        service.update_action_status(
-            name, "compose_idea", "done",
-            deliverables={"raw-idea": "old-idea.md", "ideas-folder": "ideas/"}
-        )
+        # CR-003 promises reads of existing instances, not writes of obsolete keys.
+        path = service._get_workflow_path(name)
+        legacy = json.loads(path.read_text())
+        legacy["schema_version"] = "3.0"
+        action = legacy["shared"]["ideation"]["actions"]["compose_idea"]
+        action["status"] = "done"
+        action["deliverables"] = {"raw-idea": "old-idea.md", "ideas-folder": "ideas/"}
+        path.write_text(json.dumps(legacy))
+        before = path.read_bytes()
         state = service.get_workflow(name)
         result = service._get_instance_deliverable(
             state, "ideation", "compose_idea", "raw-ideas"
         )
         assert result == "old-idea.md"
+        assert service.resolve_candidates(name, "refine_idea", "raw-ideas") == [
+            {"type": "file", "path": "old-idea.md"}
+        ]
+        rejected = service.update_action_status(
+            name, "compose_idea", "done", deliverables=action["deliverables"]
+        )
+        assert rejected["success"] is False
+        assert rejected["error"] == "INVALID_DELIVERABLES"
+        assert path.read_bytes() == before
+        updated = service.update_action_status(
+            name, "compose_idea", "done",
+            deliverables={"raw-ideas": ["new-idea.md"], "ideas-folder": "ideas/"}
+        )
+        assert updated["success"] is True
+        current = service.get_workflow(name)
+        stored = current["shared"]["ideation"]["actions"]["compose_idea"]["deliverables"]
+        assert stored == {"raw-ideas": ["new-idea.md"], "ideas-folder": "ideas/"}
+        assert current["schema_version"] == "4.0"
 
     def test_has_array_values_true(self, service, project_root):
         """_has_array_values returns True for dict with array values."""

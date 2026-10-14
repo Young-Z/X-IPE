@@ -1,0 +1,96 @@
+skill_name: x-ipe-tool-refactoring-analysis
+task_id: TASK-6749
+date: 2026-10-14
+publication_state: published
+independent_review: passed_final_revision_review
+candidate_hash: f1c848402913264155e36e76397512d2ea9fa11a7571eb8e25a926b84ce17d97
+fresh_runs:
+  - {name: inherited dedicated baseline, passed: 72, failed: 0, seconds: 1.75, exit: 0}
+  - {name: corrected refactor before receipt refresh, passed: 72, failed: 1, seconds: 1.77, exit: 1, meaning: Only stale refactor receipt; nullable concrete fixture passed}
+  - {name: analysis contracts before draft, passed: 73, failed: 13, seconds: 2.05, exit: 1, meaning: Incomplete resource/schema policies plus one new mistaken config assertion; actual fixture preservation passed}
+  - {name: complete analysis before metadata, passed: 84, failed: 2, seconds: 1.85, exit: 1, meaning: Case-sensitive new assertion and absent root receipt; config assumption corrected against actual existing key}
+  - {name: combined before newline receipt refresh, passed: 231, failed: 1, seconds: 3.87, exit: 1, meaning: Only analysis receipt stale after trailing-newline lint correction; all scenarios and creator foundation safety tests pass}
+  - {name: final combined targeted suites, passed: 232, failed: 0, skipped: 0, deselected: 0, seconds: 3.85, exit: 0, meaning: All 87 dedicated and 145 creator foundation tests pass with current receipts and unchanged live baselines}
+validation:
+  ok: true
+  files: 4
+  body_lines: 240
+  errors: 0
+  warnings: 0
+  receipt: validation-receipt-goal-TASK-6749.json
+inherited_protected_inventory:
+  files: 4039
+  fingerprint: 2a7547deb6512ca2979b7ea512287665397a148ffcb13ae5bc6287cf3e44103d
+  excluded: Authorized two skill metadata/candidate subtrees and dedicated test; environment/cache directories and git internals
+commands:
+  focused: PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -B -m pytest -p no:cacheprovider tests/test_skill_goal_change_quality.py -q --tb=short
+  final: PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -B -m pytest -p no:cacheprovider tests/test_skill_goal_change_quality.py tests/test_skill_creator_foundation.py -q --tb=short
+  validator: Installed creator validate API with actual candidate/name/x-ipe-tool; receipt persisted through editors only
+inherited_evidence_hashes:
+  tests/test_skill_goal_change_quality.py: dca96711be3039ad130ae21ef5ca2e3bb06f2241c17e47896df843d17795e156
+  tests/test_skill_creator_foundation.py: 684b1678b2c052f0fc5359ac34bd525ae7c7392caa187d5c84600107c75f6625
+  tests/test_goal_oriented_skills.py: 3b8b0a3a0f10a0a6ef2dcbf04bda607b915cf23e2c644da79336f28e16c47131
+  tests/test_skill_pipeline_refactor.py: 151eb395eb34682e72a0681693e13f162509178e5ab39c983d4aab63b65729a9
+  .github/skills/x-ipe-meta-skill-creator/scripts/validate_skill.py: 21fbb19a17e3f8d80657936be66843af55fe047d910fb599831c0571dbab856f
+  x-ipe-docs/config/tools.json: 6df39210e203507a79023cc9c3d4aff4e93456f63f623e9b01c58a091b49e36d
+  x-ipe-docs/config/workflow-template.json: ab2e1563a0d4a9246b050b7cf779c676035345e78e29d88c10a0d556e20f6db1
+  src/x_ipe/static/js/features/workflow-stage.js: caaf689bac011047abe360c5bb205ea5b9e8fb141238d3d72066b2b0c3de83af
+cases:
+  - {id: PKG-01, covers: [AC-S01, AC-P01, AC-R01], evidence: Four original paths complete; exact original keys plus explicit nullable schema; domain references preserved, state: automated_contract}
+  - {id: GOAL-01, covers: [AC-G01], evidence: Authored trace rendered in temp report; six negative source/baseline/parent/preservation/trade-off/outcome fixtures, state: authored_contract_not_autonomous_analysis}
+  - {id: SCOPE-01, covers: [AC-D01], evidence: Actual temporary imports AST outgoing/inverse edges with cycle stable and unchanged bytes; chain frontier after ten passes, state: actual_disposable_fixture_not_general_resolver}
+  - {id: EVIDENCE-01, covers: [AC-E01, AC-N01], evidence: All five policy states and concrete nullable authored JSON; actual attempted process exit versus absent checker, state: local_observations_and_authored_contract_not_skill_execution}
+  - {id: CONFIG-01, covers: [AC-C01], evidence: Actual config keys and allowed tool; metadata-first scoped excerpt policy, state: configuration_contract_not_autonomous_routing}
+  - {id: FRESH-01, covers: [AC-F01], evidence: Fresh validator/meta/case hashes and baseline-bound exact four-file live/candidate/receipt parity plus final independent review, state: verified_editor_publication}
+preservation:
+  production_manifest: baseline-goal-TASK-6749.json
+  prework_candidate_manifest: prework-candidate-goal-TASK-6749.json
+  resource_removals: []
+  original_assertions_weakened: false
+  production_promoted: true
+  board_memory_git_app_source_mutations: none
+limits:
+  - Independent final review and user-authorized editor publication complete; no publisher transaction/recovery claimed.
+  - Authored instruction contracts do not execute an agent or establish runtime consumer compatibility.
+  - No whole-repository green claim or stakeholder observation; numeric null is not failed evidence or measured zero.
+final_correction_checks:
+  command: Explicit pytest node IDs for optional legacy alias and malformed consultation configuration; bytecode/cache writes disabled
+  passed: 2
+  failed: 0
+  skipped: 0
+  deselected: 0
+  seconds: 0.12
+  exit: 0
+  original_alias_type: number
+  exact_files: 4
+  byte_parity: true
+  publication_receipt: publication-receipt-goal-TASK-6749.json
+  review: review-main-TASK-6749.md
+current_verification:
+  command: PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -B -m pytest -p no:cacheprovider tests/test_skill_goal_change_quality.py tests/test_skill_creator_foundation.py tests/test_goal_oriented_skills.py tests/test_skill_pipeline_refactor.py -q --tb=short
+  stage: final_postpublication_both_packages
+  passed: 370
+  failed: 0
+  skipped: 0
+  deselected: 0
+  seconds: 8.22
+  exit: 0
+  candidate_hash: f1c848402913264155e36e76397512d2ea9fa11a7571eb8e25a926b84ce17d97
+  exact_files: 4
+  byte_parity: true
+  strict_consumer_integration: not_verified
+protected_inventory:
+  files: 4039
+  fingerprint: f2cc045c1ddd7a8e24231d00f9b265e342836978809fd8b98d2c409ea86115cf
+  unchanged: true
+  excluded: Two authorized metadata/candidate and production subtrees plus dedicated test; git internals and environment/cache directories; symlinks excluded
+current_evidence_hashes:
+  tests/test_skill_goal_change_quality.py: 405e8608bcf894a2d6ed63d18dab001ba940483c9a34d490023e48d8d9ac6830
+  tests/test_skill_creator_foundation.py: 684b1678b2c052f0fc5359ac34bd525ae7c7392caa187d5c84600107c75f6625
+  tests/test_goal_oriented_skills.py: 3b8b0a3a0f10a0a6ef2dcbf04bda607b915cf23e2c644da79336f28e16c47131
+  tests/test_skill_pipeline_refactor.py: 151eb395eb34682e72a0681693e13f162509178e5ab39c983d4aab63b65729a9
+  .github/skills/x-ipe-meta-skill-creator/scripts/validate_skill.py: 21fbb19a17e3f8d80657936be66843af55fe047d910fb599831c0571dbab856f
+  .github/skills/x-ipe-tool-code-quality-sync/SKILL.md: 31b9ba13ecf80640a0ef403f6ab001e5675a803a0bea8dbc8fbc591b5f8b7c70
+  x-ipe-docs/config/tools.json: 6df39210e203507a79023cc9c3d4aff4e93456f63f623e9b01c58a091b49e36d
+  x-ipe-docs/config/workflow-template.json: ab2e1563a0d4a9246b050b7cf779c676035345e78e29d88c10a0d556e20f6db1
+  src/x_ipe/static/js/features/workflow-stage.js: caaf689bac011047abe360c5bb205ea5b9e8fb141238d3d72066b2b0c3de83af

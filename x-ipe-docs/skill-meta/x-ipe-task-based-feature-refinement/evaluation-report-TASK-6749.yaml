@@ -1,0 +1,37 @@
+evaluation_report:
+  task_id: TASK-6749
+  evaluated_on: 2026-10-13
+  skill: x-ipe-task-based-feature-refinement
+  publication_state: candidate_ready
+  independent_review: pending_separate_reviewer
+  promotion_authorized: false
+  production_version_bump: none
+  candidate_hash: 8c863e8f8e5a35b60a259e49ce32b024a764b51f2a567959c18fefd7ebb46b5e
+  baseline_hash: df22cd0e7c750ee170dfc9f541968f07a79eac54076d20fd1c17a9b16ea3a30d
+  validation_receipt: validation-receipt-TASK-6749.json
+  evidence_files: evidence-files-TASK-6749.json
+  execution_receipt: execution-log-TASK-6749.yaml
+  scenario_map: test-cases-TASK-6749.yaml
+  package_delta:
+    retained_paths: [SKILL.md, references/examples.md, references/specification-template.md, references/specification-writing-guide.md]
+    added: [references/integration.md]
+    removed: []
+    task_metadata_shipped: false
+  counts: {entry_total_lines: 224, entry_body_lines: 220, resource_lines: 713, package_lines: 937, package_files: 5}
+  validator: {ok: true, errors: 0, warnings: 3}
+  warning_disposition: explicit mockup path placeholders in retained scaffold/guide, to instantiate during domain use; never claimed existing artifacts
+  focused_result: {passed: 407, failed: 0, seconds: 7.79}
+  preserved_contracts:
+    - Exact original output fields/order/category/conditional successor and specification/feature-docs-folder tags.
+    - Full stories/GWT primary-type acceptance/FR/NFR/UI/dependency/business/edge/out-of-scope/version-CR/traceability domain.
+    - Stable IDs/language and delta-first unaffected sections; targeted questions and revision-bound confirmations.
+    - Actual board artifact links, legacy/new folder fallback, Planned new gate and authorized advanced CR/resume with no status reset.
+    - Current scoped mockup story/UI/AC coverage; outdated directional only; date is provenance, not precedence.
+    - One lifecycle/task/category/Git/routing owner; actual per-feature action/readback and honest helper limits.
+  evidence_limits:
+    - No autonomous specification/CR authoring or reasoning pilots and no separate reviewer claimed.
+    - Temporary fixtures are actual helper tests, not writes to real project boards/workflows.
+    - Initial unrelated callback-token discovery and historical config-sync failures remain outside scope.
+  editor_diagnostics: touched guide/integration/tests have no errors; canonical candidate-aware validator authoritative for staged name/root links
+  preservation: refinement production matches original four-file baseline; other source/board/memory/Git unchanged
+  next_action: independent reviewer inspects complete current candidate/domain/tests/root evidence before any separately authorized refinement promotion

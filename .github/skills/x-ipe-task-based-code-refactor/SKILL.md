@@ -1,73 +1,69 @@
 ---
 name: x-ipe-task-based-code-refactor
-description: Execute code refactoring end-to-end — analyze scope, sync docs, plan, execute, and validate. Single entry point for all refactoring work. Invokes x-ipe-tool-refactoring-analysis and x-ipe-tool-code-quality-sync as tool steps. Triggers on requests like "refactor code", "execute refactoring", "analyze for refactoring", "code quality assessment".
+description: Study or restructure authorized code or skills while preserving externally-visible behavior and verifying a named measurable or qualitative quality improvement against its baseline. Orchestrates analysis, targeted sync, safe execution and evidence. Use when refactoring. Triggers on "refactor code", "execute refactoring", "analyze for refactoring", "code quality assessment".
 ---
 
 # Task-Based Skill: Code Refactor
 
 ## Purpose
 
-Execute safe, end-to-end code refactoring with full traceability by:
-1. **Analyze** scope and evaluate quality gaps (via `x-ipe-tool-refactoring-analysis`)
-2. **Sync** documentation and tests with current code (via `x-ipe-tool-code-quality-sync`)
-3. **Plan** refactoring following suggestions and principles
-4. **Execute** refactoring incrementally with test validation
-5. **Validate** quality improvement and update references
-
----
+Preserve externally-visible behavior while achieving a named measurable or qualitative quality improvement.
+An internal enabling subgoal contributes to maintainers' safe change confidence;
+record its source/parent, inspected baseline, preservation contract, after evidence
+and trade-off. Restructuring is a means, not stakeholder gain; no arbitrary scores.
+Study-only produces recommendations, not implementation or achieved improvement.
 
 ## Important Notes
 
-BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skill.
+BLOCKING: Load [shared workflow](.github/skills/x-ipe-workflow-task-execution/SKILL.md),
+[common lifecycle](.github/skills/x-ipe-workflow-task-execution/references/lifecycle.md)
+and [goal contract](.github/skills/x-ipe-workflow-task-execution/references/goal-contract.md).
+Use same task/readiness and one owner; direct entry obtains Orient/Plan once without
+redispatching this child. No board, Git, app writes or successor execution here.
+The owner handles completion/routing; default no commit, no automatic checkpoint,
+dirty branch/index changes, broad staging or destructive rollback.
 
-**Note:** If Agent does not have skill capability, go to `.github/skills/` folder to learn skills. SKILL.md is the entry point.
+BLOCKING: Preserve approved goals, GWT ACs/types, interfaces, results, data, errors,
+side effects and constraints. Intentional behavior/acceptance/scope changes require
+actual human CR authority before behavior change in every mode. Never rewrite
+requirements to bless accidental deviations or weaken assertions to pass. Detected
+bugs are findings for the owner, not incidental refactor repairs.
 
-This skill is the **single entry point** for all refactoring work. It orchestrates:
-- `x-ipe-tool-refactoring-analysis` — scope expansion + quality evaluation
-- `x-ipe-tool-code-quality-sync` — doc sync + test baseline
-
-BLOCKING: If user requests "refactor", "analyze for refactoring", or "assess code quality" — this skill handles it. Do NOT redirect to separate analysis skills.
-
-IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-interact"`, NEVER stop to ask the human. Instead, call `x-ipe-assistant-user-representative-Engineer` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
-
----
+This is the single refactor entry for study-only/local/broad. Read
+[integration](.github/skills/x-ipe-task-based-code-refactor/references/integration.md)
+for installed analysis/sync limitations, configuration gating, creator special
+routing and mandatory app action. Inspection expansion is not write permission.
 
 ## Input Parameters
 
 ```yaml
 input:
-  # Task attributes (from task board)
   task_id: "{TASK-XXX}"
-  task_based_skill: "x-ipe-task-based-code-refactor"
-
-  # Execution context (passed by x-ipe-workflow-task-execution)
-  execution_mode: "free-mode | workflow-mode"
+  task_based_skill: x-ipe-task-based-code-refactor
+  execution_mode: free-mode | workflow-mode
   workflow:
-    name: "N/A"
+    name: N/A
+    action: null
     extra_context_reference:
       test-report: "path | N/A | auto-detect"
       specification: "path | N/A | auto-detect"
-
-  # Task type attributes
-  category: "feature-stage | standalone"
+      tech-design: "path | N/A | auto-detect"
+  category: feature-stage | standalone
   next_task_based_skill:
-    - skill: "x-ipe-task-based-feature-acceptance-test"
-      condition: "Re-verify after refactoring"
-    - skill: "x-ipe-task-based-feature-closing"
-      condition: "Close feature if refactoring is the final step"
+    - skill: x-ipe-task-based-feature-acceptance-test
+      condition: Re-verify after refactoring
+    - skill: x-ipe-task-based-feature-closing
+      condition: Close feature if refactoring is the final step
   process_preference:
-    interaction_mode: "{from input process_preference.interaction_mode}"
-
-  # Required inputs
+    interaction_mode: interact-with-human | dao-represent-human-to-interact | dao-represent-human-to-interact-for-questions-in-skill
   refactoring_scope:
-    scope_level: "feature | custom"
-    feature_id: "{FEATURE-XXX}"
-    refactoring_purpose: "<why refactoring is needed>"
+    scope_level: feature | custom
+    feature_id: "{FEATURE-XXX or N/A}"
+    refactoring_purpose: "{named quality goal and contribution}"
     files: []
     modules: []
-    description: "<user's refactoring intent>"
-
-  # Tech context (optional — auto-detected if not provided)
+    description: "{authorized intent and boundaries}"
+  refactoring_mode: study-only | local | broad
   program_type: "frontend | backend | fullstack | cli | library | skills | mcp | ..."
   tech_stack: []
 ```
@@ -76,328 +72,121 @@ input:
 
 ```xml
 <input_init>
-  <field name="task_id" source="x-ipe-tool-task-board-manager (auto-generated)" />
-  <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
-  <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
-  <field name="process_preference.interaction_mode" source="from caller (x-ipe-workflow-task-execution) or default 'interact-with-human'" />
-
-  <field name="refactoring_scope.scope_level">
-    <steps>
-      1. IF caller provides scope_level → use provided value
-      2. IF feature_id is provided → default to "feature"
-      3. IF files[] is provided → default to "custom"
-      4. ELSE → IF interaction_mode == "dao-represent-human-to-interact": ASK x-ipe-assistant-user-representative-Engineer for scope; ELSE: ASK human for scope
-    </steps>
-  </field>
-
-  <field name="refactoring_scope.refactoring_purpose">
-    <steps>
-      1. IF caller provides → use provided value
-      2. IF human describes intent → derive from description
-      3. ELSE → IF interaction_mode == "dao-represent-human-to-interact": ASK x-ipe-assistant-user-representative-Engineer; ELSE: ASK human: "What is the purpose of this refactoring?"
-    </steps>
-  </field>
-
-  <field name="program_type">
-    <steps>
-      1. IF caller provides → use provided value
-      2. ELSE → auto-detect from scope files (extensions, frameworks, project structure)
-    </steps>
-  </field>
-
-  <field name="tech_stack">
-    <steps>
-      1. IF caller provides → use provided value
-      2. ELSE → auto-detect from package.json, pyproject.toml, go.mod, etc.
-    </steps>
-  </field>
+  <field name="task_id" source="same supplied lifecycle task/readiness; no duplicate" />
+  <field name="task_based_skill" source="exact canonical discovered name" />
+  <field name="execution_mode" source="caller mode; default free-mode; never silently convert" />
+  <field name="workflow.name" source="exact caller identity or N/A" />
+  <field name="workflow.action"><steps>Resolve ACTION_MAP code_refactor and actual template; free-mode null. Verify current required contexts/predecessors; study-only cannot fake mandatory action completion.</steps></field>
+  <field name="workflow.extra_context_reference"><steps>Explicit selected source first, declared artifact/specification link, unique EPIC/FEATURE then legacy feature folder. Validate anchors, kind/content/identity, containment and symlink escape. Explicit broken or ambiguous link blocks, not fallback. Preserve caller keys.</steps></field>
+  <field name="process_preference.interaction_mode" source="caller exact enum/source; default interact-with-human; reject unknown" />
+  <field name="category" source="original Output Result and actual caller context" />
+  <field name="next_task_based_skill" source="original conditional suggestions only; not successor authority" />
+  <field name="refactoring_scope.scope_level"><steps>Explicit value first; feature when actual feature ID exists, otherwise custom with bounded files/modules/description. Missing material scope needs bounded decision.</steps></field>
+  <field name="refactoring_scope.feature_id" source="actual caller/source feature identity or N/A; no allocation" />
+  <field name="refactoring_scope.refactoring_purpose"><steps>Derive named improvement, credible parent contribution and concrete success comparison from authorized intent; missing material criterion is a pertinent gap, not an invented score.</steps></field>
+  <field name="refactoring_scope.files" source="explicit authorized files or validated feature source component links; inspect dependencies separately" />
+  <field name="refactoring_scope.modules" source="caller or verified component ownership; not neighboring-module write permission" />
+  <field name="refactoring_scope.description" source="original scope/constraints and exclusions" />
+  <field name="refactoring_mode"><steps>Explicit study-only/local/broad wins. Assessment-only intent defaults study-only; bounded approved edits default local; broad requires explicit scope/risk rationale. Never auto-expand local to broad.</steps></field>
+  <field name="program_type" source="actual runtime/behavior/domain, not extension alone; skills use creator" />
+  <field name="tech_stack" source="caller or verified manifests/runtime and affected layers" />
 </input_init>
 ```
-
----
 
 ## Definition of Ready
 
 ```xml
 <definition_of_ready>
-  <checkpoint required="true">
-    <name>Refactoring scope provided</name>
-    <verification>scope_level set; if feature: feature_id exists; if custom: files[] or description present</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Target code accessible</name>
-    <verification>All listed files/modules can be read from filesystem</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Code compiles without errors</name>
-    <verification>Run build/lint to confirm no pre-existing failures</verification>
-  </checkpoint>
+  <checkpoint required="true"><name>Owner and authority</name><verification>Same task/readiness, mode source, approved roots/paths/exclusions known; dirty baseline protected.</verification></checkpoint>
+  <checkpoint required="true"><name>Scope and goal</name><verification>Study/local/broad selected, target readable, named improvement and preservation boundaries identified; material ambiguity explicit.</verification></checkpoint>
+  <checkpoint required="true"><name>Baseline capability</name><verification>Relevant tests/build/lint available or known gap; baseline failures named, not forced global repair before study.</verification></checkpoint>
+  <checkpoint required="true"><name>Integration and review</name><verification>Tool contracts/adapters, workflow gates and required review resolved; candidate versus publication explicit.</verification></checkpoint>
 </definition_of_ready>
 ```
 
----
-
 ## Execution Flow
 
-| Phase | Steps | Action | Gate |
-|-------|-------|--------|------|
-| 1. 博学之 — Study Broadly | 1.1 Analyze Scope & Quality | Invoke `x-ipe-tool-refactoring-analysis`, self-validate findings | Analysis complete |
-| 2. 审问之 — Inquire Thoroughly | 2.1 Sync Docs & Tests | Invoke `x-ipe-tool-code-quality-sync` | All aligned, coverage ≥ 80% |
-| 3. 慎思之 — Think Carefully | 3.1 Generate Refactoring Plan | Design target structure, AI self-validates plan | Plan validated |
-| 4. 明辨之 — Discern Clearly | 4.1 Execute Refactoring | Apply changes incrementally with tests | All tests pass |
-| 5. 笃行之 — Practice Earnestly | 5.1 Validate & Complete | Verify improvement, update refs, apply tracing | DoD verified |
-| 继续执行 | 6.1 Decide Next Action | DAO-assisted next task decision | Next action decided |
-| 继续执行 | 6.2 Execute Next Action | Load skill, generate plan, execute | Execution started |
-
-BLOCKING: Phase 1 → 2 requires verification that analysis identified all issues.
-BLOCKING: Phase 3 → 4 requires confirmation that refactoring plan addresses identified issues (manual/stop_for_question: human confirms; auto: DAO confirms).
-BLOCKING: Phase 4 halts if any test fails (must fix or revert).
-
----
+| Step | Action | Gate |
+| --- | --- | --- |
+| 1 | Analyze scope and quality | Inspected baseline and named gap |
+| 2 | Targeted sync and preservation baseline | Mode/risk evidence; no contract rewriting |
+| 3 | Plan structural means | Scope, trade-offs and preservation tests |
+| 4 | Execute or study recommendations | No new regressions; authorized edits only |
+| 5 | Compare and return | Current evidence; original output; no fake done |
 
 ## Execution Procedure
 
 ```xml
 <procedure name="code-refactor">
   <execute_dor_checks_before_starting/>
-  <schedule_dod_checks_with_sub_agent_before_starting/>
-
-  <phase_0 name="Board — Register Task">
-    <step_0_1>
-      <name>Create Task on Board</name>
-      <action>
-        Call `x-ipe-tool-task-board-manager` → `task_create.py`:
-        - task_type: "Code Refactor"
-        - description: summarize work from input context
-        - status: "in_progress"
-        - role: from input context
-        - assignee: from input context
-        Store returned task_id for later update.
-      </action>
-      <output>Task created on board with status in_progress</output>
-    </step_0_1>
-  </phase_0>
-
-  <phase_1 name="博学之 — Study Broadly">
-    <step_1_1>
-      <name>Analyze Scope & Quality</name>
-      <action>
-        1. INVOKE x-ipe-tool-refactoring-analysis with:
-           - operation: "full_analysis"
-           - scope: {from input refactoring_scope}
-           - quality_baseline_path: "x-ipe-docs/planning/project-quality-evaluation.md"
-        2. RECEIVE output: refactoring_scope (expanded), code_quality_evaluated,
-           refactoring_suggestion, refactoring_principle, report_path
-        3. AI self-critique — validate analysis against objective criteria:
-           a. Every item in refactoring_scope maps to a measurable quality gap
-           b. No suggestions contradict each other (e.g., "extract class" + "inline class" on same target)
-           c. Suggestions stay within the requested scope — no scope creep
-           d. Quality scores are consistent (e.g., high complexity score but low smell count = investigate)
-        4. Collect unresolved_questions[] — ONLY genuine ambiguities:
-           - Scope conflicts: "You asked to refactor module X, but the analysis shows module Y is the root cause — include Y?"
-           - Priority conflicts: "Both DRY and performance improvements are needed but they conflict — which to prioritize?"
-        5. IF unresolved_questions is EMPTY → analysis validated, proceed
-        6. IF unresolved_questions is NON-EMPTY:
-           IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-             → Invoke x-ipe-assistant-user-representative-Engineer with specific questions list
-           ELSE:
-             → Present ONLY the specific questions to human
-           → Incorporate answers, update analysis
-      </action>
-      <constraints>
-        - MUST NOT ask broad "are these findings correct?" — only ask specific, bounded questions
-        - IF self-critique passes with zero questions → skip human/DAO entirely
-      </constraints>
-      <output>Validated analysis: refactoring_scope, code_quality_evaluated, suggestions, principles</output>
-    </step_1_1>
-  </phase_1>
-
-  <phase_2 name="审问之 — Inquire Thoroughly">
-    <step_2_1>
-      <name>Sync Docs & Tests</name>
-      <action>
-        1. INVOKE x-ipe-tool-code-quality-sync with:
-           - operation: "full_sync"
-           - refactoring_scope: {from Step 1 output}
-           - code_quality_evaluated: {from Step 1 output}
-           - refactoring_suggestion: {pass-through from Step 1}
-           - refactoring_principle: {pass-through from Step 1}
-        2. RECEIVE output: updated code_quality_evaluated, validation report
-        3. VERIFY all alignments "aligned" and coverage ≥ 80%
-        4. IF any sync failed → present issues to human, decide to retry or proceed
-      </action>
-      <constraints>
-        - BLOCKING: All alignment statuses must be "aligned" before proceeding
-        - BLOCKING: Test coverage must be ≥ 80%
-      </constraints>
-      <output>Synced documentation, test baseline at 80%+</output>
-    </step_2_1>
-  </phase_2>
-
-  <phase_3 name="慎思之 — Think Carefully">
-    <step_3_1>
-      <name>Generate Refactoring Plan</name>
-      <action>
-        1. ANALYZE current structure (sizes, smells, violations) using analysis output
-        2. DESIGN target structure applying principles:
-           - SOLID: Extract classes/modules for SRP violations
-           - DRY: Plan abstractions
-           - KISS: Simplifications
-           - YAGNI: Remove unused code
-        3. CREATE refactoring_plan with phases ordered by goal priority
-        4. AI self-critique — validate plan against objective criteria:
-           a. Every identified issue from Step 1 has a corresponding plan item
-           b. No plan item exceeds the approved refactoring_scope
-           c. Plan respects refactoring_principle constraints (no new dependencies, etc.)
-           d. Phases are ordered so earlier phases don't break later ones
-           e. Each phase is independently testable — can verify before moving on
-        5. Collect unresolved_questions[] — ONLY genuine trade-offs:
-           - "Extracting this module improves DRY but adds a new dependency — acceptable?"
-           - "Two valid refactoring orders exist: A→B is safer but slower, B→A is faster but riskier"
-        6. IF unresolved_questions is EMPTY → plan validated, proceed
-        7. IF unresolved_questions is NON-EMPTY:
-           IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-             → Invoke x-ipe-assistant-user-representative-Engineer with specific trade-off questions
-           ELSE:
-             → Present ONLY the specific trade-offs to human
-           → Incorporate answers, update plan
-      </action>
-      <constraints>
-        - MUST NOT ask broad "does this plan look right?" — only ask specific trade-off questions
-        - IF self-critique passes with zero questions → skip human/DAO entirely
-      </constraints>
-      <output>Validated refactoring_plan with phases and principle mappings</output>
-    </step_3_1>
-  </phase_3>
-
-  <phase_4 name="明辨之 — Discern Clearly">
-    <step_4_1>
-      <name>Execute Refactoring</name>
-      <action>
-        0. TOOL SKILL ROUTING (config-filtered):
-           a. DISCOVER: Scan .github/skills/x-ipe-tool-implementation-*/
-           b. READ CONFIG: Read x-ipe-docs/config/tools.json → stages.validation.code_refactor
-              - IF section missing/empty → config_active = false (all tools enabled)
-              - ELSE → config_active = true (opt-in); force-enable general
-           c. FILTER: IF config_active → only ENABLED tools participate
-           d. SEMANTIC MATCH: Match tech_stack to enabled tool skill
-           e. IF no match → fall back to inline refactoring (current behavior)
-        FOR EACH phase in refactoring_plan:
-          1. CREATE checkpoint: git commit -m "checkpoint: before phase {N}"
-          2. GENERATE per-phase AAA scenarios describing target state
-          3. INVOKE matched tool skill with operation: "refactor", AAA scenarios, source/test paths
-             - Tool skill handles: code writing, test running, linting
-             - feature_context optional; synthetic fallback: REFACTOR-{task_id}
-          4. IF tool skill reports test failure:
-             - Fix if import/reference issue
-             - REVERT phase if behavior changed (orchestrator manages rollback)
-             - Update test if change is legitimate
-          5. COMMIT: git commit -m "refactor({scope}): {desc} [principle: {p}]"
-      </action>
-      <constraints>
-        - BLOCKING: Must fix or revert if any test fails before continuing
-        - CRITICAL: Structure changes only — preserve existing behavior
-        - CRITICAL: Orchestrator manages checkpoints/commits — tool skills do NOT manage git
-      </constraints>
-      <output>Refactored code with incremental commits per phase</output>
-    </step_4_1>
-  </phase_4>
-
-  <phase_5 name="笃行之 — Practice Earnestly">
-    <step_5_1>
-      <name>Validate & Complete</name>
-      <action>
-        1. UPDATE technical designs (component list, paths, Design Change Log)
-        2. UPDATE feature specifications (file references)
-        3. UPDATE requirements (implementation notes)
-        4. RUN final test suite (coverage maintained or improved)
-        5. VALIDATE goals achieved from refactoring_suggestion
-        6. CALCULATE quality improvements (before/after scores)
-        7. CHECK tracing preserved on moved/renamed functions
-        8. IF tracing infrastructure exists:
-           - INVOKE x-ipe-tool-tracing-instrumentation for new files/functions
-           - RE-RUN tests, UPDATE tracing counts
-        9. IF execution_mode == "workflow-mode":
-           Run workflow update script via bash (`python3 .github/skills/x-ipe-tool-x-ipe-app-interactor/scripts/workflow_update_action.py`):
-             - workflow_name: {from context}
-             - action: "code_refactor"
-             - status: "done"
-             - feature_id: {feature_id}
-             - deliverables: {"refactor-report": "{path}"}
-        10. Verify DoD checkpoints and resolve any open questions
-
-            Response source (based on interaction_mode):
-            IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-              → Resolve open questions via x-ipe-assistant-user-representative-Engineer
-            ELSE (interact-with-human/dao-represent-human-to-interact-for-questions-in-skill):
-              → Ask human for answers
-        11. CREATE final commit
-      </action>
-      <success_criteria>
-        - All tests passing
-        - Quality score improved
-        - All goals achieved or documented
-        - Tracing preserved on existing code
-      </success_criteria>
-      <output>Refactoring summary with quality scores and tracing status</output>
-    </step_5_1>
-
-    <step_5_2>
-      <name>Update Task on Board</name>
-      <action>
-        Call `x-ipe-tool-task-board-manager` → `task_update.py`:
-        - task_id: from Phase 0 / Step 0
-        - status: "done"
-        - output_links: list of deliverables produced in this skill execution
-      </action>
-      <output>Task marked done on board</output>
-    </step_5_2>
-  </phase_5>
-
-  <phase_6 name="继续执行（Continue Execute）">
-    <step_6_1>
-      <name>Decide Next Action</name>
-      <action>
-        Collect the full context and task_completion_output from this skill execution.
-
-        IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-          → Invoke x-ipe-assistant-user-representative-Engineer with:
-            type: "routing"
-            completed_skill_output: {full task_completion_output YAML from this skill}
-            next_task_based_skill: "{from output}"
-            context: "Skill completed. Study the context and full output to decide best next action."
-          → DAO studies the complete context and decides the best next action
-        ELSE (interact-with-human):
-          → Present next task suggestion to human and wait for instruction
-      </action>
-      <constraints>
-        - BLOCKING (manual): Human MUST confirm or redirect before proceeding
-        - BLOCKING (auto): Proceed after DoD verification; auto-select next task via DAO
-      </constraints>
-      <output>Next action decided with execution context</output>
-    </step_6_1>
-    <step_6_2>
-      <name>Execute Next Action</name>
-      <action>
-        Based on the decision from Step 6.1:
-        1. Load the target task-based skill's SKILL.md
-        2. Generate an execution plan from the skill's Execution Flow table
-        3. Start execution from the skill's first phase/step
-      </action>
-      <constraints>
-        - MUST load the skill before executing — do not skip skill loading
-        - Execution follows the target skill's procedure, not this skill's
-      </constraints>
-      <output>Next task execution started</output>
-    </step_6_2>
-  </phase_6>
-
+  <step_1>
+    <name>Analyze Scope and Quality</name>
+    <action>
+      1. Read approved sources/requirements/spec/story/GWT AC/type/design and inspect actual code/callers/dependencies/config. Record inspected versus authorized scope and gaps; dependency discovery grants no write authority.
+      2. Load x-ipe-tool-refactoring-analysis. Receive/preserve actual full_analysis operation_output when its full contract is authorized and satisfied; otherwise use disclosed scoped analysis adapter in integration, never invented tool success or numeric metrics. Retain scope, code_quality_evaluated, refactoring_suggestion, refactoring_principle and report_path when actually returned.
+      3. In existing analysis/refactor report map goal/subgoal, source/parent/stakeholder, indirect contribution, inspected baseline, justified measure or qualitative success, constraints/non-goals and existing story/AC/type preservation links. all-required branches need checks; alternatives select one bounded means, not all options as backlog.
+      4. Legacy explicit so-that only may supply inferred intent with anchor; missing intent blocks pertinent outcome/coverage claim, not unrelated delivery or whole-project retrofit. Separate engineering delivery from not measured stakeholder outcome.
+      5. Self-check each suggestion against inspected gap/purpose/scope. For genuine decisions human asks the human within skill and waits; full DAO and hybrid use common message_context/instruction_units/execution_plan. Human and hybrid require human completion/route confirmation; full DAO selects only authorized successors. Clear authority needs no repeated confirmation; changed contract needs actual human CR authority in every mode.
+    </action>
+    <output>Actual analysis output or disclosed scoped adapter report; goal/baseline/preservation frame</output>
+  </step_1>
+  <step_2>
+    <name>Sync Affected Documentation and Tests</name>
+    <action>
+      1. Feed Step 1 scope/quality/suggestions/principles into x-ipe-tool-code-quality-sync only under its supported authorized full_sync contract; otherwise use disclosed targeted adapter. Preserve actual result/errors/pass-through fields, not invented aligned status for absent documents.
+      2. Study-only performs read-only gap assessment; no source/test/doc mutation except authorized analysis deliverable. Local reconciles affected documentation and adds targeted risk-based tests only; no blanket 80% coverage, full-global docs alignment or unrelated full-suite prerequisite. Broad plans relevant integration/full suite and justified measured coverage within authorized scope.
+      3. Preserve requirements/ACs; document deviations as findings, not acceptance additions/removals to bless current code. do not skip failing tests. Relevant baseline failure blocks mutation without explicit safe disposition, not study; bugs return to owner, not incidental repair.
+      4. Run applicable baseline tests/build/lint in actual domain; capture commands/exits/source/test/config hashes and pre-existing failures. Characterize approved observable interfaces/results/errors/data/side effects/concurrency/security/caller boundaries as implicated. Refactor tests need not fail first.
+    </action>
+    <output>Targeted sync evidence, unchanged preservation assertions, baseline failures/gaps</output>
+  </step_2>
+  <step_3>
+    <name>Plan Improvement and Trade-offs</name>
+    <action>
+      1. Choose structural means using actual suggestions/principles SOLID/DRY/KISS/YAGNI/SoC; map each plan item to quality goal/baseline/after comparison/preservation checks. Small clear scope may use one combined report, not duplicate documents.
+      2. Record exact allowed edits, phases, dependencies/docs/tests, trade-off, restoration using owned prework bytes and review needs. No arbitrary score or guaranteed stakeholder gain. YAGNI public removal requires verified no observable consumer, not guessed dead code.
+      3. Validate bounded scope, cross-phase independence and all-required checks. Scope expansion needs actual authority; intentional behavior change needs prior actual human CR authority. Structural design Change Log never grants changed product contract.
+    </action>
+    <output>Bounded plan or study recommendations with trade-offs and evidence plan</output>
+  </step_3>
+  <step_4>
+    <name>Execute Structural Changes or Study</name>
+    <action>
+      1. Study-only stops at recommendations without mutation. Local/broad discover and semantically route enabled stages.validation.code_refactor tools sequentially, loading operation: refactor, AAA source/AC/preservation scenarios and source/test paths. Skill-package refactors instead delegate same task/readiness to x-ipe-meta-skill-creator; no arbitrary production edits. Read integration for actual tool exceptions.
+      2. Before each phase retain owned baseline bytes/hashes, not Git checkpoint commits. Tool owns its one operation; collect operation_output success/result/files/tests/lint/errors without coercion. No inline production fallback or invented feature IDs.
+      3. Apply structural edits incrementally; preserve public exports/import paths/results/errors/data/workflow/side effects and existing tracing/redaction. Run unchanged assertions after each phase; new regressions block. Repair imports/re-exports, not tests masking broken public API. Restore only owned edits; never reset/stash/checkout foreign dirty work.
+      4. After three failed iterations return partial outputs/blocker. Tool failure/unavailable required evidence/meaningful review gap blocks pertinent completion/publication, not candidate drafting. Disabled/absent tracing requires no new installation; enabled instrumentation needs authorized scope and preservation tests.
+    </action>
+    <output>Actual structural changes and preservation results, or unchanged-source study report</output>
+  </step_4>
+  <step_5>
+    <name>Compare Before / After and Return Once</name>
+    <action>
+      1. Run mode/risk-appropriate final tests/build/lint; broad includes planned integration/full suite. Compare public behavior and scoped goal/AC/type/constraints, named baseline/after evidence and trade-off. New regressions block; pre-existing/unavailable checks remain explicit, never all-green or hidden by deselection.
+      2. Update only affected authorized references/design Change Log, counts/paths. Measure applicable coverage with same method/scope before/after; unmeasured is a gap, not maintained. Preserve tracing/redaction; no forced setup.
+      3. Bind evidence/review to actual source/test/config hashes. Report engineering delivery separately from stakeholder outcome not measured; study is recommendations, not achieved structural improvement. Edits invalidate affected evidence; retain unrelated IDs/history/evidence.
+      4. Fill full original task_completion_output with actual links/counts/principles/goals and supplied legacy/dynamic attributes. Designated score strings may say not measured; no sentinel in numeric tool schema or synthetic aggregate score. Coverage strings and comparison status explicitly allow null; explain not measured/non-applicability in report. A required missing measurement blocks that claim, not unrelated study delivery.
+      5. Workflow-mode completion depends on actual mandatory code_refactor gates and completed refactor report, not study-only. Return exact refactor-report mapping to owner for one authorized write/readback; no child app mutation or successors. Candidate readiness/study evidence is distinct from larger-task closure or publication.
+    </action>
+    <output>Original task output, report, revision-bound comparison and honest blockers</output>
+  </step_5>
 </procedure>
 ```
 
----
-
 ## Output Result
+
+Preserve original fields/order/nested shape/counts/enums/conditional next tasks and
+dynamic attributes. The two quality-score fields are designated strings allowing
+`not measured`; numeric strings require a cited measurement method and comparable
+before/after evidence. No new aggregate, arbitrary score, metric or app tag.
+Unmeasured coverage cannot claim maintained/improved/degraded. Coverage before and
+after are percentage strings or actual YAML/JSON null (not the string "null");
+status is maintained/improved/degraded only for comparable measurements, otherwise
+actual null. Preserve a measured side when only one side exists. Explain method,
+scope, denominator, applicability and missing evidence in the report. A required
+coverage claim returns blocked with these partial values; optional/non-applicable
+study/local coverage does not block unrelated delivery. Consumers rejecting null
+remain a disclosed compatibility blocker, never silently coerced. See integration.
 
 ```yaml
 task_completion_output:
@@ -417,10 +206,7 @@ task_completion_output:
     - "x-ipe-docs/refactoring/analysis-{context}.md"
     - "x-ipe-docs/refactoring/validation-{context}.md"
     - "{paths to refactored files}"
-
-  # Feature context pass-through
   feature_id: "{from input refactoring_scope.feature_id or N/A}"
-
   refactoring_summary:
     files_modified: "<count>"
     files_created: "<count>"
@@ -433,90 +219,56 @@ task_completion_output:
       - goal: "<name>"
         status: "achieved | partial | skipped"
         notes: "<details>"
-
   code_quality_evaluated:
-    quality_score_before: "<1-10>"
-    quality_score_after: "<1-10>"
+    quality_score_before: "<1-10 | not measured>"
+    quality_score_after: "<1-10 | not measured>"
     test_coverage:
-      before: "<percentage>"
-      after: "<percentage>"
-      status: "maintained | improved | degraded"
+      before: "<percentage string | null>"
+      after: "<percentage string | null>"
+      status: "maintained | improved | degraded | null"
     references_updated:
       requirements: "<count>"
       specifications: "<count>"
       technical_designs: "<count>"
 ```
 
----
-
 ## Definition of Done
-
-CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
 
 ```xml
 <definition_of_done>
-  <checkpoint required="true">
-    <name>Analysis completed and approved</name>
-    <verification>x-ipe-tool-refactoring-analysis output received and issues identified</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Documentation synced</name>
-    <verification>x-ipe-tool-code-quality-sync completed, all alignments "aligned"</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>All planned changes executed</name>
-    <verification>Compare completed phases against refactoring_plan</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>All tests passing</name>
-    <verification>Run full test suite with zero failures</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Test coverage maintained or improved</name>
-    <verification>Compare coverage before/after, verify no regression</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Quality score improved</name>
-    <verification>Compare quality_score_before vs quality_score_after</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>All references updated</name>
-    <verification>Tech designs, feature specs, requirements all reflect new structure</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>All changes committed</name>
-    <verification>Clean git status with no uncommitted changes</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Tracing preserved and applied</name>
-    <verification>Existing decorators preserved; new public functions have @x_ipe_tracing</verification>
-  </checkpoint>
+  <checkpoint required="true"><name>Scope and analysis</name><verification>Inspected/authorized scope, named quality goal/baseline/source/parent and actual analysis or disclosed adapter evidenced.</verification></checkpoint>
+  <checkpoint required="true"><name>Mode-aware sync</name><verification>Study gaps/local affected docs and targeted tests/broad justified integration baseline; no global retrofit or fake tool success.</verification></checkpoint>
+  <checkpoint required="true"><name>Behavior preserved</name><verification>Public behavior/contracts/AC/types/constraints/callers verified; changed intent needs prior actual human CR authority.</verification></checkpoint>
+  <checkpoint required="true"><name>Quality comparison</name><verification>Named measured or qualitative improvement versus baseline with trade-off; study recommendations only; no invented score/outcome.</verification></checkpoint>
+  <checkpoint required="true"><name>Current verification</name><verification>Required risk checks pass at current hashes; failures/unavailable checks named, new regressions block.</verification></checkpoint>
+  <checkpoint required="true"><name>Bounded records</name><verification>Affected references only, tracing/redaction preserved, dirty bytes protected, default no commit.</verification></checkpoint>
+  <checkpoint required="conditional"><name>Independent review</name><verification>Meaningful workflow/executable/safety/public-contract change reviewed; unavailable blocks pertinent completion/publication, not drafting.</verification></checkpoint>
+  <checkpoint required="conditional"><name>App gates</name><verification>Actual mandatory action/predecessors/contexts/refactor-report and owner readback; no study shortcut or fake done.</verification></checkpoint>
+  <checkpoint required="true"><name>Original handoff</name><verification>Full original/dynamic task fields and actual tool results retained; one owner no duplicate registration/routing or successor.</verification></checkpoint>
 </definition_of_done>
 ```
-
-MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution` to continue the task execution flow.
-
----
 
 ## Patterns & Anti-Patterns
 
 | Pattern | When | Then |
-|---------|------|------|
-| Full Flow | "refactor this code" | Analysis → sync → plan → execute incrementally → validate → commit |
-| Rollback | Tests fail after change | STOP, analyze, REVERT if behavior changed, fix if import issue |
-| Tracing | Moving/renaming functions | Keep @x_ipe_tracing decorators, preserve redact=[], add to new public functions |
+| --- | --- | --- |
+| Study-only | Assessment requested | Inspect/recommend without mutation or achieved change claim |
+| Local | Bounded structure change | Target risks/affected docs and unchanged assertions |
+| Broad | Authorized cross-module risk | Integration/full suite and justified comparable measurement |
+| Skill refactor | Skill package target | Creator candidate/review/publication gates, same task |
 
-| Anti-Pattern | Why Bad | Do Instead |
-|--------------|---------|------------|
-| Big bang refactor | High risk, hard to debug | Small incremental changes |
-| Skip analysis/sync | Missing baseline | Always run analysis + sync first |
-| Skip test runs | Silent regressions | Test after EVERY change |
-| Change behavior | Refactoring preserves semantics | Structure only, same behavior |
----
+| Anti-Pattern | Consequence | Correction |
+| --- | --- | --- |
+| Invent scores | Synthetic quality | Named baseline/after evidence; designated string not measured |
+| Rewrite spec to code | Covert behavior change | Actual human CR authority first |
+| Forced checkpoint commits | Dirty work exposure | Owned bytes/hashes; default no commit |
+| Global sync for study | Scope creep | Mode-aware adapter/pertinent gaps |
+| Fix public import by weakening test | External behavior lost | Preserve re-export and unchanged caller assertion |
+| Study marked app done | Mandatory gate bypass | Actual integration required; partial/blocked handoff |
 
-## References
+## Examples
 
-| File | Purpose |
-|------|---------|
-| [references/refactoring-techniques.md](.github/skills/x-ipe-task-based-code-refactor/references/refactoring-techniques.md) | Detailed procedures, input/output structures, tracing rules |
-| [references/examples.md](.github/skills/x-ipe-task-based-code-refactor/references/examples.md) | Concrete execution examples |
+Read [examples](.github/skills/x-ipe-task-based-code-refactor/references/examples.md),
+[techniques](.github/skills/x-ipe-task-based-code-refactor/references/refactoring-techniques.md),
+[integration](.github/skills/x-ipe-task-based-code-refactor/references/integration.md)
+and [report scaffold](.github/skills/x-ipe-task-based-code-refactor/templates/refactor-report.md).

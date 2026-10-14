@@ -37,9 +37,20 @@
 ## User Stories
 - As a [user type], I want to [action] so that [benefit]
 
+## Goal / Subgoal Coverage
+
+{Reuse parent requirement/source and stable story/goal IDs; stakeholder observable
+outcome and credible contribution; constraints/non-goals, selected alternatives,
+AC-to-validation plan and outcome not measured unless actual observation exists.
+New/changed coverage is required; explicit legacy so-that inference is labeled.}
+
 ## Acceptance Criteria
-- [ ] [Measurable criterion 1]
-- [ ] [Measurable criterion 2]
+| AC ID | Criterion (Given/When/Then) | Test Type |
+| --- | --- | --- |
+| {stable AC ID} | GIVEN [context] WHEN [event] THEN [observable result] | {UI/API/Unit/Integration} |
+
+This retained downstream scaffold does not authorize authoring specifications
+during breakdown; use the refinement full scaffold for actual refinement.
 
 ## Business Logic Refinement
 (To be filled in Business Refinement phase)

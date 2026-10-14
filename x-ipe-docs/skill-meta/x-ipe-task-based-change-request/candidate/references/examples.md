@@ -1,298 +1,146 @@
-# Change Request - Examples
+# Change Request — authored examples, not executed stakeholder outcomes
 
-> **Legacy Note:** Examples below use the Epic-aware folder structure (`EPIC-{nnn}/FEATURE-{nnn}-{X}/`). Projects created before the Epic migration may still use the legacy format (`FEATURE-{nnn}/`). Both formats are supported during the transition period.
+Use actual canonical EPIC/FEATURE or legacy ownership, source links and revisions.
+The following are authored fixtures, not human approvals or actual source audits.
+All proposed tests are planned; stakeholder outcomes remain not measured. Fixture
+approval labels explain the intended authorized path, not a real project decision.
 
-> Reference from SKILL.md: `See [references/examples.md](references/examples.md)`
+## 1. Settings auto-save: modification of selected means
 
----
+Request: make settings auto-save instead of a save button. Existing approved
+FR-005-01/US-005-01 outcome is preferences persist across reload; no sharing.
+Critically evaluate explicit save versus auto-save failure/retry semantics before
+approval. Current source/code must really be inspected in an actual CR run.
 
-## Example 1: Bulk Import Feature Change Request
+| Goal / Subgoal | Parent / Source | Stakeholder | Before Outcome | Proposed Outcome | Contribution / Selection | Success Evidence | Constraints / Non-goals | Story / AC Links | Delta Kind | Authority | Affected Evidence | Outcome State |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| US-005-01 | FR-005-01; approved preferences scope | account owner | preferences persist across reload | preferences persist across reload | all-required persistence + reload; auto-save selected instead of explicit save | planned qualitative edit, wait for saved state, reload and see same value | no sharing; preserve retry/error visibility | US-005-01; AC-005-01 | selected means only | human-approved CR-002 scope; fixture only | AC-005-01 design/test/outcome evidence invalidated; rerun planned UI reload check | not measured |
+| US-005-02 | FR-005-02; unchanged privacy scope | account owner | preferences remain private | preferences remain private | unchanged privacy rule | original qualitative owner-only scenario retained | no coworker access | US-005-02; AC-005-02 | unchanged | original source contract unchanged | retain original AC-005-02 source and evidence bytes | not measured |
 
-**Request:** "Add bulk import functionality to the existing product management module"
+| Aspect | CR Requirement | Existing Feature(s) | Evidence / Boundary Decision |
+| --- | --- | --- | --- |
+| Users | account owner | account owner | FR-005-01 source unchanged; same users |
+| Workflow | edit triggers save with visible failure | explicit save then reload | AC-005-01 changes trigger, not persistence outcome |
+| Data Model | same preference schema | existing owner preference map | actual schema/callers inspected in real run; no new sharing |
+| UI Elements | saved/pending indicator | save button and preference fields | mockup-v1 retained; proposed mockup-v2 |
+| API Endpoints | same settings save contract | existing settings endpoint | design/caller inspection required; no API-only classification |
 
-### CR Classification
+| # | Type | Affected Feature | Severity | Classification | Description | Source / Revision | Resolution / Authority |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | specification | FEATURE-005 | medium | expected | explicit save trigger conflicts with auto-save | specification.md#AC-005-01; fixture source, hash recorded only in real run | approved trigger delta only; preserve failure/retry contract |
 
-```
-Step 3.1: Read Change Request
-  change_request: "Add bulk import to product management"
+| AC ID | Criterion (Given/When/Then) | Test Type |
+| --- | --- | --- |
+| AC-005-01 | GIVEN saved preferences WHEN owner edits and sees saved state then reloads THEN new value persists AND failed saves remain visible with retry | UI |
+| AC-005-02 | GIVEN owner preferences WHEN another account views settings THEN owner values remain inaccessible | UI |
 
-Step 3.2: Identify Affected Features
-  - Search features.md for "product management"
-  - Found: FEATURE-012 (Product Management Module)
-  - Check if bulk import exists → Not found
+Approved authored path: one CR in actual legacy FEATURE-005 or EPIC/FEATURE owner;
+minor specification/history trigger delta, applicable design context invalidation,
+new mockup-v2 preserving v1. Requirement unchanged because high-level outcome is
+unchanged. Neither reload tests nor actual stakeholder benefit are claimed here.
 
-Step 3.3: Classify Scope
-  Questions:
-  1. Does this require entirely new components? → Yes, import service
-  2. Does this significantly expand feature scope? → Yes, new capability
-  3. Are there new user stories? → Yes, "As admin, I can import CSV"
-  4. Estimated complexity? → High (parsing, validation, error handling)
-  
-  Classification: NEW_FEATURE
-```
-
-### Conflict Analysis (Step 4)
-
-```
-Step 4.1: Spawn Conflict Detector
-  - Read FEATURE-012 specification (product management)
-  - No other features depend on FEATURE-012's data model
-  - No pending CRs for FEATURE-012
-  
-  Conflicts found: 0
-
-Step 4.2: No conflicts → proceed to Human Approval
-```
-
-### Output
+Original full output example (authored planned disposition; not actual execution):
 
 ```yaml
-category: Standalone
-next_task_based_skill: Feature Breakdown
-require_human_review: Yes
-
-cr_classification: NEW_FEATURE
-conflicts_found: []
-conflicts_resolution: none
-reasoning: |
-  Bulk import requires:
-  - New ImportService component
-  - CSV parsing logic
-  - Validation pipeline
-  - Error handling and reporting
-  - New API endpoints
-  - New UI components
-  This significantly expands the scope beyond the existing feature.
-  
-affected_artifacts:
-  - x-ipe-docs/planning/features.md (new feature to add)
-  - x-ipe-docs/requirements/EPIC-013/FEATURE-013-A/ (new folder to create)
-
-task_output_links:
-  - x-ipe-docs/requirements/EPIC-013/FEATURE-013-A/ (pending creation in Feature Breakdown)
+task_completion_output:
+  category: standalone
+  status: blocked
+  next_task_based_skill:
+    - skill: x-ipe-task-based-feature-refinement
+      condition: When CR modifies an existing feature
+    - skill: x-ipe-task-based-feature-breakdown
+      condition: When CR requires a new feature
+  process_preference:
+    interaction_mode: interact-with-human
+  execution_mode: free-mode
+  workflow:
+    name: N/A
+  task_output_links: []
+  feature_id: FEATURE-005
+  cr_id: CR-002
+  cr_classification: modification
+  affected_features: [FEATURE-005]
+  new_feature_ids: []
+  requirement_updated: false
+  mockup_updated: false
+  updated_mockup_paths: []
+  conflicts_found:
+    - feature: FEATURE-005
+      type: specification
+      severity: medium
+      classification: expected
+      description: explicit save trigger; authored source not a real audit
+  conflicts_resolution: none
+  conflicting_docs_updated: []
+  conflicting_docs_retired: []
 ```
 
----
+## 2. Bulk import: new outcome versus implementation alternative
 
-## Example 2: UI Refinement - ENHANCEMENT Classification
+Bulk import to product management is not automatically new_feature because an
+ImportService, endpoint or screen is new. If approved outcome is managing many
+products efficiently and import is a bounded means, modification may fit.
+If current source only authorizes individual product editing and operations staff
+request a new stakeholder outcome of validating/ingesting supplier catalogs with
+reject/recovery reporting, propose new_feature after actual five-axis/conflict study.
 
-**Request:** "Make the settings page auto-save instead of requiring a save button"
+Goal delta: supplier operator; existing individual edits → approved catalog
+ingestion outcome; parent product-operations source; selected import alternative;
+all-required parsing/validation/reject-report children; qualitative valid/invalid
+catalog scenario; no silent data loss; new FR/US/AC IDs reserved only when approved;
+affected product API/design/test evidence invalidated, unrelated inventory retained.
+Outcome not measured; approval pending is blocked, not a confirmed benefit.
+Keep CR in existing product owner folder, update affected spec/history and new
+requirements before implementation; suggest breakdown; new_feature_ids: [].
+No related feature: approved free-mode requirements intake with spec N/A; workflow
+per-feature readiness blocked. Never run breakdown here to obtain a CR folder.
 
-### CR Classification
+## 3. Profile flattening: actual conflict evidence and major retirement
 
-```
-Step 3.1: Read Change Request
-  change_request: "Auto-save settings page"
+Existing profile outcome unchanged; scalar flattening can be modification even
+with API/data changes. Inspect source specifications/designs and real callers:
+search AC-007-03 reads profile.address.city; dashboard destructures
+profile.preferences.theme; admin bulk edit iterates profile.permissions.roles[].
+Record actual source anchors and SHA256 in the real CR, not invented hashes here.
+Scalar path changes are expected; lost role-array semantics is unexpected/high.
+Propose keep arrays nested and preserve search/theme adapters; blocked until
+actual human approval of multi-feature solution, even full DAO. Then conflicts
+resolution may be mitigated; no document mutation before that approval.
 
-Step 3.2: Identify Affected Features
-  - Search features.md for "settings"
-  - Found: FEATURE-005 (User Settings)
-  
-Step 3.3: Classify Scope
-  Questions:
-  1. Entirely new components? → No, modifying existing SettingsService
-  2. Expand feature scope? → No, same functionality with UX improvement
-  3. New user stories? → No, same goal "user saves preferences"
-  4. Estimated complexity? → Medium (debouncing, state management)
-  
-  Classification: ENHANCEMENT
-```
+Minor AC references updated inline. Major contradictory data contract is retained
+under [RETIRED by CR-003] with reason, date, CR reference and replacement. Preserve
+all old version rows and source-to-replacement IDs. Approved requirement/spec/design
+delta occurs before implementation; only affected dependent checks/review/outcome
+are invalidated. Unrelated caller evidence remains intact. Not measured outcome.
 
-### Conflict Analysis (Step 4)
+## 4. Better error handling: consequential ambiguity and legacy inference
 
-```
-Step 4.1: Spawn Conflict Detector
-  - Read FEATURE-005 specification
-  - Read FEATURE-005 technical design
-  - Check features depending on FEATURE-005: FEATURE-010 (Dashboard) uses saved settings
-  - Spec conflict: none (settings data model unchanged)
-  - Design conflict: none (SettingsService API contract preserved)
-  - Dependency conflict: none (FEATURE-010 reads settings, not writes)
-  
-  Conflicts found: 0
+"better error handling" could mean upload errors, developer logs or user recovery.
+Ask only consequential scope/source questions per mode; no repeated confirmation
+after current consolidated approval. Legacy explicit story "so-that I can retry
+failed uploads" permits inferred recovery goal with exact story source, not
+confirmed intent. Missing/ambiguous goal blocks only pertinent outcome/coverage
+claims, not unrelated original delivery evidence. New/changed scope remains
+blocked until actual intended behavior/success constraints are clear and approved.
 
-Step 4.2: No conflicts → proceed to Human Approval
-```
+## 5. Safari crash: bug intake, not a third classification enum
 
-### Output
+Login crashes on Safari against documented existing behavior. Return blocked CR
+intake with bug-fix suggestion to lifecycle owner; do not fabricate classification,
+new outcome, CR-completed evidence or output fields. No child automatically starts
+bug-fix or registers another task; owner handles actual authorized disposition.
 
-```yaml
-category: Standalone
-next_task_based_skill: Feature Refinement
-require_human_review: Yes
+## 6. Enabling subgoal and multi-feature CR chain
 
-cr_classification: ENHANCEMENT
-conflicts_found: []
-conflicts_resolution: none
-reasoning: |
-  Auto-save modifies existing behavior without adding new capabilities.
-  Same user goal, improved UX implementation.
-  
-affected_artifacts:
-  - x-ipe-docs/requirements/EPIC-005/FEATURE-005-A/specification.md
-  - x-ipe-docs/requirements/EPIC-005/FEATURE-005-A/technical-design.md
-
-task_output_links:
-  - x-ipe-docs/requirements/EPIC-005/FEATURE-005-A/specification.md (to update)
-```
-
----
-
-## Example 3: CR with Dependency Conflict
-
-**Request:** "Change the user profile data model to use a flat structure instead of nested objects"
-
-### CR Classification
-
-```
-Step 3.1: Read Change Request
-  change_request: "Flatten user profile data model"
-
-Step 3.2: Identify Affected Features
-  - Found: FEATURE-003 (User Profile Management)
-  - FEATURE-003 is used by: FEATURE-007 (User Search), FEATURE-010 (Dashboard), FEATURE-015 (Admin Panel)
-  
-Step 3.3: Classify Scope
-  - Modifies existing data model within same feature → MODIFICATION
-```
-
-### Conflict Analysis (Step 4)
-
-```
-Step 4.1: Spawn Conflict Detector
-  - Read FEATURE-003 specification and technical design
-  - Read FEATURE-007 specification: uses profile.address.city for location search
-  - Read FEATURE-010 specification: renders profile.preferences.theme
-  - Read FEATURE-015 specification: bulk-edits profile.permissions.roles[]
-
-  Conflicts found: 3
-    1. SPEC CONFLICT: FEATURE-007 acceptance criteria references "profile.address.city"
-       → Flattening would change to "profile_address_city", breaking AC-007-03
-       Severity: High
-    2. DESIGN CONFLICT: FEATURE-010 technical design uses nested destructuring
-       → Code assumes nested structure: const { preferences: { theme } } = profile
-       Severity: Medium
-    3. DEPENDENCY CONFLICT: FEATURE-015 bulk edit logic iterates profile.permissions.roles[]
-       → Flattening arrays requires different iteration pattern
-       Severity: High
-
-Step 4.2: Classify conflicts
-  - Conflict 1: "expected" — flattening necessarily changes field paths
-  - Conflict 2: "expected" — code changes are implied by data model change
-  - Conflict 3: "unexpected" — CR did not mention changing array handling, this is a side effect
-
-Step 4.3: Unexpected conflict found
-  - Present to human: "Flattening the profile model would also require changing
-    how FEATURE-015 (Admin Panel) handles role arrays. The current nested
-    profile.permissions.roles[] would become profile_permissions_roles (a single
-    field), losing array semantics."
-  - Suggest mitigation: "Consider a hybrid approach — flatten scalar fields but
-    preserve nested arrays. Or create a separate CR for FEATURE-015 admin panel."
-```
-
-### Human Decision
-
-```
-Human: "Keep arrays nested, only flatten scalar fields. Update the CR scope."
-→ Return to Step 3 with narrowed scope
-→ Re-run conflict analysis: all remaining conflicts now "expected"
-```
-
-### Output
-
-```yaml
-category: Standalone
-next_task_based_skill: Feature Refinement
-require_human_review: Yes
-
-cr_classification: MODIFICATION
-conflicts_found:
-  - feature: FEATURE-007
-    type: specification
-    severity: high
-    classification: expected
-    description: "Field path references change from nested to flat"
-  - feature: FEATURE-010
-    type: design
-    severity: medium
-    classification: expected
-    description: "Technical design code patterns change"
-conflicts_resolution: mitigated
-reasoning: |
-  Data model flattening for scalar fields only (arrays preserved).
-  Scope narrowed after conflict analysis revealed array handling issues.
-  
-affected_artifacts:
-  - x-ipe-docs/requirements/EPIC-003/FEATURE-003-A/specification.md
-  - x-ipe-docs/requirements/EPIC-007/FEATURE-007-A/specification.md (AC updates)
-  - x-ipe-docs/requirements/EPIC-010/FEATURE-010-A/technical-design.md (code pattern updates)
-```
-
----
-
-## Example 4: Ambiguous Request - Human Decision Required
-
-**Request:** "We need better error handling"
-
-### CR Classification
-
-```
-Step 3.1: Read Change Request
-  change_request: "better error handling"
-  → Too vague to classify
-
-Step 3.2: Identify Affected Features
-  - "error handling" could apply to multiple features
-  - Cannot determine specific feature
-
-Step 3.3: Request Clarification
-  Questions for human:
-  1. Which module needs better error handling?
-  2. What specific errors are not being handled?
-  3. Is this about user-facing messages or logging?
-  
-Human Response: "The file upload feature doesn't show error details"
-
-Step 3.2 (retry): 
-  - Found: FEATURE-008 (File Upload)
-
-Step 3.3: Classify Scope
-  - Just improving error messages → ENHANCEMENT
-  
-Step 3.4: Route CR
-  - Classification: ENHANCEMENT
-  - Next Task: Feature Refinement
-```
-
----
-
-## Example 5: Bug Report - NOT a Change Request
-
-**Request:** "The login page crashes on Safari"
-
-### CR Classification
-
-```
-Step 3.1: Read Change Request
-  change_request: "login page crashes on Safari"
-
-Step 3.2: Analyze Request Type
-  - This describes broken existing functionality
-  - Not a new feature or enhancement
-  - This is a BUG, not a Change Request
-
-Step 3.3: Redirect to Bug Fix
-  Response: "This appears to be a bug report, not a change request.
-             Switching to Bug Fix task type."
-
-Step 3.4: Route to Bug Fix
-  → Hand off to x-ipe-task-based-bug-fix skill
-```
-
-### Output
-
-```yaml
-cr_classification: NOT_A_CR
-redirect_to: Bug Fix
-reasoning: "Describes broken functionality, not a change request"
-```
+Approved parent preferences persistence outcome can add retry subgoal AC-005-03
+within existing constraints: all-required save/retry/reload branches. Qualitative
+offline then reconnect scenario, original UI/API checks appropriate to changed
+clauses, no fabricated benefit. Compared alternatives (explicit retry versus bounded
+queue) select one; do not build all alternatives. New enabling subgoal is not
+automatically new_feature; modification may be correct after actual impact study.
+Approved changed acceptance/source/context updates and affected invalidation happen
+before implementation. Audit reporting for compliance stakeholders may instead be
+new_feature; logging mechanism alone is not proof. Subsequent import validation or
+error reporting CRs reuse real feature ownership, check pending CRs and preserve
+histories; mixed unrelated intents require proposed separately approved splits,
+not speculative tasks or recursive routing.

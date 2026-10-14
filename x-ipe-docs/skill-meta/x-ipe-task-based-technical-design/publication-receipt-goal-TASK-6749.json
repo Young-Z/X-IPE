@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "operation": "editor-promotion",
+  "task_id": "TASK-6749",
+  "name": "x-ipe-task-based-technical-design",
+  "publication_state": "published",
+  "permission": "Current user explicitly authorized independent review, candidate fixes, then technical-design promotion via edit tools only",
+  "method": "Exact-file editor promotion; no publisher --apply, Git, board or memory operations",
+  "managed_provenance": "No prior trusted managed manifest supplied; no managed ownership fabricated. This is an explicitly authorized reviewed editor delta, not a transactional publisher receipt.",
+  "baseline_checked_before_edit": true,
+  "candidate_hash": "7df91e86fe0264b67730e891af1b3a1196b07e18067d86757303ca0aee55944d",
+  "baseline": {
+    "SKILL.md": "4e1e57aa17780d8bac8b9e2d17389e3372336623c08a3d3e7865ddec93a077e5",
+    "references/design-principles.md": "03e3fe1e25ed1f608d33eaf49993f3457ab39b61bd8c313897f67bb4e0d1c5a5",
+    "references/design-templates.md": "f0ecf762bd7e18dbefc0624e8b6fe16b30d889d003cf02f5fee2e1352d7ffe7e",
+    "references/examples.md": "4bbbd2bcfd91fcc48b3e81f966bbfa2dd853dc807bcdbdb801cbf76b78d1c6d8"
+  },
+  "files": {
+    "SKILL.md": "2d978e0496f48c6104862a189919de542772b1201b1a6524a9a5e6b4516bf398",
+    "references/design-principles.md": "3a6c385adacd2fc62893bb5350e2cee09a5622d0320d0168217f45bde80ab06b",
+    "references/design-templates.md": "98631178fa938385c43e1dde47da26b2b2acd3ee531ec0f88db829f6d16d20b6",
+    "references/examples.md": "9971a0a4e3ac31c0ad20eddb51df299c3c0ddf4899c2129f0a37fcbaf543ddbb",
+    "references/integration.md": "51d57510597cdf64dbba796fbcc37e12859d314aa01c4e53375b2779e48c0226"
+  },
+  "added": ["references/integration.md"],
+  "changed": ["SKILL.md", "references/design-principles.md", "references/design-templates.md", "references/examples.md"],
+  "removed": [],
+  "byte_parity": true,
+  "independent_review": "Current new main session independently reviewed prior author's candidate; supplementary-Part-2 finding fixed with failing-then-passing regression",
+  "tests_before_promotion": "337 passed; no deselection",
+  "limits": ["Editor publication is not atomic/journaled; no publisher backup/recovery guarantee claimed", "Editor retained obsolete tails; bounded fallback removed them and final five-file byte equality passed"]
+}

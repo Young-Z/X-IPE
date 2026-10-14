@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "operation": "editor-promotion",
+  "task_id": "TASK-6749",
+  "name": "x-ipe-task-based-change-request",
+  "publication_state": "published",
+  "permission": "Current user authorized sequential independent CR review, focused verification, then exact edit-tool promotion",
+  "method": "Five exact editor replacements and one resource addition; read-only installed publisher dry-run; no publisher --apply",
+  "managed_provenance": "All five tracked files equal git show HEAD bytes and recorded prework baseline; no dirty or unmanaged production files",
+  "baseline_hash": "7d158e476935a7eaf01922c31f3812020a76f87ec7200c8f0c5e215e5fda9809",
+  "candidate_hash": "7e7604fbaa558da5e881ad82e1efc49bef4a27a832afc2480fa263e1423eb5c2",
+  "files": {
+    "SKILL.md": "5203bda7c87b3547682cad2f5315d7cd066efcedd8e8558b144cda66effc7ba2",
+    "references/examples.md": "fcf36a13b1dde3f26247c34b5accbb3a56273364b8b317cfad0addc7e821a6d8",
+    "references/integration.md": "0e03e9d3fd51a872b108a2655d4a4cb41d0450ea0b6ef7c8ef4305586920f679",
+    "references/patterns.md": "231ea68f760f9b4d94dd13dc2d6ad98f3f6fb654b816a4bd1ae1f1a6bcb9d2d4",
+    "references/version-history-template.md": "f6681980e47de797118f11526d4645ad33237eb0a275fe189ca637d54521b110",
+    "templates/change-request.md": "d894f7e5ee2fa367227139256c701df102c8802eb566deb835f6b3ba75118dcb"
+  },
+  "added": ["references/integration.md"],
+  "changed": ["SKILL.md", "references/examples.md", "references/patterns.md", "references/version-history-template.md", "templates/change-request.md"],
+  "removed": [],
+  "byte_parity": true,
+  "independent_review": "Sequential fresh main-agent review of inherited worker candidate, not self-review of own draft; classifications, full goal delta pipeline, actual artifacts/authority, all six resources, tags/config and no-feature boundaries inspected; no blocking findings",
+  "tests_before_promotion": "37 passed in tests/test_skill_goal_change_quality.py; deterministic validator zero errors/warnings, same candidate hash",
+  "limits": ["Exact editing is not atomic/journaled; no transactional backup/recovery claimed", "Initial addition lacked terminal newline; parity rejected and bounded newline repair applied before final readback", "Authored examples are not autonomous classification, real approvals or stakeholder observations", "Four previously reported unrelated closing/lifecycle failures not claimed fixed", "No board/memory/Git mutation or broader task closure"]
+}

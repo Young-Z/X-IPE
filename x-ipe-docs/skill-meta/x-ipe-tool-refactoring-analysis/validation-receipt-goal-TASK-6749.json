@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "operation": "validate",
+  "name": "x-ipe-tool-refactoring-analysis",
+  "skill_type": "x-ipe-tool",
+  "ok": true,
+  "errors": [],
+  "warnings": [],
+  "excluded_files": {},
+  "body_lines": 240,
+  "files": {
+    "SKILL.md": "b336da755ba1e23c894a5cc41b26d9d5bfa7a83dc075cde5aadf92e3a414a6b1",
+    "references/detailed-procedures.md": "28178fc65debf89c1a4b4566615934f583389d2812569a42e11809c86f2ad058",
+    "references/examples.md": "0cea4e1171e90fb8f9c93fd297b8d8df794b1e2faba60509411309e45a7e6e0c",
+    "references/output-schema.md": "8f684bb105ea935433f9e074ed89b7701b3b703cb891b83fb161124ea28276d2"
+  },
+  "candidate_hash": "f1c848402913264155e36e76397512d2ea9fa11a7571eb8e25a926b84ce17d97"
+}

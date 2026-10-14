@@ -2,6 +2,11 @@
 
 This document contains detailed implementation guidelines, coding standards, AAA scenario format specification, tool skill contract, and error handling patterns for the Code Implementation task type.
 
+Load the common lifecycle/goal contracts from the entry. All procedures here are
+domain-only under the same supplied owner/readiness, not another task or Git route.
+Concrete example credentials/API behaviors are illustrative approved-contract
+fixtures, not authority to add authentication, status codes or targets to a feature.
+
 ---
 
 ## AAA Scenario Format Specification
@@ -40,10 +45,10 @@ INPUT: specification.md, technical-design.md
 OUTPUT: List of tagged AAA scenarios
 
 1. PARSE specification.md:
-   a. Extract each acceptance criterion → create one @integration scenario per AC
+   a. Extract every scoped AC and ALL original assertions with stable source/story/AC links and specification test type; use appropriate layer scenarios, not forced mocked integration for every acceptance type
       - Arrange = preconditions from AC context
       - Act = user action described in AC
-      - Assert = expected outcome from AC
+      - Assert = all approved observable expected behaviors from AC, not a stakeholder-outcome achievement claim
 
 2. PARSE technical-design.md Part 2:
    a. Extract API endpoints / service methods:
@@ -60,21 +65,21 @@ OUTPUT: List of tagged AAA scenarios
 3. TAG each scenario with @backend, @frontend, or @integration
 
 4. VALIDATE coverage:
-   - Every AC has ≥1 scenario
-   - Every endpoint/component has both happy + sad path
-   - Log coverage summary
+   - Every scoped AC has suitable checks and every original Assert clause retained
+   - Selected contracts have concrete happy/error/edge/regression checks where applicable
+   - Log source/AC/assertion coverage; activity counts are not success criteria
 
 5. IF context is large (>20 components):
    - Generate per-layer: all @backend first, then @frontend
-   - Pass each batch to tool skills before generating next batch
+   - Retain complete cross-layer AC/assertion map before any invocation; never lose uncovered criteria between batches
 ```
 
 ### Context Budget Strategy (Large Features)
 
-For features with >20 components:
-1. Generate all @backend scenarios → invoke backend tool skill
-2. Generate all @frontend scenarios → invoke frontend tool skill
-3. Generate @integration scenarios → orchestrator validates with mocking
+For large context (the >20 components heuristic is not a feature goal):
+1. Preserve a complete scoped AC/assertion/test-type map, including cross-layer cases.
+2. Generate per-layer batches; invoke distinct matched enabled tools sequentially, backend first.
+3. Run integration with suitable mocking plus original UI/API/CLI/structured acceptance checks; mocking does not prove actual UI or stakeholder outcome.
 
 This prevents context overflow by processing one layer at a time.
 
@@ -99,18 +104,24 @@ tool_skill_input:
             - Response status is 201
   source_code_path: "src/my_app/"
   test_code_path: "tests/"
-  feature_context:  # OPTIONAL for "fix"/"refactor"; REQUIRED for "implement"
+  feature_context:  # REQUIRED for implement; OPTIONAL for fix/refactor
     feature_id: "FEATURE-XXX-X"
     feature_title: "..."
+    mockup_link: "{current scoped frontend mockup or N/A}"
     technical_design_link: "x-ipe-docs/requirements/EPIC-XXX/FEATURE-XXX-X/technical-design.md"
     specification_link: "x-ipe-docs/requirements/EPIC-XXX/FEATURE-XXX-X/specification.md"
 ```
+
+Use actual approved source_code_path/test_code_path. Preserve original scenario
+texts, AC/test types and feature links when filtering layers. Supplemental
+feature_context may carry existing artifact anchors/revision evidence, not a new
+board/output schema. Agree same-task lifecycle ownership before tool invocation.
 
 ### Operation Semantics
 
 | Operation | Purpose | AAA Scenarios | feature_context | TDD Gate |
 |-----------|---------|--------------|-----------------|----------|
-| `implement` | Build new feature code | Full set from orchestrator | Required | N/A |
+| `implement` | Build approved feature capability | Full scoped original assertion set | Required | New/changed behavior RED before implementation then GREEN; baseline/regression for already satisfied criteria |
 | `fix` | Fix a bug via TDD | 1-2 narrow scenarios from bug context | Optional (synthetic fallback) | Test MUST fail before fix |
 | `refactor` | Restructure preserving behavior | Per-phase target state scenarios | Optional (synthetic fallback) | Baseline tests must pass first |
 
@@ -134,6 +145,59 @@ tool_skill_output:
   lint_details: ""
 ```
 
+Verify outputs against actual files and test execution, not a tool's self-reported
+pass alone. Special skill-creator/MCP outputs retain their own contracts; adapt
+their actual scoped artifacts/checks into existing evidence without fabricating
+tool_skill_output, publication permission or an observed outcome.
+
+## Implementation Coverage in Existing Artifacts
+
+Append/update this section in the existing design/testing artifact, never a new
+mandatory goal document. Replace placeholders with current sources and evidence.
+
+| Goal ID | Parent / Source | Stakeholder | Desired Observable Outcome | Contribution / Selection | Success Evidence | Constraints / Non-goals | AC Links | Outcome State |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| {stable source/story ID} | {authoritative source/parent} | {actual stakeholder} | {approved outcome} | {enabling selected means; all-required cases versus alternatives} | {source-derived qualitative scenario or justified measure} | {approved constraints} | {all scoped ACs} | {not measured or cited actual observation} |
+
+| Source / Parent Goal | Story / Subgoal | AC ID | Selected Means | Test / Assert | Delivery State | Outcome State |
+| --- | --- | --- | --- | --- | --- | --- |
+| {source/parent anchor} | {stable story/subgoal} | {stable scoped AC} | {justified means within approved design} | {original test type, every assertion, path/command/input/result/revision evidence} | {planned or current verified engineering delivery with actual evidence} | {not measured or cited observation} |
+
+Record rejected alternatives as rationale, not backlog mandates. Necessary
+support concerns must explain their contribution/constraints. Qualitative outcome
+scenario identifies actual stakeholder/context/observable conditions/result and
+evidence gaps; no invented KPI or scope. Planned checks, fixtures, approval or DAO
+guidance are not observed stakeholder outcome. Legacy explicit so-that intent is
+labeled inferred with exact source/story; ambiguity blocks its pertinent claim.
+
+### TDD, Regression and Freshness
+
+For new/changed behavior execute a relevant failing check before implementation,
+confirm the failure is the expected behavior (not broken collection/import), then
+rerun after changes for GREEN. Existing satisfied ACs retain passing baseline
+and affected regression; never force all old tests red. Preserve ALL original
+assertions/ACs/test types: no weakening/deletion/xfail/skips to manufacture success.
+Delegated structured review has domain checks instead of fabricated executable RED.
+
+Installed ordinary implement operations often create tests after code; do not
+claim they already enforce this RED gate. The orchestrator supplies/runs relevant
+RED tests before invoking them (or an explicitly agreed same-task TDD adapter),
+then verifies those unchanged assertions against tool results. Live tool output
+does not silently migrate every tool procedure. Keep mockup_link inside actual
+feature_context as the HTML5 tool declares. When adding await verify async on the
+containing function and propagate through callers needing completion; actual
+browser/runtime syntax checks supplement mocks or jsdom where applicable.
+
+Evidence binds relevant inputs: authoritative parent/spec/ACs, both design parts,
+dependent interfaces, current mockups, actual tool/workflow/tracing config and
+declarations, implementation/tests, commands/exits/results and review scope.
+Rehash before completion; timestamps alone or prior pass counts cannot prove
+freshness. Authorized intent/parent/means deltas invalidate affected checks/review/
+outcome and dependent claims; preserve unrelated IDs/bytes/assertions/history and
+evidence only after verifying dependency independence. An unmeasured outcome
+does not block independently supported engineering delivery. No-op resume checks
+fresh evidence read-only without rewriting logs or replaying owner persistence.
+
 ---
 
 ## Implementation Principles (Detailed)
@@ -143,7 +207,7 @@ tool_skill_output:
 **Core Principles:**
 - Write simple, readable code
 - No complex abstractions unless specified in design
-- Use standard patterns from technical design
+- Use compatible patterns within approved technical design/acceptance/constraints
 - Prefer clarity over cleverness
 - If implementation seems complex, question the design
 
@@ -168,7 +232,7 @@ def get_user_display_name(user, formatter=None, cache=None, observer=None):
 - Implement ONLY what's in technical design
 - No extra features "just in case"
 - No "nice to have" additions
-- If it's not in the design doc, don't implement it
+- Means may flex within approved design/interfaces/outcome/constraints; changed contracts require authorized affected design update first, not scope expansion
 - Defer future features to future tasks
 
 ---
@@ -282,48 +346,48 @@ def get_user(user_id: str) -> User:
 1. Single tool skill fails:
    a. Retry ONCE with original scenarios + error context from first attempt
    b. IF retry succeeds → continue to next tool skill
-   c. IF retry fails → preserve all other passing results, escalate to human
+   c. IF retry fails → preserve passing results, block affected delivery and resolve through actual mode (human asks human; full DAO and hybrid bounded guidance)
 
 2. Multiple tool skills fail:
    a. Preserve results from passing tool skills
    b. Re-invoke ONLY failed tool skills
-   c. IF still failing → escalate with details of all attempts
+   c. IF still failing → block and resolve through actual mode with all attempts; guidance cannot make failed tests pass
 
 3. AAA generation failure:
    a. FALLBACK to x-ipe-tool-test-generation (Phase 1 coexistence)
-   b. Use test-generation output as implementation guidance
+   b. Validate generated checks against every approved AC/original assertion; unresolved expectations block, never become invented scope
    c. Log warning: "AAA generation fell back to test-generation"
 
 4. No tool skill match + general insufficient:
-   a. Signal human: "New tool skill needed for tech_stack entry: {entry}"
-   b. Do NOT attempt ad-hoc implementation
+   a. Signal the bounded gap through actual policy: human asks human; full DAO and hybrid use common representative contract
+   b. BLOCK affected implementation; do NOT continue ad hoc or invent a new tool task
 ```
 
 ### Integration Failure
 
 ```
 1. @integration scenario fails after all unit-level tool skills pass:
-   a. Both tool skill outputs are correct individually
-   b. Cross-layer contract mismatch exists
+   a. Unit-level passing evidence supports only the checks actually executed, not complete individual correctness
+   b. Investigate the cross-layer contract, wiring, mocks and actual runtime behavior; do not assume the cause from unit passes
    c. Report: describe the mismatch, provide both outputs
-   d. Human decides: fix backend interface, frontend expectations, or both
+   d. Resolve the specific conflict through actual mode; original expectations stay intact. Approved contract changes require affected design/change-log/CR authority and reruns
 ```
 
 ---
 
 ## Tracing Instrumentation
 
-### Step 7: Apply Tracing (Detailed)
+### Applicable Existing Tracing Only
 
 ```
-1. INVOKE x-ipe-tool-tracing-instrumentation skill:
-   - Target: All files modified/created in this implementation
+1. IF existing tracing infrastructure and supported modified runtime functions are applicable, invoke x-ipe-tool-tracing-instrumentation; otherwise record a skip rationale, no implicit setup
+   - Target: Applicable modified runtime files only
    
 2. REVIEW proposed decorators:
    - Verify level assignments (INFO for public, DEBUG for helpers)
    - Verify sensitive params detected (password, token, secret, key)
 
-3. APPLY decorators and RE-RUN tests
+3. APPLY decorators with sensitive parameter/log redaction and opt-in behavior; RE-RUN affected tests and refresh revision evidence
 
 Skip Conditions:
 - Skip if project has no tracing infrastructure (no x_ipe.tracing module)
@@ -338,11 +402,11 @@ Skip Conditions:
 IF during implementation you discover design issues:
 
 THEN:
-  1. STOP implementation
-  2. UPDATE technical-design.md:
+   1. Determine whether means remain within approved design/contracts; compatible bounded choices need rationale, not ceremonial redesign. STOP affected work for contract/scope changes
+   2. With actual authorized affected design/CR scope, UPDATE the existing technical-design.md:
      - Modify affected sections in Part 1 and/or Part 2
-     - Add entry to Design Change Log
-  3. RESUME implementation with updated design
+     - Append actual Version History/Design Change Log entry, preserve unaffected bytes/IDs and invalidate affected design/test/outcome/dependent evidence
+  3. Refresh affected scenarios/TDD/regression/review, then RESUME within updated approved design
 
 DO NOT:
   - Implement something different from the design without updating it

@@ -1,224 +1,163 @@
-# Feature Acceptance Test Examples
+# Acceptance Testing — Authored Plans and Honest Evidence
 
-> **Legacy Note:** Examples below use the Epic-aware folder structure (`EPIC-{nnn}/FEATURE-{nnn}-{X}/`). Projects created before the Epic migration may still use the legacy format (`FEATURE-{nnn}/`). Both formats are supported during the transition period.
+These are authored plans/scaffolds, not autonomous skill execution, approval,
+browser/API acceptance, release or observed stakeholder behavior. Installed
+workflow CLI and consistency helper scenarios run in temporary test projects.
 
-This document provides concrete execution examples for the Feature Acceptance Test skill.
+## 1. Read-only status badge — full source-to-AC coverage
 
----
+Reuse approved FEATURE-061-A implementation/design frame verbatim in values.
+Selected BadgeView and StateSelector are means, not new stakeholder goals.
+All-required available and absent-state checks remain original frontend-ui type.
 
-## Example 1: Full-Stack Feature (UI + Backend)
+| Goal ID | Parent / Source | Stakeholder | Desired Observable Outcome | Contribution / Selection | Success Evidence | Constraints / Non-goals | AC Links | Outcome State |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| US-061-A-01 | FR-061-01; explicit badge request | Operator | Recognize available versus absent current state | FEATURE-061-A readable badge selected; all-required available and absent-state handling | planned available/absent-state UI scenario; no operator observation yet | Read-only; no state controls | AC-061-A-01, AC-061-A-02 | not measured |
 
-**Context:** FEATURE-049-A: KB Backend & Storage Foundation — has both backend API and is consumed by frontend.
+| Source / Parent Goal | Story / Subgoal | AC ID | TC / Type | Original Assertions | Evidence / Revision | Delivery State | Outcome State |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| FR-061-01; explicit badge request | US-061-A-01 | AC-061-A-01 | TC-061-01 / frontend-ui | approved current label; no controls/mutation | not executed; relevant input hashes required | planned | not measured |
+| FR-061-01; explicit badge request | US-061-A-01 | AC-061-A-02 | TC-061-02 / frontend-ui | approved unavailable label; no controls/mutation | not executed; relevant input hashes required | planned | not measured |
 
-### Step 1.1: Load Toolbox Config
+Planned UI execution: resolve actual enabled Chrome MCP/dedicated profile/URL,
+navigate to existing panel, trigger available/absent state, inspect badge label,
+controls and state non-mutation plus browser console. Source/jsdom checks cannot
+replace this. Fixture selectors/URLs are not invented as actual app evidence.
+If browser unavailable, both cases Blocked, no fake Pass/done/Tested. Independent
+unit checks may proceed but cannot erase blocked UI assertions. Operator outcome
+scenario is recognizing the two states; no actual observation, no invented target.
 
-```
-Read x-ipe-docs/config/tools.json → stages.validation.acceptance_test:
-  chrome-devtools-mcp: true
-  x-ipe-tool-implementation-python: true
-  x-ipe-tool-implementation-typescript: true
-  (others enabled)
+Actual temporary helper fixture uses done implementation, selected specification
+and impl-files file array, actual authored report and tests/status folder. Owner
+write acceptance_testing passes keyed test-report/test-folder and verifies matching
+validation action/readback. These path fixtures do not execute badge acceptance.
+Original report-link output stays file-oriented. No actual board/app write here.
 
-enabled_tools:
-  frontend_ui_tool: chrome-devtools-mcp ✓
-  code_test_tools: [python, typescript, ...] ✓
-```
+## 2. Authorized source/parent delta and explicit reuse
 
-### Step 1.2: Classify & Generate Test Plan
+Illustrative approved CR-061-01 maps source-flagged stale state to unavailable,
+without new clock/latency threshold. Preserve stable US/AC IDs and original
+no-mutation clauses. Invalidate current-state/stale dependent design/tests/review/
+outcome evidence; absence mapping unchanged does not alone justify reuse if shared
+selector changed. Independently inventory source/spec/code/config/tests and
+applicable design/mockup/environment/evidence. Rehash; if shared dependency changed,
+rerun absence too without rewriting its stable mapping or history. Unrelated dirty
+docs do not invalidate a claim when explicit dependencies establish independence.
 
-```
-Read specification.md → ACs:
-  AC-1: System creates kb-articles directory on startup
-  AC-2: User can create article via POST /api/kb/articles
-  AC-3: User can list articles via GET /api/kb/articles
-  AC-4: Article editor modal displays when clicking "New Article"
-  AC-5: User can save article with title, content, and tags
+Read-only verify_evidence checks report against independently selected expected
+inputs and AC/types/assertions, never a receipt against itself. Omitted source,
+specification, implementation, config, tests or evidence rejects reuse; so do stale
+hashes, wrong feature, missing AC/type/assertion, failed/partial/blocked cases,
+missing actual result/environment/artifact provenance or unsafe paths. A helper
+consistency pass is not runtime execution or semantic acceptance. Reused actual
+browser evidence requires same relevant code/mockup/URL/environment/config and
+original assertions plus reviewed actual captured observations, not just log text.
 
-Classification:
-  AC-1 → test_type: unit         (file system setup logic)
-  AC-2 → test_type: backend-api  (POST endpoint)
-  AC-3 → test_type: backend-api  (GET endpoint)
-  AC-4 → test_type: frontend-ui  (modal interaction)
-  AC-5 → test_type: frontend-ui  (form submission)
+## 3. Full-stack article feature (original example 1)
 
-Tool Assignment:
-  TC-001 (AC-1) → x-ipe-tool-implementation-python (pytest)
-  TC-002 (AC-2) → x-ipe-tool-implementation-python (pytest + httpx)
-  TC-003 (AC-3) → x-ipe-tool-implementation-python (pytest + httpx)
-  TC-004 (AC-4) → chrome-devtools-mcp
-  TC-005 (AC-5) → chrome-devtools-mcp
-```
+Illustrative FEATURE-049-A source explicitly approves creation/storage/listing
+and editor/save behavior. Retain all five ACs: storage setup unit; POST creates
+article with approved status/body; GET lists actual article API; New Article opens
+modal UI; save title/content/tags UI with specified persistence behavior. These
+expected codes/content must come from that source, not from this example.
+Inspect actual route schemas/auth/data and selectors; use enabled Python/API
+runner and actual configured browser for editor/save, integration where required.
+Test real contracts and side effects, not just tool counts or successful file writes.
+Actual evidence records methods/inputs/status/body plus UI trigger/console/state,
+hashes and boundary (in-process versus deployed). This example is not_run and
+does not assert five passes or stakeholder adoption. Missing browser blocks UI
+while independent API checks proceed; no activity pass implies goal achieved.
 
-### Step 2.1: Analyze Implementation
+## 4. CLI and library without frontend (original example 2)
 
-```
-backend-api group:
-  - POST /api/kb/articles → src/x_ipe/routes/kb_routes.py:create_article
-    Request: {"title": str, "content": str, "tags": [str]}
-    Response: 201 {"id": str, "title": str, ...}
-  - GET /api/kb/articles → src/x_ipe/routes/kb_routes.py:list_articles
-    Response: 200 [{"id": str, "title": str, ...}]
+FEATURE-018 explicitly approves --init filesystem creation, config validation
+and error exit 1. Classify CLI entry behavior as integration: run actual executable
+in disposable cwd, assert exit/stdout/stderr and specified files; invalid config
+retains error message and no-mutation assertions. Config parser unit checks are
+additional, not substitutes for CLI error exit. No browser/target_url prerequisite.
+Match enabled stack declarations and existing runner/test-only adapter; never
+invoke ordinary implement and change production behavior during acceptance.
 
-frontend-ui group:
-  - "New Article" button: #kb-new-article-btn
-  - Article editor modal: #kb-article-editor-modal
-  - Title input: #article-title
-  - Content editor: .EasyMDEContainer
-  - Save button: #save-article-btn
-```
+For a library scope, inspect/import actual public API, valid/boundary inputs,
+return values/errors/side effects and applicable integration/import compatibility.
+All approved assertions retained; no UI-only or manual invented metric test.
+Known valid fixtures require no ceremonial human data question. These remain
+planned scenarios; subprocess helper tests elsewhere execute only temporary fixtures.
 
-### Step 4.1: Execute Tests
+## 5. Disabled UI and mixed failures (original examples 3 and 4)
 
-```
-=== backend-api group (pytest) ===
-TC-001: test_kb_directory_creation → PASS
-TC-002: test_create_article_api → PASS
-TC-003: test_list_articles_api → PASS
+FEATURE-010 has two UI cases and one API case. If chrome-devtools-mcp false,
+retain UI Blocked; actual passing API evidence would be 1/3 = 33.33% diagnostic
+pass rate, not 50% or completed delivery. Original cases/types stay in report;
+goal outcome remains not measured. No empty-config enablement or Playwright alias.
 
-=== frontend-ui group (chrome-devtools-mcp) ===
-TC-004: Navigate → click #kb-new-article-btn → verify modal visible → PASS
-TC-005: Fill form → click save → verify success → PASS
-```
+FEATURE-022-C feedback example keeps two API and four UI cases; hypothetical
+observed submit timeout/export missing modal must be Fail with actual screenshot/
+console/result, not assumed pass. Four actual passes of six = 66.67% diagnostic,
+status blocked until all required assertions pass at current revisions. Reports
+propose bounded fix scope; no code repair/expectation weakening or hidden UI failures.
+Numbers are illustrative arithmetic, not actual execution or observed outcome.
 
-### Step 4.2: Report
+## 6. Skills, prompts and configuration contracts
 
-```yaml
-results_by_type:
-  unit: { passed: 1, failed: 0, blocked: 0 }
-  backend_api: { passed: 2, failed: 0, blocked: 0 }
-  frontend_ui: { passed: 2, failed: 0, blocked: 0 }
-total: 5, passed: 5, pass_rate: 100%
-```
+Approved skill feature has source/parent/goal/AC links; read complete candidate
+package, cite precise section/line, verify actual contracts and consumer config,
+run enabled appropriate validator/temporary workflow helper scenarios when AC
+requires behavior. Structured review alone cannot turn keyword presence into
+browser/runtime/lifecycle proof. No fake executable RED for prose-only changes;
+existing implementation TDD/regression/assertions remain intact where applicable.
+Candidate_ready is not published capability. Required independent main review
+and explicit permission remain prerequisites for promotion. Automated helper/
+content checks are fixture evidence, not autonomous agent execution or stakeholder
+observation. Outcome not measured explicitly; no forced manual observation metric.
 
----
+## 7. Conditional quality and existing mandatory app gates
 
-## Example 2: Backend-Only Feature
+Source acceptance passed at current revisions; inspected quality analysis finds
+no evidenced refactor need. Original output still suggests conditional closing.
+Free-mode may return that suggestion to owner. Workflow-mode current template
+code_refactor optional false and actual helper suggests code_refactor pending:
+record closing routing blocker; no fake skip/done/refactor-report, mandatory code
+churn or imaginary quality problem. Existing actual gate must legitimately finish
+or later authorized config migration resolves it. Acceptance action/delivery
+evidence can be supported separately from downstream route availability.
 
-**Context:** FEATURE-018: CLI Tool — no frontend component at all.
+Temporary helper tests prove correct acceptance_testing tags/context/readback,
+reject folder arrays/extra tags/wrong feature/locked stage preserving bytes,
+and characterize permissive missing report/context/pending-prerequisite writes.
+Writer success alone is insufficient. Read-only resume never replays app/board
+writes; advanced Completed feature status/identity remain unchanged. One owner,
+no duplicate task/Git/routing or unrelated source changes in this maintenance slice.
 
-### Step 1.1: Load Toolbox Config
+## 8. All-type authored coverage using one report schema
 
-```
-enabled_tools: {chrome-devtools-mcp: true, python: true, ...}
-```
+Illustrative approved source FR-062-01 requests a reusable read-only diagnostic
+snapshot across UI, HTTP, public library, CLI and a composed flow, plus a complete
+skill package. These are authored source expectations, not requirements or actual
+execution of this repository. All-required channels contribute to one source
+story; no branch is an alternative that can be silently dropped. Each row uses
+the existing coverage schema and every case uses the same acceptance_evidence
+keys regardless of type. Planned commands/selectors are resolved from the real
+scope before execution, never asserted as actual runtime proof by this example.
 
-### Step 1.2: Classify & Generate Test Plan
+| Goal ID | Parent / Source | Stakeholder | Desired Observable Outcome | Contribution / Selection | Success Evidence | Constraints / Non-goals | AC Links | Outcome State |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| US-062-01 | FR-062-01; authored diagnostic request | Maintainer | Inspect the same diagnostic state through approved channels without changing it | all-required UI, HTTP, library, CLI, composed flow and skill contract | planned qualitative scenario; no maintainer observation | Read-only; no invented latency or adoption target | AC-062-UI, AC-062-API, AC-062-LIB, AC-062-CLI, AC-062-FLOW, AC-062-SKILL | not measured |
 
-```
-Read specification.md → ACs:
-  AC-1: CLI accepts --init flag to create project
-  AC-2: CLI validates config file format
-  AC-3: CLI returns exit code 1 on error
+| Source / Parent Goal | Story / Subgoal | AC ID | TC / Type | Original Assertions | Evidence / Revision | Delivery State | Outcome State |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| FR-062-01; authored diagnostic request | US-062-01 | AC-062-UI | TC-062-UI / frontend-ui | snapshot label; no controls/mutation; console free of runtime errors | not executed; relevant input hashes required | planned | not measured |
+| FR-062-01; authored diagnostic request | US-062-01 | AC-062-API | TC-062-API / backend-api | GET status 200; approved body; no storage mutation | not executed; relevant input hashes required | planned | not measured |
+| FR-062-01; authored diagnostic request | US-062-01 | AC-062-LIB | TC-062-LIB / unit | public import and return; documented invalid-input error; no argument mutation | not executed; relevant input hashes required | planned | not measured |
+| FR-062-01; authored diagnostic request | US-062-01 | AC-062-CLI | TC-062-CLI / integration | actual executable exit/stdout; invalid input exit 1/stderr; no file mutation | not executed; relevant input hashes required | planned | not measured |
+| FR-062-01; authored diagnostic request | US-062-01 | AC-062-FLOW | TC-062-FLOW / integration | real component handoff yields same snapshot; isolated setup/cleanup; no state mutation | not executed; relevant input hashes required | planned | not measured |
+| FR-062-01; authored diagnostic request | US-062-01 | AC-062-SKILL | TC-062-REVIEW / structured-review | complete resources; original output and same-owner lifecycle; actual app tags and contexts | not executed; relevant input hashes required | planned | not measured |
+| FR-062-01; authored diagnostic request | US-062-01 | AC-062-SKILL | TC-062-HELPER / integration | actual validator/helper exits and results; required error rejection; no source mutation | not executed; relevant input hashes required | planned | not measured |
 
-Classification:
-  AC-1 → test_type: integration  (CLI + file system)
-  AC-2 → test_type: unit         (config validation logic)
-  AC-3 → test_type: unit         (error handling)
-
-Note: NO frontend-ui tests. chrome-devtools-mcp not needed.
-
-Tool Assignment:
-  TC-001 (AC-1) → x-ipe-tool-implementation-python
-  TC-002 (AC-2) → x-ipe-tool-implementation-python
-  TC-003 (AC-3) → x-ipe-tool-implementation-python
-```
-
-### Final Output
-
-```yaml
-Output:
-  status: completed
-  test_types_tested: ["unit", "integration"]
-  test_cases_created: 3
-  tests_passed: 3
-  tests_failed: 0
-  pass_rate: "100%"
-  results_by_type:
-    frontend_ui: { passed: 0, failed: 0, blocked: 0 }
-    backend_api: { passed: 0, failed: 0, blocked: 0 }
-    unit: { passed: 2, failed: 0, blocked: 0 }
-    integration: { passed: 1, failed: 0, blocked: 0 }
-```
-
----
-
-## Example 3: Frontend-UI Tests Blocked (MCP Disabled)
-
-**Context:** FEATURE-010: Dashboard — tools.json has `chrome-devtools-mcp: false`.
-
-### Step 1.1: Load Toolbox Config
-
-```
-Read tools.json → stages.validation.acceptance_test:
-  chrome-devtools-mcp: false  ← DISABLED
-  x-ipe-tool-implementation-python: true
-
-enabled_tools:
-  frontend_ui_tool: NONE (chrome-devtools-mcp disabled)
-  code_test_tools: [python]
-```
-
-### Step 1.2: Classify
-
-```
-AC-1: Dashboard loads with charts → frontend-ui → chrome-devtools-mcp → BLOCKED (disabled)
-AC-2: API returns dashboard data → backend-api → python → OK
-AC-3: Data refresh updates charts → frontend-ui → chrome-devtools-mcp → BLOCKED
-
-Tool Assignment:
-  TC-001 (AC-1) → blocked (chrome-devtools-mcp disabled)
-  TC-002 (AC-2) → x-ipe-tool-implementation-python
-  TC-003 (AC-3) → blocked (chrome-devtools-mcp disabled)
-```
-
-### Final Output
-
-```yaml
-Output:
-  status: completed  # Ran what we could
-  test_cases_created: 3
-  tests_passed: 1
-  tests_failed: 0
-  tests_blocked: 2
-  pass_rate: "50%"
-  results_by_type:
-    frontend_ui: { passed: 0, failed: 0, blocked: 2 }
-    backend_api: { passed: 1, failed: 0, blocked: 0 }
-```
-
----
-
-## Example 4: Mixed Results with Failures
-
-**Context:** FEATURE-022-C: Feedback Capture — has UI and API tests, some failures.
-
-### Step 4.1: Execute
-
-```
-=== backend-api (pytest) ===
-TC-001: POST /api/feedback → 201 → PASS
-TC-002: GET /api/feedback → 200 → PASS
-
-=== frontend-ui (chrome-devtools-mcp) ===
-TC-003: Right-click context menu → PASS
-TC-004: Panel opens with screenshot → PASS
-TC-005: Submit feedback form → FAIL (timeout waiting for success message)
-TC-006: Export feedback → FAIL (modal never appeared)
-```
-
-### Step 4.2: Report
-
-```markdown
-| Type | Total | Passed | Failed | Blocked |
-|------|-------|--------|--------|---------|
-| backend-api | 2 | 2 | 0 | 0 |
-| frontend-ui | 4 | 2 | 2 | 0 |
-| **TOTAL** | 6 | 4 | 2 | 0 |
-| **Pass Rate** | | 67% | | |
-
-### Failed Tests
-| Test Case | Type | Failure Reason | Recommended Action |
-|-----------|------|----------------|-------------------|
-| TC-005 | frontend-ui | Timeout for success message | Check submit handler |
-| TC-006 | frontend-ui | Export modal not rendered | Check export implementation |
-```
+The skill AC needs both structured-review and integration, with independently
+resolved type-specific clauses and explicit reuse partitions retaining its AC ID.
+Full report coverage must include both rows. Five-type consistency tests exercise
+the helper API/schema only, not these fictional browser/HTTP/library/CLI flows.
+Real UI still needs isolated enabled Chrome, navigation/trigger/console/assertions;
+all others need actual applicable boundaries and current command/results/artifacts.
+No Pass/done/Tested or observed stakeholder outcome is inferred from this plan.

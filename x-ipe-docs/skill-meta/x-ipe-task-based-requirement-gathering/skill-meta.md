@@ -1,292 +1,156 @@
-# ═══════════════════════════════════════════════════════════
-# SKILL META - Task-Based: Requirement Gathering (v2)
-# ═══════════════════════════════════════════════════════════
+# Task-Based Skill Metadata — Requirement Gathering
 
-# ─────────────────────────────────────────────────────────────
-# IDENTITY
-# ─────────────────────────────────────────────────────────────
+## Goal extension — independently promoted
+
+Prior metadata/receipts describe the already-promoted upstream refactor, not
+the new goal delta. [Goal metadata](x-ipe-docs/skill-meta/x-ipe-task-based-requirement-gathering/skill-meta-goal-TASK-6749.md)
+records historical drafting scope. Current independent gate and exact publication
+are in evaluation-goal-promotion-TASK-6749.md and promotion-receipt-goal-TASK-6749.json.
+
+```yaml
 skill_name: x-ipe-task-based-requirement-gathering
 skill_type: x-ipe-task-based
-version: "2.0.0"
-status: candidate
+version: "2.2.0"
+status: production
 created: 2026-02-11
-updated: 2026-03-30
-
-# ─────────────────────────────────────────────────────────────
-# PURPOSE
-# ─────────────────────────────────────────────────────────────
-summary: |
-  Gathers requirements from user requests, checks for conflicts/overlaps with existing features, updates impacted features, and creates requirement detail documents.
-
-triggers:
-  - "new feature"
-  - "add feature"
-  - "I want to build"
-  - "create requirement"
-  - "gather requirements"
-
+updated: 2026-10-13
+task_id: TASK-6749
+publication_state: published
+independent_review: approved_main_distinct_from_prior_author
+summary: >-
+  Gather new/small/CR requirements with revision-bound context reuse, bounded
+  questions, resolved feature impacts, Epic documents and real app deliverables.
+triggers: [new feature, add feature, I want to build, create requirement, gather requirements]
 not_for:
-  - "x-ipe-task-based-feature-breakdown: Use for splitting requirements into features"
-  - "x-ipe-task-based-change-request: Use when modifying an already-specified feature"
-
-# ─────────────────────────────────────────────────────────────
-# CHANGE LOG (v1 → v2)
-# ─────────────────────────────────────────────────────────────
-changes:
-  - type: added
-    description: "Step 3 'Conflict & Overlap Review' — scans existing requirement-details for conflicting/overlapping features before documenting new requirements"
-  - type: added
-    description: "Step 4 'Update Impacted Features' — marks impacted features in requirement-details with CR notes and flags for specification refactoring"
-  - type: modified
-    description: "Steps 3-5 renumbered to 5-7 to accommodate new steps"
-  - type: added
-    description: "New DoD checkpoints for conflict review and impact update verification"
-
-# ─────────────────────────────────────────────────────────────
-# WORKFLOW POSITION
-# ─────────────────────────────────────────────────────────────
+  - "x-ipe-task-based-feature-breakdown: assigning feature units"
+  - "x-ipe-task-based-change-request: separately authorized CR processing"
 workflow:
   category: requirement-stage
-  phase: "Requirements"
-  next_task_based_skill: "Feature Breakdown"
-  human_review: true
-
-# ─────────────────────────────────────────────────────────────
-# INTERFACE
-# ─────────────────────────────────────────────────────────────
+  phase: Requirements
+  next_task_based_skill:
+    - skill: x-ipe-task-based-feature-breakdown
+      condition: Break requirements into features
+  human_review: mode-aware lifecycle boundary; explicit domain human gates retained
 inputs:
   required:
-    - name: interaction_mode
-      type: boolean
-      default: false
-      description: Whether to auto-proceed to next task
-
-    - name: mockup_list
-      type: array
-      default: null
-      description: "List of mockups from ideation, each with mockup_name and mockup_link"
-
-  optional:
-    - name: idea_summary_path
+    - name: task_id
       type: string
-      default: null
-      description: "Path to idea summary from ideation stage"
-
+      description: Existing supplied lifecycle identity and readiness
+    - name: process_preference.interaction_mode
+      type: string
+      default: interact-with-human
+      validation: interact-with-human | dao-represent-human-to-interact | dao-represent-human-to-interact-for-questions-in-skill
+    - name: user_request
+      type: context
+      description: Original user request or valid idea artifact; preserve what/who/why
+  optional:
+    - name: workflow
+      type: object
+      description: Exact resolved name/action/extra_context_reference; required refined idea in workflow-mode
+    - name: epic_id
+      type: string
+      description: Reuse task-associated Epic on resume; otherwise collision-safe next EPIC number
+    - name: mockup_list
+      type: array-or-NA
+      description: Validated mockup_name/mockup_link entries or N/A
 outputs:
   state:
-    - name: category
-      value: requirement-stage
-    - name: status
-      value: completed | blocked
+    - {name: category, value: requirement-stage}
+    - {name: status, value: completed | blocked}
     - name: next_task_based_skill
-      value: Feature Breakdown
-    - name: require_human_review
-      value: true
-    - name: interaction_mode
-      value: "${inputs.interaction_mode}"
-
+      value: conditional canonical Feature Breakdown suggestion retained
+    - {name: process_preference.interaction_mode, value: resolved exact caller enum}
   artifacts:
     - name: requirement_details
       type: file
-      path: "x-ipe-docs/requirements/requirement-details-part-{N}.md"
-      description: "Requirement details document with new feature requirements"
-
-    - name: impacted_features_log
-      type: embedded
-      path: "within requirement-details files"
-      description: "CR markers added to impacted features in existing requirement-details files"
-
+      path: x-ipe-docs/requirements/requirement-details.md or actual active numbered part
+      description: Complete domain content, impacts, source/coverage/verification evidence
+    - name: epic_folder
+      type: directory
+      path: x-ipe-docs/requirements/EPIC-{nnn}/
+      description: New intake grouping with mockups subdirectory; not a Feature ID
+    - name: requirements_folder
+      type: directory
+      path: x-ipe-docs/requirements
+      description: Scalar app folder output, not an array or Epic-only folder
   data:
-    - name: conflict_review_result
-      type: object
-      description: "Summary of conflicts/overlaps found and human decisions (CR vs new feature)"
-    - name: impacted_features
-      type: array
-      description: "List of feature IDs that were marked as impacted"
-    - name: requirement_details_part
-      type: number
-      description: "Current active part number"
-
-# ─────────────────────────────────────────────────────────────
-# ACCEPTANCE CRITERIA (MoSCoW)
-# ─────────────────────────────────────────────────────────────
+    - {name: workflow_action, type: string, description: requirement_gathering}
+    - {name: workflow_action_updated, type: boolean, description: true only after actual successful write/readback}
+    - {name: requirement_summary_updated, type: boolean, description: actual document mutation}
+    - {name: requirement_details_part, type: integer, description: actual active number; single file is 1}
+    - {name: conflict_review_completed, type: boolean, description: complete current revision-bound coverage}
+    - {name: conflicts_found, type: integer, description: actual reviewed conflicts}
+    - {name: impacted_features, type: array, description: existing FEATURE IDs with CR markers}
+    - {name: conflicting_docs_updated, type: array, description: actual minor conflict paths}
+    - {name: conflicting_docs_retired, type: array, description: actual major retirement paths}
+    - {name: epic_id, type: string, description: allocated/reused intake Epic}
+    - {name: mockup_list, type: array-or-NA, description: resolved upstream/input references}
 acceptance_criteria:
   must:
-    - id: AC-S01
-      category: structure
-      criterion: SKILL.md exists with valid frontmatter (name + description with triggers)
-      test: file_exists + yaml_parse
-      expected: name and description fields present
-
-    - id: AC-S02
-      category: structure
-      criterion: references/examples.md exists with at least 1 example
-      test: file_exists
-      expected: file contains at least 1 example
-
-    - id: AC-S03
-      category: structure
-      criterion: SKILL.md body < 500 lines
-      test: line_count
-      expected: < 500
-
-    - id: AC-C01
-      category: content
-      criterion: All required sections present in cognitive flow order
-      test: section_parse
-      expected: |
-        [Frontmatter, Purpose, Important Notes, Input Parameters, 
-         Input Initialization, Definition of Ready, Execution Flow, Execution Procedure, 
-         Output Result, Definition of Done, Patterns & Anti-Patterns, Examples]
-
-    - id: AC-C02
-      category: content
-      criterion: Execution Flow table has 7 steps (Understand, Clarify, Conflict Review, Update Impacted, Check File, Document, Complete)
-      test: table_parse
-      expected: 7 rows in execution flow table
-
-    - id: AC-C03
-      category: content
-      criterion: Step 3 (Conflict Review) scans ALL existing requirement-details files for overlapping features
-      test: content_check
-      expected: step_3 action includes scanning requirement-details files and comparing with new requirements
-
-    - id: AC-C04
-      category: content
-      criterion: Step 3 asks human to confirm CR vs new feature with recommendation
-      test: content_check
-      expected: step_3 action includes asking human with recommendation based on principles
-
-    - id: AC-C05
-      category: content
-      criterion: Step 4 (Update Impacted Features) marks changes in affected requirement-details files
-      test: content_check
-      expected: step_4 action includes adding CR markers and notes for spec refactoring
-
-    - id: AC-C06
-      category: content
-      criterion: DoD has checkpoints for conflict review and impact update
-      test: table_parse
-      expected: DoD includes conflict_review_completed and impacted_features_updated checkpoints
-
-    - id: AC-B01
-      category: behavior
-      criterion: When conflicts found, skill blocks until human decides CR vs new feature
-      test: execution
-      expected: BLOCKING constraint in step_3 prevents proceeding without human decision
-
-    - id: AC-B02
-      category: behavior
-      criterion: When no conflicts found, steps 3-4 complete quickly without blocking
-      test: execution
-      expected: step_3 outputs "no conflicts" and step_4 is skipped
-
+    - {id: AC-S01, category: structure, criterion: Complete candidate with discovery and referenced resources, test: installed creator validator}
+    - {id: AC-S02, category: structure, criterion: About 200-300 entry lines with <=1000 logical body-line ceiling, test: body count}
+    - {id: AC-C01, category: contract, criterion: Preserve full original task_completion_output keys and conditional successor list, test: YAML comparison to live entry}
+    - {id: AC-C02, category: ownership, criterion: Common lifecycle once with no child board/Git/successor boilerplate, test: contract inspection}
+    - {id: AC-C03, category: domain, criterion: Input initialization preserves idea/mockups/language/Epic identity, test: XML and domain assertions}
+    - {id: AC-C04, category: domain, criterion: Fresh all-part coverage can reuse summaries with affected delta review; missing coverage establishes baseline, test: resource inspection}
+    - {id: AC-C05, category: domain, criterion: Bounded questions and all three modes use common lifecycle authority, test: policy contract assertions}
+    - {id: AC-C06, category: domain, criterion: Preserve CR markers/minor edits/major retirement and unrelated FRs/ACs, test: domain template/resource assertions}
+    - {id: AC-C07, category: domain, criterion: Preserve pre-append >500 split boundary/index/links and legacy/new IDs, test: contract assertions; authoring pilot not claimed}
+    - {id: AC-I01, category: integration, criterion: Mandatory shared action and both keyed outputs match real app/prompt/tool config, test: consumer assertions}
+    - {id: AC-I02, category: integration, criterion: Real write/readback succeeds in temporary projects without completing successor, test: installed CLI subprocess tests}
+    - {id: AC-I03, category: integration, criterion: Invalid tags/folder arrays or missing state/action/locked prerequisite do not mutate existing temporary state, test: negative helper tests}
+    - {id: AC-I04, category: honesty, criterion: Missing-tag/nonexistent-file writer acceptance is NOT domain completion, test: helper characterization plus explicit domain guard assertions}
   should:
-    - id: AC-C07
-      category: content
-      criterion: Conflict review provides principle-based recommendation (single responsibility, cohesion, minimal coupling)
-      test: content_check
-      expected: recommendation guidelines reference feature management principles
-
-    - id: AC-C08
-      category: content
-      criterion: Impact markers use consistent format (e.g., `<!-- CR-IMPACT: ... -->` or similar)
-      test: content_check
-      expected: defined marker format for impacted features
-
-    - id: AC-C09
-      category: content
-      criterion: Anti-patterns include "skipping conflict review" scenario
-      test: table_parse
-      expected: anti-pattern table includes conflict-skipping row
-
-    - id: AC-C11
-      category: content
-      criterion: Input Initialization subsection present under Input Parameters
-      test: section_parse
-      expected: "### Input Initialization with <input_init> XML block"
-
+    - {id: AC-R01, criterion: Reuse one canonical template through compatible resource path}
+    - {id: AC-R02, criterion: Small/new/CR/blocked examples contain no contradictory mandatory orchestration}
   could:
-    - id: AC-C10
-      category: content
-      criterion: Conflict review generates a summary table of all overlaps found
-      test: content_check
-      expected: structured output format for conflict findings
-
+    - {id: AC-E01, criterion: Add future representative authoring pilots after independent review}
   wont:
-    - id: AC-W01
-      criterion: Automatic conflict resolution without human input
-      reason: Human judgment required for CR vs new feature decisions
-
-# ─────────────────────────────────────────────────────────────
-# DEPENDENCIES
-# ─────────────────────────────────────────────────────────────
+    - {id: AC-W01, criterion: Board/memory/Git/source/other skill writes, reason: expressly excluded by current scope}
+    - {id: AC-W02, criterion: Broader pipeline completion, reason: only this package is published; breakdown remains separately reviewed}
 dependencies:
   skills:
-    - name: x-ipe-workflow-task-execution
-      relationship: prerequisite
-      description: Must be learned before executing this skill
-
+    - {name: x-ipe-workflow-task-execution, relationship: lifecycle, description: one owner/readiness/policy/boundary}
+    - {name: x-ipe-tool-x-ipe-app-interactor, relationship: integration, description: workflow-mode actual installed update/read helpers}
   artifacts:
-    - path: "x-ipe-docs/requirements/requirement-details*.md"
-      description: "Existing requirement details files to scan for conflicts"
-    - path: "x-ipe-docs/requirements/requirement-details-index.md"
-      description: "Index of all requirement parts"
-
-# ─────────────────────────────────────────────────────────────
-# TESTING
-# ─────────────────────────────────────────────────────────────
+    - {path: x-ipe-docs/config/workflow-template.json, description: shared action gates/contexts/tags}
+    - {path: x-ipe-docs/config/tools.json, description: stages.requirement.gathering tool policy}
+    - {path: src/x_ipe/static/js/features/workflow-stage.js, description: authoritative action/skill map}
 test_scenarios:
   happy_path:
-    - name: "New feature with no conflicts"
-      given: "User requests new feature, no overlaps with existing features"
-      when: "Skill scans existing requirements"
-      then: "Step 3 reports no conflicts, Step 4 skipped, proceeds to document"
-
-    - name: "New feature with overlapping feature found"
-      given: "User requests feature that overlaps FEATURE-005 (Console)"
-      when: "Skill scans and finds overlap"
-      then: "Presents overlap to human with CR recommendation, human decides, impacted features marked"
-
+    - {name: Single and numbered requirement output, given: real temp document/folder/state, when: installed CLI update and read, then: exact outputs done; successor remains pending}
   edge_cases:
-    - name: "Multiple overlapping features"
-      given: "New requirement overlaps 3 existing features"
-      when: "Skill scans"
-      then: "All 3 presented to human, each decided independently"
-
-    - name: "Partial overlap - some FRs conflict, some don't"
-      given: "New feature has 5 FRs, 2 overlap with existing"
-      when: "Skill identifies partial overlap"
-      then: "Only overlapping FRs flagged, recommendation distinguishes partial vs full overlap"
-
+    - {name: Fresh small or CR context, given: complete hash-bound coverage, when: domain review, then: reuse unchanged summaries and inspect affected delta; contract only here}
   error_cases:
-    - name: "No existing requirement files"
-      given: "First-time requirement gathering, no existing files"
-      when: "Skill attempts scan"
-      then: "Reports no existing requirements, skips conflict review"
-
+    - {name: Writer lacks semantic validation, given: missing folder tag/nonexistent file, when: helper called, then: acceptance characterized but candidate requires blocked domain claim}
   blocking:
-    - name: "Human must decide on conflict"
-      given: "Overlap found with existing feature"
-      when: "Agent tries to proceed without human decision"
-      then: "BLOCKED until human confirms CR or new feature"
-
-# ─────────────────────────────────────────────────────────────
-# EVALUATION
-# ─────────────────────────────────────────────────────────────
+    - {name: Missing workflow/action or locked prerequisite, given: invalid temp state, when: helper called, then: nonzero exit and preserved state}
 evaluation:
   self_check:
-    - "SKILL.md < 500 lines"
-    - "All 7 steps present in execution flow"
-    - "Step 3 has BLOCKING constraint for human decision"
-    - "Step 4 has clear marker format"
-    - "DoD includes conflict and impact checkpoints"
-
+    - Installed validator and common requirement-specific tests pass at recorded revisions
+    - Complete package has five retained/updated paths and one new context reference; no removals
+    - Historical execution-log.yaml is not current evidence; use TASK-6749 receipts
   judge_agent:
-    - criterion: "Conflict review step is clear, actionable, and principle-based"
-      rubric: |
-        5: Excellent - clear scan procedure, principle-based recommendation, structured output
-        4: Good - scan and recommendation present but could be clearer
-        3: Acceptable - basic conflict check present
-        2: Poor - vague conflict handling
-        1: Fail - no conflict review
+    - criterion: Semantic lifecycle/domain integration review
+      rubric: Main independent review approved; see independent-review-TASK-6749.md and promotion-receipt-TASK-6749.json
+version_history:
+  - version: "2.2.0"
+    date: 2026-10-13
+    task_id: TASK-6749
+    changes: Independently reviewed goal coverage with canonical shared contract; six-file byte parity, 307 tests passed
+    candidate_hash: c020a439d33be6e4653d954d644ed183b01ca05ce7cb6a0adaed1ee0a41ab6e0
+    parity_receipt: promotion-receipt-goal-TASK-6749.json
+  - version: "2.1.0"
+    date: 2026-10-13
+    task_id: TASK-6749
+    changes: Single-owner lifecycle adoption with delta-first requirements and verified domain/action contracts
+    candidate_hash: fda78fe5234e0d054a4b720e0773ed30cac8f1e39a10215ce277882576ab294b
+    parity_receipt: promotion-receipt-TASK-6749.json
+```
+
+  ## R2 recovered publication history
+
+  - Version 2.2.1, TASK-6749; verified 2026-10-14T04:28:27.605298+00:00.
+  - Current production/candidate fingerprint: 1aed46f6ca4829599fd330117b0dc400d4a8d36c3bd493e03458991da6a51a27.
+  - [Recovered verification receipt](publication-receipt-TASK-6749-R2.json); prior history above remains historical, not current parity evidence.
+  - Hybrid inner guidance and human completion/route boundary independently reviewed at exact R2 hash. Prior-worker promotion time is unknown; no production replay or atomic writer journal claimed.

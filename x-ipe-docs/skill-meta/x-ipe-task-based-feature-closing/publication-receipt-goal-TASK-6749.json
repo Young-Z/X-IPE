@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "operation": "editor-promotion",
+  "task_id": "TASK-6749",
+  "name": "x-ipe-task-based-feature-closing",
+  "publication_state": "published",
+  "permission": "Current user explicitly authorized independent final closing review, consolidated rerun, bounded candidate fixes and editor-only promotion",
+  "method": "Exact-file editor transfer; no publisher apply, board, memory, Git, test, app/config or other source operations",
+  "managed_provenance": "No trusted managed manifest supplied or fabricated; authorized editor transfer, not transactional publisher evidence",
+  "baseline_checked_before_edit": true,
+  "candidate_hash": "9d5a17709cb1f911fd32fa3eb07b338c43eccbafeb064836debaa8485e77fee4",
+  "baseline": {
+    "SKILL.md": "b49abf0c9382ab6b837317a48d88e3118f087f3fd3b35e947c0e04148dae2267",
+    "references/examples.md": "72c3ded38895c6dac61aecb389a7ff82ad0f8c896bbcd57dcf4ac5c6af12b018",
+    "references/templates/changelog-template.md": "2259cadc910e9fa7f79b080f34fffa161e71446db2a5615ed59f09a47f1c588d",
+    "references/templates/pr-template.md": "4625aec829719b8112252d58eb458bd523500fb86a4626c4d57181c56a2d5c9a"
+  },
+  "files": {
+    "SKILL.md": "3e4f03636eebe3fd579aaef50bc1755917781c4e5555b06d887af100b99d2880",
+    "references/examples.md": "5a94b5d5785b93246f828d33eeab73ad86199438d698a47cbe6e8404269115aa",
+    "references/integration.md": "c4e8559cd45ce933fcbc37a0db6bcdacfe2a19180d9f4a791c1402060f0019d4",
+    "references/templates/changelog-template.md": "2259cadc910e9fa7f79b080f34fffa161e71446db2a5615ed59f09a47f1c588d",
+    "references/templates/pr-template.md": "4625aec829719b8112252d58eb458bd523500fb86a4626c4d57181c56a2d5c9a",
+    "templates/closing-report.md": "e3b261cf19a8df0db2ff7903edbb0dd5d0105fa6de768b22bb7a83d85f233d5a"
+  },
+  "changed": ["SKILL.md", "references/examples.md"],
+  "added": ["references/integration.md", "templates/closing-report.md"],
+  "removed": [],
+  "byte_parity": true,
+  "independent_review": "review-main-TASK-6749.md; final independent reviewer inspected all six candidate files and actual contracts",
+  "tests_before_promotion": "Final hash: 503 passed in 31.74s; previous independent consolidated run: 503 passed in 31.46s; all five focused suites, no filters/skips/deselections",
+  "tests_after_promotion": "499 passed, 4 failed in 31.33s; same five suites unfiltered, exit 1, zero skips/deselections. Three stale candidate-only/baseline assertions plus one obsolete rejected closing-report tag expectation; excluded tests unchanged",
+  "protected_files": 2852,
+  "protected_fingerprint": "61c5153e5c44f3a87c0302534b9396c119ccf01411382a4a5c8140738211f25f",
+  "limits": [
+    "Editor promotion is non-atomic, not journaled; no publisher managed ownership or recovery guarantee claimed",
+    "EOF-only candidate corrections revalidated; editor transfer retained legacy suffixes/EOF differences, repaired before parity and metadata settlement",
+    "Four preexisting source assertions conflict with authorized published state or corrected empty-tag mapping; tests excluded from editing; final focused suite is not green",
+    "Authored plans and disposable consumer tests are not autonomous feature closing, real release or stakeholder observation",
+    "TASK-6749 remains in_progress; board, memory, Git, tests and unrelated source unchanged"
+  ]
+}

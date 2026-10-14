@@ -1,0 +1,80 @@
+{
+  "task_id": "TASK-6749",
+  "date": "2026-10-14",
+  "operation": "policy_review_and_publication_verification",
+  "state": "already_published_verified",
+  "ok": true,
+  "publication_replayed": false,
+  "publication_method_this_step": "none; exact production/candidate parity already established",
+  "metadata_write_method": "apply_patch",
+  "version": "2.1.1",
+  "candidate_hash": "b79761fd9d6c36700b1312dc98b7e6b69c7099e14e05d8a10ded9f6ef21dcc00",
+  "production_hash": "b79761fd9d6c36700b1312dc98b7e6b69c7099e14e05d8a10ded9f6ef21dcc00",
+  "byte_parity": true,
+  "files": {
+    "SKILL.md": "79d41c6a58005ecaab44b82baeb380fd7160b25c728848f4dde6daeac66aff42",
+    "references/examples.md": "f4279ab78cfb3e910f55688286461de94ba5fd03bb6d9510a7dc06314982bbed",
+    "references/goal-contract.md": "fd007a0f946ee3ccf60507f88c898358de9ea045b18de6446b65079d62911074",
+    "references/lifecycle.md": "3cf75d245d4640ae0c994abd174e53c6ce1d32591104e4d7c2b1db7595fb31dc",
+    "templates/task-board.md": "521f08a73e475efe950d9167bd33ca174730535387a178fcc813caf1d889bc41",
+    "templates/task-record.yaml": "062f4e547db2dca988b39e49feb8862bc8ce266a9859e26aef0b8f1ab08ed96b"
+  },
+  "source_hashes": {
+    "x-ipe-docs/requirements/EPIC-044/FEATURE-044-E/specification.md": "e776eb9189c474efa4ae0eb17029c0a08db11d149ad07e6424949e58349fec06",
+    "x-ipe-docs/requirements/EPIC-044/FEATURE-044-E/CR-002.md": "b00c7305720e7da8eee6708825b5f4d23bfff6833403cf3df47f23173f34798e",
+    "tests/test_skill_lifecycle.py": "f183236045faf688c69ed4d6a67faa2b24d0951449289b96141c6c79e25e7c69",
+    "x-ipe-docs/skill-meta/x-ipe-workflow-task-execution/publication-receipt-mode-TASK-6749-R2.json": "a315aab5561e2b248eb7c853505110f0177d825f7285ee40839c057e6522d2a8",
+    "x-ipe-docs/skill-meta/x-ipe-workflow-task-execution/promotion-receipt-goal-TASK-6749.json": "3526a58f94834d4fc9e9b8e1457165e311091e7e70bf7821d6b39c1408309cb6"
+  },
+  "validation": {
+    "helper": ".github/skills/x-ipe-meta-skill-creator/scripts/validate_skill.py",
+    "candidate_helper_override": false,
+    "exit_code": 0,
+    "body_lines": 250,
+    "errors": [],
+    "warnings": []
+  },
+  "dry_run": {
+    "helper": ".github/skills/x-ipe-meta-skill-creator/scripts/publish_skill.py",
+    "operation": "publish",
+    "state": "dry_run",
+    "ok": true,
+    "ownership_source": "existing successful R2 publication receipt files; not an invented current inventory",
+    "added": [],
+    "changed": [],
+    "removed": [],
+    "protected": [],
+    "apply": false
+  },
+  "targeted_assertions": {
+    "command": "PYTHONDONTWRITEBYTECODE=1 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 .venv/bin/python -B -m pytest -p no:cacheprovider --noconftest tests/test_skill_lifecycle.py::test_exact_mode_contract -q --tb=short",
+    "exit_code": 0,
+    "passed": 3,
+    "failed": 0,
+    "duration_seconds": 0.03,
+    "test_edits": []
+  },
+  "review": {
+    "reviewer": "GitHub Copilot, reviewer of the preexisting unmodified candidate",
+    "independence_limit": "Candidate was not authored or changed in this bounded step; no spawned independent agent is claimed",
+    "verdict": "approve exact existing workflow revision; publication already satisfied",
+    "human": "human within skill and human completion/route confirmation",
+    "full_dao": "bounded DAO within skill and authorized routing only",
+    "hybrid": "DAO within skill; human completion/route confirmation",
+    "authority": "Current user authorizes workflow-only promotion; representative guidance supplies no scope, acceptance, publication, release, destructive, commit, push or PR authority",
+    "goal_contract_unchanged": true,
+    "blocking_findings": []
+  },
+  "production_edits": [],
+  "board_operations": false,
+  "memory_operations": false,
+  "git_operations": false,
+  "other_skill_edits": [],
+  "larger_task_completed": false,
+  "limitations": [
+    "No new publication transaction or version increment; historical R2 receipt remains the actual publication evidence",
+    "Only targeted lifecycle policy assertions ran; no broader tests, app behavior pilot or stakeholder outcome measurement",
+    "Other skill candidates and legacy installed naming exceptions remain outside this step",
+    "Conflicting child policies still require explicit bounded adapters or block invocation"
+  ]
+}

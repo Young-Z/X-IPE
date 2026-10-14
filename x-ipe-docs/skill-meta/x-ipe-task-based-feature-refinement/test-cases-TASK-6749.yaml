@@ -1,0 +1,28 @@
+test_cases:
+  task_id: TASK-6749
+  suite: tests/test_skill_pipeline_refactor.py
+  evidence_type: parsed domain/structure contracts and installed helpers with temporary projects
+  scenarios:
+    - id: REF-STRUCTURE
+      tests: [test_refinement_complete_validator_structure_and_protected_live, test_refinement_initialized_fields_single_owner_and_all_resources]
+      verifies: complete resources, section order, valid XML, four steps/checkpoint/input contracts and one lifecycle
+    - id: REF-OUTPUT
+      tests: [test_refinement_exact_original_output_contract]
+      verifies: exact original YAML fields/order/values and complete example output
+    - id: REF-DOMAIN
+      tests: [test_refinement_full_scaffold_and_traceability_schema, test_refinement_acceptance_invariant_rejects_real_table_defects]
+      verifies: full domain headings and version-CR/mockup/trace table schemas; GWT/type/unique-ID negative mutations
+    - id: REF-INTEGRATION
+      tests: [test_refinement_actual_writer_readback_paths_context_and_lifecycle_handoff]
+      parameters: [new EPIC/FEATURE, legacy FEATURE]
+      verifies: actual writer/query exact artifacts/context; supported owner status/link handoff; query-only resume/no task allocation
+    - id: REF-CR
+      tests: [test_refinement_actual_advanced_cr_link_update_preserves_state]
+      verifies: actual Completed state preserved with link/version delta and immutable identity/history
+    - id: REF-FAILURES
+      tests: [test_refinement_real_helper_errors_preserve_state, test_refinement_helper_semantic_gaps_not_domain_success]
+      verifies: bad folder/tag/feature/locked errors nonzero and unchanged; skipped/missing semantic gaps honestly characterized
+    - id: REF-CONSUMERS
+      tests: [test_refinement_actual_action_prompt_and_artifact_contract]
+      verifies: mandatory per-feature action, both required contexts/tags and EN/ZH feature/input prompt fields
+  not_proven: autonomous authoring, conflict decision, stable language editing behavior or independent reviewer approval

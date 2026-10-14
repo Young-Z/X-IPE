@@ -1,0 +1,60 @@
+task_id: TASK-6749
+skill_name: x-ipe-workflow-task-execution
+publication_state: published
+candidate_hash: 90b220f8d92463eae43e18f7f2157c1cfd6ecb90a6f7fce0531173233186ed25
+promoted: true
+independent_review: reviewed_previous_builder_candidate_with_narrow_corrections
+review_receipt: review-report.md
+publication_receipt: publication-receipt.json
+promotion_blockers: []
+results:
+  validator: {ok: true, body_lines: 244, errors: [], warnings: []}
+  dry_run: {ok: true, added: 2, changed: 3, removed: 0}
+  focused_python:
+    command: PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -B -m pytest tests/test_skill_lifecycle.py tests/test_skill_creator_foundation.py -q -p no:cacheprovider
+    exit_code: 0
+    passed: 172
+    lifecycle_cases: 27
+  existing_ui_modes:
+    command: npm test -- --run tests/frontend-js/action-execution-modal-cr001.test.js tests/frontend-js/workflow-panel-actions.test.js --reporter=dot
+    exit_code: 0
+    passed: 34
+  wider_contracts:
+    command: PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -B -m pytest tests/test_skill_lifecycle.py tests/test_skill_creator_foundation.py tests/test_feature_041g.py tests/test_workflow_stage.py tests/test_workflow_settings.py -q -p no:cacheprovider
+    exit_code: 1
+    passed: 259
+    failed: 2
+    failures:
+      - test: tests/test_feature_041g.py::TestExtraContextReferencePresence::test_skill_declares_correct_ref_names
+        detail: Unmodified live change-request skill lacks legacy eval-report expected by test; current template uses closing-report.
+      - test: tests/test_workflow_settings.py::TestSkillTemplateUpdate::test_skill_count_is_19
+        detail: Unmodified live discovery has 22 task skills, not historical hardcoded 19; candidate is outside discovery.
+    disposition: Existing unrelated contract mismatches; no fixes in this scope, no all-suite pass claimed
+  semantic_compatibility:
+    hybrid: User-requested human within skill and DAO only routing supersedes inverted live UI/child prose; passing UI transport tests do not certify that prose
+    deliverables: Unmigrated closing-report tags, eval-report naming, impl-files design input and directory/file output differences recorded in review-report.md and common lifecycle
+    production_validation: Installed validator only accepts canonical candidate roots; production assurance is exact candidate manifest and byte parity, not a fabricated live-root validator pass
+current_review_preservation:
+  receipt: publication-receipt.json
+  protected_files: 1361
+  sha256: 5ddb9d2ca6d321425c9dac50c3763d41b88e6fab61cca6df73f49f59a8facc5e
+  live_board_access: false
+  memory_access: false
+  git_commands: false
+  child_edits: false
+prior_builder_preservation:
+  before_sha256: 5ec343cdccec023f6967378e56abd67c5cb79a985e94c20360bffccfa9d18f6c
+  after_sha256: 5ec343cdccec023f6967378e56abd67c5cb79a985e94c20360bffccfa9d18f6c
+  method: Sorted compact JSON path-to-SHA256 map; excludes __pycache__, node_modules and new tests/test_skill_lifecycle.py
+  roots: [.github/skills, x-ipe-docs/planning, src, x-ipe-docs/config, x-ipe-docs/skill-meta/x-ipe-meta-skill-creator, x-ipe-docs/skill-meta/x-ipe-meta-lesson-learned, x-ipe-docs/skill-meta/x-ipe-tool-task-board-manager, tests]
+  live_board: Exact supplied task ensure returned created=false; record bytes unchanged; broader task remains in_progress
+  git: Read-only inspection only; no stage commit push or branch operations
+lessons: {selected: [], changed: false}
+freshness:
+  candidate_receipt: validation-receipt.json
+  dependencies: evidence-files.json
+  rule: Any changed candidate, test or relevant consumer bytes require affected verification and current review; structural hash alone does not bind external consumers
+follow_up:
+  - Separate creator-owned candidate revision for generic template lifecycle adoption guidance
+  - Child candidate migration with explicit common contract link and duplicate lifecycle removal
+  - Combined-deliverable app integration tests before any action gate relaxation; no skips now

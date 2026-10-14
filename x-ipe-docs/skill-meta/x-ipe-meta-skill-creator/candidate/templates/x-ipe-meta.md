@@ -134,7 +134,7 @@ BLOCKING: All input fields with non-trivial initialization MUST be documented he
 
 ```xml
 <procedure name="{skill-name}">
-  <!-- CRITICAL: Both DoR/DoD check elements below are MANDATORY -->
+  <!-- Check DoR; schedule independent DoD review when risk warrants it. -->
   <execute_dor_checks_before_starting/>
   <schedule_dod_checks_with_sub_agent_before_starting/>
 
@@ -200,7 +200,7 @@ task_completion_output:
 
 ## Definition of Done
 
-CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
+CRITICAL: Use deterministic DoD checks and require independent review for meaningful workflow, executable, or safety-policy changes. Cosmetic/document-only changes may use a documented lightweight self-review.
 
 ```xml
 <definition_of_done>
@@ -324,7 +324,7 @@ patterns:
 
 ### Sub-Agent Pattern for Meta Skills
 
-Meta skills often use sub-agents for complex operations:
+Meta skills may use sub-agents where isolation or parallelism adds value. The following DAG is illustrative, not a compulsory four-round flow. Choose review by risk, not step count:
 
 ```yaml
 sub_agent_workflow:

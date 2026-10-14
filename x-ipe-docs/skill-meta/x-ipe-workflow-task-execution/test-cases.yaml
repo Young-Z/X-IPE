@@ -1,0 +1,25 @@
+task_id: TASK-6749
+candidate_hash: 90b220f8d92463eae43e18f7f2157c1cfd6ecb90a6f7fce0531173233186ed25
+test_file: tests/test_skill_lifecycle.py
+test_sha256: 092df266074e10ea6426f4ccce7f64c6118f2a0a8c1acb1abd3ded5c82f18c6b
+cases:
+  - {name: ordered five phases, method: XML content parse, result: passed}
+  - {name: existing output and common child schema, method: YAML and legacy field comparison, result: passed}
+  - {name: three exact interaction modes, method: corrected policy assertions plus actual representative schema and UI enum transport; inverted UI prose disclosed, result: passed}
+  - {name: optional review flag and known child deliverable mismatches, method: live child/config inspection plus common contract assertions, result: passed}
+  - {name: source links Git preservation and small-path honesty, method: content assertions, result: passed}
+  - {name: authoritative implementation action versus tool key, method: actual config and ACTION_MAP inspection, result: passed}
+  - {name: ensure retry no duplicate timestamps or outputs, method: installed board CLI tmp subprocess, result: passed}
+  - {name: owner blank role description and type conflicts, method: installed board CLI tmp subprocess byte snapshots, result: passed}
+  - {name: resume in_progress blocked deferred and terminal states, method: installed board CLI tmp subprocess, result: passed}
+  - {name: create allocated ID then ensure and complete pagination, method: installed board CLI tmp subprocess, result: passed}
+  - {name: duplicate live record context, method: installed board CLI tmp subprocess, result: passed}
+  - {name: candidate links and revision receipt, method: installed validator and publisher sandbox dry-run, result: passed}
+  - {name: external consumer revision freshness, method: real hashes and installed validator limitation test, result: passed}
+  - {name: keyed per-feature workflow write and raw-state readback, method: installed app helpers tmp subprocess, result: passed}
+  - {name: missing deliverables writer permissiveness, method: actual writer sandbox plus stronger lifecycle contract assertion, result: passed}
+  - {name: invalid code_implementation app action no state mutation, method: installed app helper sandbox, result: passed}
+limits:
+  - No autonomous-agent runtime emulator; modes and child orchestration are instruction contracts, not executable behavior guarantees.
+  - Child adoption and combined-deliverable app integration are not executed; mandatory gates remain unchanged.
+  - No live board writes from tests; no publication, commit, push or source changes.

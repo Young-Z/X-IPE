@@ -1,206 +1,188 @@
 ---
 name: x-ipe-meta-lesson-learned
-description: Capture issues and feedback for skill improvement. Use when a skill execution had problems, human provides feedback, or agent observes suboptimal behavior. Triggers on requests like "capture lesson", "record issue", "this skill failed", "improve this skill". Records lessons in x-ipe-docs/skill-meta/{skill}/x-ipe-meta-lesson-learned.md for future skill updates.
+description: Maintain selective, time-bounded skill lessons with evidence-backed admission, adoption, application and safe cleanup. Use when a consequential reusable skill gap is verified or an explicit finite retention request is made. Triggers on requests like "capture lesson", "record issue", "this skill failed", "improve this skill". Ordinary mistakes are skipped; unresolved incidents go to owned tasks.
 ---
 
 # Lesson Learned
 
 ## Purpose
 
-Capture issues, errors, and feedback to improve skills over time by:
-1. Identifying which skill had the issue
-2. Analyzing what went wrong (observed vs expected)
-3. Documenting the correct behavior (ground truth)
-4. Recording a structured lesson for future skill updates
-
----
+Maintain a small temporary skill-improvement queue by:
+1. Admitting only consequential, reusable, verified corrections.
+2. Selecting relevant summaries without refreshing their lifetime.
+3. Distinguishing candidate adoption from verified production application.
+4. Forgetting reminders safely once durable safeguards or risk owners exist.
 
 ## About
 
-This meta skill operates on the X-IPE skill improvement loop. When a skill produces incorrect output, throws errors, or receives human feedback, this skill captures the lesson in a structured format that can be consumed during future skill updates.
+This meta skill operates on other skills' improvement records, not a general
+incident diary. Durable instructions and tests supersede temporary reminders.
+No database, global registry, growing archive, scheduled agent or access log.
 
 ### Key Concepts
 
-- **Ground Truth** - The verified correct output or behavior, captured after manual fix or human clarification
-- **Lesson Entry** - A structured record (LL-{NNN}) stored per-skill with observed/expected/ground-truth data
-- **Improvement Proposal** - A suggested change (new AC, updated instruction, added example) derived from the lesson
+- **Ground truth:** verified correct behavior, never a fabricated proposed fix.
+- **Identity:** `(primary skill, LL-NNN)`; IDs are not global.
+- **Admission:** agent-supplied qualitative reason, gap and supporting evidence.
+- **Application:** published safeguard plus relevant passing production tests.
+- **Handoff:** an existing open task with actual owner and scoped lesson backlink.
 
 ### Scope
 
 ```yaml
 operates_on:
-  - "Skill execution issues and failures"
-  - "Human feedback on skill output"
-  - "Edge cases not covered by existing skills"
-
+  - per-skill Markdown lesson queues
+  - bounded selection and evidence-backed lifecycle decisions
 does_not_handle:
-  - "Applying fixes to skills (handled by x-ipe-meta-skill-creator)"
-  - "Automated detection of skill issues"
+  - editing or publishing skills (use x-ipe-meta-skill-creator)
+  - creating tasks, incidents or external issues inside the helper
+  - historical migration, Git operations, memory copies or periodic maintenance
 ```
-
----
 
 ## Important Notes
 
-BLOCKING: Do NOT proceed past Step 4 without ground truth. A lesson without ground truth cannot generate valid tests.
+BLOCKING: Unknown ground truth is an incident/task handoff, not a lesson.
+Never invent the corrective rule or validation evidence to complete a schema.
 
-CRITICAL: Always assign severity (critical/major/minor/enhancement) so lessons can be prioritized during skill updates.
+CRITICAL: Severity alone does not admit a major lesson. Require verified
+recurrence or a systemic contract gap likely to block ordinary future work.
+Skip cosmetic/harmless one-offs, speculative enhancements and local fixed bugs
+without a reusable skill gap. Repeated harmless typos still do not qualify.
 
-**Note:** If Agent does not have skill capability, go to `.github/skills/` folder to learn skills. SKILL.md is the entry point.
+MANDATORY: Check existing authoritative rules/tests and equivalent lessons.
+If a known rule was violated, identify enforcement/cause rather than duplicate
+the warning. Respect explicit no-retention requests without a rejected diary.
 
----
+BLOCKING: Writes use explicit roots and expected SHA256 revision under a
+cooperative lock. Physical purge requires explicit apply and preservation.
+Do not bypass protected legacy, undated, unknown-status or WIP records.
+
+MANDATORY: Creator select/settle calls and packaged instruction alignment are
+separate consumer-integration work. Installing this helper does not establish
+automatic adoption/application; lifecycle owners invoke it explicitly until
+that integration is verified. Historical lesson conversion is not included.
 
 ## Input Parameters
 
 ```yaml
 input:
-  # Primary input
-  trigger: "Human request or agent-observed issue (e.g. 'capture lesson', 'this skill failed')"
-
-  # Context (from current session)
-  skill_name: "Name of skill that had the issue (auto-detected or asked)"
-  task_id: "TASK-ID if available from current session"
-
-  # Optional
-  error_output: "Actual output or error message if available"
-  fixed_output: "Manually corrected output if human already fixed it"
+  operation: capture | select | settle | prune
+  project_root: "absolute approved project, including temporary test projects"
+  skill_name: "existing primary owner skill; select can consult multiple owners"
+  task_id: "existing lifecycle task; do not create duplicate operation tasks"
+  proposal: "agent-evaluated admission, evidence and reusable correction"
+  expected_revision: "SHA256 from load or prune preview, required for writes"
+  now: "optional explicit UTC instant for deterministic tests"
+  decision: "owned plan/application/release/retirement evidence"
+  apply: false
+  preservation: "revision-bound explicit user approval for physical purge"
+  process_preference:
+    interaction_mode: interact-with-human | dao-represent-human-to-interact | dao-represent-human-to-interact-for-questions-in-skill
 ```
 
----
+### Input Initialization
+
+```xml
+<input_init>
+  <field name="operation" source="existing task intent; capture is not automatic for every issue" />
+  <field name="project_root">
+    <steps>Resolve the approved root; reject traversal, symlinks, hard links and special nodes.</steps>
+  </field>
+  <field name="skill_name">
+    <steps>Verify target skill exists. Resolve canonical per-skill file, accepting legacy lesson-learned.md only when canonical is absent. Ambiguous dual files block.</steps>
+  </field>
+  <field name="proposal">
+    <steps>Obtain observed evidence/correction, reusable gap, coverage check, cause, corrective rule, verification and qualitative reason. Unknown truth routes to incident ownership.</steps>
+  </field>
+  <field name="expected_revision">
+    <steps>Read load snapshot or maintenance preview; reread on conflict, never retry blindly with a new revision.</steps>
+  </field>
+  <field name="decision">
+    <steps>Resolve real owner/candidate mappings or existing publication/test artifacts, not arbitrary success strings.</steps>
+  </field>
+  <field name="preservation">
+    <steps>Resolve explicit user approval tied to the exact file revision; otherwise retain untracked/WIP records.</steps>
+  </field>
+  <field name="process_preference" source="lifecycle policy; route only genuinely unresolved questions" />
+</input_init>
+```
 
 ## Definition of Ready
 
 ```xml
 <definition_of_ready>
-  <checkpoint required="true">
-    <name>Issue identified</name>
-    <verification>Human reported issue, agent observed failure, or feedback provided</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Skill exists</name>
-    <verification>Target skill folder exists at .github/skills/{skill-name}/</verification>
-  </checkpoint>
-  <checkpoint required="recommended">
-    <name>Task context available</name>
-    <verification>TASK-ID or session context provides scenario details</verification>
-  </checkpoint>
+  <checkpoint required="true"><name>Scope known</name><verification>Existing task, operation, allowed root and owner skills are explicit.</verification></checkpoint>
+  <checkpoint required="true"><name>Evidence honest</name><verification>Admission or settlement facts are supplied; unknown truth is stated.</verification></checkpoint>
+  <checkpoint required="true"><name>Mutation authorized</name><verification>Expected revision and maintenance/preservation permission are known when needed.</verification></checkpoint>
+  <checkpoint required="true"><name>Resources loaded</name><verification>Bundled schema and API reference are available; legacy is read-only.</verification></checkpoint>
 </definition_of_ready>
 ```
 
----
-
 ## Execution Flow
 
-| Step | Name | Action | Gate |
-|------|------|--------|------|
-| 1 | Identify Skill | Determine and verify target skill | Skill folder exists |
-| 2 | Gather Context | Collect task ID, scenario, inputs | Context documented |
-| 3 | Document Issue | Record observed vs expected behavior | Both behaviors captured |
-| 4 | Capture Ground Truth | Get verified correct output | Ground truth confirmed |
-| 5 | Propose Improvement | Suggest AC or instruction change | Proposal type selected |
-| 6 | Save Lesson | Append entry to x-ipe-meta-lesson-learned.md | File updated with LL-{NNN} |
-
----
+| Step | Action | Gate |
+|------|--------|------|
+| 1 | Evaluate admission or lifecycle evidence | Reusable verified correction or honest blocked disposition |
+| 2 | Resolve compact queue and relevant summaries | Protected records not treated as fresh/expired |
+| 3 | Execute the authorized operation | Revision, ownership, receipts and preservation enforced |
+| 4 | Return bounded disposition | Exact evidence and exceptions; no false application |
 
 ## Execution Procedure
 
 ```xml
 <procedure name="x-ipe-meta-lesson-learned">
   <execute_dor_checks_before_starting/>
-  <schedule_dod_checks_with_sub_agent_before_starting/>
-
   <step_1>
-    <name>Identify Skill</name>
+    <name>Evaluate Intent and Evidence</name>
     <action>
-      1. Determine which skill had the issue:
-         - If context is clear: extract skill name from conversation
-         - If unclear: ask user "Which skill had the issue?"
-      2. Verify skill exists at .github/skills/{skill-name}/
-      3. Check if x-ipe-docs/skill-meta/{skill-name}/ exists; create if missing
+      1. IF ordinary/no reusable gap/already covered/no-retention THEN skip without persisting a rejection log.
+      2. IF correct behavior is unknown THEN route incident to an existing owned task; report handoff required until an owner exists.
+      3. Admit critical failures only with explicit impact (loss/corruption, confidentiality/security/authorization, destructive action or invalid accepted success).
+      4. Admit high-value major only with verified-recurrence or systemic-contract-gap basis and supporting evidence.
+      5. IF user explicitly requests retention THEN record exact request, purpose and finite TTL (1-180 days); preserve honest severity.
     </action>
-    <constraints>
-      - BLOCKING: If skill folder does not exist, abort with error
-    </constraints>
-    <output>Verified skill name and skill-meta folder path</output>
+    <output>Admission decision or short skipped/incident disposition</output>
   </step_1>
-
   <step_2>
-    <name>Gather Context</name>
+    <name>Resolve Queue and Select</name>
     <action>
-      1. Collect task ID from current session (if available)
-      2. Document the scenario (what was being done)
-      3. Record what inputs were provided to the skill
-      4. Note skill version if known
+      1. Load the per-skill snapshot; unknown schema/status/dates and old prose remain protected for reviewed migration.
+      2. Select unexpired active/planned records by applicability, criticality, recurrence and freshness; zero relevant entries is valid.
+      3. Return at most five summaries across owners within approximately 120 lines; surface relevant critical overflow identities.
+      4. Reads, selections and prose edits do not change status, timestamps or expiry; no access log.
+      5. Surface critical review due at 90 days, expired critical cleanup identities and planned owner-progress review after 14 days; never steal ownership or automatically renew.
     </action>
-    <output>Context block with task_id, scenario, inputs, skill_version</output>
+    <output>Bounded summaries, scoped IDs, revision and protected/overflow notices</output>
   </step_2>
-
   <step_3>
-    <name>Document Issue</name>
+    <name>Execute Authorized Operation</name>
     <action>
-      1. Record observed behavior:
-         - What the skill actually did
-         - Include actual output or error messages if available
-      2. Record expected behavior:
-         - What the skill should have done
-         - Be specific about correct behavior
+      1. Use the bundled helper APIs/CLI with explicit project root. One primary owner stores shared rules; applicability links consumers.
+      2. Capture deduplicates normalized cause plus corrective rule; retain at most two evidence links. A verified new occurrence with distinct evidence can refresh validity and increment occurrence count.
+      3. Without new evidence, a duplicate is unchanged. Applied regression reopens the retained identity after confirming the cause; retired re-admission blocks for review.
+      4. Enforce eight pending active/planned entries, including stale pending cleanup. At capacity consolidate or approved maintenance; unresolved critical overflow goes to owned tasks, never silent eviction.
+      5. Set planned only when a real open task owns an existing named candidate and concrete lesson-to-change/test mapping. Planning never pauses expiry.
+      6. Set applied only after matching planned ownership, verified publication manifest/byte parity and a scoped passing production test receipt. Replay identical owned receipt is unchanged even after later production updates; it does not reapply or reset the terminal clock.
+      7. Failed publication leaves planned or explicitly releases to valid active with owner task and reason. Release preserves original expiry; expired content needs evidence-backed revalidation.
+      8. Retirement excludes immediately and records reason. Conservative helper requires verified critical handoff even for explicit rejection/supersession; record replacement in reason.
+      9. Prune previews only by default. Expired pending records retire with 30-day grace. Unresolved critical cleanup needs existing-schema open owned task plus scoped backlink; failed handoff retains the excluded record.
+      10. Apply physical purge only after grace, fresh revision and explicit revision-bound preservation approval. Never remove unrelated files, safeguards, linked tasks or history.
     </action>
-    <output>Observed vs expected behavior documentation</output>
+    <output>Operation receipt with actions, revision, protected records and blocked cleanup</output>
   </step_3>
-
   <step_4>
-    <name>Capture Ground Truth</name>
+    <name>Verify and Report</name>
     <action>
-      1. Ask: "What should the correct output look like?"
-      2. Record the ground truth:
-         - If human provides correction: record exactly as provided
-         - If human fixed output manually: reference the fixed file path and key differences
-         - If unclear: ask clarifying questions
+      1. Validate changed queue and bounded output; surface every protected exception rather than claiming a strict disk bound.
+      2. Critical active/planned TTL is 180 days, review due 90; major TTL 90. UTC expiry is now greater than or equal to expires_at.
+      3. Applied/retired disappear from normal selection immediately; retain compact receipt/reason 30 days, then approved purge.
+      4. Keep old undated/unknown status records neither fresh today nor automatically expired. No migration or global database in this operation.
+      5. Return honest result to lifecycle owner; no board/Git/memory changes from helper. Meaningful policy changes require independent review through creator.
     </action>
-    <constraints>
-      - BLOCKING: Do NOT proceed without ground truth
-      - CRITICAL: Ground truth becomes the test case for validation
-    </constraints>
-    <output>Verified correct output or behavior</output>
+    <output>Exact disposition and unresolved issues</output>
   </step_4>
-
-  <step_5>
-    <name>Propose Improvement</name>
-    <action>
-      1. Classify the improvement type:
-         - new_ac: issue reveals missing requirement -> add to acceptance_criteria
-         - update_ac: existing AC is incomplete -> modify specific AC
-         - update_instruction: skill procedure unclear -> target SKILL.md section
-         - add_example: edge case not covered -> target references/examples.md
-      2. IF issue is a missing section or validation gap: propose new_ac with specific acceptance criteria
-         ELSE: propose update_instruction or add_example as appropriate
-      3. Draft the proposed change with target location
-    </action>
-    <output>Improvement proposal with type, target, and description</output>
-  </step_5>
-
-  <step_6>
-    <name>Save Lesson</name>
-    <action>
-      1. Read template from x-ipe-docs/skill-meta/templates/x-ipe-meta-lesson-learned.md (if exists)
-      2. Generate unique lesson ID: LL-{NNN} (increment from last entry)
-      3. Create lesson entry with status: raw and all gathered information
-      4. Append to x-ipe-docs/skill-meta/{skill-name}/x-ipe-meta-lesson-learned.md
-      5. If file did not exist: create with YAML frontmatter
-    </action>
-    <success_criteria>
-      - Lesson entry has unique ID
-      - All fields populated (context, observed, expected, ground_truth, proposal)
-      - Severity assigned (critical/major/minor/enhancement)
-      - Status set to raw
-    </success_criteria>
-    <output>Updated x-ipe-meta-lesson-learned.md file path</output>
-  </step_6>
-
 </procedure>
 ```
-
----
 
 ## Output Result
 
@@ -209,60 +191,35 @@ task_completion_output:
   category: standalone
   status: completed | blocked
   next_task_based_skill: null
-  require_human_review: "no"
-  task_output_links:
-    - "x-ipe-docs/skill-meta/{skill-name}/x-ipe-meta-lesson-learned.md"
-  lesson_id: "LL-{NNN}"
-  target_skill: "{skill-name}"
-  severity: "{critical|major|minor|enhancement}"
-  improvement_type: "{new_ac|update_ac|update_instruction|add_example}"
+  process_preference:
+    interaction_mode: "resolved lifecycle mode"
+  require_human_review: "yes for policy changes or unresolved permission"
+  task_output_links: ["per-skill Markdown or existing incident task"]
+  disposition: captured | merged | duplicate | skipped | incident_handoff_required | planned | applied | active | retired | unchanged | dry_run | blocked
+  lesson_identity: "primary skill + LL-NNN when present"
+  revision: "SHA256 snapshot when available"
+  unresolved_issues: []
 ```
-
----
 
 ## Definition of Done
 
-CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
-
 ```xml
 <definition_of_done>
-  <checkpoint required="true">
-    <name>Skill identified and verified</name>
-    <verification>Skill folder exists at .github/skills/{skill-name}/</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Context documented</name>
-    <verification>Task ID (if available), scenario, and inputs are recorded</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Issue described</name>
-    <verification>Both observed and expected behavior are documented</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Ground truth captured</name>
-    <verification>Verified correct output or behavior is recorded</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Improvement proposed</name>
-    <verification>Proposal includes type, target, and description</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Lesson saved</name>
-    <verification>x-ipe-meta-lesson-learned.md exists at x-ipe-docs/skill-meta/{skill-name}/ with new LL-{NNN} entry</verification>
-  </checkpoint>
+  <checkpoint required="true"><name>Admission justified</name><verification>Qualitative gap, truth and evidence supplied; ordinary events skipped.</verification></checkpoint>
+  <checkpoint required="true"><name>Bounded records</name><verification>Scoped monotonic IDs, two evidence links, eight pending limit and explicit dates.</verification></checkpoint>
+  <checkpoint required="true"><name>Selection read-only</name><verification>Five summaries, expiry filter and critical overflow; no timestamp refresh.</verification></checkpoint>
+  <checkpoint required="true"><name>Lifecycle truthful</name><verification>Ownership and publication/test receipts gate changes; replay does not reset retention.</verification></checkpoint>
+  <checkpoint required="true"><name>Cleanup safe</name><verification>Dry-run first, critical handoff, grace and preservation; exceptions remain visible.</verification></checkpoint>
+  <checkpoint required="true"><name>Evidence exact</name><verification>Operation result reports revisions and gaps without invented ground truth or migration.</verification></checkpoint>
 </definition_of_done>
 ```
 
----
-
 ## Templates
 
-| File | Purpose | When to Use |
-|------|---------|-------------|
-| `x-ipe-docs/skill-meta/templates/x-ipe-meta-lesson-learned.md` | Lesson entry template | When creating a new x-ipe-meta-lesson-learned.md or appending entries |
-
----
+- [Canonical queue template](.github/skills/x-ipe-meta-lesson-learned/templates/lesson-learned.md)
+- [API and schema](.github/skills/x-ipe-meta-lesson-learned/references/lifecycle.md)
+- [Helper](.github/skills/x-ipe-meta-lesson-learned/scripts/lesson_ops.py)
 
 ## Examples
 
-See [references/examples.md](.github/skills/x-ipe-meta-lesson-learned/references/examples.md) for concrete execution examples.
+See [examples](.github/skills/x-ipe-meta-lesson-learned/references/examples.md).

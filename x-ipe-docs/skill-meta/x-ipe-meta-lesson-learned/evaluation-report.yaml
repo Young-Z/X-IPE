@@ -1,0 +1,70 @@
+schema: 1
+task_id: TASK-6749
+skill_name: x-ipe-meta-lesson-learned
+skill_type: x-ipe-meta
+publication_state: published
+date: '2026-10-13'
+candidate_hash: 8ace7fd65ed5aaaf8a7b0611ccc15e03d1887c2cf2d7598a042b8bc919400c01
+structural_validation:
+  helper: .github/skills/x-ipe-meta-skill-creator/scripts/validate_skill.py
+  command: PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -B .github/skills/x-ipe-meta-skill-creator/scripts/validate_skill.py --project-root "$PWD" --candidate "$PWD/x-ipe-docs/skill-meta/x-ipe-meta-lesson-learned/candidate" --name x-ipe-meta-lesson-learned --type x-ipe-meta
+  receipt: validation-receipt.json
+  ok: true
+  exit_code: 0
+  body_lines: 221
+  errors: []
+  warnings: []
+behavior:
+  command: PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -B -m pytest -q -p no:cacheprovider tests/test_lesson_management.py
+  passed: 100
+  failed: 0
+  elapsed_seconds: 1.30
+  exit_code: 0
+  detail: test-cases.yaml
+  initial_passed: 85
+  review_reproduction: {passed: 87, failed: 13}
+  added_cases: 15
+  installed_suite: {passed: 100, failed: 0, elapsed_seconds: 1.28}
+  test_sha256: 19abc002dcec74a1ea4ae66e6c918fe0a4d14c0fb2f5b4c79c6ccc209b8fc211
+delta:
+  changed: [SKILL.md, references/examples.md]
+  added: [references/lifecycle.md, scripts/lesson_ops.py, templates/lesson-learned.md]
+  removed: []
+  complete_resources: true
+  baseline: baseline.json
+  baseline_provenance: Original baseline confirmed against clean tracked HEAD eba31134078af8bfea70dcc8a25e24ccdf1409f9; initial working/index diffs empty; exact two-file inventory.
+independent_review:
+  required: true
+  status: passed_sequential_reviewer
+  reason: Meaningful workflow, executable and safety-policy change.
+  findings: review-findings.md
+  remaining_blockers: 0
+promotion:
+  authorized: true
+  performed: true
+  ownership_provenance: Reviewed clean tracked HEAD inventory matches original baseline.
+  version_history_changed: true
+  receipt: promotion-receipt.json
+  method: edit_tools_only_user_override
+  publisher_dry_run: passed_before_final_newline_normalization_same_delta
+  publisher_apply_invoked: false
+  byte_parity: true
+  exact_files: 5
+  atomic_transaction_claimed: false
+protected_scope:
+  production_changed: true
+  mirrors_changed: false
+  old_lessons_migrated: false
+  board_written: false
+  memory_written: false
+  git_invoked: true
+  git_read_only: true
+  unrelated_dirty_files_edited: false
+remaining_gaps:
+  - Consumer creator select/planned/settle wiring and end-to-end verification remain next-phase requirements, not promotion blockers for this standalone package.
+  - External consumer/instruction alignment and historical migrations separately authorized.
+  - External issue verification unsupported; helper uses existing-schema owned tasks.
+  - Physical purge conservatively requires explicit revision-bound approval; no Git tracked lookup.
+  - Evidence-only renewal/retired re-admission and abandoned ownership release conservatively block.
+  - Agent must verify qualitative relevance, artifact provenance and user permission.
+  - POSIX cooperative locking only; hostile writers, Windows and power-loss durability unproven.

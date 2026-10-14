@@ -1,7 +1,3 @@
-> ⚠️ **DEPRECATED:** The `x-ipe-dao` skill type is deprecated. Use `x-ipe-assistant` instead.
-> See [x-ipe-assistant.md](.github/skills/x-ipe-meta-skill-creator/templates/x-ipe-assistant.md) for the replacement template.
-> Existing `x-ipe-dao-*` skills continue to work but should be migrated to `x-ipe-assistant-*` namespace.
-
 # Human Representative Skill Template
 
 Use this template for skills (type: `x-ipe-dao`) that act as human representatives at human-required touchpoints while preserving bounded outputs and optional human-shadow fallback. The 格物致知 (Investigate to Reach Understanding) framework is the CORE internal reasoning methodology for all skills of this type.
@@ -110,7 +106,6 @@ input:
 
 ## Definition of Ready
 
-CRITICAL: DoR at most 5 checkpoints. DoD at most 10 checkpoints. Keep only the most critical checks.
 ```xml
 <definition_of_ready>
   <checkpoint required="true">

@@ -1,6 +1,10 @@
 # X-IPE Skill Creator - Examples
 
-Concrete execution examples for the skill-creator workflow. This file contains at least 3 complete examples covering different skill types.
+Concrete subtype examples for the creator's scope → candidate → verify/review →
+dry-run/authorized publication → record process. Numbered drafting stages and
+parallel roles below are illustrative decomposition, not a fixed agent count or
+mandatory four-round procedure. Test results are hypothetical expected outcomes,
+not execution evidence; record actual receipts outside the candidate.
 
 ---
 
@@ -101,11 +105,13 @@ evaluation_result:
   overall_pass: true
 ```
 
-### Step 10: Merge
+### Publication Gate
 
-```bash
-cp -r candidate/* .github/skills/x-ipe-task-based-bug-fix/
-```
+Run the installed creator's `scripts/publish_skill.py` with the reviewed baseline,
+trusted managed manifest, fresh candidate hash, and exact deletion list. Default
+dry-run must be reviewed. Candidate-only scope stops at `candidate_ready`; use
+`--apply` only with explicit permission and fresh evidence. Never recursively copy
+a candidate into production. Verify byte parity and retain recovery evidence.
 
 ### Step 11: Cross-References
 
@@ -130,8 +136,8 @@ input:
   analysis: "Utility function"
   
 output:
-  skill_type: tool_skill
-  template: templates/tool-skill.md
+  skill_type: x-ipe-tool
+  template: templates/x-ipe-tool.md
 ```
 
 ### Step 2: Gather Examples
@@ -170,7 +176,7 @@ workflow_execution:
   round_3: "Ran tests (PDF generation, extraction, merge)"
   round_4: "Evaluated - all passed"
   
-merge_target: ".github/skills/pdf/"
+publication_target: ".github/skills/x-ipe-tool-pdf/"  # Only after authorized publication
 ```
 
 ---
@@ -187,8 +193,8 @@ input:
   analysis: "Orchestrates multiple skills"
   
 output:
-  skill_type: workflow_orchestration
-  template: templates/workflow-skill.md
+  skill_type: x-ipe-workflow-orchestration
+  template: templates/x-ipe-workflow-orchestration.md
 ```
 
 ### Step 2: Gather Examples
@@ -229,8 +235,8 @@ orchestrated_skills:
 **Sub-agent 1 Output: skill-meta.md**
 
 ```yaml
-skill_name: feature+full-pipeline
-skill_type: workflow_orchestration
+skill_name: x-ipe-workflow-full-pipeline
+skill_type: x-ipe-workflow-orchestration
 acceptance_criteria:
   must:
     - id: AC-M01
@@ -250,7 +256,7 @@ acceptance_criteria:
 
 ```
 candidate/
-├── SKILL.md (feature+full-pipeline orchestration)
+├── SKILL.md (x-ipe-workflow-full-pipeline orchestration)
 └── references/
     ├── examples.md
     └── skill-registry.md
@@ -300,7 +306,7 @@ workflow_execution:
   round_3: "Ran tests (happy path, failure scenarios, data flow)"
   round_4: "Evaluated - all passed"
   
-merge_target: ".github/skills/feature+full-pipeline/"
+publication_target: ".github/skills/x-ipe-workflow-full-pipeline/"  # Only after authorized publication
 ```
 
 ---
@@ -349,7 +355,11 @@ workflow_execution:
   - "Generated test for AC-S04"
   - "Ran tests - all passed"
   - "Merged update"
-  - "Updated lesson status to: incorporated"
+  - "Only after publication revision and relevant passing verification: settle selected lesson as applied"
+
+Candidate-only work keeps the selected lesson mapping planned in external metadata;
+it does not change historical raw records or version history. Mere reading,
+drafting, or a hypothetical test result is not lesson application.
 ```
 
 ---
@@ -422,8 +432,8 @@ merge_target: ".github/skills/x-ipe-task-based-database-migration/"
 
 | Example | Skill Type | Key Learning |
 |---------|------------|--------------|
-| 1 | task_based_skill | Full happy path for x-ipe-task-based-bug-fix |
-| 2 | tool_skill | Tool skill with scripts and templates |
-| 3 | workflow_orchestration | Multi-skill coordination with registry |
+| 1 | x-ipe-task-based | Candidate, review and permission boundary |
+| 2 | x-ipe-tool | Tool skill with scripts and templates |
+| 3 | x-ipe-workflow-orchestration | Multi-skill coordination with registry |
 | 4 | Update flow | Incorporating lessons into existing skill |
 | 5 | Failure iteration | How to handle test failures and iterate |

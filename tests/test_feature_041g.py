@@ -18,21 +18,55 @@ import re
 from pathlib import Path
 
 import pytest
+import copy
+from tests.test_architecture_draw_skill import (
+    frontmatter, linked_resource, section, yaml_contract,
+)
 
 SKILLS_DIR = Path(__file__).resolve().parent.parent / ".github" / "skills"
+ROOT = SKILLS_DIR.parents[1]
 
-# Mapping: skill_name -> (action_name, expected_context_refs)
-SKILL_ACTION_MAP = {
-    "x-ipe-task-based-ideation": ("refine_idea", ["raw-ideas", "uiux-reference"]),
-    "x-ipe-task-based-idea-mockup": ("design_mockup", ["refined-idea", "uiux-reference"]),
-    "x-ipe-task-based-requirement-gathering": ("requirement_gathering", ["refined-idea", "mockup-html"]),
-    "x-ipe-task-based-feature-breakdown": ("feature_breakdown", ["requirement-doc"]),
-    "x-ipe-task-based-feature-refinement": ("feature_refinement", ["requirement-doc", "features-list"]),
-    "x-ipe-task-based-technical-design": ("technical_design", ["specification"]),
-    "x-ipe-task-based-code-implementation": ("implementation", ["tech-design", "specification"]),
-    "x-ipe-task-based-feature-acceptance-test": ("acceptance_testing", ["specification", "impl-files"]),
-    "x-ipe-task-based-change-request": ("change_request", ["eval-report", "specification"]),
-}
+# Scope stays the original nine skills; action/context authority is current app data.
+SCOPED_SKILLS = [
+    'ideation', 'idea-mockup', 'requirement-gathering', 'feature-breakdown',
+    'feature-refinement', 'technical-design', 'code-implementation',
+    'feature-acceptance-test', 'change-request',
+]
+TEMPLATE = json.loads((ROOT / 'x-ipe-docs/config/workflow-template.json').read_text())
+ACTION_SOURCE = (ROOT / 'src/x_ipe/static/js/features/workflow-stage.js').read_text()
+ACTION_BLOCK = ACTION_SOURCE.split('    ACTION_MAP: {', 1)[1].split('    /** Main entry:', 1)[0]
+ACTION_SKILLS = dict(re.findall(
+    r"^\s*(\w+):\s*\{[^\n]*skill:\s*'([^']+)'", ACTION_BLOCK, re.M,
+))
+
+
+def action_context(action):
+    matches = [stage['actions'][action].get('action_context', {})
+               for stage in TEMPLATE['stages'].values() if action in stage['actions']]
+    assert len(matches) == 1, f'Missing/ambiguous action: {action}'
+    return matches[0]
+
+
+SKILL_ACTION_MAP = {}
+for short_name in SCOPED_SKILLS:
+    name = 'x-ipe-task-based-' + short_name
+    actions = [action for action, skill in ACTION_SKILLS.items() if skill == name]
+    assert len(actions) == 1, f'Missing/ambiguous ACTION_MAP association: {name}'
+    SKILL_ACTION_MAP[name] = (actions[0], list(action_context(actions[0])))
+
+
+def validate_context(input_data, expected_action, contexts):
+    assert input_data.get('execution_mode') is not None
+    workflow = input_data['workflow']
+    assert workflow['action'] == expected_action, 'Incorrect workflow action'
+    refs = workflow['extra_context_reference']
+    assert isinstance(refs, dict), 'Context refs must be a mapping'
+    required = {name for name, definition in contexts.items() if definition['required']}
+    assert required <= refs.keys(), 'Missing required input context'
+    assert set(refs) == set(contexts), 'Context keys differ from current workflow template'
+    for name, value in refs.items():
+        assert isinstance(value, str) and 'auto-detect' in value and 'N/A' in value, name
+    return refs
 
 
 # ==============================================================================
@@ -51,9 +85,9 @@ class TestExtraContextReferencePresence:
         assert skill_path.exists(), f"Skill file not found: {skill_path}"
 
         content = skill_path.read_text()
-        assert "extra_context_reference" in content, (
-            f"{skill_name}/SKILL.md missing 'extra_context_reference' in workflow input block"
-        )
+        frontmatter(content, skill_name)
+        data = yaml_contract(content, 'Input Parameters', 'input')
+        assert isinstance(data['workflow']['extra_context_reference'], dict)
 
     @pytest.mark.parametrize("skill_name,expected_refs", [
         (name, refs) for name, (_, refs) in SKILL_ACTION_MAP.items()
@@ -61,15 +95,10 @@ class TestExtraContextReferencePresence:
     def test_skill_declares_correct_ref_names(self, skill_name, expected_refs):
         """SKILL.md extra_context_reference should list the correct ref names."""
         skill_path = SKILLS_DIR / skill_name / "SKILL.md"
-        if not skill_path.exists():
-            pytest.skip(f"Skill {skill_name} not found")
-
         content = skill_path.read_text()
-        for ref_name in expected_refs:
-            assert ref_name in content, (
-                f"{skill_name}/SKILL.md missing context ref '{ref_name}' "
-                f"in extra_context_reference block"
-            )
+        data = yaml_contract(content, 'Input Parameters', 'input')
+        action = SKILL_ACTION_MAP[skill_name][0]
+        validate_context(data, action, action_context(action))
 
 
 # ==============================================================================
@@ -83,19 +112,29 @@ class TestExecutionProcedureUpdates:
     def test_procedure_references_extra_context(self, skill_name):
         """Execution procedure should mention extra_context_reference handling."""
         skill_path = SKILLS_DIR / skill_name / "SKILL.md"
-        if not skill_path.exists():
-            pytest.skip(f"Skill {skill_name} not found")
-
         content = skill_path.read_text()
-        # Should have conditional logic for extra_context_reference
-        has_conditional = (
-            "extra_context_reference" in content
-            and ("auto-detect" in content.lower() or "auto_detect" in content.lower())
-        )
-        assert has_conditional, (
-            f"{skill_name}/SKILL.md procedure should reference extra_context_reference "
-            f"with auto-detect handling"
-        )
+        initialization = section(content, 'Input Parameters').split('### Input Initialization', 1)[1]
+        procedure = section(content, 'Execution Procedure')
+        assert re.search(r'<procedure\b[^>]*>.*<action>.+?</action>.*</procedure>', procedure, re.S)
+        if skill_name in {'x-ipe-task-based-ideation', 'x-ipe-task-based-idea-mockup'}:
+            # Legacy handlers are real but do not enforce required template refs.
+            # Preserve this gap as a finding, not a claimed lifecycle adoption.
+            handler = procedure if skill_name.endswith('-ideation') else initialization
+            assert 'extra_context_reference' in handler and 'auto-detect' in handler
+            assert 'N/A' in handler and re.search(r'skip', handler, re.I)
+            assert 'references/lifecycle.md' not in content
+            for name in SKILL_ACTION_MAP[skill_name][1]:
+                assert name in handler
+            if skill_name.endswith('-idea-mockup'):
+                guide = linked_resource(skill_path, '.github/skills/x-ipe-task-based-idea-mockup/references/mockup-guidelines.md')
+                assert 'Current Idea Folder' in guide and 'Extra Instructions' in guide
+        else:
+            assert 'workflow.extra_context_reference' in initialization
+            assert re.search(r'broken|invalid|explicit', initialization, re.I)
+            common = linked_resource(skill_path, '.github/skills/x-ipe-workflow-task-execution/references/lifecycle.md')
+            resolution = section(common, 'Source artifact resolution')
+            assert 'Explicit broken' in resolution and 'never mask' in resolution
+            assert 'template action_context.required' in resolution
 
 
 # ==============================================================================
@@ -109,20 +148,44 @@ class TestBackwardCompatibility:
     def test_extra_context_reference_is_optional(self, skill_name):
         """extra_context_reference should default to N/A, not be required."""
         skill_path = SKILLS_DIR / skill_name / "SKILL.md"
-        if not skill_path.exists():
-            pytest.skip(f"Skill {skill_name} not found")
-
         content = skill_path.read_text()
-        # The input block should show extra_context_reference with a default or N/A
-        # Check that it's not marked as required without a default
-        has_default = (
-            'extra_context_reference' in content
-            and ('N/A' in content or 'default' in content.lower() or 'optional' in content.lower())
-        )
-        assert has_default, (
-            f"{skill_name}/SKILL.md extra_context_reference should have a default value "
-            f"or be marked optional for backward compatibility"
-        )
+        data = yaml_contract(content, 'Input Parameters', 'input')
+        assert 'free-mode' in data['execution_mode']
+        assert 'N/A' in data['workflow']['name']
+        for value in data['workflow']['extra_context_reference'].values():
+            assert 'N/A' in value and 'auto-detect' in value
+
+
+@pytest.mark.parametrize('skill_name', list(SKILL_ACTION_MAP))
+def test_missing_required_context_cannot_be_hidden_in_prose(skill_name):
+    content = (SKILLS_DIR / skill_name / 'SKILL.md').read_text()
+    data = yaml_contract(content, 'Input Parameters', 'input')
+    action = SKILL_ACTION_MAP[skill_name][0]
+    contexts = action_context(action)
+    required = next(name for name, definition in contexts.items() if definition['required'])
+    corrupt = copy.deepcopy(data)
+    del corrupt['workflow']['extra_context_reference'][required]
+    corrupt['description'] = f'{required} still mentioned outside workflow input'
+    with pytest.raises(AssertionError, match='Missing required input context'):
+        validate_context(corrupt, action, contexts)
+
+
+def test_change_request_current_optional_report_is_not_legacy_eval_report():
+    action, refs = SKILL_ACTION_MAP['x-ipe-task-based-change-request']
+    assert action_context(action)['closing-report']['required'] is False
+    assert 'closing-report' in refs and 'eval-report' not in refs
+
+
+def test_wrong_action_and_legacy_report_corruption_are_detected():
+    data = yaml_contract((SKILLS_DIR / 'x-ipe-task-based-change-request/SKILL.md').read_text(), 'Input Parameters', 'input')
+    corrupt = copy.deepcopy(data)
+    corrupt['workflow']['action'] = 'implementation'
+    with pytest.raises(AssertionError, match='Incorrect workflow action'):
+        validate_context(corrupt, 'change_request', action_context('change_request'))
+    corrupt = copy.deepcopy(data)
+    corrupt['workflow']['extra_context_reference']['eval-report'] = corrupt['workflow']['extra_context_reference'].pop('closing-report')
+    with pytest.raises(AssertionError, match='Context keys differ'):
+        validate_context(corrupt, 'change_request', action_context('change_request'))
 
 
 # ==============================================================================

@@ -1,0 +1,71 @@
+skill_name: x-ipe-tool-code-quality-sync
+task_id: TASK-6749
+date: 2026-10-14
+publication_state: published
+independent_review: passed_final_revision_review
+candidate_hash: a9e1adf0066f237d4600b78be44f9ba205afba2fd9af3514488fc49768074753
+validation:
+  ok: true
+  files: 5
+  body_lines: 223
+  errors: 0
+  warnings: 0
+  receipt: validation-receipt-goal-TASK-6749.json
+commands:
+  focused: PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -B -m pytest -p no:cacheprovider tests/test_skill_goal_change_quality.py -q --tb=short
+  combined: PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -B -m pytest -p no:cacheprovider tests/test_skill_goal_change_quality.py tests/test_skill_creator_foundation.py tests/test_goal_oriented_skills.py tests/test_skill_pipeline_refactor.py -q --tb=short
+  validator: Installed creator validate_skill.py --project-root actual root --candidate canonical candidate --name x-ipe-tool-code-quality-sync --type x-ipe-tool; stdout receipt persisted by editor only
+fresh_runs:
+  - {name: inherited dedicated baseline, passed: 90, failed: 0, seconds: 1.97, exit: 0}
+  - {name: first candidate structural check, exit: 1, meaning: Editor replacement retained legacy suffix; duplicate DoR/DoD blocks removed before fresh successful validation}
+  - {name: first expanded suite collection, exit: 2, seconds: 0.12, meaning: Ambiguous insertion split original refactor test tail; restored all original bytes/assertions before successful rerun}
+  - {name: final dedicated suite, passed: 117, failed: 0, skipped: 0, deselected: 0, seconds: 5.41, exit: 0}
+  - {name: final combined regression suites, passed: 397, failed: 0, skipped: 0, deselected: 0, seconds: 12.07, exit: 0}
+  - {name: independent review original suites, passed: 397, failed: 0, seconds: 8.13, exit: 0}
+  - {name: publication-aware tests before promotion, passed: 397, failed: 0, seconds: 8.26, exit: 0}
+  - {name: patch publication parity, exit: 1, meaning: Three exact resources; two legacy replacements retain one extra EOF newline after three bounded correction attempts; recovery_required; no postpublication test or green claim}
+  - {name: authorized candidate EOF adoption, exit: 0, meaning: Exactly one LF added to each of two candidates; prior reviewed hashes reconstructed by stripping only final byte; complete byte parity and fresh receipt parity true}
+  - {name: reconciled postpublication regression, passed: 397, failed: 0, skipped: 0, deselected: 0, seconds: 8.58, exit: 0}
+  - {name: final five Python suites including report service, passed: 425, failed: 0, skipped: 0, deselected: 0, seconds: 12.69, exit: 0}
+  - {name: final unchanged report frontend, passed: 10, files_passed: 1, duration_ms: 393, exit: 0}
+cases:
+  - {id: PKG-01, covers: [AC-S01, AC-P01], evidence: Exact complete five-file tool package and frozen original output plus real JSON pass-through schema, state: automated_contract}
+  - {id: GOAL-01, covers: [AC-G01, AC-D01], evidence: Actual disposable approved goal/spec/docs evaluated with unchanged base/target runtime checks; descriptive design drift only, state: actual_disposable_evidence_not_autonomous_sync}
+  - {id: BUG-01, covers: [AC-D01], evidence: Actual wrong-behavior green test then approved assertion failure; source/requirement preserved with failure not skipped, state: actual_disposable_bug_boundary}
+  - {id: MODE-01, covers: [AC-M01], evidence: Three mode policies and measured below-80 fixture coverage versus explicit mandatory fixture policy; required critical branch cannot be waived, state: actual_fixture_measurement_plus_authored_policy}
+  - {id: EVIDENCE-01, covers: [AC-E01, AC-G01], evidence: Test-local evaluator checks actual goal-parent-AC-type/docs/base-target observations and dates/hashes; negative stale/unavailable/failed/score/outcome cases, state: actual_fixture_linkage_not_general_engine}
+  - {id: FRESH-01, covers: [AC-F01], evidence: Reconciled current candidate/receipt/meta/cases and publication receipt; actual five-file byte parity; retained prior independent substantive review plus deterministic cosmetic check, state: automated_contract_published}
+preservation:
+  production_manifest: baseline-goal-TASK-6749.json
+  prework_candidate_manifest: prework-candidate-goal-TASK-6749.json
+  resource_removals: []
+  original_assertions_weakened: false
+  production_promoted: true
+  production_modified: true
+  exact_candidate_byte_parity: true
+  board_memory_git_app_source_mutations: none
+current_evidence_hashes:
+  tests/test_skill_goal_change_quality.py: 106f25335e27cf3c94dd9176952de07659cc9f7ad67e1c990f64b41fcd9e45b4
+  tests/test_skill_creator_foundation.py: 684b1678b2c052f0fc5359ac34bd525ae7c7392caa187d5c84600107c75f6625
+  tests/test_goal_oriented_skills.py: 3b8b0a3a0f10a0a6ef2dcbf04bda607b915cf23e2c644da79336f28e16c47131
+  tests/test_skill_pipeline_refactor.py: 151eb395eb34682e72a0681693e13f162509178e5ab39c983d4aab63b65729a9
+  .github/skills/x-ipe-meta-skill-creator/scripts/validate_skill.py: 21fbb19a17e3f8d80657936be66843af55fe047d910fb599831c0571dbab856f
+  .github/skills/x-ipe-workflow-task-execution/references/goal-contract.md: fd007a0f946ee3ccf60507f88c898358de9ea045b18de6446b65079d62911074
+protected_inventory:
+  files: 4075
+  fingerprint: 282507041bd05d87808691ba77bb4eace9bdda99e364ad1aea9f363cef16893e
+  unchanged: true
+  excluded: Authorized sync metadata subtree and dedicated test; environment/cache directories and Git internals; symlinks excluded
+original_test_preservation:
+  method: Remove only new SYNC_NAME block through next original test function; reconstruct original complete test text
+  reconstructed_hash: 405e8608bcf894a2d6ed63d18dab001ba940483c9a34d490023e48d8d9ac6830
+  matches_prework_hash: true
+prior_receipts:
+  refactor: {files: 5, candidate_hash: 10be4133be03f6c4c1a654c17232ed6e3edd0d23c32b0717ff980056c9232e3e, current_receipt_live_candidate_parity: true}
+  analysis: {files: 4, candidate_hash: f1c848402913264155e36e76397512d2ea9fa11a7571eb8e25a926b84ce17d97, current_receipt_live_candidate_parity: true}
+limits:
+  - Prior independent review and installed publisher dry-run passed; authorized newline-only reconciliation now has exact byte parity and fresh receipt/history; no --apply or atomic-publisher claim.
+  - Historical original-test reconstruction and protected-inventory records describe author prework; independent review changed only two publication-state tests and records its own protected inventory in independent-review-goal-TASK-6749.md.
+  - Authored policy checks and fixture evaluator do not execute an agent or prove strict-consumer integration.
+  - Existing coverage capability used only in temporary executable fixture; no new infrastructure or repository coverage claims.
+  - No whole-repository all-green claim, broad source changes or observed stakeholder outcome.

@@ -1,89 +1,79 @@
-# Requirement File Splitting Reference
+# Requirement file splitting
 
-## Splitting Rules
+This is a requirement-document threshold, not a SKILL.md body-line limit.
+Check logical lines in the current active file BEFORE appending NEW requirements.
+Only an already **>500-line** active file requires the split below: 473 and 500
+continue in place; 501 requires a split. Do not use projected length as the trigger.
+An agreed inline CR edit need not regenerate or split every existing part.
 
-- **Threshold:** 500 lines
-- **When:** Before adding NEW requirements, check current file line count
-- **How:** If current file > 500 lines, create new part
+## Resolve active file and preserve contents
 
-## Procedure
+1. Reconcile requirement-details-index with ALL requirement-details-part-X files.
+   No files means requirement-details.md will be the first active file, part 1.
+   With only requirement-details.md use it. With numbered parts use the highest
+   integer X, not lexicographic order. Ambiguous coexistence of original and parts
+   or missing index targets blocks until an authorized disposition is known.
+2. If active file has <=500 lines, append in that file; no new part or rename.
+3. If original file has >500 lines and no parts exist, check part-1/part-2 paths
+   are unused, rename original to requirement-details-part-1.md without changing
+   its content, then create part-2 with the header below.
+4. If numbered part X has >500 lines, preserve it and create part-(X+1), after
+   checking collision. Do not overwrite a concurrently created part.
+5. Create/update index when parts exist. Include every part, accurate Epic/feature
+   coverage and line counts; retain each part's own Feature List. EPIC IDs appear
+   only in Epic coverage/grouping, never in Feature ID rows.
+6. Repair inbound links affected by the first rename within approved write scope,
+   including required workflow deliverable references through the actual agreed
+   writer. If a protected/unowned consumer cannot be repaired, block and report
+   the link/owner, not a knowingly broken completion claim. Verify both preserved
+   old contents and current links. Do not modify another workflow implicitly.
 
-```
-1. Determine current active file:
-   a. Check if x-ipe-docs/requirements/requirement-details.md exists
-   b. Check if x-ipe-docs/requirements/requirement-details-part-X.md files exist
-   c. Find the highest part number (latest active part)
-
-2. Count lines in current active file:
-   - If no file exists -> current_lines = 0, active_file = requirement-details.md
-   - If requirement-details.md exists (no parts) -> count its lines
-   - If parts exist -> count lines in highest part number file
-
-3. IF current_lines > 500:
-   a. IF file is requirement-details.md (original, no parts yet):
-      - Rename requirement-details.md -> requirement-details-part-1.md
-      - Create new requirement-details-part-2.md with header template
-      - New file becomes active
-   
-   b. ELSE IF file is requirement-details-part-X.md:
-      - Create new requirement-details-part-(X+1).md with header template
-      - New file becomes active
-
-4. ELSE (current_lines <= 500):
-   - Continue using current active file
-```
-
-## New Part Header Template
+## New part header
 
 ```markdown
 # Requirement Details - Part {X}
 
-> Continued from: [requirement-details-part-{X-1}.md](requirement-details-part-{X-1}.md)  
-> Created: {MM-DD-YYYY}
+> Continued from: [Part {previous}](x-ipe-docs/requirements/requirement-details-part-{previous}.md)
+> Created: {YYYY-MM-DD}
 
----
+## Epic Coverage
+
+| Epic ID | Title |
+| --- | --- |
 
 ## Feature List
 
 | Feature ID | Feature Title | Version | Brief Description | Feature Dependency |
-|------------|---------------|---------|-------------------|-------------------|
-
----
+| --- | --- | --- | --- | --- |
 
 ## Linked Mockups
 
 | Mockup Function Name | Feature | Mockup List |
-|---------------------|---------|-------------|
+| --- | --- | --- |
 
----
-
-## Feature Details (Continued)
-
+## Requirement Details (Continued)
 ```
 
-## File Naming Convention
+Append gathered Epic sections using the canonical requirement template. Feature
+rows remain empty until actual Feature Breakdown assignments; legacy feature
+rows already present remain valid and unchanged.
 
-| Scenario | File Names |
-|----------|------------|
-| Single file (< 500 lines total) | `requirement-details.md` |
-| After first split | `requirement-details-part-1.md`, `requirement-details-part-2.md` |
-| After second split | `requirement-details-part-1.md`, `requirement-details-part-2.md`, `requirement-details-part-3.md` |
-
-## Index File (Required when parts exist)
-
-When parts exist, create/update `requirement-details-index.md`:
+## Index shape
 
 ```markdown
 # Requirement Details Index
 
-> Last Updated: MM-DD-YYYY
+> Last Updated: {YYYY-MM-DD}
 
 ## Parts Overview
 
-| Part | File | Features Covered | Lines |
-|------|------|------------------|-------|
-| 1 | [Part 1](requirement-details-part-1.md) | EPIC-001 to EPIC-005 | ~420 |
-| 2 | [Part 2](requirement-details-part-2.md) | EPIC-006 to EPIC-010 | ~380 |
+| Part | File | Epics / Features Covered | Lines |
+| --- | --- | --- | --- |
+| 1 | [Part 1](x-ipe-docs/requirements/requirement-details-part-1.md) | {actual coverage} | {count} |
+| 2 | [Part 2](x-ipe-docs/requirements/requirement-details-part-2.md) | {actual coverage} | {count} |
 ```
 
-NOTE: Feature List is NOT in index - each part file has its own Feature List section.
+All generated links use project-root-relative paths, not ./, ../ or absolute
+filesystem paths. Record active `requirement_details_part` and actual output link;
+do not confuse index with the populated `requirement-doc` deliverable.
+

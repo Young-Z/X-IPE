@@ -65,6 +65,10 @@
 
 ## Document Location Rules
 
+Resolve the actual owning feature folder from authoritative specification_link
+or validated workflow context. Both EPIC/FEATURE and legacy FEATURE layouts are
+supported; do not relocate an existing design or choose by modification time.
+
 | Design Scope | Location |
 |--------------|----------|
 | Feature-specific design | `x-ipe-docs/requirements/FEATURE-XXX/technical-design.md` |
@@ -97,3 +101,18 @@ Technical design documents MUST use this two-part structure. Adapt content based
 - Prioritize Mermaid diagrams for visual comprehension
 
 See [design-templates.md](.github/skills/x-ipe-task-based-technical-design/references/design-templates.md) for full document template with examples.
+
+## Goals Control Means and Tradeoffs
+
+Read authoritative feature goals/subgoals, parent/source anchors, constraints
+and stable ACs before selecting components. Explain enabling contributions and
+all-required children versus alternatives. Components, libraries and architecture
+patterns are means/options, not new product goals. Select the simplest compatible
+option satisfying approved outcome/acceptance; rejected options are not backlog.
+
+Keep coverage and qualitative outcome scenarios in the existing two-part design.
+Do not invent KPIs, scope, observations or confirmation. Legacy explicit so-that
+intent may be labeled inferred; ambiguity blocks the pertinent claim only.
+Authorized parent/intent/means delta replans affected goals/contracts/dependencies
+and invalidates affected tests/outcome evidence; preserve unrelated IDs/bytes/history.
+Planned checks are not verified delivery, and neither is stakeholder observation.

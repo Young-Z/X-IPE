@@ -1,68 +1,62 @@
 ---
 name: x-ipe-task-based-code-implementation
-description: Implement code for a single feature using orchestrator pattern. Generates AAA test scenarios from specification, routes to language-specific tool skills via semantic matching, and validates results. Delegates to x-ipe-meta-skill-creator for skill files and mcp-builder for MCP servers. Triggers on requests like "implement feature", "write code", "develop feature".
+description: Implement one designed feature with goal-to-AC-to-test traceability, sequential enabled semantic tool routing and revision-bound validation. Delegates skill packages to x-ipe-meta-skill-creator and MCP servers to mcp-builder before normal scenario generation and routing. Use when implementing a feature. Triggers on requests like "implement feature", "write code", "develop feature".
 ---
 
 # Task-Based Skill: Code Implementation
 
 ## Purpose
 
-Implement code for a single feature by:
-1. Querying feature board for full Feature Data Model
-2. Learning technical design document thoroughly
-3. Reading architecture designs (if referenced in technical design)
-4. **Generating AAA test scenarios** from specification + technical design
-5. **Routing to language-specific tool skills** via semantic matching
-6. **Validating all Assert clauses** pass across tool skill outputs
-
----
+Deliver one approved feature capability, not an activity count:
+1. Follow authoritative outcome/parent/story/AC and both parts of its design.
+2. Select justified implementation means within approved contracts and constraints.
+3. Delegate special domains first, otherwise generate AAA tests and route enabled tools sequentially.
+4. Verify every scoped AC and original Assert clauses, regression, lint and relevant revision evidence.
+5. Return original outputs and actual artifacts to the same lifecycle owner.
 
 ## Important Notes
 
-BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skill.
+BLOCKING: Load `x-ipe-workflow-task-execution` and the
+[common lifecycle contract](.github/skills/x-ipe-workflow-task-execution/references/lifecycle.md).
+Direct entry calls Orient/Plan with supplied task ID/original context without
+recursively dispatching this skill. Reuse readiness; one owner handles task
+registration/status, feature/workflow persistence, Git and the next boundary.
+Delegated skills receive that same task/readiness; agree a bounded ownership
+adapter for unmigrated children or block, never duplicate create/close/route/Git.
 
-**Note:** If Agent does not have skill capability, go to `.github/skills/` folder to learn skills. SKILL.md is the entry point.
+BLOCKING: Adopt the [goal contract](.github/skills/x-ipe-workflow-task-execution/references/goal-contract.md)
+at implementation coverage/verification. Exactly ONE feature; outcomes → stable
+ACs → tests/assertions → selected means → current evidence. Components and tools
+are means, not stakeholder goals. Qualitative source-derived scenarios suffice;
+no invented KPIs, targets, scope or observed benefit; no chasing activity counts.
+Keep mappings/evidence in existing design/testing artifacts, no new output/board
+schema, goal database, mandatory graph, action tag or approval ritual.
 
-**BLOCKING: Single Feature Only.** This skill operates on exactly ONE feature at a time. Do NOT batch or combine multiple features in a single execution. If multiple features need processing, run this skill separately for each feature.
+Special skill-creator/MCP delegations happen before scenario generation and semantic routing.
+They retain their own tests/DoD and full scoped AC coverage; they never bypass
+verification or later feature acceptance testing. Candidate readiness is not
+production promotion, implementation release or permission to alter live skills.
 
-**Workflow Mode:** When `execution_mode == "workflow-mode"`, the completion step MUST run the workflow update script via bash: `python3 .github/skills/x-ipe-tool-x-ipe-app-interactor/scripts/workflow_update_action.py` with `workflow_name` from `workflow.name` input, `action` from `workflow.action` input, `status: "done"`, and a `deliverables` keyed dict using ONLY the extract tags defined in `workflow-template.json` for this action (format: `{"tag-name": "path/to/file"}`). Do NOT pass a flat list of file paths. Verify the script exits with code 0 before marking the task complete.
-
-**Phase 1 Coexistence:** AAA scenario generation coexists with `x-ipe-tool-test-generation`. If AAA generation fails (ambiguous spec, insufficient detail), fall back to `x-ipe-tool-test-generation` as a safety net. This fallback will be removed in Phase 3 after all tool skills are proven stable.
-
-### Implementation Principles
-
-| Principle | Rule |
-|-----------|------|
-| KISS | Keep code simple and readable; prefer clarity over cleverness |
-| YAGNI | Implement ONLY what is in technical design; no extras |
-| AAA-Driven | Arrange/Act/Assert scenarios drive implementation and validation |
-| Coverage | Target 80%+; NEVER add complexity just for coverage |
-| Standards | Use linters, formatters, meaningful names |
-| Mockups | For frontend work, reference mockups from specification.md and match layout, components, and visual states |
-
-See [references/implementation-guidelines.md](.github/skills/x-ipe-task-based-code-implementation/references/implementation-guidelines.md) for detailed principles, coding standards, AAA format specification, and error handling patterns.
-
-IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-interact"`, NEVER stop to ask the human. Instead, call `x-ipe-assistant-user-representative-Engineer` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
-
----
+Read [implementation guidelines](.github/skills/x-ipe-task-based-code-implementation/references/implementation-guidelines.md)
+for AAA/TDD/tool I/O, standards, retry, batching and evidence. Read
+[integration contract](.github/skills/x-ipe-task-based-code-implementation/references/integration.md)
+for config/action/path/status/deliverables semantics. Generated Markdown links
+are project-root-relative; reject escaping/symlinked artifacts. Preserve unrelated
+dirty source/docs and assertions; never weaken tests to manufacture a pass.
 
 ## Input Parameters
 
 ```yaml
 input:
-  # Task attributes (from task board)
   task_id: "{TASK-XXX}"
   task_based_skill: "x-ipe-task-based-code-implementation"
-
-  # Execution context (passed by x-ipe-workflow-task-execution)
-  execution_mode: "free-mode | workflow-mode"  # default: free-mode
+  execution_mode: "free-mode | workflow-mode"
   workflow:
-    name: "N/A"  # workflow name, default: N/A
-    extra_context_reference:  # optional, default: N/A for all refs
+    name: "N/A"
+    action: "implementation"
+    extra_context_reference:
       tech-design: "path | N/A | auto-detect"
       specification: "path | N/A | auto-detect"
-
-  # Task type attributes
   category: "feature-stage"
   next_task_based_skill:
     - skill: "x-ipe-task-based-feature-acceptance-test"
@@ -70,325 +64,142 @@ input:
   process_preference:
     interaction_mode: "{from input process_preference.interaction_mode}"
   feature_phase: "Code Implementation"
-
-  # Required inputs
   feature_id: "{FEATURE-XXX}"
-
-  # Git strategy (from .x-ipe.yaml, passed by workflow)
   git_strategy: "main-branch-only | dev-session-based"
   git_main_branch: "{auto-detected}"
-
-  # Context (from previous task or project)
   specification_link: "x-ipe-docs/requirements/FEATURE-XXX/specification.md"
-  mockup_link: "{path | N/A}"       # Derived from specification's Linked Mockups section; N/A if outdated or missing
+  mockup_link: "{path | N/A}"
   technical_design_link: "x-ipe-docs/requirements/FEATURE-XXX/technical-design.md"
-
-  # Tech context (from Technical Design output)
-  program_type: "frontend | backend | fullstack | cli | library | skills | mcp | ..."  # non-exhaustive
-  tech_stack: []  # e.g. ["Python/Flask", "JavaScript/Vanilla", "HTML/CSS"]
+  program_type: "frontend | backend | fullstack | cli | library | skills | mcp | ..."
+  tech_stack: []
 ```
 
 ### Input Initialization
 
 ```xml
 <input_init>
-  <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
-  <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
-  <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
-  <field name="process_preference.interaction_mode" source="from caller (x-ipe-workflow-task-execution) or default 'interact-with-human'" />
-  <field name="feature_id" source="from previous task (Technical Design) output or task board" />
-  <field name="extra_context_reference" source="from workflow context or auto-detect from feature artifacts (x-ipe-docs/requirements/FEATURE-XXX/)" />
-  <field name="specification_link" source="IF workflow mode AND extra_context_reference.specification is a path → use it; ELSE → x-ipe-docs/requirements/{feature_id}/specification.md" />
-  <field name="technical_design_link" source="IF workflow mode AND extra_context_reference.tech-design is a path → use it; ELSE → x-ipe-docs/requirements/{feature_id}/technical-design.md" />
-  <field name="mockup_link">
-    <steps>
-      1. READ specification at specification_link, find "Linked Mockups" section
-      2. IF mockup found AND Linked Date >= latest spec/design update → set mockup_link = "{path}"
-      3. ELSE (no mockup, missing section, or Linked Date outdated) → set mockup_link = "N/A"
-    </steps>
-  </field>
-  <field name="git_strategy" source="from .x-ipe.yaml" />
-  <field name="git_main_branch" source="auto-detect via `git symbolic-ref refs/remotes/origin/HEAD`" />
-  <field name="program_type" source="from Technical Design output" />
-  <field name="tech_stack" source="from Technical Design output" />
+  <field name="task_id" source="existing lifecycle task/readiness; no new ID" />
+  <field name="task_based_skill" source="this canonical skill and caller match" />
+  <field name="execution_mode" source="lifecycle; free-mode default" />
+  <field name="workflow.name" source="exact lifecycle workflow or N/A" />
+  <field name="workflow.action"><steps>Resolve ACTION_MAP/template implementation; reject explicit conflict. This app action is not tools.json code_implementation.</steps></field>
+  <field name="workflow.extra_context_reference"><steps>Selected specification and tech-design paths take precedence in either mode. Required workflow contexts cannot be waived by N/A; preserve exact tag names.</steps></field>
+  <field name="category" source="Output Result: feature-stage" />
+  <field name="next_task_based_skill" source="original conditional Acceptance Test suggestion; not execution permission" />
+  <field name="feature_phase" source="Code Implementation" />
+  <field name="process_preference.interaction_mode"><steps>Use lifecycle-resolved exact enum/source: interact-with-human, dao-represent-human-to-interact, dao-represent-human-to-interact-for-questions-in-skill. Within skill human asks the human and waits; full DAO and hybrid use bounded message_context/instruction_units/execution_plan. Human and hybrid require human completion/route confirmation; full DAO selects only authorized successors. Explicit human approval binds in every mode. Clear inputs need neither.</steps></field>
+  <field name="feature_id"><steps>Previous Technical Design output, explicit approved identity, current task context; feature board read-only verifies exactly one record.</steps></field>
+  <field name="specification_link"><steps>Selected specification context first; declared input/previous design or feature specification_link next; unique owning EPIC/FEATURE or legacy FEATURE folder last for absent/N/A/auto-detect. Broken explicit path blocks, never fallback. Validate content, feature, file kind and approved roots.</steps></field>
+  <field name="technical_design_link"><steps>Selected tech-design context first; actual previous design task output/declared input next; unique owning feature technical-design.md last for absent/N/A/auto-detect. No technical_design_link board field exists. Reject broken/wrong-feature/ambiguous/escaping sources.</steps></field>
+  <field name="mockup_link"><steps>Previous design mockup_list/linked_mockups, explicit scoped path, specification Linked Mockups, then N/A. Preserve singular legacy field while collecting/opening every current scoped mockup. Validate content/scope, not latest date; conflict uses actual decision policy.</steps></field>
+  <field name="git_strategy" source="validated lifecycle .x-ipe.yaml context; owner alone handles Git" />
+  <field name="git_main_branch" source="validated lifecycle context; no child branch/network mutation" />
+  <field name="program_type"><steps>Previous Technical Design output verified against both design parts and actual source; known types are extensible lowercase, not a forced enum.</steps></field>
+  <field name="tech_stack"><steps>Approved design technologies/test frameworks verified against actual project artifacts, not every available tool.</steps></field>
 </input_init>
 ```
-
----
 
 ## Definition of Ready
 
 ```xml
 <definition_of_ready>
-  <checkpoint required="true">
-    <name>Feature exists on feature board</name>
-    <verification>Query feature board for feature_id; status must exist</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Feature status is "Designed"</name>
-    <verification>Feature board status == "Designed"</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Technical design document exists</name>
-    <verification>File exists at x-ipe-docs/requirements/FEATURE-XXX/technical-design.md</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Tracing utility exists in project</name>
-    <verification>Check for tracing/ directory or x_ipe.tracing import; if missing, use x-ipe-tool-tracing-creator skill first</verification>
-  </checkpoint>
+  <checkpoint required="true"><name>Identity and owner</name><verification>One feature/task/readiness, authorized source/test paths and single lifecycle owner; protected baseline captured.</verification></checkpoint>
+  <checkpoint required="true"><name>Design readiness</name><verification>New implementation requires actual Designed status and complete specification/two-part design. Authorized CR/resume may preserve Implemented/Tested/Completed with fresh design evidence; Planned/Refined/Retired or missing design blocks.</verification></checkpoint>
+  <checkpoint required="true"><name>Authoritative acceptance</name><verification>Sources/parent/story/AC/test types, constraints/non-goals, architecture/dependencies and current mockups resolve safely; material gaps block pertinent claims.</verification></checkpoint>
+  <checkpoint required="true"><name>Verification and means</name><verification>Delta/relevant inputs, config, actual source/test paths, special delegations, regression/lint/coverage and independent review planned; tracing only where existing infrastructure is applicable.</verification></checkpoint>
 </definition_of_ready>
 ```
 
----
-
 ## Execution Flow
 
-| Phase | Steps | Action | Gate |
-|-------|-------|--------|------|
-| 1. 博学之 — Study Broadly | 1.1 Query Board, 1.2 Learn Design, 1.3 Read Architecture | Load feature data, study technical design, read architecture | Design fully understood |
-| 2. 审问之 — Inquire Thoroughly | 2.1 Generate AAA Scenarios | Create tagged test scenarios from spec + design | Scenarios with coverage |
-| 3. 慎思之 — Think Carefully | 3.1 Route & Invoke Tool Skills | Semantic-match and invoke tool skills sequentially | All tool skills complete |
-| 4. 明辨之 — Discern Clearly | 4.1 Validate Results, 4.2 Apply Tracing | Verify Assert clauses, run integration, add tracing | All checks pass |
-| 5. 笃行之 — Practice Earnestly | 5.1 Update Workflow Status | Update workflow, verify DoD, output summary | Task complete |
-| 继续执行 | 6.1 Decide Next Action | DAO-assisted next task decision | Next action decided |
-| 继续执行 | 6.2 Execute Next Action | Load skill, generate plan, execute | Execution started |
-
-BLOCKING: Phase 2 → 3 is BLOCKED until AAA scenarios are generated with coverage validated.
-BLOCKING: Phase 3: If design needs changes → UPDATE technical design BEFORE implementing.
-BLOCKING: Step 3.1 special-case delegations run BEFORE semantic routing.
-
----
+| Phase | Step | Action | Gate |
+| --- | --- | --- | --- |
+| 1. 博学之 — Study Broadly | 1.1 | Read board/spec/design/architecture/goals/mockups | Approved outcome and bounded design |
+| 2. 审问之 — Inquire Thoroughly | 2.1, 2.2 | Special delegation first; otherwise AAA/TDD coverage | Every scoped AC has valid assertions |
+| 3. 慎思之 — Think Carefully | 3.1 | Match enabled capabilities and implement sequentially | Justified means within approved contracts |
+| 4. 明辨之 — Discern Clearly | 4.1 | Validate, regression, applicable tracing and review | Fresh supported delivery, outcome separate |
+| 5. 笃行之 — Practice Earnestly | 5.1 | Return original output and artifact handoff | Same owner, no child route |
 
 ## Execution Procedure
 
 ```xml
 <procedure name="code-implementation">
-  <!-- CRITICAL: Both DoR/DoD check elements below are MANDATORY -->
   <execute_dor_checks_before_starting/>
-  <schedule_dod_checks_with_sub_agent_before_starting/>
-
   <phase_1 name="博学之 — Study Broadly">
-
     <step_1_1>
-      <name>Query Feature Board</name>
+      <name>Study Approved Outcome and Design</name>
       <action>
-        1. CALL x-ipe+feature+feature-board-management skill with operation=query_feature
-        2. RECEIVE Feature Data Model (feature_id, title, version, status, specification_link, technical_design_link)
+        1. Query feature board read-only for actual identity/title/version/status/specification/dependencies. Resolve both source documents via initialization; no invented board design-link field.
+        2. Read authoritative source/parent/subgoal/story/AC/test types, constraints/non-goals and both design parts, Version History/Design Change Log, referenced architecture and reuse patterns. Legacy explicit so-that may be labeled inferred with exact anchor; missing intent blocks its pertinent outcome/coverage claim only.
+        3. Follow goal-to-AC-to-planned-check chain. Explain enabling contributions and all-required cases versus alternative means. Rejected options are not backlog mandates. Choose flexible means within approved design/contracts; changes outside it require authorized affected design/change-log update before coding, scope/AC changes need CR/human-intent authority.
+        4. Inspect actual source/test paths/module sizes and project standards; retain KISS/YAGNI/DRY and 800-line module threshold. Open current frontend/fullstack mockups and map layout/spacing/colors/states/events/accessibility/responsiveness within scope.
+        5. Capture relevant input hashes and baseline tests; identify affected goals/AC/contracts/dependencies, preserve unaffected IDs/bytes/assertions/history/evidence. No-op resume is read-only verification, not mandatory rewrite or replay.
       </action>
-      <constraints>
-        - BLOCKING: Feature must exist on board with status "Designed"
-      </constraints>
-      <output>Feature Data Model with all links and context</output>
+      <output>Approved contribution chain, delta/test plan and source revision evidence</output>
     </step_1_1>
-
-    <step_1_2>
-      <name>Learn Technical Design</name>
-      <action>
-        1. Resolve spec/design from Input Initialization (specification_link, technical_design_link)
-        2. READ technical_design_link; UNDERSTAND Part 1 (Summary) and Part 2 (Guide)
-        3. NOTE architecture references; CHECK Design Change Log for updates
-        4. IF mockup_link != "N/A": READ mockup files, extract layout/components/styling for Phase 3
-        5. CHECK for skill files (.github/skills/) → FLAG for x-ipe-meta-skill-creator in Phase 3
-        6. CHECK for MCP server keywords → FLAG for mcp-builder in Phase 3
-      </action>
-      <constraints>
-        - BLOCKING: Do NOT code until design is understood; STOP and clarify if unclear
-        - CRITICAL: If later steps reveal design issues → UPDATE technical-design.md + Design Change Log, then RESUME
-      </constraints>
-      <output>Implementation requirements understood, mockup references loaded (if applicable)</output>
-    </step_1_2>
-
-    <step_1_3>
-      <name>Read Architecture Designs</name>
-      <action>
-        1. CHECK if technical design references architecture patterns
-        2. IF no references: skip this step
-           ELSE: READ x-ipe-docs/architecture/technical-designs/{component}.md; UNDERSTAND common patterns, interfaces, integration requirements
-      </action>
-      <output>Architecture patterns understood (or skipped)</output>
-    </step_1_3>
-
   </phase_1>
-
   <phase_2 name="审问之 — Inquire Thoroughly">
-
     <step_2_1>
+      <name>Special Delegation Gate</name>
+      <action>
+        1. Before normal AAA generation or semantic routing, if program_type is skills or any approved skill files are involved, delegate that package scope to x-ipe-meta-skill-creator with same task/readiness, complete candidate/metadata, validation/review and explicit publication boundary. Do not edit live skills directly. If MCP server scope exists, load mcp-builder and delegate its protocol/build scope first; it may consult runtime capabilities, not bypass configured routing for separate ordinary layers.
+        2. Collect actual delegated artifacts/tests/receipts and DoD, map every scoped AC to structured or executable checks and original expectations. A delegation does not jump past validation/tracing/handoff or assert outcome achievement; later feature-acceptance-test still applies.
+        3. For exclusively delegated scope use its suitable structured/executable tests instead of forcing code AAA; for uncovered ordinary code continue step_2_2 and step_3_1 without double implementation. Missing delegation checks/review/promotion authority block pertinent completion, preserve candidate output honestly.
+      </action>
+      <output>Bounded special-domain outputs or explicit ordinary path</output>
+    </step_2_1>
+    <step_2_2>
       <name>Generate AAA Scenarios</name>
       <action>
-        1. PARSE specification.md: each AC → one @integration scenario (Arrange/Act/Assert)
-        2. PARSE technical-design.md Part 2:
-           - API endpoints → @backend happy + error scenarios
-           - UI components → @frontend happy + error scenarios
-           - Validation rules → @backend scenarios; edge cases → matching layer
-        3. TAG scenarios: @backend, @frontend, @integration
-        4. VALIDATE coverage: every AC ≥1 scenario, every endpoint/component has happy + sad path
-        5. Large context (>20 components) → per-layer batches (see references/)
-        6. IF generation fails → FALLBACK to x-ipe-tool-test-generation (Phase 1 coexistence)
+        1. For ordinary scope translate every scoped AC into Arrange/Act/Assert with stable source/story/AC links and original test type. Use @backend, @frontend, @integration for layer responsibility; UI/API/CLI/structured acceptance types remain intact, not converted to mocked integration only.
+        2. Map selected design interfaces/data/algorithms/state/error branches to concrete happy/error/edge checks and affected regression. Include relevant no-mutation/security/mockup requirements, not speculative endpoints or activity quotas. Validate all ACs and all original Assert clauses are retained, including multiple clauses per AC.
+        3. For large context retain a complete cross-layer coverage map first, then per-layer batches (backend first); no untested AC disappears between batches. If AAA generation fails, use x-ipe-tool-test-generation safety net with same authorized design/ACs; unresolved vague acceptance still blocks, never invent expectations.
+        4. TDD: new/changed expected behavior must fail before implementation for the relevant reason, then pass after; existing satisfied criteria keep passing baseline and regression evidence. Orchestrator supplies/runs relevant RED tests before invoking an implement operation; live tools do not uniformly enforce RED. Preserve assertions/test types/all ACs; do not delete, weaken, xfail or skip a failing check to get green. Delegated structured checks retain their domain readiness rather than fabricate executable RED.
+        5. Ask only consequential unresolved questions per actual mode; DAO cannot invent targets, confirm stakeholder intent, authorize scope/release or replace explicit required human approval.
       </action>
-      <constraints>
-        - MANDATORY: AAA format: @{tag} / Test Scenario: {name} / Arrange: / Act: / Assert:
-        - BLOCKING: Do NOT proceed to Phase 3 until scenarios generated and coverage validated
-      </constraints>
-      <output>Tagged AAA scenarios with coverage summary</output>
-    </step_2_1>
-
+      <output>Full acceptance/assertion map, tagged scenarios and genuine relevant RED/baseline evidence</output>
+    </step_2_2>
   </phase_2>
-
   <phase_3 name="慎思之 — Think Carefully">
-
     <step_3_1>
-      <name>Route and Invoke Tool Skills</name>
+      <name>Route and Implement Sequentially</name>
       <action>
-        1. CHECK special-case delegations FIRST:
-           a. IF program_type == "skills": DELEGATE to x-ipe-meta-skill-creator; VERIFY DoD; JUMP to step_4_2
-              NOTE: Acceptance testing is NOT skipped — x-ipe-task-based-feature-acceptance-test will run structured-review tests on the deliverables
-           b. IF MCP server detected: DELEGATE to mcp-builder; VERIFY quality checks; JUMP to step_4_2
-
-        2. DISCOVER: SCAN .github/skills/x-ipe-tool-implementation-*/ for available tool skills
-
-        3. READ CONFIG: Read x-ipe-docs/config/tools.json → extract stages.implement.implementation section
-           - IF section missing OR empty (only _order key, no tool entries) → config_active = false
-           - ELSE (has tool entries beyond _order and _extra_instruction) → config_active = true
-
-        4. FILTER ENABLED TOOLS:
-           IF config_active == false:
-             → All discovered tools treated as ENABLED (backwards compatibility)
-           ELSE (config_active == true):
-             → FOR EACH discovered tool skill:
-               a. Look up key "x-ipe-tool-implementation-{name}" in config
-               b. IF key exists AND value is true → ENABLED
-               c. IF key exists AND value is false → DISABLED, log: "skipped x-ipe-tool-implementation-{name} (disabled)"
-               d. IF key does NOT exist (undeclared) → DISABLED (opt-in required), log: "skipped x-ipe-tool-implementation-{name} (undeclared, default disabled)"
-
-        5. FORCE-ENABLE GENERAL: x-ipe-tool-implementation-general is ALWAYS enabled
-           - IF general was disabled or undeclared → override to ENABLED
-           - Log warning: "x-ipe-tool-implementation-general cannot be disabled — safety net fallback"
-
-        6. LOAD _extra_instruction: IF stages.implement.implementation._extra_instruction exists → use as supplementary semantic routing context
-
-        7. SEMANTIC MATCH: FOR EACH tech_stack entry: semantically match to ENABLED tool skill only
-           - No match among enabled skills → assign x-ipe-tool-implementation-general
-           - General insufficient → signal "new tool skill needed"
-           dao-represent-human → log gap via DAO, continue; else → ask human
-
-        8. INVOKE: FOR EACH matched tool skill (sequentially, backend first):
-           a. FILTER AAA scenarios by layer tag
-           b. INVOKE with: aaa_scenarios, source_code_path, feature_context, mockup_link (if frontend)
-           c. RECEIVE: implementation_files, test_files, test_results, lint_status
-
-        9. IF mockup_link != "N/A" AND frontend components:
-           PASS mockup_link in feature_context to frontend tool skill (e.g., x-ipe-tool-implementation-html5)
-           Tool skill uses mockup for visual fidelity: layout, components, spacing, color, states
-
-        10. COLLECT all tool skill outputs for validation
+        1. Discover x-ipe-tool-implementation-* descriptions/When to Use/operations. Read tools.json stages.implement.code_implementation and _extra_instruction, not app action implementation or technical_design consultation config.
+        2. Exclude metadata keys: missing/empty/metadata-only enables discovered tools. Explicit tool booleans activate opt-in: true enabled, false disabled, undeclared disabled; log disabled/undeclared rationale. Malformed values block the relevant config decision, not truthy enablement. Always force-enable general with warning if disabled/undeclared.
+        3. Match actual type/stack/responsibility semantically to enabled tools only, not suffix or hardcoded registry. General is fallback when no eligible specific match; if insufficient report new-tool gap and block affected implementation, do not continue ad hoc. Preserve _extra_instruction as supplementary context, never authority to weaken gates or disable assertions.
+        4. Invoke distinct matched skills sequentially, backend first then dependent frontend, never parallel. Pass standard operation implement, original layer aaa_scenarios, actual source_code_path/test_code_path, feature_context with source/design links and current frontend mockup_link. Tool calls carry agreed same-owner adapter; no child task CRUD/Git/routing.
+        5. Collect implementation_files, test_files, test_results for each original assertion and lint_status/details. Deduplicate actual paths, preserve passing outputs. Retry a failed tool once with original scenarios plus error context; persistent failure blocks affected delivery. Adapt suitable means within approved design; design-contract changes require affected authorized update/reruns, not silent drift.
       </action>
-      <constraints>
-        - BLOCKING: Special-case check runs BEFORE semantic routing
-        - CRITICAL: Tool skills invoked sequentially, NOT in parallel
-        - CRITICAL: Only ENABLED tools participate in semantic matching (step 7)
-        - MANDATORY: Use standard tool skill I/O contract (see references/implementation-guidelines.md)
-        - MANDATORY: File links in generated markdown MUST use project-root-relative paths so the UI can intercept them and open a preview modal. **Avoid** relative paths (`../`, `./`, `../../`) and absolute filesystem paths (`/Users/...`). **Correct:** `[spec](x-ipe-docs/requirements/EPIC-001/specification.md)`, `[skill](.github/skills/x-ipe-task-based-bug-fix/SKILL.md)`. **Wrong:** `[spec](../specification.md)`, `[spec](./specification.md)`.
-        - MANDATORY: Log diagnostic messages for all skipped (disabled/undeclared) tools
-      </constraints>
-      <output>All tool skill outputs collected</output>
+      <output>Actual sequential tool outputs and revision-bound implementation/test inventory</output>
     </step_3_1>
-
   </phase_3>
-
   <phase_4 name="明辨之 — Discern Clearly">
-
     <step_4_1>
-      <name>Validate Tool Skill Results</name>
+      <name>Verify Delivery and Relevant Evidence</name>
       <action>
-        1. FOR EACH tool skill output: verify all Assert clauses (count pass/fail); verify lint_status == "pass"
-        2. IF failing Asserts: re-invoke failed tool skill with original scenarios + error context
-           - Retry succeeds → continue; retry fails → preserve passing results, escalate
-           dao-represent-human → log failure via DAO; else → escalate to human
-        3. RUN @integration scenarios: verify cross-layer behavior with mocking
-        4. IF integration fails: report contract mismatch
-           dao-represent-human → log via DAO; else → report to human
-        5. PRODUCE aggregated report: per-skill pass/fail, integration results, overall status
+        1. Inspect actual tool/delegation outputs and run relevant unit/integration/UI/API/CLI/structured checks, all original Assert clauses and affected regression. Mocked integration alone cannot prove UI/API acceptance or stakeholder observation. Verify real paths/content/design/mockup fidelity, lint and new-code coverage at least 80% where executable coverage applies; keep simple code, never chase assertion/tool/component/activity counts or invent stakeholder targets.
+        2. With existing tracing infrastructure and applicable modified runtime functions, use x-ipe-tool-tracing-instrumentation for supported files: INFO public boundaries, DEBUG helpers, sensitive parameter/log redaction and opt-in behavior. Skip with rationale when absent/inapplicable or only tests/config/skills; no mandatory setup every task. Rerun affected tests after instrumentation; do not introduce tracing infrastructure implicitly.
+        3. Record actual commands/exits/assertion results, relevant source/spec/design/mockup/config/implementation/test hashes, review and unavailable checks in existing artifacts. Engineering delivery may be verified while stakeholder outcome is not measured. Qualitative outcome scenario follows source intent; only actual cited observation supports observed stakeholder outcome.
+        4. Rehash relevant inputs before claiming completion; changed intent/parent/means invalidates affected design/test/outcome evidence and dependent claims. Rerun affected checks/review; preserve unrelated evidence only when dependencies establish it is still valid. Timestamps alone or historical pass counts are insufficient.
+        5. Obtain independent DoD review for meaningful workflow/safety/public-contract risk; unavailable review blocks required completion/publication claim, not candidate drafting. Persisting failure/coverage gap/missing evidence is blocked, not done; do not hide partial artifacts or erase passing evidence.
       </action>
-      <success_criteria>
-        - All @backend, @frontend, @integration Assert clauses pass; all lint checks pass
-      </success_criteria>
-      <output>Aggregated validation report (PASS/FAIL)</output>
+      <output>Fresh delivery/AC evidence with honest outcome state and review limits</output>
     </step_4_1>
-
-    <step_4_2>
-      <name>Apply Tracing Instrumentation</name>
-      <action>
-        1. IF no tracing infrastructure (no x_ipe.tracing module) or only skill/config files modified: skip
-        2. ELSE: INVOKE x-ipe-tool-tracing-instrumentation for all modified files
-           - REVIEW decorators (INFO for public, DEBUG for helpers)
-           - APPLY with sensitive param redaction; RE-RUN tests to verify
-      </action>
-      <output>Tracing decorators applied; tests still pass</output>
-    </step_4_2>
-
   </phase_4>
-
   <phase_5 name="笃行之 — Practice Earnestly">
-
     <step_5_1>
-      <name>Update Workflow Status</name>
+      <name>Return Same-Owner Handoff</name>
       <action>
-        1. IF execution_mode == "workflow-mode":
-           a. Run `python3 .github/skills/x-ipe-tool-x-ipe-app-interactor/scripts/workflow_update_action.py` with: workflow_name, action, status: "done", feature_id,
-              deliverables: {"impl-files": "{path}", "impl-folder": "{path}"}
-           b. Log: "Workflow action status updated to done"
-        2. Verify all DoD checkpoints
-        3. Output task completion summary
+        1. Verify domain DoD and return original task_completion_output/conditional successor and resolved actual links/feature fields. src/ and tests/ are legacy directory output examples, not impl-files. Preserve directory-oriented output semantics adapted to actual source/test/delegated folders, no schema additions.
+        2. Same lifecycle owner in workflow-mode verifies specification and tech-design contexts, actual technical_design done and design artifacts, then performs or verifies one implementation action write/readback. Deliverables are exact impl-files nonempty file array from actual owned implementation/test/delegation files and impl-folder scalar directory for browsing. Files may span source/tests outside that browsing directory; every path still must exist safely and match scope. Neither directories nor a design document mislabeled as code substitute for impl-files.
+        3. Owner verifies matching features[].implement.actions.implementation done, exact tags/artifacts/contexts and actual Implemented feature handoff for new Designed scope. Authorized advanced CR/resume preserves Tested/Completed status unless explicit transition approved. Writer success alone is insufficient; workflow_action_updated true only for verified actual/prior write, read-only resume otherwise. Free-mode writes no app workflow.
+        4. Task/category persistence, Git and fresh-mode next boundary belong only to current owner. Suggest Acceptance Test without invoking/registering it. Unmigrated acceptance impl-files-to-design-link mismatch needs bounded mapping or blocks its claim, never fake a tag. Return to already-active caller, no recursive lifecycle or duplicate boundary.
       </action>
-      <output>Task completion output, workflow_action_updated</output>
+      <output>Original domain result and real file/directory adaptation for current owner</output>
     </step_5_1>
-
   </phase_5>
-
-  <phase_6 name="继续执行（Continue Execute）">
-    <step_6_1>
-      <name>Decide Next Action</name>
-      <action>
-        Collect the full context and task_completion_output from this skill execution.
-
-        IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-          → Invoke x-ipe-assistant-user-representative-Engineer with:
-            type: "routing"
-            completed_skill_output: {full task_completion_output YAML from this skill}
-            next_task_based_skill: "{from output}"
-            context: "Skill completed. Study the context and full output to decide best next action."
-          → DAO studies the complete context and decides the best next action
-        ELSE (interact-with-human):
-          → Present next task suggestion to human and wait for instruction
-      </action>
-      <constraints>
-        - BLOCKING (manual): Human MUST confirm or redirect before proceeding
-        - BLOCKING (auto): Proceed after DoD verification; auto-select next task via DAO
-      </constraints>
-      <output>Next action decided with execution context</output>
-    </step_6_1>
-    <step_6_2>
-      <name>Execute Next Action</name>
-      <action>
-        Based on the decision from Step 6.1:
-        1. Load the target task-based skill's SKILL.md
-        2. Generate an execution plan from the skill's Execution Flow table
-        3. Start execution from the skill's first phase/step
-      </action>
-      <constraints>
-        - MUST load the skill before executing — do not skip skill loading
-        - Execution follows the target skill's procedure, not this skill's
-      </constraints>
-      <output>Next task execution started</output>
-    </step_6_2>
-  </phase_6>
-
 </procedure>
 ```
-
-See [references/implementation-guidelines.md](.github/skills/x-ipe-task-based-code-implementation/references/implementation-guidelines.md) for detailed sub-procedures per step.
-
----
 
 ## Output Result
 
@@ -404,8 +215,8 @@ task_completion_output:
   execution_mode: "{from input}"
   workflow:
     name: "{from input}"
-  workflow_action: "{workflow.action}"   # triggers workflow status update when execution_mode == workflow-mode
-  workflow_action_updated: true | false # true if workflow_update_action.py was run
+  workflow_action: "{workflow.action}"
+  workflow_action_updated: true | false
   task_output_links:
     - "src/"
     - "tests/"
@@ -415,86 +226,43 @@ task_completion_output:
   feature_phase: "Code Implementation"
 ```
 
----
+Preserve original keys/order/value types; directory examples are not forced
+layout. Collect actual file inventory in existing evidence/tool outputs for
+workflow tags separately. No goal/coverage/implementation_files board fields.
 
 ## Definition of Done
 
-CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
-
 ```xml
 <definition_of_done>
-  <checkpoint required="true">
-    <name>Context gathered (board queried + design learned)</name>
-    <verification>Feature Data Model received with all links; agent can describe implementation plan from design</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>AAA scenarios generated OR special-case delegation invoked</name>
-    <verification>Either AAA scenarios exist with coverage validated, or program_type triggered skill-creator/mcp-builder delegation (acceptance testing still required via feature-acceptance-test skill)</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Tool skills invoked and all assertions pass</name>
-    <verification>All matched tool skills returned implementation_files, test_files, test_results, lint_status; aggregated validation report shows all pass (or delegation DoD satisfied)</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Implementation matches technical design</name>
-    <verification>Compare implemented components against design document</verification>
-  </checkpoint>
-  <checkpoint required="if-applicable">
-    <name>Frontend matches current mockups</name>
-    <verification>If feature has current mockups in specification, UI layout/components/styling match the mockup</verification>
-  </checkpoint>
-  <checkpoint required="if-applicable">
-    <name>Special-case delegations used correctly (skill-creator / mcp-builder)</name>
-    <verification>If design includes .github/skills/ files, created by x-ipe-meta-skill-creator; if it requires MCP server, built using mcp-builder skill (not directly)</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Code follows YAGNI and KISS principles</name>
-    <verification>No functionality beyond design spec; no unnecessary abstractions or over-engineering</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Linter passes and test coverage ≥80% for new code</name>
-    <verification>Run ruff check / eslint with zero errors; run pytest --cov=src tests/ and check coverage report</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Tracing decorators and redact annotations applied</name>
-    <verification>Public functions have @x_ipe_tracing decorators; password/token/secret/key params have redact=[] set (skip if only skill files)</verification>
-  </checkpoint>
-  <checkpoint required="if-applicable">
-    <name>Workflow Action Updated</name>
-    <verification>If execution_mode == "workflow-mode", ran `workflow_update_action.py` script with status "done" and deliverables keyed dict</verification>
-  </checkpoint>
+  <checkpoint required="true"><name>Authoritative context</name><verification>One designed feature, both design parts/spec/architecture/source goals/ACs/current mockups and actual path/config contracts inspected.</verification></checkpoint>
+  <checkpoint required="true"><name>Full acceptance preserved</name><verification>Every scoped AC/original assertion/test type maps to selected means and suitable tests; TDD RED/GREEN and baseline/affected regression are real, no weakened/skipped checks.</verification></checkpoint>
+  <checkpoint required="true"><name>Correct delegation/routing</name><verification>Skill-creator/MCP first with own tests/DoD; ordinary tools enabled semantic matches sequentially with general fallback; actual outputs verified, gaps block.</verification></checkpoint>
+  <checkpoint required="true"><name>Approved means</name><verification>Implementation stays within approved outcome/acceptance/design/constraints, KISS/YAGNI/DRY/800-line rule; authorized affected design log and reruns where contracts changed.</verification></checkpoint>
+  <checkpoint required="if_applicable"><name>Mockup fidelity</name><verification>Actual frontend visuals/states/accessibility/responsiveness match current scoped mockups and acceptance; unavailable visual verification explicit.</verification></checkpoint>
+  <checkpoint required="true"><name>Delivery verification</name><verification>Actual assertions/integration/regression/lint pass; new executable code coverage at least 80% where applicable, structured delegation checks otherwise; no activity-count surrogate.</verification></checkpoint>
+  <checkpoint required="if_applicable"><name>Existing tracing only</name><verification>Applicable existing runtime infrastructure instrumented/redacted/opt-in and tests rerun; absent infrastructure or only test/config/skill changes have explicit skip, no mandatory setup.</verification></checkpoint>
+  <checkpoint required="true"><name>Fresh honest evidence</name><verification>Relevant input/implementation/test/config hashes match checks/review; affected deltas invalidated; delivery separate from not measured/cited actual outcome, independent risk review satisfied or blocked.</verification></checkpoint>
+  <checkpoint required="true"><name>Verified owner handoff</name><verification>Workflow-mode owner verifies required prior design/context and done/both tags/nonempty actual file array/scalar folder/readback plus Implemented where authorized; original output preserved, no duplicate task/Git/route or status regression.</verification></checkpoint>
 </definition_of_done>
 ```
-
-MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution` to continue the task execution flow.
-
----
 
 ## Patterns & Anti-Patterns
 
 | Pattern | When | Then |
-|---------|------|------|
-| Orchestrator Flow | Code feature (backend/frontend/fullstack) | Generate AAA → route tool skills → validate → trace |
-| Special-Case Delegation | program_type "skills" or MCP server | Bypass AAA, delegate to skill-creator/mcp-builder, verify DoD |
-| Design Reference | Technical design references architecture | Read architecture docs, follow existing patterns, reuse utilities |
+| --- | --- | --- |
+| Ordinary code | Approved designed feature | Outcome/AC map → AAA/TDD → enabled sequential tools → actual validation |
+| Special package/protocol | Skill files or MCP server | Delegate first with same readiness; collect own scoped checks, still verify/accept |
+| Authorized CR/resume | Affected parent/means delta | Preserve IDs/assertions/advanced status, invalidate dependent evidence only |
 
-| Anti-Pattern | Why Bad | Do Instead |
-|--------------|---------|------------|
-| Skip reading design | Wrong implementation | Learn technical design first |
-| Ignore architecture docs | Inconsistent patterns | Read referenced architecture |
-| Skip AAA generation | No validation contract | Always generate scenarios first |
-| Parallel tool skills | Context conflicts | Sequential invocation only |
-| Add "nice to have" features | YAGNI violation | Only implement what's in design |
-| Complex code for coverage | Maintenance nightmare | Keep simple, accept 80% |
-| Ignore mockups | UI drifts from design | Use current mockups as visual spec |
-| Copy-paste code | DRY violation | Extract reusable functions |
-
----
+| Anti-Pattern | Consequence | Correction |
+| --- | --- | --- |
+| Component/tool counts as success | Activity over outcome | Full approved acceptance and fresh actual evidence |
+| Green by deleting assertions | False delivery | Preserve original expectations and fix behavior |
+| General gap ignored | Unsupported implementation | Block affected scope with bounded decision |
+| Output directories copied to impl-files | Invalid workflow handoff | Collect real files separately and one browsing directory |
+| Mandatory tracing creation or recursive route | Scope/ownership violation | Existing applicable infrastructure only; same owner boundary |
 
 ## Examples
 
-See [references/examples.md](.github/skills/x-ipe-task-based-code-implementation/references/examples.md) for detailed execution examples including:
-- Standard backend+frontend feature with AAA orchestration
-- Skills-type feature delegated to skill-creator
-- AAA generation fallback to test-generation (Phase 1)
-- Tool skill retry on failure
+See [authored mappings and scenarios](.github/skills/x-ipe-task-based-code-implementation/references/examples.md)
+and [integration contract](.github/skills/x-ipe-task-based-code-implementation/references/integration.md).

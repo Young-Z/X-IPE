@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "task_id": "TASK-6749",
+  "date": "2026-10-14",
+  "operation": "candidate-review-correction",
+  "publication_state": "candidate_pending_independent_review",
+  "production_changed": false,
+  "candidate_production_parity": false,
+  "installed_hash": "89ddfa5a1abd55dca9a5e16177340c806fa194e575e5c3cd58396fa8e40d4764",
+  "authority": "Current user: preserve established app/spec/UI hybrid semantics, no board/memory/Git operations",
+  "independent_review": "Earlier claimed inversion rejected; reviewer-authored corrections require later independent review before promotion",
+  "validation_tool": "Explicit creator candidate validator bootstrap; actual API equals CLI; installed validator also supports this workflow subtype",
+  "validation": {
+    "schema": 1,
+    "operation": "validate",
+    "name": "x-ipe-workflow-task-execution",
+    "skill_type": "x-ipe-workflow-orchestration",
+    "ok": true,
+    "errors": [],
+    "warnings": [],
+    "excluded_files": {},
+    "body_lines": 250,
+    "files": {
+      "SKILL.md": "79d41c6a58005ecaab44b82baeb380fd7160b25c728848f4dde6daeac66aff42",
+      "references/examples.md": "f4279ab78cfb3e910f55688286461de94ba5fd03bb6d9510a7dc06314982bbed",
+      "references/goal-contract.md": "fd007a0f946ee3ccf60507f88c898358de9ea045b18de6446b65079d62911074",
+      "references/lifecycle.md": "3cf75d245d4640ae0c994abd174e53c6ce1d32591104e4d7c2b1db7595fb31dc",
+      "templates/task-board.md": "521f08a73e475efe950d9167bd33ca174730535387a178fcc813caf1d889bc41",
+      "templates/task-record.yaml": "062f4e547db2dca988b39e49feb8862bc8ce266a9859e26aef0b8f1ab08ed96b"
+    },
+    "candidate_hash": "b79761fd9d6c36700b1312dc98b7e6b69c7099e14e05d8a10ded9f6ef21dcc00"
+  },
+  "changed": ["SKILL.md", "references/examples.md", "references/lifecycle.md"],
+  "added": [],
+  "removed": [],
+  "historical_publication_receipts": "Unchanged; bind installed bytes only, not this corrected candidate",
+  "downstream_compatibility": "Installed adopting children still contain inverted hybrid clauses; require reviewed candidate corrections or explicit bounded adapters, never silent override",
+  "version_advanced": false,
+  "publisher_apply": false
+}

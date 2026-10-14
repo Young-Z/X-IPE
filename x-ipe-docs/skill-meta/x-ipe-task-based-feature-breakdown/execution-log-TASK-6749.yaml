@@ -1,0 +1,72 @@
+execution_log:
+  task_id: TASK-6749
+  skill: x-ipe-task-based-feature-breakdown
+  executed_on: 2026-10-13
+  root: /Users/yzhang/Documents/projects/X-IPE
+  interpreter: .venv/bin/python (Python 3.12.9)
+  ownership: user-supplied resume of candidate slice; no task registration/board access or closure
+  preserved_plan: plan-TASK-6749.md
+  loaded_contracts:
+    - installed creator, general guidelines, task subtype and metadata templates, validation/publication reference
+    - installed lifecycle and common lifecycle reference
+    - live breakdown entry/domain guidelines and all candidate resources/templates
+    - installed board/helper contracts and read-only app/config consumers
+  previous_requirement:
+    receipt_verified: true
+    exact_current_manifest_parity: true
+    fingerprint: fda78fe5234e0d054a4b720e0773ed30cac8f1e39a10215ce277882576ab294b
+    production_or_metadata_writes: none
+  initial_focused_run:
+    command: PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -B -m pytest tests/test_skill_pipeline_refactor.py -q -p no:cacheprovider
+    exit: 1
+    passed: 74
+    failed: 2
+    corrections:
+      - Replace stale patterns that erased parent board history and truncated total scope.
+      - Correct feature HTTP single envelope to data.feature; do not inherit task HTTP shape.
+      - Test actual Markdown link targets instead of rejecting prohibition examples in prose.
+      - Retain prioritized-list completeness confirmation and revision-bound reuse.
+      - Add temporary helper failure/prerequisite/append-only/corrupt-store/pagination regressions.
+  final_scoped_run:
+    command: PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -B -m pytest tests/test_skill_pipeline_refactor.py tests/test_skill_creator_foundation.py tests/test_skill_lifecycle.py tests/test_feature_crud.py tests/test_feature_board_api.py tests/test_board_lib.py -q -p no:cacheprovider
+    exit: 0
+    passed: 383
+    failed: 0
+    duration_seconds: 6.10
+    test_file_hash: 5a50e7b6e089205961f5ee00125745a05687ff3bdd314bbb89b1c288fcf1f61f
+  final_extended_run:
+    command: PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -B -m pytest tests/test_skill_pipeline_refactor.py tests/test_skill_creator_foundation.py tests/test_skill_lifecycle.py tests/test_feature_crud.py tests/test_feature_board_api.py tests/test_board_lib.py tests/test_workflow_template_sync.py -q -p no:cacheprovider
+    exit: 1
+    passed: 385
+    failed: 2
+    duration_seconds: 5.89
+    failures: unchanged config synchronization failures; see evaluation-report-TASK-6749.yaml
+  focused_collection:
+    command: PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -B -m pytest tests/test_skill_pipeline_refactor.py --collect-only -q -p no:cacheprovider
+    collected: 87
+    execution_evidence: all collected cases passed as part of both final runs
+  validator:
+    command: .venv/bin/python -B .github/skills/x-ipe-meta-skill-creator/scripts/validate_skill.py --project-root /Users/yzhang/Documents/projects/X-IPE --candidate /Users/yzhang/Documents/projects/X-IPE/x-ipe-docs/skill-meta/x-ipe-task-based-feature-breakdown/candidate --name x-ipe-task-based-feature-breakdown --type x-ipe-task-based
+    exit: 0
+    ok: true
+    errors: []
+    warnings: []
+    receipt: validation-receipt-TASK-6749.json
+    final_same_revision_api_receipt: validate(project_root, candidate, name, x-ipe-task-based)
+  writes_in_this_resume:
+    candidate: [SKILL.md, references/patterns.md, references/integration.md, templates/requirement-details.md]
+    root_metadata: [skill-meta.md, validation-receipt-TASK-6749.json, evidence-files-TASK-6749.json, evaluation-report-TASK-6749.yaml, execution-log-TASK-6749.yaml, test-cases-TASK-6749.yaml]
+    tests: [tests/test_skill_pipeline_refactor.py]
+    note: preexisting drafted entry/guidelines/examples/templates retained and validated; no blind production copy
+  preservation:
+    production_breakdown_baseline_fingerprint: dc1a0ca71eb7ba6f40af3ca8eb16bf0bc4ae2d9ee2423c594cf4ddbf054e92a2
+    unchanged: baseline.json, prework-candidate.json, plan-TASK-6749.md, execution-log.yaml, test-cases.yaml, sandbox, downstream specification scaffold
+    board_memory_git_production_unrelated_source_operations: none
+    temporary_helper_writes: pytest temporary projects only
+  outcome:
+    slice: candidate_ready
+    larger_task_status: not_changed_or_claimed_completed
+    independent_review: pending_separate_review
+    publication: not_attempted
+    history_version_bump: none
+    next: separate independent review, not refinement or promotion

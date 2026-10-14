@@ -1,0 +1,37 @@
+{
+  "schema": 1, "task_id": "TASK-6749", "name": "x-ipe-task-based-feature-breakdown",
+  "version": "3.2.0", "date": "2026-10-13", "publication_state": "published",
+  "method": "editor apply_patch only; installed publisher dry-run, no apply",
+  "review": "evaluation-goal-promotion-TASK-6749.md",
+  "baseline_hash": "bb6482e2e3915fbe2e9806b42510253bc6851ea923509f398b0af581ed28669c",
+  "managed_provenance": "trusted same-session promotion-receipt-TASK-6749.json production_hash + validation-receipt-promotion-TASK-6749.json files",
+  "baseline_files": {
+    "SKILL.md": "02b671d0c66fef30a7f70dfc1e8a4e42e4f3e14215639e18e7a5dc1077f1b9bc",
+    "references/breakdown-guidelines.md": "de09e61adb749b9cd27b6e1cb967a3627ed186ff751950cac48daf74e4634bae",
+    "references/examples.md": "fa95c346e73f531244c6ba15cdaa85ae8042a8f330909db548d9e13216fd2125",
+    "references/integration.md": "90d9ca71da51bfa2f86e6a03e98df7e33e3ebb670cf62b2d177781005b79ab3c",
+    "references/patterns.md": "88d055a6422c2ff212ae0da786cc7bfd55c6cf1bcb9c9c80fdf7ef3b32888a47",
+    "templates/features.md": "15d0baeb0c02ec0cb2b301c4eb1dfc7058e99504d27f929ab3b1c162954a6177",
+    "templates/requirement-details.md": "774f732004be5faf92ac581602833cb607c5c998c46ce30017c88d3a223500a5",
+    "templates/specification.md": "9aff96e9cc97695110f7504dda00a185ff1ea96e25fba6f64a14f7669416dc5a"
+  },
+  "candidate_hash": "9cae32f8fb61fafbec7cfc712a91626b2ae05e34df2f86ae3ac05ad690f20fdc",
+  "production_hash": "9cae32f8fb61fafbec7cfc712a91626b2ae05e34df2f86ae3ac05ad690f20fdc",
+  "files": {
+    "SKILL.md": "58a5828bd6c4991433094969e2bdb99a0e4706e9a9e87ecf8526e730acad9dbc",
+    "references/breakdown-guidelines.md": "4c7a5409feaa69ec966ccba9fb76bfe0ba08ba2ab95154c168047c11bb82bb9c",
+    "references/examples.md": "abeb20ca76f3d595003754a6363285228516e817aaa5b4643aa237ca1b53c3b6",
+    "references/integration.md": "90d9ca71da51bfa2f86e6a03e98df7e33e3ebb670cf62b2d177781005b79ab3c",
+    "references/patterns.md": "88d055a6422c2ff212ae0da786cc7bfd55c6cf1bcb9c9c80fdf7ef3b32888a47",
+    "templates/features.md": "f54a2bf7bb8ef6ae52a9fdd770ebff1c07acb4cfaea7415f03147906cb227ae2",
+    "templates/requirement-details.md": "1919fb182b426e98b1720905eb724e0092f5792adb8d65a763a398c40bbfcb8c",
+    "templates/specification.md": "a182f39aaf60a7ddb73a2bd5f6160ff9eda1ace384631c8bea4ff366db8fd55a"
+  },
+  "added": [], "changed": ["SKILL.md", "references/breakdown-guidelines.md", "references/examples.md", "templates/features.md", "templates/requirement-details.md", "templates/specification.md"], "removed": [],
+  "byte_parity": true, "validation": {"ok": true, "body_lines": 245, "errors": [], "warnings": []},
+  "tests": {"evidence_command_and_hashes": "../x-ipe-workflow-task-execution/promotion-receipt-goal-TASK-6749.json", "passed": 307, "failed": 0, "exit": 0, "seconds": 8.04},
+  "dependencies": {"workflow_hash": "89ddfa5a1abd55dca9a5e16177340c806fa194e575e5c3cd58396fa8e40d4764", "requirement_hash": "c020a439d33be6e4653d954d644ed183b01ca05ce7cb6a0adaed1ee0a41ab6e0", "goal_contract_sha256": "fd007a0f946ee3ccf60507f88c898358de9ea045b18de6446b65079d62911074"},
+  "dependency_order": 3,
+  "recovery": "Non-atomic editor patch; compare baseline/proposed/current maps and preserve divergent edits; no automatic lock, backup or rollback",
+  "outcome_limit": "Artifact/helper evidence only; no autonomous agent or stakeholder-observation pilot"
+}

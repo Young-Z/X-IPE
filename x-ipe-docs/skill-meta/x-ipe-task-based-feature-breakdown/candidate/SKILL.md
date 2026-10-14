@@ -1,383 +1,176 @@
 ---
 name: x-ipe-task-based-feature-breakdown
-description: Break requirements into Epics and features. Assesses scope to determine Epic grouping, then breaks each Epic into features with MVP-first criteria. Calls feature-board-management to initialize tracking. Use when requirements need to be split into discrete features. Triggers on requests like "break down features", "split into features", "create feature list", "organize epics".
+description: Break requirements into Epics and features with MVP-first sizing, dependencies and verified feature-board registration. Use when requirements need to be split into discrete features. Triggers on requests like "break down features", "split into features", "create feature list", "organize epics".
 ---
 
 # Task-Based Skill: Feature Breakdown
 
 ## Purpose
 
-Break user requests into Epics and features by:
-1. Analyzing requirement documentation (or current active part)
-2. Assessing scope to determine Epic-level grouping
-3. Identifying feature boundaries within each Epic using MVP-first criteria
-4. Creating feature list in requirement-details.md (or current active part)
-5. Calling feature-board-management to create features on board
-
----
+Translate approved requirements into cohesive Epics and independently deliverable
+features, a runnable MVP-first order, direct dependencies and real board entries.
+Reuse fresh requirement findings; carry only authorized new/small/CR deltas into
+consolidated Feature Lists and details without regenerating stable features.
 
 ## Important Notes
 
-BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skill.
+BLOCKING: Load the [common lifecycle](.github/skills/x-ipe-workflow-task-execution/references/lifecycle.md).
+Caller supplies readiness; direct entry loads the workflow and calls Orient/Plan
+once, returning here without recursively dispatching this child. Lifecycle owns
+task registration/status, Git and completion/routing. This child owns breakdown
+documents, feature registration and the agreed verified application action.
+Never create/close a task, commit or execute the suggested successor here.
 
-**Note:** If Agent does not have skill capability, go to `.github/skills/` folder to learn skills. SKILL.md is the entry point.
+CRITICAL: New IDs are FEATURE-{nnn}-{X}, matching parent EPIC-{nnn}; never use an
+EPIC ID as a Feature ID. Preserve legacy FEATURE-{nnn} IDs and both legacy
+FEATURE folders and EPIC/FEATURE folders. Resume reuses identities and artifacts.
+Board feature creation is domain work, NOT duplicate lifecycle task registration.
 
-**Workflow Mode:** When `execution_mode == "workflow-mode"`, the completion step MUST run the workflow update script via bash: `python3 .github/skills/x-ipe-tool-x-ipe-app-interactor/scripts/workflow_update_action.py` with `workflow_name` from `workflow.name` input, `action` from `workflow.action` input, `status: "done"`, and a `deliverables` keyed dict using ONLY the extract tags defined in `workflow-template.json` for this action (format: `{"tag-name": "path/to/file"}`). Do NOT pass a flat list of file paths. Verify the script exits with code 0 before marking the task complete.
+BLOCKING: Apply the [goal contract](.github/skills/x-ipe-workflow-task-execution/references/goal-contract.md)
+to every new/changed feature in the existing consolidated details: deliverable
+contributes a subgoal with parent requirement/source, success evidence and gaps.
+Keep stable shared folders/index and identities; legacy inference is labeled.
 
-MANDATORY: This skill MUST call feature-board-management to create features on the board. Never edit features.md manually.
-
-MANDATORY: Every feature MUST have a feature ID in the format `FEATURE-{nnn}-{X}` (e.g., FEATURE-035-A, FEATURE-035-B) where `{nnn}` matches the parent Epic number. Features are created as sub-folders under the parent `EPIC-{nnn}/` folder.
-
-> **Transition Note:** During migration, both old (`FEATURE-{nnn}/`) and new (`EPIC-{nnn}/FEATURE-{nnn}-{X}/`) folder structures may coexist. Skills must handle both formats when scanning existing files.
-
-See [references/breakdown-guidelines.md](.github/skills/x-ipe-task-based-feature-breakdown/references/breakdown-guidelines.md) for:
-- Epic granularity heuristics and grouping decision matrix
-- Feature dependency patterns (sequential, parallel, multiple) and rules
-- Feature sizing guidelines, naming conventions, version numbering rules
-- Mockup processing procedures and examples
-- Feature board integration details and call format
-
-Additional notes:
-- All features are consolidated in requirement-details.md (no individual feature.md files)
-- Feature board (features.md) is the status tracking system
-- Feature specifications are created later during Feature Refinement
-- Keep feature descriptions concise (50 words max) in the table
-
-IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-interact"`, NEVER stop to ask the human. Instead, call `x-ipe-assistant-user-representative-Engineer` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
-
----
+BLOCKING: Use x-ipe-tool-task-board-manager for actual feature CRUD, never edit
+features.json manually or invent batch/archive/delete operations. New features
+start Planned; existing statuses and specifications are not reset by breakdown.
+All feature details remain in requirement-details (or its selected part), not
+individual feature.md files. Specifications belong to later Feature Refinement.
 
 ## Input Parameters
 
 ```yaml
 input:
-  # Task attributes (from task board)
-  task_id: "{TASK-XXX}"
+  task_id: "{existing TASK-XXX}"
   task_based_skill: "x-ipe-task-based-feature-breakdown"
-
-  # Execution context (passed by x-ipe-workflow-task-execution)
-  execution_mode: "free-mode | workflow-mode"  # default: free-mode
+  execution_mode: "free-mode | workflow-mode"
   workflow:
-    name: "N/A"  # workflow name, default: N/A
-    action: "feature_breakdown"  # workflow action name for status updates
-    extra_context_reference:  # optional, default: N/A for all refs
+    name: "N/A or resolved workflow"
+    action: "feature_breakdown"
+    extra_context_reference:
       requirement-doc: "path | N/A | auto-detect"
-
-  # Task type attributes
   category: "requirement-stage"
   next_task_based_skill:
     - skill: "x-ipe-task-based-feature-refinement"
-      condition: "Refine individual features from breakdown"
+      condition: "Refine the first unstarted feature. Each feature goes through the complete pipeline (refinement → design → implementation → testing → closing) one at a time before starting the next."
   process_preference:
-    interaction_mode: "{from input process_preference.interaction_mode}"
-
-  # Required inputs
-  mockup_list: "N/A"  # List of mockups from previous task or context
-
-  # Context (from previous task or project)
-  requirement_doc: "x-ipe-docs/requirements/requirement-details.md"  # or requirement-details-part-X.md
+    interaction_mode: "interact-with-human | dao-represent-human-to-interact | dao-represent-human-to-interact-for-questions-in-skill"
+  mockup_list: "N/A"  # or [{mockup_name, mockup_link}]
+  requirement_doc: "x-ipe-docs/requirements/requirement-details.md"  # or selected part
 ```
 
 ### Input Initialization
 
 ```xml
 <input_init>
-  <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
-  <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
-  <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
-  <field name="process_preference.interaction_mode" source="from caller (x-ipe-workflow-task-execution) or default 'interact-with-human'" />
-  <field name="extra_context_reference.requirement-doc" source="workflow context OR auto-detect">
-    <steps>
-      1. IF workflow-mode AND workflow.extra_context_reference.requirement-doc is a file path → use it
-      2. ELIF "auto-detect" → scan x-ipe-docs/requirements/ for requirement-details*.md
-      3. ELIF "N/A" → skip
-      4. ELSE (free-mode) → use existing discovery logic
-    </steps>
+  <field name="task_id" source="existing lifecycle identity/readiness; no child task allocation" />
+  <field name="task_based_skill" source="this canonical entry; category and next suggestion from Output Result" />
+  <field name="execution_mode" source="caller context; default free-mode" />
+  <field name="workflow.name" source="validated caller workflow; N/A only free-mode" />
+  <field name="workflow.action">
+    <steps>Verify feature_breakdown against ACTION_MAP and workflow template; shared mandatory action, not a tool configuration key.</steps>
   </field>
-  <field name="mockup_list" source="previous task (Idea Mockup) output links OR human input OR N/A">
-    <steps>
-      1. IF previous task was "Idea Mockup" → use previous task output's mockup_list field (array of {mockup_name, mockup_link})
-      2. ELIF previous task was "Requirement Gathering" → inherit from its mockup_list output
-      3. ELIF human provides explicit mockup paths → use human-provided value
-      4. ELSE → set to "N/A"
-    </steps>
+  <field name="process_preference.interaction_mode" source="common lifecycle exact resolved enum/source" />
+  <field name="workflow.extra_context_reference.requirement-doc">
+    <steps>Explicit selected context first, then requirement_doc/upstream output, then legacy auto-detection. Validate contents, root containment, source/Epic identity and SHA256; explicit broken or conflicting selections block rather than fall back. Workflow-mode requires a populated requirement-doc even if N/A was supplied.</steps>
   </field>
-  <field name="requirement_doc" source="auto-detect from x-ipe-docs/requirements/">
-    <steps>
-      1. Check if x-ipe-docs/requirements/requirement-details-part-X.md files exist
-      2. IF parts exist → use current active part (highest part number)
-      3. ELIF x-ipe-docs/requirements/requirement-details.md exists → use it
-      4. ELSE → analyze user request directly
-    </steps>
+  <field name="requirement_doc">
+    <steps>Absent/auto input uses highest numeric requirement-details-part-X, else requirement-details.md. Reconcile all parts/index and locate affected older features too. Explicit affected-part selection outranks newest-part fallback. Free-mode direct request is allowed only when documented into real requirement artifacts before completion.</steps>
   </field>
+  <field name="mockup_list">
+    <steps>Use explicit validated links, then Requirement Gathering/Idea Mockup output, then selected Epic/mockups or linked idea/mockups. No unrelated-folder scan. Preserve mockup_name/mockup_link; absent optional mockups are N/A.</steps>
+  </field>
+  <field name="breakdown_context">
+    <steps>Reuse fresh requirement source/parts/index hashes, scope/conflict decisions, acceptance, risks and impacted_features. Inventory current feature IDs/reservations, board and workflow entries; record changed/affected boundaries and evidence invalidation, not timestamps alone.</steps>
+  </field>
+  <field name="epic_context">
+    <steps>Reuse intake Epic from gathered document/output or matching existing feature. For additional authorized groupings scan Epic folders, headers and board reservations; allocate highest number + 1 and recheck collisions. Never allocate a second Epic merely because this is the next task.</steps>
+  </field>
+  <field name="document_language" source="explicit requested language, else established requirement language; retain EN/ZH IDs/paths/tags unchanged" />
 </input_init>
 ```
-
-### Mockup List Structure
-
-```yaml
-mockup_list:
-  - mockup_name: "Description of what function the mockup is for"
-    mockup_link: "URL or path to the mockup"
-```
-
----
 
 ## Definition of Ready
 
 ```xml
 <definition_of_ready>
-  <checkpoint required="true">
-    <name>Requirement documentation exists</name>
-    <verification>User request or requirement-details.md (or current active part) is available</verification>
-  </checkpoint>
+  <checkpoint required="true"><name>Owner and intent</name><verification>Supplied task/readiness, approved scope/root, mode and authorized new/small/CR delta match.</verification></checkpoint>
+  <checkpoint required="true"><name>Sources and coverage</name><verification>Requirement contents or free-mode request resolved; Epic, current parts/index, upstream findings and affected features identified.</verification></checkpoint>
+  <checkpoint required="true"><name>Integration safe</name><verification>Actual board/helper schemas loaded; inventory is readable, write scope and app action owner known; no unresolved destructive/identity decisions.</verification></checkpoint>
 </definition_of_ready>
 ```
 
----
-
 ## Execution Flow
 
-| Phase | Steps | Action | Gate |
-|-------|-------|--------|------|
-| 1. 博学之 — Study Broadly | 1.1 Analyze Requirements, 1.2 Assess Epic Scope | Read requirements, evaluate scope and Epic grouping | Requirements and Epic structure understood |
-| 2. 审问之 — Inquire Thoroughly | 2.1 Scope Challenge | Challenge scope assumptions, question feature necessity | Scope validated |
-| 3. 慎思之 — Think Carefully | 3.1 Evaluate Complexity, 3.2 Identify Features | Count ACs, assess dimensions, identify feature boundaries | Features identified |
-| 4. 明辨之 — Discern Clearly | 4.1 MVP Prioritization Decision | Decide MVP order, validate dependency DAG | MVP and order decided |
-| 5. 笃行之 — Practice Earnestly | 5.1 Process Mockups, 5.2 Create Summary, 5.3 Update Board, 5.4 Complete | Execute all deliverables | All artifacts created |
-| 继续执行 | 6.1 | Decide Next Action | DAO-assisted next task decision | Next action decided |
-| 继续执行 | 6.2 | Execute Next Action | Load skill, generate plan, execute | Execution started |
+| Step | Domain work | Gate |
+| --- | --- | --- |
+| 1 | Reuse context, bound delta and assess Epic grouping | Current scope and grouping rationale |
+| 2 | Size units, separate MVP, validate dependencies | Coverage and deliverable order decided |
+| 3 | Author targeted lists/details, register real features | Documents, IDs and board consistent |
+| 4 | Verify action/artifacts and return full result | DoD evidence or honest blocked output |
 
-BLOCKING: If parts exist, work with the CURRENT ACTIVE PART (highest part number).
-BLOCKING: Features with more than 20 ACs MUST be split into sub-features.
-BLOCKING: First feature in each Epic MUST be "Minimum Runnable Feature" (MVP).
-BLOCKING: MUST use feature-board-management skill (not manual file editing).
-BLOCKING (manual/stop_for_question): Human MUST confirm feature list is complete before refinement.
-BLOCKING (auto): Proceed after DoD verification; resolve open questions via x-ipe-assistant-user-representative-Engineer if needed.
-
----
+Load [domain guidelines](.github/skills/x-ipe-task-based-feature-breakdown/references/breakdown-guidelines.md)
+and [integration](.github/skills/x-ipe-task-based-feature-breakdown/references/integration.md)
+before domain work. Study/inquiry/reflection/decision combine proportionately;
+no forced re-interview, five-phase ceremony or duplicate upstream research.
 
 ## Execution Procedure
 
 ```xml
 <procedure name="feature-breakdown">
   <execute_dor_checks_before_starting/>
-  <schedule_dod_checks_with_sub_agent_before_starting/>
-
-  <phase_1 name="博学之 — Study Broadly">
-
-    <step_1_1>
-      <name>Analyze Requirements</name>
-      <action>
-        0. Resolve extra_context_reference inputs:
-           - FOR ref requirement-doc:
-             IF workflow mode AND extra_context_reference.requirement-doc is a file path:
-               READ the file at that path
-             ELIF "auto-detect": Use existing discovery logic
-             ELIF "N/A": Skip
-             ELSE (free-mode): Use existing behavior
-        1. Determine file: check for requirement-details-part-X.md (use highest), else requirement-details.md, else user request
-        2. Read and understand requirement summary
-        3. Identify: verbs (actions), nouns (entities), boundaries, user goals, domain clusters
-      </action>
-      <constraints>
-        - BLOCKING: If parts exist, MUST use current active part (highest number)
-      </constraints>
-      <output>Requirements understood, capability areas and domain clusters identified</output>
-    </step_1_1>
-
-    <step_1_2>
-      <name>Assess Epic Scope</name>
-      <action>
-        1. Evaluate scope signals: estimated feature count, domain diversity, dependency clusters
-        2. Apply Epic grouping matrix (see references/breakdown-guidelines.md):
-           - 1 domain, ≤7 features → Single Epic
-           - 2-3 domains, 8-15 features → 2-3 Epics
-           - 4+ domains OR >15 features → Multiple Epics
-        3. IF single Epic: assign EPIC-{nnn}, create folder
-        4. IF multiple Epics: define boundaries, name each, assign sequential IDs, create folders
-        5. Document Epic assessment decision with rationale
-      </action>
-      <constraints>
-        - BLOCKING: Epic structure must be decided BEFORE feature identification
-      </constraints>
-      <output>Epic structure with IDs, names, domains, dependencies</output>
-    </step_1_2>
-
-  </phase_1>
-
-  <phase_2 name="审问之 — Inquire Thoroughly">
-
-    <step_2_1>
-      <name>Scope Challenge</name>
-      <action>
-        1. For each identified domain/capability area, challenge assumptions:
-           - Is this capability truly needed for the MVP?
-           - Can this be deferred to a later version?
-           - Does this overlap with existing features in the system?
-        2. Present scope challenges and ask for confirmation
-        3. Document scope decisions and rationale
-
-        Response source (based on interaction_mode):
-        IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-          → Resolve via x-ipe-assistant-user-representative-Engineer
-        ELSE (interact-with-human/dao-represent-human-to-interact-for-questions-in-skill):
-          → Ask human for confirmation
-      </action>
-      <constraints>
-        - CRITICAL: Challenge scope BEFORE breaking down into features
-      </constraints>
-      <output>Validated scope with challenge decisions documented</output>
-    </step_2_1>
-
-  </phase_2>
-
-  <phase_3 name="慎思之 — Think Carefully">
-
-    <step_3_1>
-      <name>Evaluate Complexity</name>
-      <action>
-        1. Count ACs per Epic (total and per logical group)
-        2. Assess scope dimensions: technical layers, user-facing capabilities, new files
-        3. Apply sizing heuristics (see references/breakdown-guidelines.md):
-           - <10 ACs: likely single feature
-           - 10-20 ACs: evaluate split if multiple capabilities
-           - >20 ACs: MUST split
-        4. Identify natural split boundaries within each Epic
-      </action>
-      <constraints>
-        - BLOCKING: Features with more than 20 ACs MUST be split
-      </constraints>
-      <output>Per-Epic complexity assessment with split decisions</output>
-    </step_3_1>
-
-    <step_3_2>
-      <name>Identify Features</name>
-      <action>
-        1. Assign Feature IDs: FEATURE-{nnn}-{A|B|C...} where {nnn} matches Epic number
-        2. Apply feature criteria: Single Responsibility, Independent, Deliverable Value, Reasonable Size
-        3. First feature = MVP (Minimum Runnable Feature)
-        4. Subsequent features build upon first
-      </action>
-      <constraints>
-        - BLOCKING: First feature per Epic MUST be MVP
-        - Limit to 5-7 features per Epic maximum
-      </constraints>
-      <output>Feature list with IDs, titles, descriptions, dependencies per Epic</output>
-    </step_3_2>
-
-  </phase_3>
-
-  <phase_4 name="明辨之 — Discern Clearly">
-
-    <step_4_1>
-      <name>MVP Prioritization Decision</name>
-      <action>
-        1. Review feature list across all Epics
-        2. Validate MVP selection: does first feature provide minimum runnable value?
-        3. Validate dependency DAG: no circular dependencies, clear implementation order
-        4. Present prioritized list for confirmation
-        5. Finalize feature order and dependency graph
-
-        Response source (based on interaction_mode):
-        IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-          → Confirm via x-ipe-assistant-user-representative-Engineer
-        ELSE (interact-with-human/dao-represent-human-to-interact-for-questions-in-skill):
-          → Ask human for confirmation
-      </action>
-      <output>Confirmed feature prioritization with validated dependency DAG</output>
-    </step_4_1>
-
-  </phase_4>
-
-  <phase_5 name="笃行之 — Practice Earnestly">
-
-    <step_5_1>
-      <name>Process Mockups</name>
-      <action>
-        1. IF mockup_list empty: scan EPIC-{nnn}/mockups/ then x-ipe-docs/ideas/{idea-folder}/mockups/
-        2. IF still empty: skip
-        3. Mockups stay at EPIC-{nnn}/mockups/ (shared), features reference via ../mockups/
-      </action>
-      <constraints>
-        - CRITICAL: Only copy if NOT already in feature folder
-      </constraints>
-      <output>Mockups in Epic folders (or confirmed absent)</output>
-    </step_5_1>
-
-    <step_5_2>
-      <name>Create Summary & Update Board</name>
-      <action>
-        1. Determine target file (current active part or requirement-details.md)
-        2. Add Feature List table:
-           | Feature ID | Epic ID | Feature Title | Version | Brief Description | Feature Dependency |
-        3. Add detailed sections for each feature
-        4. CALL x-ipe+feature+feature-board-management skill to create all features
-        5. IF parts exist: update requirement-details-index.md
-        6. IF features were split: run parent dedup check (100% coverage → remove parent)
-      </action>
-      <constraints>
-        - BLOCKING: Feature List goes into PART FILE, NOT index
-        - BLOCKING: MUST use feature-board-management skill
-        - MANDATORY: File links in generated markdown MUST use project-root-relative paths so the UI can intercept them and open a preview modal. **Avoid** relative paths (`../`, `./`, `../../`) and absolute filesystem paths (`/Users/...`). **Correct:** `[spec](x-ipe-docs/requirements/EPIC-001/specification.md)`, `[skill](.github/skills/x-ipe-task-based-bug-fix/SKILL.md)`. **Wrong:** `[spec](../specification.md)`, `[spec](./specification.md)`.
-      </constraints>
-      <output>Requirement-details updated, features on board with status "Planned"</output>
-    </step_5_2>
-
-    <step_5_3>
-      <name>Complete & Verify</name>
-      <action>
-        1. IF workflow-mode: run `python3 .github/skills/x-ipe-tool-x-ipe-app-interactor/scripts/workflow_update_action.py` with status "done", features list
-        2. Verify all DoD checkpoints
-        3. IF manual/stop_for_question: present feature breakdown, ask if any features are missing or miscategorized
-      </action>
-      <output>Task completion output, workflow_action_updated</output>
-    </step_5_3>
-
-  </phase_5>
-
-  <phase_6 name="继续执行（Continue Execute）">
-    <step_6_1>
-      <name>Decide Next Action</name>
-      <action>
-        Collect the full context and task_completion_output from this skill execution.
-
-        IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-          → Invoke x-ipe-assistant-user-representative-Engineer with:
-            type: "routing"
-            completed_skill_output: {full task_completion_output YAML from this skill}
-            next_task_based_skill: "{from output}"
-            context: "Skill completed. Study the context and full output to decide best next action."
-          → DAO studies the complete context and decides the best next action
-        ELSE (interact-with-human):
-          → Present next task suggestion to human and wait for instruction
-      </action>
-      <constraints>
-        - BLOCKING (manual): Human MUST confirm or redirect before proceeding
-        - BLOCKING (auto): Proceed after DoD verification; auto-select next task via DAO
-      </constraints>
-      <output>Next action decided with execution context</output>
-    </step_6_1>
-    <step_6_2>
-      <name>Execute Next Action</name>
-      <action>
-        Based on the decision from Step 6.1:
-        1. Load the target task-based skill's SKILL.md
-        2. Generate an execution plan from the skill's Execution Flow table
-        3. Start execution from the skill's first phase/step
-      </action>
-      <constraints>
-        - MUST load the skill before executing — do not skip skill loading
-        - Execution follows the target skill's procedure, not this skill's
-      </constraints>
-      <output>Next task execution started</output>
-    </step_6_2>
-  </phase_6>
-
+  <step_1>
+    <name>Bound scope and grouping</name>
+    <action>
+      1. Reuse fresh what/who/why, acceptance, scope, conflicts, risk and mockup findings. Compare current SHA256 revisions and inventory; refresh changed/affected facts only, or establish missing coverage. Do not redo the requirement interview.
+      2. Classify new/single-feature/CR delta; preserve approved existing-feature impact decisions. Challenge only material unresolved MVP, overlap, domain or priority choices; human asks the human within skill and waits; full DAO and hybrid receive bounded guidance through common message_context/instruction_units/execution_plan.
+      3. Assess estimated feature count, domain diversity, dependency clusters and team boundaries. Reuse intake Epic for single domain &lt;=7 features; 2-3 domains/8-15 features suggest 2-3 Epics; 4+ domains or >15 suggest multiple Epics. Borderline cases need cohesion/coupling rationale, not automatic allocation.
+      4. Decide grouping before assigning new feature IDs. Additional Epics require approved scope/links to intake. Existing CR targets keep their original Epic even when the intake has a newer Epic. Record actual grouping, scope and deferred capabilities without silently dropping requirements.
+    </action>
+    <output>Revision-bound context reuse, scoped delta and Epic assessment</output>
+  </step_1>
+  <step_2>
+    <name>Size, separate MVP and order</name>
+    <action>
+      1. Count ACs per proposed feature: under 10 likely one; 10-20 evaluate distinct capabilities and outcome contributions; more than 20 ACs MUST split along natural boundaries. Layers/files signal risk, not a feature per technical layer reflex; assess user value and foundation/consumer depth; keep 5-7 features per Epic maximum.
+      2. Apply Single Responsibility, Independence, Deliverable Value and Reasonable Size. First new feature in each Epic is Minimum Runnable Feature (MVP), a testable vertical runnable outcome, not a bare interface. Subsequent features add value without bloating the MVP; do not reselect a stable existing MVP for a CR.
+      2a. Explain each feature deliverable's credible subgoal contribution to its parent requirement, including indirect enabling value. Reuse existing FR/US/AC or stable doc-local G IDs; bound goals by coherent scope without fixed minimums/caps. Separate all-required decomposition from alternatives: select/bound one means with rationale, do not create features for every rejected option.
+      3. Preserve every requirement/FR/AC through explicit feature coverage or approved deferral. Aim for 3-7 concise ACs without padding; retain required edge/security cases and &lt;=20 ceiling. Use &lt;=50-word brief descriptions and specific action-oriented titles.
+      4. Reserve new FEATURE-{nnn}-{A|B|C...} suffixes from current documents, folders, board and history; never renumber/reuse retired IDs or fill historic gaps. New features use v1.0; existing versions change only for an approved minor v1.1/v1.2 or major v2.0 delta.
+      5. Record only direct dependencies with reasons, including cross-Epic or legacy targets. Validate references, self/circular dependencies and the DAG across changed plus existing impacted edges; foundations first and topological implementation order. No synthetic dependency just to force sequential routing.
+      5a. Existing board dependencies contain only selected actual all-required edges. Alternative selection and non-selected rationale stay in document coverage, not unsupported dependency/goal fields; chosen means remain adaptable within approved contracts.
+      6. Single-feature lightweight path records one feature, MVP rationale, ACs and actual registration; no ceremonial split. Incremental CR updates only affected rows/details/dependencies; preserve stable IDs, versions, status and specifications outside authorized changes.
+      7. Confirm prioritized feature-list completeness before refinement: human and hybrid require human completion/route confirmation; full DAO uses bounded common-policy guidance and only authorized routing. Reuse a recorded confirmation only when it covers this exact list/revision; material edits invalidate it. Explicit domain human approval binds in every mode. Return unresolved confirmation as blocked, never silently waive this domain gate or execute refinement.
+    </action>
+    <output>Covered feature units, stable IDs, MVP and validated dependency order</output>
+  </step_2>
+  <step_3>
+    <name>Author and register delta</name>
+    <action>
+      1. Upsert Feature List and detailed sections only in selected owning requirement part; list never lives only in index. Free-mode request gets a real populated document. Keep requirement_id if present; do not invent REQ IDs for Epic-only inputs.
+      2. Use retained templates for Feature ID/Epic ID/title/version/brief description/dependency, ACs, technical considerations, mockups and coverage/evidence. Create/reuse new EPIC/FEATURE folders; preserve legacy folders. Do not create specifications or individual feature.md files here.
+      2a. Add subgoal/parent/source, GWT leaf ACs, success scenario and outcome evidence gaps in the existing details/coverage section. Require honest coverage for new/changed scopes; CR carries parent delta and affected evidence invalidation, legacy explicit so-that inference keeps its source/label without historical rewrites.
+      3. Keep shared mockups at EPIC-{nnn}/mockups; preserve extension, validate local/URL sources and copy only missing authorized files, never overwrite foreign bytes. Generated links are project-root-relative, never ../mockups, ./ or absolute paths. Map actual mockups to covered features; N/A stays honest.
+      4. Update index coverage/line counts when parts exist, preserving other part contents. Do not re-split or regenerate all stable documents as a CR side effect; use requirement splitting contract only if genuinely needed within approved scope.
+      5. Load board manager; query before create/update. Sequential feature_create.py --feature JSON for absent new IDs uses actual required fields/status Planned. Query readback verifies identity, title/version/dependencies. Matching resume is read-only, not another create; collision/corrupt state blocks. No task CRUD or manual features.json.
+      6. CR uses feature_update.py only for authorized mutable fields after matching current identity; epic_id is immutable. Never reset existing status to Planned. For a genuine split compare each parent FR/AC against children: partial coverage retains parent and dedup_gaps; full coverage permits authorized Retired status and removal from active breakdown, preserving historical record and redirects. Do not invent archive/delete API; list parent_features_removed only after both actual changes.
+    </action>
+    <output>Populated lists/details/folders/mockups/index and verified feature registrations</output>
+  </step_3>
+  <step_4>
+    <name>Verify action and return</name>
+    <action>
+      1. Verify domain DoD and current source/document/board/config hashes, coverage, language, dependency order, actual new Planned records and preserved stable state. Meaningful workflow/public-contract/risky changes require independent review; unavailable review blocks the relevant claim, not drafting.
+      2. Workflow-mode checks requirement_gathering is actually done with valid artifacts and required context. Verify prerequisite states, not helper success or skipped flags. Free-mode makes no app write and returns workflow_action_updated false.
+      3. Initial workflow action uses installed workflow_update_action.py --workflow NAME --action feature_breakdown --status done --deliverables keyed JSON --features JSON --format json. Supply BOTH features-list = actual populated Feature List file and breakdown-folder = scalar existing folder containing the breakdown; one requirement part/root requirements directory can satisfy these real artifacts.
+      4. Workflow feature payload is id/name/depends_on, not board feature_id/title/dependencies. Query current state first; helper appends blindly. Send only absent new entries after validating collisions/edges; never resend existing entries or reset per-feature stages. Completed unchanged resume verifies without replay.
+      5. CR-only already-done action verifies preserved entries/deliverables and current actual artifacts without write; true only with verified prior write evidence. If pending/failed action has only existing entries, helper requires nonempty --features and would duplicate them: return blocked, do not bypass. Needed existing workflow dependency changes require separately supported authorized reconciliation; no silent JSON edits or false synchronization.
+      6. Read workflow_get_state.py; shared.requirement.actions.feature_breakdown must be done with both exact artifacts and intended features/depends_on, unique IDs and preserved existing stages. Missing/invalid artifacts, failures or unsatisfied gates block; writer success alone is insufficient. Return full output/evidence once; lifecycle owns human review and one sequential first-unstarted-feature suggestion boundary.
+    </action>
+    <output>Verified domain result or blocked output with actual partial links</output>
+  </step_4>
 </procedure>
 ```
-
----
 
 ## Output Result
 
@@ -387,7 +180,7 @@ task_completion_output:
   status: completed | blocked
   next_task_based_skill:
     - skill: "x-ipe-task-based-feature-refinement"
-      condition: "Refine individual features from breakdown"
+      condition: "Refine the first unstarted feature. Each feature goes through the complete pipeline (refinement → design → implementation → testing → closing) one at a time before starting the next."
   process_preference:
     interaction_mode: "{from input process_preference.interaction_mode}"
   execution_mode: "{from input}"
@@ -396,10 +189,9 @@ task_completion_output:
   workflow_action: "{workflow.action}"
   workflow_action_updated: true | false
   task_output_links:
-    - "x-ipe-docs/requirements/requirement-details.md"
+    - "x-ipe-docs/requirements/requirement-details.md"  # actual selected part
   mockup_list: "{inherited from input or N/A}"
-  # Dynamic attributes
-  requirement_id: "REQ-XXX"
+  requirement_id: "REQ-XXX"  # retain actual ID; N/A if no REQ identity
   epic_ids: ["EPIC-001", "EPIC-002"]
   epic_count: 2
   feature_ids: ["FEATURE-001-A", "FEATURE-001-B", "FEATURE-002-A"]
@@ -412,81 +204,46 @@ task_completion_output:
       mockup_link: "x-ipe-docs/requirements/EPIC-XXX/mockups/mockup-name.html"
 ```
 
----
+Keep original output fields and conditional successor, not renamed schemas. Lists
+and counts cover actual scoped affected features/Epics (new/reused), not the
+whole board; evidence distinguishes created/updated/reused. Single file uses
+null part as legacy contract; numbered part uses its actual integer. Blocked
+output reports only produced artifacts and no intended-action success flags.
 
 ## Definition of Done
 
-CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
-
 ```xml
 <definition_of_done>
-  <checkpoint required="true">
-    <name>Epic structure assessed and documented</name>
-    <verification>Epic grouping decision made with rationale; EPIC-{nnn}/ folders created</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Requirement-details file updated with Feature List</name>
-    <verification>Feature List table exists in requirement-details.md (or current part)</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>All features have detailed sections</name>
-    <verification>Each feature has a detail section in requirement-details (or part)</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Feature board updated via skill</name>
-    <verification>feature-board-management skill was called to create features</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>All features have status Planned</name>
-    <verification>Check features.md shows status "Planned" for all new features</verification>
-  </checkpoint>
-  <checkpoint required="if-applicable">
-    <name>Index updated (if parts exist)</name>
-    <verification>requirement-details-index.md updated with new feature range</verification>
-  </checkpoint>
-  <checkpoint required="if-applicable">
-    <name>Mockups copied to Epic folders</name>
-    <verification>Mockup files exist in x-ipe-docs/requirements/EPIC-{nnn}/mockups/</verification>
-  </checkpoint>
-  <checkpoint required="if-applicable">
-    <name>Parent feature deduplication verified</name>
-    <verification>If features were split, parent coverage checked — fully covered parents removed</verification>
-  </checkpoint>
-  <checkpoint required="if-applicable">
-    <name>Workflow Action Status Updated</name>
-    <verification>If execution_mode == "workflow-mode", ran `workflow_update_action.py` script with status "done"</verification>
-  </checkpoint>
+  <checkpoint required="true"><name>Grouping and identity</name><verification>Epic rationale, stable legacy/new IDs, correct folders and no second intake Epic verified.</verification></checkpoint>
+  <checkpoint required="true"><name>Feature artifacts</name><verification>Selected populated Feature List and all scoped details cover acceptance/scope and new/changed subgoal-parent-source-evidence mapping with explicit outcome gaps; descriptions &lt;=50 words; requested language/root-relative links intact.</verification></checkpoint>
+  <checkpoint required="true"><name>MVP and dependencies</name><verification>Runnable MVP-first, &lt;=20 ACs per feature, 5-7 maximum per Epic, approved deferrals and valid direct DAG including existing impacted edges.</verification></checkpoint>
+  <checkpoint required="true"><name>Board registration</name><verification>Real board create/query/update results verified; only new records Planned, existing identities/status/specifications preserved; no manual edits or task duplication.</verification></checkpoint>
+  <checkpoint required="conditional"><name>Parts and mockups</name><verification>Index accurate if parts exist, shared mockups checked or N/A, unchanged content/folders preserved.</verification></checkpoint>
+  <checkpoint required="conditional"><name>Split dedup</name><verification>Parent coverage complete before authorized retirement/active removal; partial coverage retained with gaps/history; output reflects actual supported operations.</verification></checkpoint>
+  <checkpoint required="if-applicable"><name>Application action</name><verification>Actual done state/readback, both keyed outputs, unique correct feature payloads and mandatory prerequisites evidenced; no append replay, duplicate or reset.</verification></checkpoint>
+  <checkpoint required="true"><name>Fresh honest return</name><verification>Relevant checks/review revisions current; known failures/partial state reported; full result returned once to lifecycle without successor execution.</verification></checkpoint>
 </definition_of_done>
 ```
 
-MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution` to continue the task execution flow.
-
----
+MANDATORY: Return to `x-ipe-workflow-task-execution` for its single completion boundary.
 
 ## Patterns & Anti-Patterns
 
-See [references/patterns.md](.github/skills/x-ipe-task-based-feature-breakdown/references/patterns.md) for detailed patterns including:
-- Clear Requirements, Vague Requirements, Large Scope patterns
-- Epic Grouping pattern (single vs multi-Epic decision)
-- Feature Split with Parent Dedup pattern
+See [patterns](.github/skills/x-ipe-task-based-feature-breakdown/references/patterns.md).
+Small single-feature registration is complete domain work, not a workflow skip.
+Fresh CR review narrows analysis, not artifact or integration truthfulness.
 
-### Anti-Patterns
-
-| Anti-Pattern | Why Bad | Do Instead |
-|--------------|---------|------------|
-| Skipping Epic assessment | Features lack cohesion, poor organization | Always assess Epic granularity first |
-| All features in one Epic | Monolithic, hard to manage large scope | Split by domain when >7 features |
-| Too many features per Epic | Overwhelming, hard to track | Limit to 5-7 features per Epic |
-| Features too granular | Micromanagement | Combine related functions |
-| MVP not first | Critical path unclear | First feature per Epic = MVP |
-| Circular dependencies | Impossible to implement | Ensure DAG structure |
-| Manual board updates | Inconsistent state | Use feature-board-management skill |
-| Keeping duplicate parent | Redundant tracking | Remove parent if fully covered |
-
----
+| Anti-pattern | Consequence | Correction |
+| --- | --- | --- |
+| Regenerate stable features | Lost IDs/state and repeated work | Target authorized CR delta |
+| Interface-only MVP or monolithic scope | No runnable value | Vertical MVP then separable enhancements |
+| Replay --features or fake done | Duplicates and misleading action | Query, absent delta only, exact artifact/state readback |
 
 ## Examples
 
-See [references/examples.md](.github/skills/x-ipe-task-based-feature-breakdown/references/examples.md) for detailed examples including:
-- Multi-Epic and single-Epic breakdown scenarios
-- Epic grouping decisions, change requests, and parent feature deduplication
+- [Single/multi-Epic, CR, split and blocked cases](.github/skills/x-ipe-task-based-feature-breakdown/references/examples.md)
+- [Grouping, sizing and identity](.github/skills/x-ipe-task-based-feature-breakdown/references/breakdown-guidelines.md)
+- [Actual board/workflow integration](.github/skills/x-ipe-task-based-feature-breakdown/references/integration.md)
+- [Feature list](.github/skills/x-ipe-task-based-feature-breakdown/templates/features.md)
+- [Consolidated details](.github/skills/x-ipe-task-based-feature-breakdown/templates/requirement-details.md)
+- [Retained downstream specification scaffold](.github/skills/x-ipe-task-based-feature-breakdown/templates/specification.md)

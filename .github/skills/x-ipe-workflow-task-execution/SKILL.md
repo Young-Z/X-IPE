@@ -1,219 +1,117 @@
 ---
 name: x-ipe-workflow-task-execution
-description: Orchestrates development task lifecycle through 6-step workflow. Coordinates skills for planning, execution, closing, and routing. Use when "implement feature", "fix bug", "create PR", "design architecture", "set up project". Triggers on requests like "implement feature", "fix bug", "refactor code", "set up project".
+description: Orchestrates the shared Orient, Plan, Execute, Verify, Record task lifecycle with one owner, safe resume, mode-aware decisions and evidence-backed routing. Use when implementing features, fixing bugs, refactoring code, designing architecture, setting up projects, or entering a task skill directly. Triggers on requests like "implement feature", "fix bug", "refactor code", "set up project".
 ---
 
-# Task Execution Guideline
+# Shared Task Execution Lifecycle
 
 ## Purpose
 
-Orchestrate a multi-skill workflow for development tasks by:
-
-1. **Plan** - Match requests to task-based skills and create tasks on board
-2. **Verify** - Check prerequisites via Global DoR gate
-3. **Execute** - Load and run task-based skills for core work
-4. **Close** - Update boards via category-based skill loading
-5. **Validate** - Confirm completion via Global DoD checks
-6. **Route** - Chain to next task if auto-proceed enabled
-
----
+Coordinate one authorized task at a time through Orient → Plan → Execute →
+Verify → Record. Domain skills produce work and evidence; this workflow owns
+registration, lifecycle persistence, boundary decisions and authorized routing.
 
 ## Important Notes
 
-BLOCKING: Tasks MUST be created via x-ipe-tool-task-board-manager BEFORE any work begins. Step 2 will reject tasks not found on the board.
+BLOCKING: Load the [common lifecycle contract](.github/skills/x-ipe-workflow-task-execution/references/lifecycle.md)
+before invoking a child. Child skills entering directly must load this workflow
+and call its Orient/Plan ensure/resume entry before domain work.
 
-CRITICAL: This skill does NOT implement task logic itself — it coordinates task-based skills and category skills.
+Use the [goal contract](.github/skills/x-ipe-workflow-task-execution/references/goal-contract.md)
+when an adopting child's domain gate requires it. Keep goal/evidence mappings in
+existing artifacts; no board/output schema changes or implicit child migration.
 
-MANDATORY: NEVER use `manage_todo_list` (VS Code internal) as substitute for the JSON task board (project tracking).
+CRITICAL: One task owner. Never recursively execute the workflow or a domain
+skill already on the invocation stack. A child returns domain output to its
+caller; it does not independently register, close, commit, or execute the next task.
+An unmigrated child with conflicting lifecycle instructions requires a bounded
+adapter agreeing ownership before invocation; unresolved conflict blocks execution.
+Publication does not silently rewrite or declare all live children migrated.
 
-**Note:** If Agent does not have skill capability, go to `.github/skills/` folder to learn skills. SKILL.md is the entry point for each skill.
+BLOCKING: No upfront speculative chain. A next-task suggestion is not permission.
+Only ensure/register the current approved task; register a successor after the
+current evidence and interaction boundary authorize it.
 
-IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-interact"`, NEVER stop to ask the human. Instead, call `x-ipe-assistant-user-representative-Engineer` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue. When `manual` or `stop_for_question`, always wait for human feedback before proceeding to the next task.
+CRITICAL: No automatic commit, implicit push, dirty branch switch, stash, reset,
+or broad staging. Preserve configured Git strategy without moving dirty work.
+No application workflow skips or mandatory-gate relaxations are introduced.
 
----
+## About
+
+- **Owner:** current authorized caller with exact persisted role and task context.
+- **Domain entry:** child skill selected dynamically, executed once after readiness.
+- **Evidence revision:** hashes of source artifacts, implementation, tests and
+  configuration relevant to a claim; timestamps alone cannot prove freshness.
+- **Small path:** one explicit combined deliverable can cover multiple planning
+  sections for bounded work; it cannot fake completed actions or replace domain gates.
 
 ## Input Parameters
+
+Retain the existing Task Data Model; this is not the persisted board schema.
 
 ```yaml
 input:
   task:
-    task_id: "TASK-XXX"
-    task_based_skill: "{task_based_skill}"
-    task_description: "{description, max 50 words}"
-    category: "{derived from task-based skill} | Standalone"
-    role_assigned: "{agent_nickname}"
-    status: "pending | in_progress | blocked | deferred | completed | cancelled"
-    last_updated: "{MM-DD-YYYY HH:MM:SS}"
-
-  execution_mode: "free-mode | workflow-mode"
+    task_id: "supplied ID or null for genuinely new work"
+    task_based_skill: "discovered canonical skill"
+    task_description: "approved scope; reuse original board description on resume"
+    category: "derived from child Output Result"
+    role_assigned: "authorized owner"
+    status: "current board status"
+    last_updated: "board-generated timestamp"
+  execution_mode: free-mode | workflow-mode
   workflow:
-    name: "N/A"
-
+    name: "N/A or exact workflow identity"
+    action: "authoritative action identity or null"
+    extra_context_reference: {}  # path | N/A | auto-detect, child keys preserved
   execution:
-    next_task_based_skill: "{task_based_skill} | null"
+    next_task_based_skill: null
     process_preference:
-      interaction_mode: "interact-with-human | dao-represent-human-to-interact | dao-represent-human-to-interact-for-questions-in-skill"  # default: manual
-    task_output_links: ["{links}"] | null
+      interaction_mode: interact-with-human | dao-represent-human-to-interact | dao-represent-human-to-interact-for-questions-in-skill
+    task_output_links: []
     dynamic_attributes: {}
-
   git:
-    strategy: "main-branch-only | dev-session-based"
-    main_branch: "{auto-detected}"
-
+    strategy: main-branch-only | dev-session-based
+    main_branch: "configured or locally detected"
   closing:
-    category_level_change_summary: "{summary, max 100 words} | null"
+    category_level_change_summary: null
 ```
 
 ### Input Initialization
 
 ```xml
 <input_init>
-  <!-- Task fields (resolved during Step 1 Planning) -->
-  <field name="task.task_id" source="x-ipe-tool-task-board-manager (auto-generated on create)" />
-  <field name="task.task_based_skill" source="Auto-discovery: match request against .github/skills/x-ipe-task-based-*/SKILL.md descriptions" />
-  <field name="task.task_description" source="Summarize from human request (max 50 words)" />
-  <field name="task.category" source="Read from matched skill's Output Result `category` field" />
-  <field name="task.role_assigned" source="Current agent nickname" />
-  <field name="task.status" source="Set to 'pending' on creation" />
-  <field name="task.last_updated" source="Current timestamp on each status change" />
-
-  <!-- Execution mode (resolved at start of Step 1) -->
-  <field name="execution_mode">
-    <steps>
-      1. IF instruction starts with `--workflow-mode@{name}` → "workflow-mode"
-      2. IF instruction starts with `--workflow-mode` (no @) → "workflow-mode"
-      3. ELSE → "free-mode"
-    </steps>
-  </field>
-  <field name="workflow.name">
-    <steps>
-      1. IF instruction has `--workflow-mode@{name}` → extract {name}
-      2. ELSE → "N/A"
-    </steps>
-  </field>
-
-  <!-- Execution fields (populated after Step 3) -->
-  <field name="execution.next_task_based_skill" source="From task-based skill output" />
-  <field name="execution.process_preference.interaction_mode" source="Resolved from: (a) workflow-{name}.json global.process_preference in workflow-mode, (b) CLI flag --proceed@auto or --proceed@stop-for-question in free-mode, (c) Semantic understanding from user message, (d) default: manual" />
-  <field name="execution.task_output_links" source="From task-based skill output" />
-
-  <!-- Git strategy (resolved during Step 2 DoR) -->
-  <field name="git.strategy">
-    <steps>
-      1. Read .x-ipe.yaml from project root
-      2. IF file exists AND git.strategy specified → use value
-      3. ELSE → "main-branch-only"
-    </steps>
-  </field>
-  <field name="git.main_branch">
-    <steps>
-      1. IF .x-ipe.yaml specifies git.main-branch → use value
-      2. ELSE → auto-detect from `git remote show origin` or fallback to main/master
-    </steps>
-  </field>
-
-  <!-- Closing fields (populated after Step 4) -->
-  <field name="closing.category_level_change_summary" source="From category skill output (or null if skipped)" />
+  <field name="task"><steps>Use supplied ID and original role/task_type/description when resuming. Adapt role_assigned to role, task_description to description, selected task type to task_type; never send the whole Task Data Model to CRUD. Query current board state; board owns timestamps.</steps></field>
+  <field name="task.task_based_skill"><steps>Match attached discovered descriptions or scan task-based and assistant SKILL.md frontmatter; exact explicit skill wins if authorized. Ambiguity uses the decision policy. Read its declared category and outputs, never infer category from its name.</steps></field>
+  <field name="execution_mode"><steps>--workflow-mode@name or --workflow-mode selects workflow-mode; otherwise free-mode. Named workflow must resolve uniquely through the app interactor; missing or ambiguous identity blocks workflow claims.</steps></field>
+  <field name="workflow"><steps>Preserve name/action/extra_context_reference. Resolve action from the authoritative ACTION_MAP and verify against the current workflow template and requested skill. Resolve required artifacts by the common contract; free-mode retains validated legacy fallback.</steps></field>
+  <field name="execution.process_preference"><steps>Explicit current --interaction@MODE or user task override, then named workflow global.process_preference, then legacy --proceed flags/user intent, then interact-with-human. Normalize --proceed@auto to full DAO and --proceed@stop-for-question to hybrid; manual to human. Reject unknown enums; record source and re-read at every decision/boundary.</steps></field>
+  <field name="execution"><steps>Capture full child output unchanged; adapt next-task forms only for selection, preserve dynamic fields and links. Validate the common output contract before lifecycle persistence.</steps></field>
+  <field name="git"><steps>Read approved root .x-ipe.yaml; strategy defaults main-branch-only. Use git.main-branch or local refs/remotes/origin/HEAD, then existing main/master; ambiguity blocks Git mutation. dev-session-based uses validated real Git identity, not nickname. Capture branch, staged and unstaged/untracked paths before work; pass git_strategy/git_main_branch to existing child inputs.</steps></field>
+  <field name="closing"><steps>Derive required category/feature updates from child contract or discovered category skill. Missing mandatory category work blocks completion; optional unavailable integrations are reported, never invented.</steps></field>
 </input_init>
 ```
-
-### Git Strategy
-
-BLOCKING: At the start of every workflow execution, read `.x-ipe.yaml` from project root to determine `git.strategy` and `git.main-branch`. If `.x-ipe.yaml` does not exist or `git.strategy` is not specified, default to `main-branch-only`. If `git.main-branch` is not specified, auto-detect the main branch from git (see Step 2 procedure). Pass these values to all task-based skills that interact with git.
-
-| Strategy | Branch Model | PR Required? | Description |
-|----------|-------------|--------------|-------------|
-| `main-branch-only` | Work directly on main branch | No | All commits go to main. No feature branches created. |
-| `dev-session-based` | `dev/{git_user_name}` branch per developer | Yes, on feature close | Each developer works on their own persistent branch. PR to main when a feature is closed. |
-
-See [references/examples.md](.github/skills/x-ipe-workflow-task-execution/references/examples.md) for detailed strategy rules and git identity validation.
-
-### Category Derivation
-
-BLOCKING: Category is read from the skill's own Output Result section (`category` field). Do NOT hardcode category mappings.
-
-**Auto-discovery rule:** Load `.github/skills/x-ipe-task-based-{name}/SKILL.md` → read `category` from Output Result YAML block.
-
-### Category to Closing Skill Mapping
-
-| Category | Closing Skill | Required? |
-|----------|--------------|-----------|
-| feature-stage | x-ipe-tool-task-board-manager | Yes |
-| ideation-stage | (none) | N/A |
-| requirement-stage | (none) | N/A |
-| code-refactoring-stage | x-ipe+feature+quality-board-management | No (optional) |
-| Standalone | (none) | N/A |
-
-### Task States
-
-| State | Terminal? | Description |
-|-------|-----------|-------------|
-| `pending` | No | Created, waiting to start |
-| `in_progress` | No | Currently being worked on |
-| `blocked` | No | Waiting for dependency |
-| `deferred` | No | Human paused |
-| `completed` | Yes | Successfully done |
-| `cancelled` | Yes | Stopped |
-
-### Valid State Transitions
-
-```
-pending → in_progress
-in_progress → completed | blocked | deferred | cancelled
-blocked → in_progress
-deferred → in_progress
-```
-
----
 
 ## Definition of Ready
 
 ```xml
 <definition_of_ready>
-  <checkpoint required="true">
-    <name>Task Exists on Board</name>
-    <verification>Task {task_id} found via x-ipe-tool-task-board-manager query</verification>
-    <on_failure>STOP, return to Step 1 to create task on board</on_failure>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Valid Starting Status</name>
-    <verification>Task status is pending or blocked</verification>
-    <on_failure>STOP, log "Task {task_id} has invalid status: {status}"</on_failure>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Git Repository Initialized</name>
-    <verification>Project root is a git repository (invoke x-ipe-tool-git-version-control skill if needed)</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Git Strategy Resolved</name>
-    <verification>Read .x-ipe.yaml git.strategy; agent is on correct branch per strategy rules</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Git Identity Valid</name>
-    <verification>For dev-session-based strategy: git config user.name is NOT a placeholder ("Your Name", empty). If invalid, STOP and ask user.</verification>
-    <on_failure>STOP, ask user to provide actual git user.name</on_failure>
-  </checkpoint>
+  <checkpoint required="true"><name>Identity and scope</name><verification>Approved root, current task ID/context/owner and write paths known; ownership exact and session authority established.</verification></checkpoint>
+  <checkpoint required="true"><name>Domain and policy</name><verification>Selected child and common contract loaded; mode source and single lifecycle owner agreed; no invocation cycle.</verification></checkpoint>
+  <checkpoint required="true"><name>Inputs and workflow</name><verification>Required artifacts exist, resolve within approved roots, match feature/context and action; domain DoR and application gates remain enforced.</verification></checkpoint>
+  <checkpoint required="true"><name>Preservation and verification</name><verification>Dirty baseline protected; Git strategy resolved; required tests/review and revision evidence planned.</verification></checkpoint>
 </definition_of_ready>
 ```
 
----
+## Execution Flow
 
-## Execution Flow Summary
-
-| Step | Name | Action | Mandatory Output | Next Step |
-|------|------|--------|------------------|-----------|
-| 1 | Planning | Match request, create task(s) on board | Tasks visible via task board query | → Step 2 |
-| 2 | Global DoR | Verify prerequisites | All checks pass | → Step 3 (pass) or STOP (fail) |
-| 3 | Execute | Load task-based skill, do work | Skill output collected | → Step 4 |
-| 4 | Closing | Load category skills, update boards | Boards updated | → Step 5 |
-| 5 | Global DoD | Validate, output summary | Summary displayed | → Step 6 (pass) or STOP (manual) |
-| 6 | 继续执行（Continue Execute） | Resolve process_preference mode, route next | Next action decided | → Step 1 (auto) or WAIT for human (manual/stop_for_question) |
-
-BLOCKING: Step 1 → Step 2: task must be created via x-ipe-tool-task-board-manager.
-BLOCKING: Step 3 → Step 4: x-ipe-tool-task-board-manager skill must be loaded.
-BLOCKING: Step 4 → Step 5: task board must be updated via x-ipe-tool-task-board-manager.
-
----
+| Phase | Coordination | Gate |
+| --- | --- | --- |
+| Orient | Resolve request, domain, policy, source links and protected paths | Authorized scope and inputs |
+| Plan | Ensure/resume one task and choose proportional deliverables/tests | Matching board identity + domain readiness |
+| Execute | Invoke child domain once | Full child result and artifacts |
+| Verify | Verify output, evidence freshness, action/category gates and review | No unsupported completion claim |
+| Record | Persist verified state; report; resolve one next boundary | Authorized next task or stop |
 
 ## Execution Procedure
 
@@ -221,308 +119,136 @@ BLOCKING: Step 4 → Step 5: task board must be updated via x-ipe-tool-task-boar
 <procedure name="x-ipe-workflow-task-execution">
   <execute_dor_checks_before_starting/>
   <schedule_dod_checks_with_sub_agent_before_starting/>
-
-  <step_1>
-    <name>Task Planning</name>
-    <trigger>Receive work request from human or system</trigger>
-    <actions>
-      1. Resolve execution_mode and workflow.name from instruction prefix (see Input Initialization)
-      2. Match request to task-based skill using auto-discovery (scan `.github/skills/x-ipe-task-based-*/SKILL.md` descriptions)
-         See references/examples.md for request matching patterns.
-      3. Derive category from skill's Output Result `category` field
-      4. Check task:
-         - IF task not exists → Create with status: pending
-         - ELSE IF exists AND assigned to you → Continue
-         - ELSE → STOP
-      5. MANDATORY: Load x-ipe-tool-task-board-manager skill to create/update tasks on board
-         → This step CANNOT be skipped
-         → Tasks MUST appear on board BEFORE proceeding to Step 2
-      6. IF task-based skill defines next_task_based_skill → Create ALL chained tasks upfront
-      7. VERIFICATION: Confirm all tasks are visible on task board before proceeding
-    </actions>
-    <output>Task Data Model with core fields populated AND tasks created on board</output>
-    <gate>All tasks visible via task board query</gate>
-  </step_1>
-
-  <step_2>
-    <name>Check Global DoR</name>
-    <actions>
-      GATE CHECK: This step validates that Step 1 was completed correctly.
-
-      1. Query task board via x-ipe-tool-task-board-manager (task_query.py)
-      2. Search for {task_id} in Active Tasks section
-      3. IF task NOT found:
-         → STOP execution
-         → Log: "Task {task_id} not found on board. Returning to Step 1."
-         → Return to Step 1 and create task on board
-      4. IF task found but status is not pending/blocked:
-         → STOP execution
-         → Log: "Task {task_id} has invalid status for starting: {status}"
-      5. Verify git repository:
-         IF not a git repository:
-           CALL x-ipe-tool-git-version-control skill: operation=init
-           CALL x-ipe-tool-git-version-control skill: operation=create_gitignore
-
-      6. Resolve git.strategy and git.main_branch (see Input Initialization)
-
-      7. Apply git strategy:
-         IF git.strategy == "main-branch-only":
-           → Ensure on main branch: git checkout {main_branch}
-           → Do NOT create any other branches
-         ELSE IF git.strategy == "dev-session-based":
-           → BLOCKING: Validate git identity first:
-             Run: git config user.name AND git config user.email
-             KNOWN_PLACEHOLDERS = ["Your Name", "your name", "you@example.com", ""]
-             IF user.name IN KNOWN_PLACEHOLDERS OR user.email IN KNOWN_PLACEHOLDERS OR user.name is empty:
-               → STOP: Ask user "Your git user.name is '{user.name}' which appears to be a placeholder. Please provide your actual name for the dev branch."
-               → Do NOT proceed until user provides valid identity
-               → After user provides name: run git config user.name "{provided_name}" (and git config user.email if needed)
-           → Resolve dev branch name from git identity:
-             Run: git config user.name (or git config user.email if empty)
-             Sanitize: lowercase, spaces→hyphens, remove special chars
-             Branch name: dev/{sanitized_git_user_name}
-           → Check if branch dev/{git_user_name} exists
-           → IF not exists: git checkout -b dev/{git_user_name} (from main)
-           → IF exists: git checkout dev/{git_user_name}
-           → Pull latest: git pull origin dev/{git_user_name} (ignore if remote doesn't exist yet)
-    </actions>
-    <on_failure>STOP and report missing prerequisites</on_failure>
-    <on_success>Transition task status: pending → in_progress</on_success>
-    <gate>All DoR checkpoints pass</gate>
-  </step_2>
-
-  <step_3>
-    <name>Task Work Execution</name>
-    <actions>
-      1. Load task-based skill: x-ipe-task-based-{task_based_skill}
-      2. Pass Task Data Model to skill, including execution_mode and workflow.name
-      3. Check task-based skill DoR (defined in skill)
-      4. Execute core work (defined in skill)
-      5. Check task-based skill DoD (defined in skill)
-      6. Collect skill output into Task Data Model
-    </actions>
-    <skill_output_contract>
-      Each task-based skill MUST return:
-        status: {new_status}
-        next_task_based_skill: {task_based_skill} | null
-        process_preference:
-          interaction_mode: "{from input process_preference.interaction_mode}"
-        task_output_links: [{links}] | null
-        {dynamic_attributes}: per skill definition
-    </skill_output_contract>
-    <output>Task Data Model updated with execution results</output>
-    <gate>Skill output collected</gate>
-  </step_3>
-
-  <step_4>
-    <name>Category Closing</name>
-    <actions>
-      1. MANDATORY: Load skill x-ipe-tool-task-board-manager
-         → Update task status on board
-         → Pass Task Data Model
-
-      2. IF category != "Standalone":
-         TRY:
-           → Load skill @{category}+{category-skill-name}
-           → Pass Task Data Model
-           → Collect category_level_change_summary
-         CATCH SkillNotFound:
-           → Log: "No category-level skill found for {category}, skipping"
-           → Continue without error (category_level_change_summary = null)
-    </actions>
-    <category_skill_mapping>
-      Refer to "Category to Closing Skill Mapping" in the Category Derivation section above.
-    </category_skill_mapping>
-    <note>If category skill not found, execution continues without error. Category-level change summary will be null if skipped.</note>
-    <output>category_level_change_summary added to Task Data Model (or null)</output>
-    <gate>task board updated via x-ipe-tool-task-board-manager</gate>
-  </step_4>
-
-  <step_5>
-    <name>Check Global DoD</name>
-    <actions>
-      1. Validate:
-         - Task status updated on task board
-         - Category-level changes committed (if applicable)
-         - All task-based skill DoD met
-         - Changes committed to git (if files were created/modified)
-
-      2. Git Commit Check:
-         IF task_output_links is NOT empty AND files were created/modified:
-           CALL x-ipe-tool-git-version-control skill: operation=add, files=null (stage all)
-           CALL x-ipe-tool-git-version-control skill: operation=commit, task_data={task_id, task_description, feature_id}
-         OPTIONAL: IF auto_push = true:
-           CALL x-ipe-tool-git-version-control skill: operation=push
-
-      3. Workflow Status Verification:
-         IF execution_mode == "workflow-mode" AND completed skill's task_completion_output contains workflow_action field:
-           a. Extract workflow_name and workflow_action from output
-           b. READ instance/workflows/wf-{nnn}-{workflow_name}.json
-           c. CHECK that actions.{workflow_action}.status is NOT "pending"
-           d. IF status is "pending" → FLAG task as incomplete: "Workflow action '{workflow_action}' status not updated. Run `python3 .github/skills/x-ipe-tool-x-ipe-app-interactor/scripts/workflow_update_action.py` before completing."
-           e. CHECK that actions.{workflow_action}.deliverables is a keyed dict (not a list). Keys must match extract tags from workflow-template.json for this action.
-           f. IF workflow JSON file not found → WARN and skip (non-blocking)
-         ELSE IF execution_mode == "free-mode":
-           → Skip workflow status verification
-
-      4. Auto-Proceed Freshness Check:
-         Re-read the current process_preference.interaction_mode value from its source:
-           - workflow-mode: from workflow-{name}.json global.process_preference
-           - free-mode: from CLI flag or user message
-         IF the value has changed since Step 2 → update process_preference.interaction_mode for Step 6 routing.
-
-      5. Human Review Check (mode-aware):
-         IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-           → Skip human review, proceed directly
-         ELIF process_preference.interaction_mode == "dao-represent-human-to-interact-for-questions-in-skill" OR "manual":
-           → Output summary and STOP for human review
-    </actions>
-    <output_template>
-      > Task ID: {task_id}
-      > Task-Based Skill: {task_based_skill}
-      > Description: {task_description}
-      > Category: {category}
-      > Assignee: {role_assigned}
-      > Status: {status}
-      > Execution Mode: {execution_mode}
-      > Workflow: {workflow.name}
-      > Category Changes: {category_level_change_summary}
-      > Process Preference: {process_preference.interaction_mode}
-      > Task Output Links: {task_output_links}
-      > --- Dynamic Attributes ---
-      > {attr_1}: {value}
-    </output_template>
-    <gate>All DoD checkpoints pass</gate>
-  </step_5>
-
-  <step_6>
-    <name>继续执行（Continue Execute）</name>
-    <actions>
-      NOTE: Each task-based skill now includes its own &lt;routing&gt; phase at the end.
-      The task-based skill's routing phase passes the full task_completion_output to
-      x-ipe-assistant-user-representative-Engineer for context-rich routing decisions.
-
-      This step acts as a fallback/coordinator:
-
-      IF task-based skill already executed its &lt;routing&gt; phase:
-        → Routing decision was already made with full skill output context
-        → Follow the routing decision (next task or stop)
-        → If routing to next task → Start from Step 1 (Planning)
-
-      ELSE IF routing was not handled by the task-based skill:
-        IF next_task_based_skill EXISTS:
-          IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-            → Invoke x-ipe-assistant-user-representative-Engineer with:
-              type: "routing"
-              completed_skill_output: {full task_completion_output YAML}
-              next_task_based_skill: "{from output}"
-              context: "Skill completed. Study the full output to decide best next action."
-            → IF multiple next_actions_suggested (workflow-mode):
-                invoke x-ipe-assistant-user-representative-Engineer (type: routing) to choose
-            → Start execution from Step 1 (Planning — to create/verify task on board)
-          ELIF process_preference.interaction_mode == "dao-represent-human-to-interact-for-questions-in-skill":
-            → Invoke x-ipe-assistant-user-representative-Engineer with same context
-            → Present DAO's recommendation to human and wait for confirmation
-          ELSE (interact-with-human):
-            → Present next task suggestion to human using the skill-specific hint template
-              (each skill defines its own contextual hint in its routing phase)
-            → For feature-stage skills: always name the specific feature ID and the next pipeline step
-            → After feature-closing: suggest the next unstarted feature from backlog, or celebrate completion if all done
-            → Wait for human instruction
-        ELSE:
-          → STOP (no next task defined)
-    </actions>
-    <constraints>
-      - BLOCKING (manual/stop_for_question): Human MUST confirm or redirect before routing to next task
-      - BLOCKING (auto): Proceed automatically; resolve routing ambiguity via x-ipe-assistant-user-representative-Engineer
-      - DAO receives full task_completion_output for context-aware routing decisions
-    </constraints>
-    <gate>Continue Execute decision made</gate>
-  </step_6>
+  <phase_1>
+    <name>Orient</name>
+    <action>
+      1. Load common contract and dynamically selected skill; resolve inputs as above.
+      2. Establish one lifecycle owner; direct child entry calls this entry once and resumes domain work only after it returns readiness context. Do not dispatch the same child back to itself.
+      3. Capture protected dirty paths and source revisions; identify real decisions and route through exact mode policy. Clear inputs do not require a ceremonial question or DAO call.
+      4. Verify artifact links and action identity; loading a tool capability for design is not authorization to execute code.
+      5. For adopting children, locate stakeholder goal/subgoal, source/parent and evidence gaps in the existing artifact per goal contract; legacy inference is labeled, ambiguity blocks only the pertinent claim.
+    </action>
+    <gate>Authorized scope, policy and caller identity resolved</gate>
+  </phase_1>
+  <phase_2>
+    <name>Plan</name>
+    <action>
+      1. Load board manager. Supplied ID: query then task_ensure.py --task JSON with original context; genuine not-found permits ensure of exactly that ID. Never allocate a replacement on conflict or corruption.
+      2. No supplied ID: all-date ownership queries, consume all pages and exact role matches; identify same-session context, not nickname alone. For genuinely new work call task_create.py once, retain returned ID; retries use ensure.
+      3. Matching in_progress resumes without re-registering or resetting outputs. pending starts after readiness; blocked/deferred resume only when dependency/permission is resolved. completed/cancelled/skipped returns existing result without reopening or routing again. Another owner/context blocks without mutation.
+      4. Choose explicit deliverables, tests, review and next decision. A small clear path may combine scope, acceptance and design sections in one linked artifact; name every covered requirement and retained gate. Do not precreate downstream tasks.
+      5. Preserve main-branch-only or dev-session-based strategy. If wrong branch and dirty, block branch-sensitive mutation and request a safe authorized disposition; no switch, stash or pull. Clean branch preparation still requires authority; no network or identity changes by default. Recheck domain DoR, then owner updates current task to in_progress and queries it.
+    </action>
+    <gate>One matching task and domain readiness; no speculative chain</gate>
+  </phase_2>
+  <phase_3>
+    <name>Execute</name>
+    <action>
+      1. Pass task ID, resolved mode, execution_mode, workflow.name/action/context, Git strategy and child-specific fields. Invoke the child domain procedure once, or return readiness to an already-entered direct child.
+      2. Child reads common lifecycle contract, performs its domain steps and actual decision policy, preserves domain gates and returns task_completion_output (or its declared operation result when an assistant/tool is coordinated). Do not force task output fields onto tools.
+      3. Route actual within-skill questions per mode: human asks the human and waits; full DAO and hybrid use the representative for bounded guidance. DAO calls use message_context and consume operation_output.result.instruction_units plus execution_plan; do not use legacy type:routing input. Guidance cannot authorize new scope or protected operations. Conflicting child mode wording needs a bounded compatibility adapter or blocks invocation; preserve current FEATURE-044-E/UI semantics, not earlier unauthorized review claims.
+      4. Child next-task execution/board/Git blocks are delegated to this owner, not recursively invoked. Collect all output fields, domain DoD evidence and exact changed paths. On failure preserve artifacts and return blocked/deferred as appropriate, not completed.
+    </action>
+    <gate>Domain result collected; no recursive execution</gate>
+  </phase_3>
+  <phase_4>
+    <name>Verify</name>
+    <action>
+      1. Validate common output fields and declared category; preserve dynamic attributes. Confirm domain DoD and tests, failed assertions and required review honestly. Independent review required for meaningful workflow/executable/safety/public-contract changes; unavailable review blocks publication, not candidate drafting.
+      2. Rehash relevant source/implementation/tests/config and compare evidence revision. Any edit invalidates affected tests, review and acceptance; rerun or report blocked. A passing receipt or timestamp alone is insufficient.
+      2a. Where the child adopts the goal contract, verify source/goal/story/AC/validation coverage and authorized delta invalidation. Separate verified engineering delivery from observed stakeholder outcome or not measured; do not invent metrics, observations or confirmation.
+      3. In workflow-mode, resolve state via workflow_get_state.py and inspect shared.stage.actions.action or the matching features[].stage.actions.action. Required completed action must be done, not merely non-pending. Verify keyed deliverables against extract tags, all required links/files and feature context; missing state/action or failed/skipped/in_progress is blocking, never warn-and-pass.
+      4. Domain completion writes use existing workflow_update_action.py flags and real tag-to-path values only, once by the agreed owner; if child already wrote, verify instead of replaying. No skipped writes, fake done or automatic prerequisite completion. Free-mode does not mutate app workflows.
+      5. Derive category work from the selected contract and verify required updates. Do not mark board completed before these checks. Re-read mode source before the boundary; a mode change cannot retroactively authorize unapproved work.
+    </action>
+    <gate>Claims supported at current revision; required gates satisfied</gate>
+  </phase_4>
+  <phase_5>
+    <name>Record</name>
+    <action>
+      1. Persist only verified lifecycle status, output_links and next_task through board manager with ownership query before and after. Map task_output_links to output_links and null next_task_based_skill to empty next_task. Retain broader-task in_progress when only one slice is candidate_ready; record slice evidence outside board if board writes are excluded.
+      2. Git changes may remain uncommitted by default. Commit only with explicit user approval for exact owned paths, reviewing staged and unstaged diffs against protected baseline. Never git add -A, git add . or files=null. Preexisting staged changes block committing until separately approved isolated disposition; never silently unstage them. Push/PR/network actions require separate explicit authority, even in full DAO.
+      3. Return existing output aggregate and full child result without renamed schemas. State candidate readiness separately from promotion/release and list unresolved issues.
+      4. Apply one boundary: human asks actual decisions and waits for human completion/route confirmation; full DAO answers within skill and chooses only authorized routes; hybrid uses DAO within skill, then waits for human completion/route confirmation. Explicit domain-required human approval still blocks until obtained in every mode. Representative approval is guidance, not human permission. No successor or no authorized route means stop, not invent work.
+      5. After authorization, dynamically select the next skill from current result/context; ensure a newly approved task through Orient/Plan. Never execute child routing twice. Record already-handled boundary on resume in existing task evidence/dynamic context, not a new board field.
+    </action>
+    <gate>Verified record and one mode-aware boundary; successor authorized or stopped</gate>
+  </phase_5>
 </procedure>
 ```
 
----
-
 ## Output Result
+
+Preserve the existing aggregate `output`, not generic `workflow_output` or a new
+board schema. Full child result is retained in dynamic_attributes when needed.
 
 ```yaml
 output:
-  task_id: "{task_id}"
-  task_based_skill: "{task_based_skill}"
-  task_description: "{task_description}"
-  category: "{category}"
-  role_assigned: "{role_assigned}"
-  status: "completed | blocked | deferred"
-  execution_mode: "{execution_mode}"
+  task_id: "current task"
+  task_based_skill: "selected canonical skill"
+  task_description: "original scope"
+  category: "child-declared category"
+  role_assigned: "owner"
+  status: completed | blocked | deferred | in_progress | cancelled | skipped
+  execution_mode: free-mode | workflow-mode
   workflow:
-    name: "{workflow.name}"
-  category_level_change_summary: "{summary} | null"
+    name: "exact name or N/A"
+  category_level_change_summary: null
   process_preference:
-    interaction_mode: "interact-with-human | dao-represent-human-to-interact | dao-represent-human-to-interact-for-questions-in-skill"
-  task_output_links: ["{links}"] | null
-  next_task_based_skill: "{task_based_skill} | null"
-  dynamic_attributes: {}  # Per task-based skill
+    interaction_mode: "resolved exact enum"
+  task_output_links: []
+  next_task_based_skill: null
+  dynamic_attributes: {}  # full child output, revision evidence, bounded slice state
 ```
-
----
 
 ## Definition of Done
 
 ```xml
 <definition_of_done>
-  <checkpoint required="true">
-    <name>Task Board Updated</name>
-    <verification>Task status updated via x-ipe-tool-task-board-manager</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Category Changes Committed</name>
-    <verification>Category-level changes committed if applicable</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Task-Based Skill DoD Met</name>
-    <verification>All task-based skill Definition of Done criteria satisfied</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Git Changes Committed</name>
-    <verification>All created/modified files committed to git</verification>
-  </checkpoint>
+  <checkpoint required="true"><name>Single ownership</name><verification>One current task registered/resumed; owner and original context preserved; no recursive or speculative execution.</verification></checkpoint>
+  <checkpoint required="true"><name>Domain result</name><verification>Common output and dynamic fields retained; required domain DoD, category and action gates verified or honest noncompletion returned.</verification></checkpoint>
+  <checkpoint required="true"><name>Fresh evidence</name><verification>Artifacts and test/review evidence match current relevant revisions; candidate_ready distinguished from publication and larger-task completion.</verification></checkpoint>
+  <checkpoint required="true"><name>Safe records</name><verification>Authorized board write queried; dirty paths/staging preserved; commit/push absent unless separately approved.</verification></checkpoint>
+  <checkpoint required="true"><name>Boundary resolved</name><verification>Fresh exact mode respected; human and hybrid retain human completion/route confirmation, hybrid DAO only within skill, DAO authority bounded, one successor authorized or stopped.</verification></checkpoint>
 </definition_of_done>
 ```
 
----
+## Skill Registry
 
-## Task-Based Skills Auto-Discovery
+Registry is discovery-based, not a hardcoded domain/category mapping.
 
-BLOCKING: Do NOT maintain a hardcoded registry. Skills are auto-discovered.
+| Discovered role | Input | Output |
+| --- | --- | --- |
+| Current task-based/assistant SKILL.md descriptions | Authorized request + context | Selected skill, declared category and output contract |
+| x-ipe-tool-task-board-manager | Actual CRUD JSON and supplied ID | Existing record or safe registration; verified update |
+| x-ipe-assistant-user-representative-Engineer (decision policy only) | message_context, human_shadow | operation_output.result.instruction_units + execution_plan |
+| x-ipe-tool-x-ipe-app-interactor (workflow-mode only) | Exact workflow/action/feature/tags | Existing state and verified action write |
+| Required category integrations from child/discovery | Full child result | Verified category changes; optional unavailable integration reported |
+| x-ipe-tool-git-version-control (explicitly authorized only) | Strategy and approved exact paths | Bounded Git receipt, never automatic release |
 
-**Discovery rule:**
-1. Scan `.github/skills/x-ipe-task-based-*/SKILL.md`
-2. Each skill's Output Result YAML declares: `category`, `next_task_based_skill`, `process_preference.interaction_mode`
-3. Each skill's `description` in frontmatter contains trigger keywords for request matching
-
-**Request matching:**
-1. Read the `description` field from each `x-ipe-task-based-*/SKILL.md` frontmatter
-2. Match user request against trigger keywords (e.g., "fix bug" matches `x-ipe-task-based-bug-fix`)
-3. See [references/examples.md](.github/skills/x-ipe-workflow-task-execution/references/examples.md) for common request-to-skill patterns
-
-> **Note:** When `process_preference.interaction_mode` is `dao-represent-human-to-interact` or `dao-represent-human-to-interact-for-questions-in-skill`, human review at skill completion is handled by the mode-aware gate in Step 5. In `dao-represent-human-to-interact` mode, review is skipped entirely. In `dao-represent-human-to-interact-for-questions-in-skill` mode, review still stops for human approval.
-
----
+Authoritative action identity comes from [ACTION_MAP](src/x_ipe/static/js/features/workflow-stage.js),
+with gates/tags from [workflow template](x-ipe-docs/config/workflow-template.json).
+Enabled tool routing comes separately from [tools configuration](x-ipe-docs/config/tools.json):
+the workflow action `implementation` is NOT the tool key `code_implementation`.
+See [common contract](.github/skills/x-ipe-workflow-task-execution/references/lifecycle.md)
+for exact schemas, modes, statuses, source resolution and child entry obligations.
 
 ## Error Handling
 
-| Error | Cause | Recovery |
-|-------|-------|----------|
-| `TASK_NOT_ON_BOARD` | Task not found via x-ipe-tool-task-board-manager query | Return to Step 1, create task on board |
-| `INVALID_STATUS` | Task status not valid for starting | STOP, log invalid status |
-| `SKILL_NOT_FOUND` | Task-based or category skill missing | Fail for task-based skills; skip for optional category skills |
-| `GIT_NOT_INITIALIZED` | No git repository | Invoke x-ipe-tool-git-version-control skill to init |
-| `DOR_FAILED` | Prerequisites not met | STOP, report missing prerequisites |
+| Condition | Recovery |
+| --- | --- |
+| Missing task | Ensure supplied ID only after genuine not-found; never replace on error |
+| Ownership/context/corrupt board conflict | Stop without mutation; request authorized resolution |
+| Invalid mode, cycle or unresolved lifecycle owner | Block invocation; no guessed policy |
+| Missing/ambiguous source or action | Block required claim; validated legacy fallback only for absent/auto inputs |
+| Dirty wrong branch or staged foreign changes | Preserve all bytes/index; no implicit switch/stash/commit |
+| Stale/failed evidence | Rerun affected checks, otherwise blocked; retain partial outputs |
+| Independent review unavailable | Candidate drafting allowed; promotion blocked |
 
----
+No destructive rollback by default. Preserve partial domain output and report
+recovery scope; retry only bounded idempotent operations with the same identity.
 
-## Templates & Examples
+## Examples
 
-- `templates/task-record.yaml` - Task data template
-- [references/examples.md](.github/skills/x-ipe-workflow-task-execution/references/examples.md) - Full workflow examples, request matching patterns, and git strategy rules
+- [Direct entry, mode boundaries and combined deliverables](.github/skills/x-ipe-workflow-task-execution/references/examples.md)
+- [Task Data Model and CRUD adaptation](.github/skills/x-ipe-workflow-task-execution/templates/task-record.yaml)

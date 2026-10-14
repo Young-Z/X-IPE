@@ -16,12 +16,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from _board_lib import (
     EXIT_FILE_NOT_FOUND,
+    EXIT_VALIDATION_ERROR,
     atomic_read_json,
     exit_with_error,
     normalize_task_status,
     output_result,
     resolve_data_path,
 )
+from _task_store import index_file, read_daily, read_index
 
 
 def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -88,20 +90,20 @@ def _paginate(tasks: list, page: int, page_size: int) -> dict:
 
 def _query_single(tasks_dir: Path, task_id: str) -> None:
     """Query a single task by ID via index lookup."""
-    result = atomic_read_json(tasks_dir / "tasks-index.json")
-    if not result["success"]:
+    if not (tasks_dir / "tasks-index.json").exists():
         exit_with_error(EXIT_FILE_NOT_FOUND, "INDEX_NOT_FOUND", "Task index not found")
 
-    entries = result["data"].get("entries", {})
+    entries = read_index(tasks_dir)["entries"]
     if task_id not in entries:
         exit_with_error(EXIT_FILE_NOT_FOUND, "TASK_NOT_FOUND", f"Task {task_id} not found")
 
-    daily_name = entries[task_id]["file"]
+    daily_name = index_file(entries[task_id])
     daily_result = atomic_read_json(tasks_dir / daily_name)
     if not daily_result["success"]:
         exit_with_error(EXIT_FILE_NOT_FOUND, "DAILY_FILE_NOT_FOUND", f"File {daily_name} not found")
 
-    for task in daily_result["data"].get("tasks", []):
+    _, daily_tasks = read_daily(tasks_dir / daily_name)
+    for task in daily_tasks:
         if task.get("task_id") == task_id:
             output_result({"success": True, "data": {"task": task}})
             return
@@ -116,11 +118,10 @@ def _query_list(tasks_dir: Path, args: argparse.Namespace) -> None:
 
     all_tasks: list[dict] = []
     for f in files:
-        result = atomic_read_json(f)
-        if result["success"]:
-            for task in result["data"].get("tasks", []):
-                if _matches_filters(task, args.status, args.search):
-                    all_tasks.append(task)
+        _, daily_tasks = read_daily(f)
+        for task in daily_tasks:
+            if _matches_filters(task, args.status, args.search):
+                all_tasks.append(task)
 
     all_tasks.sort(key=lambda t: t.get("last_updated", ""), reverse=True)
     output_result({"success": True, "data": _paginate(all_tasks, args.page, args.page_size)})
@@ -128,6 +129,8 @@ def _query_list(tasks_dir: Path, args: argparse.Namespace) -> None:
 
 def main(argv: list[str] | None = None) -> None:
     args = _parse_args(argv)
+    if args.page < 1 or args.page_size < 1:
+        exit_with_error(EXIT_VALIDATION_ERROR, "INVALID_PAGINATION", "page and page-size must be positive")
     tasks_dir = resolve_data_path("tasks")
 
     if not tasks_dir.exists():

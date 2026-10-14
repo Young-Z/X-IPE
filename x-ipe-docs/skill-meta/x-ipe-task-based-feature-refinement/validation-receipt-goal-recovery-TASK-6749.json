@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "operation": "validate",
+  "name": "x-ipe-task-based-feature-refinement",
+  "skill_type": "x-ipe-task-based",
+  "ok": true,
+  "body_lines": 228,
+  "candidate_hash": "094644928517509cd6818629cb00ce5ab9908829c18dcdd32dfaf241b6d48ccc",
+  "errors": [],
+  "excluded_files": {},
+  "warnings": [
+    "Uninstantiated template link: references/specification-template.md: x-ipe-docs/requirements/{EPIC-ID}/mockups/dashboard-v1.html",
+    "Uninstantiated template link: references/specification-writing-guide.md: x-ipe-docs/requirements/{EPIC-ID}/mockups/dashboard-v1.html",
+    "Uninstantiated template link: references/specification-writing-guide.md: x-ipe-docs/requirements/{EPIC-ID}/mockups/settings.html"
+  ],
+  "files": {
+    "SKILL.md": "72588caeb5b03174be9627928ae211011b94ce200d4e4628761d2853799bb599",
+    "references/examples.md": "8c1bb76446cd89116632dbec8e9b296a1056bc70881261c2ee69c82f29862f93",
+    "references/integration.md": "91fcf15c4e743fcd94954d8b3c6b7a1a42c3e04e143d8cdab2d69ff914c09435",
+    "references/specification-template.md": "39afd1a5b53c3921975f3812ee6348fdc01dfe1e4f256005a9d4ec6ecc0360aa",
+    "references/specification-writing-guide.md": "5d5067da8eaef32176cf2849060ce21e245362e2614c9d6355ed89aa0ab549d4"
+  }
+}

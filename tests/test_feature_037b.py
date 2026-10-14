@@ -157,10 +157,15 @@ class TestCompletedActionReopen:
         # _handleCompletedAction must exist and use StageGateChecker
         assert "_handleCompletedAction" in content, \
             "Completed actions must use _handleCompletedAction, not just toast"
-        handler_idx = content.index("_handleCompletedAction")
-        block = content[handler_idx:handler_idx + 1000]
-        assert "StageGateChecker" in block or "canReopen" in block, \
-            "Completed modal actions must use gate check"
+        handler = re.search(
+            r"async _handleCompletedAction\([^)]*\)\s*\{(.*?)\n    \},",
+            content, re.DOTALL,
+        )
+        assert handler is not None, "Must inspect the handler definition, not its call site"
+        block = handler.group(1)
+        assert "StageGateChecker.canReopen(actionKey, stages)" in block
+        assert block.index("StageGateChecker.canReopen") < block.index("_showConfirmModal")
+        assert block.index("_showConfirmModal") < block.index("status: 'pending'")
 
     def test_confirm_dialog_before_reopen(self):
         """AC-013: Bootstrap confirmation modal shown before re-opening."""
@@ -289,17 +294,14 @@ class TestGetIdeaFileAPI:
     @pytest.fixture
     def app_client(self, temp_project_dir):
         """Create Flask test client."""
-        try:
-            from src.app import create_app
-            app = create_app({
-                "PROJECT_ROOT": temp_project_dir,
-                "TESTING": True,
-                "SETTINGS_DB_PATH": os.path.join(temp_project_dir, "test_settings.db")
-            })
-            with app.test_client() as client:
-                yield client
-        except ImportError:
-            pytest.skip("App not importable yet (TDD)")
+        from src.app import create_app
+        app = create_app({
+            "PROJECT_ROOT": temp_project_dir,
+            "TESTING": True,
+            "SETTINGS_DB_PATH": os.path.join(temp_project_dir, "test_settings.db")
+        })
+        with app.test_client() as client:
+            yield client
 
     def test_get_file_returns_content(self, app_client):
         """AC-019: GET /api/ideas/file returns file content as plain text."""
@@ -307,7 +309,7 @@ class TestGetIdeaFileAPI:
             "/api/ideas/file?path=x-ipe-docs/ideas/wf-001-test/new idea.md"
         )
         assert resp.status_code == 200
-        assert b"# Test Idea" in resp.data
+        assert resp.data == b"# Test Idea\n\nContent here"
 
     def test_get_file_returns_plain_text_content_type(self, app_client):
         """AC-019: Response content type is text/plain."""

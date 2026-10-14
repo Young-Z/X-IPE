@@ -1,396 +1,163 @@
 ---
 name: x-ipe-task-based-feature-refinement
-description: Refine feature specification for a single feature. Queries feature board for context, creates/updates specification document. Use when a feature needs detailed requirements. Triggers on requests like "refine feature", "detail specification", "clarify requirements".
+description: Refine one feature into a complete, testable specification using board context, current mockups and delta-first updates. Use when a feature needs detailed requirements. Triggers on requests like "refine feature", "detail specification", "clarify requirements".
 ---
 
 # Task-Based Skill: Feature Refinement
 
 ## Purpose
 
-Refine feature requirements for a single feature by:
-1. Querying feature board for full Feature Data Model
-2. Creating/updating detailed feature specification
-3. Documenting user stories, acceptance criteria, and requirements
-4. NO board status update (handled by category skill)
-
----
+Create or update one complete specification with user stories, testable acceptance,
+functional/nonfunctional requirements, mockup traceability and scope decisions.
+Reuse fresh breakdown findings; refine only authorized deltas without rewriting
+stable AC IDs, language, unrelated sections or the feature's execution history.
 
 ## Important Notes
 
-BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skill.
+BLOCKING: Load the [common lifecycle](.github/skills/x-ipe-workflow-task-execution/references/lifecycle.md).
+Caller provides readiness; direct entry loads the workflow and calls Orient/Plan
+once, returning here without recursively dispatching this child. Lifecycle owns
+task registration/status, category/feature status and specification_link updates,
+Git and the single completion/routing boundary. Child owns specification artifacts,
+questions and the agreed verified application action, not task creation or routing.
+Never create/close a task, commit, reset feature status or execute the successor.
 
-**Note:** If Agent does not have skill capability, go to `.github/skills/` folder to learn skills. SKILL.md is the entry point.
+CRITICAL: Exactly ONE feature per execution. Preserve legacy FEATURE-{nnn} and
+new FEATURE-{nnn}-{X}, matching board epic_id and EPIC/FEATURE or legacy FEATURE
+folders. Do not renumber, batch features or migrate existing paths implicitly.
 
-**BLOCKING: Single Feature Only.** This skill operates on exactly ONE feature at a time. Do NOT batch or combine multiple features in a single execution. If multiple features need processing, run this skill separately for each feature.
+BLOCKING: New refinement requires a real Planned feature. Authorized CR/resume
+of an advanced feature needs explicit delta/readiness and its matching existing
+specification; preserve status/history, never reset to Planned to pass the gate.
+Missing/Retired/wrong-identity or unauthorized advanced features block.
 
-MANDATORY: Every feature MUST have a feature ID in the format `FEATURE-{nnn}` (e.g., FEATURE-001, FEATURE-027). This applies regardless of the output language used.
-
-IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-interact"`, NEVER stop to ask the human. Instead, call `x-ipe-assistant-user-representative-Engineer` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
-
----
+BLOCKING: Adopt the [goal contract](.github/skills/x-ipe-workflow-task-execution/references/goal-contract.md)
+for honest new/changed goal coverage in the existing specification. Preserve
+legacy stories/ACs; explicit so-that inference is source-labeled, not confirmed.
+No goal database, fixed minimum/three-goal cap or board/output/tag additions.
 
 ## Input Parameters
 
 ```yaml
 input:
-  # Task attributes (from task board)
-  task_id: "{TASK-XXX}"
+  task_id: "{existing TASK-XXX}"
   task_based_skill: "x-ipe-task-based-feature-refinement"
-
-  # Execution context (passed by x-ipe-workflow-task-execution)
-  execution_mode: "free-mode | workflow-mode"  # default: free-mode
+  execution_mode: "free-mode | workflow-mode"
   workflow:
-    name: "N/A"  # workflow name, default: N/A
-    extra_context_reference:  # optional, default: N/A for all refs
+    name: "N/A or resolved workflow"
+    action: "feature_refinement"
+    extra_context_reference:
       requirement-doc: "path | N/A | auto-detect"
       features-list: "path | N/A | auto-detect"
-
-  # Task type attributes
   category: "feature-stage"
   next_task_based_skill:
     - skill: "x-ipe-task-based-technical-design"
       condition: "Design the refined feature"
   process_preference:
-    interaction_mode: "{from input process_preference.interaction_mode}"
+    interaction_mode: "interact-with-human | dao-represent-human-to-interact | dao-represent-human-to-interact-for-questions-in-skill"
   feature_phase: "Feature Refinement"
-
-  # Required inputs
-  mockup_list: "N/A"  # Path to mockup file(s) from previous Idea Mockup task or context
-
-  # Context (from previous task or project)
-  feature_id: "{FEATURE-XXX}"
+  mockup_list: "N/A"  # or [{mockup_name, mockup_link}]
+  feature_id: "{FEATURE-XXX or FEATURE-XXX-X}"
 ```
 
 ### Input Initialization
 
 ```xml
 <input_init>
-  <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
-  <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
-  <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
-  <field name="process_preference.interaction_mode" source="from caller (x-ipe-workflow-task-execution) or default 'interact-with-human'" />
-  <field name="feature_id" source="previous task (Feature Breakdown) output OR task board OR human input">
-    <steps>
-      1. IF previous task was "Feature Breakdown" → use previous task output's feature_ids field (iterate: one refinement task per feature_id)
-      2. ELIF task board has feature_id in task data → use it
-      3. ELSE → IF interaction_mode == "dao-represent-human-to-interact": derive from workflow context or x-ipe-assistant-user-representative-Engineer; ELSE: ask human for feature_id
-    </steps>
-  </field>
-  <field name="extra_context_reference" source="workflow context OR auto-detect">
-    <steps>
-      1. IF workflow-mode → use workflow.extra_context_reference values
-      2. FOR EACH ref in [requirement-doc, features-list]:
-         IF ref is a file path → use it
-         ELIF "auto-detect" → use existing discovery logic
-         ELIF "N/A" → skip
-      3. ELSE (free-mode) → use existing behavior
-    </steps>
-  </field>
-  <field name="mockup_list" source="see Mockup List Resolution section below">
-    <steps>
-      1. IF previous task was "Idea Mockup" → use previous task output's mockup_list field
-      2. ELIF previous task was "Feature Breakdown" → inherit from its mockup_list output (or derive from linked_mockups)
-      3. ELIF human provides explicit path → use human-provided value
-      4. ELIF idea-summary-vN.md exists → extract from "Mockups &amp; Prototypes" section
-      5. ELSE → set to "N/A"
-    </steps>
-  </field>
+  <field name="task_id" source="existing lifecycle identity/readiness; no child allocation" />
+  <field name="task_based_skill" source="this canonical entry; category and successor from Output Result" />
+  <field name="execution_mode" source="caller context; default free-mode" />
+  <field name="workflow.name" source="validated caller context; N/A only free-mode" />
+  <field name="workflow.action"><steps>Verify feature_refinement is the mandatory per-feature implement action in ACTION_MAP/template, not a guessed tool key.</steps></field>
+  <field name="process_preference.interaction_mode" source="exact resolved common lifecycle enum/source" />
+  <field name="feature_phase" source="Feature Refinement; preserve declared output" />
+  <field name="feature_id"><steps>Use explicit authorized feature, then caller's single selected first-unstarted breakdown feature or matching task context. A feature_ids list is not permission to iterate; unresolved/ambiguous selection uses actual decision policy. Validate board identity and existing specification links.</steps></field>
+  <field name="workflow.extra_context_reference"><steps>For requirement-doc and features-list use explicit selected paths first, then upstream artifact links, then owning requirement part containing the feature (reconcile index/parts; never blindly latest part). Both are required in workflow-mode even if N/A. Free-mode retains validated requirement document/Feature List fallback. A populated owning part may serve both tags. Explicit broken/wrong-feature/escaping/ambiguous links block, not fall back.</steps></field>
+  <field name="feature_docs_folder"><steps>Explicit authorized specification artifact, then board specification_link, then matching EPIC/FEATURE folder, then legacy requirements/FEATURE folder. Strip supported anchors for lookup; validate containment, feature content and file kind. Multiple matches block. Preserve existing owning folder. For absent new suffix feature create EPIC-{nnn}/FEATURE-{nnn}-{X}; new legacy ID uses legacy folder. No silent migration.</steps></field>
+  <field name="mockup_list"><steps>Explicit validated links first, then breakdown mockup_list/linked_mockups or Idea Mockup output, then existing selected feature mockups, linked idea-summary/idea mockups and matching Epic mockups. Scope-filter every source, including preexisting copies; no unrelated scans. Preserve mockup_name/mockup_link and shared root-relative links. N/A only after bounded discovery confirms no applicable mockup.</steps></field>
+  <field name="refinement_context"><steps>Reuse upstream scope, source/parts/index/board/specification/mockup SHA256, dependency findings, confirmed decisions and approved CR identity. Refresh changed/affected facts; missing coverage needs a baseline. Record which AC/story/FR/NFR/edge/UI/scope sections are affected.</steps></field>
+  <field name="document_language" source="explicit requested language, else established specification/requirement EN/ZH; stable IDs, paths and tags unchanged" />
 </input_init>
 ```
-
-### Mockup List Resolution
-
-The `mockup_list` is resolved: (1) previous Idea Mockup task output, (2) human-provided path, (3) idea-summary-vN.md "Mockups & Prototypes" section, (4) N/A.
-
-Step 1.3 performs additional discovery: idea folder → EPIC-level `mockups/` folder → scope-aware filtering.
-
-MANDATORY: When mockups are linked, spec content — especially ACs and UI/UX Requirements — MUST reference the mockup.
-
----
 
 ## Definition of Ready
 
 ```xml
 <definition_of_ready>
-  <checkpoint required="true">
-    <name>Feature exists on feature board</name>
-    <verification>Query feature board for feature_id</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Feature status is "Planned"</name>
-    <verification>Check feature status field equals "Planned"</verification>
-  </checkpoint>
+  <checkpoint required="true"><name>Owner and scope</name><verification>One feature, supplied task/readiness, mode, approved root and new/CR/resume delta known.</verification></checkpoint>
+  <checkpoint required="true"><name>Board identity and phase</name><verification>Actual matching Planned record, or explicitly authorized advanced-feature CR/resume with existing matching specification; no status reset.</verification></checkpoint>
+  <checkpoint required="true"><name>Artifacts and integration</name><verification>Sources, board specification link/folder, dependencies and scoped mockups resolved; required workflow context/prerequisites and one action owner known.</verification></checkpoint>
 </definition_of_ready>
 ```
 
----
-
 ## Execution Flow
 
-| Phase | Steps | Action | Gate |
-|-------|-------|--------|------|
-| 1. 博学之 — Study Broadly | 1.1 Query Feature Board, 1.2 Gather Context, 1.3 Process Mockups | Load feature data, read requirements, analyze mockups | Full context gathered |
-| 2. 审问之 — Inquire Thoroughly | 2.1 Specification Review Questions | Challenge spec completeness, probe gaps and assumptions | Questions resolved |
-| 3. 慎思之 — Think Carefully | 3.1 AC Quality Reflection | Assess testability, measurability, completeness of ACs | AC quality validated |
-| 4. 明辨之 — Discern Clearly | 4.1 Specification Scope Decision | Finalize in/out scope, resolve edge cases | Scope decided |
-| 5. 笃行之 — Practice Earnestly | 5.1 Create/Update Specification, 5.2 Complete & Verify | Write specification document, verify DoD | Specification created |
-| 继续执行 | 6.1 | Decide Next Action | DAO-assisted next task decision | Next action decided |
-| 继续执行 | 6.2 | Execute Next Action | Load skill, generate plan, execute | Execution started |
+| Step | Domain work | Gate |
+| --- | --- | --- |
+| 1 | Reuse current feature context | Current revision and affected scope |
+| 2 | Resolve targeted gaps, validate ACs and decide scope | Complete testable acceptance and confirmation |
+| 3 | Author delta in one complete specification | Full domain, stable IDs/language and links |
+| 4 | Verify artifacts/action and return full result | Current evidence or honest blocked result |
 
-BLOCKING: Phase 1 fails if feature not on board or status not "Planned".
-BLOCKING: Step 1.3 MUST scan for mockups (feature folder → idea folder → EPIC folder) if feature folder has no `mockups/` directory.
-BLOCKING: Step 1.3 MUST apply scope-aware filtering — only link mockups relevant to this feature.
-BLOCKING (manual/stop_for_question): Human MUST confirm specification is complete before Technical Design.
-BLOCKING (auto): Proceed automatically after DoD verification.
-
----
+Load [specification scaffold](.github/skills/x-ipe-task-based-feature-refinement/references/specification-template.md),
+[writing guide](.github/skills/x-ipe-task-based-feature-refinement/references/specification-writing-guide.md)
+and [integration](.github/skills/x-ipe-task-based-feature-refinement/references/integration.md)
+before domain work. Study/inquiry/reflection/decision combine proportionately;
+clear fresh scope needs no repeated interview, forced research or phase ceremony.
 
 ## Execution Procedure
 
 ```xml
 <procedure name="feature-refinement">
   <execute_dor_checks_before_starting/>
-  <schedule_dod_checks_with_sub_agent_before_starting/>
-
-  <phase_1 name="博学之 — Study Broadly">
-
-    <step_1_1>
-      <name>Query Feature Board</name>
-      <action>
-        1. CALL x-ipe+feature+feature-board-management skill:
-           operation: query_feature, feature_id: {feature_id from task_data}
-        2. RECEIVE Feature Data Model (feature_id, title, version, status, description, dependencies, timestamps)
-        3. Use data to understand context, check dependencies, determine if specification exists
-      </action>
-      <constraints>
-        - BLOCKING: Feature must exist on board with status "Planned"
-      </constraints>
-      <output>Feature Data Model loaded</output>
-    </step_1_1>
-
-    <step_1_2>
-      <name>Gather Context</name>
-      <action>
-        0. Resolve extra_context_reference inputs (requirement-doc, features-list)
-        1. IF requirement-details.md exists: read for context, related features, business goals
-        2. IF feature has dependencies: check if specs exist, read integration points
-        3. IF architecture implications: check x-ipe-docs/architecture/
-        4. Web search: domain rules, compliance, UX best practices, accessibility (WCAG)
-        5. IF mockup_list provided: analyze mockups, extract UI/UX requirements, identify gaps
-      </action>
-      <output>Full context gathered including mockup analysis</output>
-    </step_1_2>
-
-    <step_1_3>
-      <name>Process Mockups</name>
-      <action>
-        1. CHECK x-ipe-docs/requirements/{FEATURE-ID}/mockups/
-           IF exists AND contains files → skip to step 5
-        2. IF mockups NOT in feature folder, discover from these sources (in order):
-           a. Check requirement-details.md for idea folder reference
-              IF idea folder exists → scan x-ipe-docs/ideas/{idea-folder}/mockups/
-           b. Scan EPIC-level mockups folder: x-ipe-docs/requirements/{EPIC-ID}/mockups/
-              (derive EPIC-ID from feature_id, e.g., FEATURE-049-A → EPIC-049)
-           c. IF mockup_list provided → use those paths
-        3. SCOPE-AWARE FILTERING: For each discovered mockup:
-           a. Read mockup content/filename to understand what it covers
-           b. Compare against feature scope (from Step 1.1 Feature Data Model description)
-           c. ONLY link mockups whose content overlaps with this feature's scope
-           d. Skip mockups that cover unrelated features in the same epic
-        4. IF scope-relevant mockups found:
-           a. Create x-ipe-docs/requirements/{FEATURE-ID}/mockups/ folder
-           b. Copy ONLY scope-relevant mockup files
-           c. Update paths in mockup_list
-        5. IF linked mockups exist (pre-existing or just copied):
-           a. Analyze each mockup: extract UI/UX elements, layouts, interactions
-           b. Record findings for use in Steps 3.1 and 5.1
-        6. IF no relevant mockups found → log and proceed
-      </action>
-      <constraints>
-        - CRITICAL: Only copy if NOT already in feature folder
-        - CRITICAL: Only link mockups relevant to this feature's scope — do NOT blindly link all epic mockups
-        - MANDATORY: If mockups are discovered in this step, perform analysis (step 5) before proceeding
-      </constraints>
-      <output>Scope-relevant mockups in feature folder with analysis (or confirmed absent)</output>
-    </step_1_3>
-
-  </phase_1>
-
-  <phase_2 name="审问之 — Inquire Thoroughly">
-
-    <step_2_1>
-      <name>Specification Review Questions</name>
-      <action>
-        1. Review gathered context and identify gaps:
-           - Are user stories comprehensive? Missing personas?
-           - Are acceptance criteria testable and measurable?
-           - Are edge cases documented?
-           - Are dependencies clearly identified?
-           - Are non-functional requirements addressed?
-        2. Ask clarifying questions about identified gaps (batch 3-5 questions)
-
-        Response source (based on interaction_mode):
-        IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-          → Resolve via x-ipe-assistant-user-representative-Engineer
-        ELSE (interact-with-human/dao-represent-human-to-interact-for-questions-in-skill):
-          → Ask human for answers
-        4. Document all answers and clarifications
-      </action>
-      <constraints>
-        - CRITICAL: Do not skip — incomplete specs lead to incorrect implementations
-      </constraints>
-      <output>Clarified specification requirements with all gaps addressed</output>
-    </step_2_1>
-
-  </phase_2>
-
-  <phase_3 name="慎思之 — Think Carefully">
-
-    <step_3_1>
-      <name>AC Quality Reflection</name>
-      <action>
-        1. For each acceptance criterion, verify:
-           - Is it in Given/When/Then format? (MANDATORY — reject any AC not in GWT syntax)
-           - Is it specific (not vague)?
-           - Is it measurable (can be tested programmatically)?
-           - Is it achievable (technically feasible)?
-           - Is it relevant (directly tied to a user story)?
-        2. Flag any ACs that fail SMART criteria or do not follow GWT format
-        3. Identify missing ACs for: error states, loading states, empty states, edge cases
-        4. Consider testability: can each AC be verified with an automated test?
-        5. Classify each AC with a Test Type indicating the best validation method:
-           - **UI** — validated via browser/DOM interaction (e.g., click, render, layout checks)
-           - **API** — validated via HTTP request/response (e.g., endpoint returns correct status/body)
-           - **Unit** — validated via isolated function/module test (e.g., parsing logic, calculations)
-           - **Integration** — validated via multi-component interaction (e.g., service + DB)
-           Assign the MOST SPECIFIC type. If an AC could be tested multiple ways, pick the primary method.
-           All ACs MUST be automatable — do not use "Manual" as a test type.
-        6. MOCKUP CROSS-CHECK (if linked mockups exist and marked "current"):
-           a. For each UI element/interaction in the mockup, verify a corresponding AC exists
-           b. Flag mockup elements that have NO matching AC — these are gaps
-           c. Ensure ACs reference specific mockup elements (e.g., "grid layout per mockup Scene 1")
-           d. BLOCKING: Do not proceed if current mockups have UI elements with no corresponding AC
-      </action>
-      <output>AC quality assessment with test type classification, mockup cross-check, and improvement recommendations</output>
-    </step_3_1>
-
-  </phase_3>
-
-  <phase_4 name="明辨之 — Discern Clearly">
-
-    <step_4_1>
-      <name>Specification Scope Decision</name>
-      <action>
-        1. Review all gathered context, questions, and AC assessment
-        2. Decide final scope: what's IN scope vs OUT of scope
-        3. Resolve any remaining edge case decisions
-        4. IF mockups exist: decide freshness status (current vs outdated)
-        5. Present scope decisions for confirmation
-
-        Response source (based on interaction_mode):
-        IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-          → Log via x-ipe-assistant-user-representative-Engineer
-        ELSE (interact-with-human/dao-represent-human-to-interact-for-questions-in-skill):
-          → Ask human to confirm scope
-      </action>
-      <output>Final specification scope with all decisions documented</output>
-    </step_4_1>
-
-  </phase_4>
-
-  <phase_5 name="笃行之 — Practice Earnestly">
-
-    <step_5_1>
-      <name>Create/Update Feature Specification</name>
-      <action>
-        1. Create or update: x-ipe-docs/requirements/FEATURE-XXX/specification.md
-        2. Follow specification-template.md structure
-        3. Include all sections: Version History, Linked Mockups, Overview, User Stories,
-           Acceptance Criteria, Functional Requirements, NFRs, UI/UX Requirements,
-           Dependencies, Business Rules, Edge Cases, Out of Scope, Technical Considerations
-        4. MANDATORY: Write Acceptance Criteria as a table with Test Type column per AC group:
-           | AC ID | Criterion (Given/When/Then) | Test Type |
-           Each row: AC ID (e.g., AC-XXX-01), criterion in **Given/When/Then** format, and one of: UI, API, Unit, Integration
-           MANDATORY: Every criterion MUST use GWT (Gherkin) syntax:
-             `GIVEN [precondition/context] WHEN [action/event] THEN [expected outcome]`
-           Example: "GIVEN user is on login page WHEN user submits valid credentials THEN dashboard is displayed"
-           Multi-clause: use AND to chain conditions (GIVEN ... AND ... WHEN ... THEN ... AND ...)
-        5. IF linked mockups exist and marked "current":
-           a. MANDATORY: Spec content MUST reference the mockup — ACs, UI/UX Requirements,
-              and User Stories must trace back to mockup elements
-           b. Add mockup-comparison ACs (layout, styling, interactive elements) with Test Type = UI
-           c. In the Linked Mockups table, record Linked Date as the current date (MM-DD-YYYY)
-           d. UI/UX Requirements section MUST derive from mockup analysis, not invented independently
-        6. IF linked mockups marked "outdated": note as directional reference only, do NOT derive ACs
-      </action>
-      <constraints>
-        - MANDATORY: Single file with version history
-        - MANDATORY: AC table MUST include Test Type column (UI | API | Unit | Integration)
-        - MANDATORY: Every AC Criterion MUST use Given/When/Then (GWT) format
-        - BLOCKING: If current mockups are linked, spec MUST reference them in ACs and UI/UX sections
-        - CRITICAL: Focus on WHAT not HOW in Technical Considerations
-        - CRITICAL: Only add mockup-comparison ACs for current mockups
-        - MANDATORY: File links in generated markdown MUST use project-root-relative paths so the UI can intercept them and open a preview modal. **Avoid** relative paths (`../`, `./`, `../../`) and absolute filesystem paths (`/Users/...`). **Correct:** `[spec](x-ipe-docs/requirements/EPIC-001/specification.md)`, `[skill](.github/skills/x-ipe-task-based-bug-fix/SKILL.md)`. **Wrong:** `[spec](../specification.md)`, `[spec](./specification.md)`.
-      </constraints>
-      <output>specification.md created/updated with mockup-referenced, test-type-classified ACs</output>
-    </step_5_1>
-
-    <step_5_2>
-      <name>Complete & Verify</name>
-      <action>
-        1. IF workflow-mode: run `python3 .github/skills/x-ipe-tool-x-ipe-app-interactor/scripts/workflow_update_action.py` with:
-           - workflow_name, action, status: "done", feature_id
-           - deliverables: {"specification": "{path}", "feature-docs-folder": "{path}"}
-        2. Verify all DoD checkpoints are met
-        3. IF manual/stop_for_question: present specification, ask if anything is missing or incorrect
-      </action>
-      <output>Task completion output with specification path, workflow_action_updated</output>
-    </step_5_2>
-
-  </phase_5>
-
-  <phase_6 name="继续执行（Continue Execute）">
-    <step_6_1>
-      <name>Decide Next Action</name>
-      <action>
-        Collect the full context and task_completion_output from this skill execution.
-
-        IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-          → Invoke x-ipe-assistant-user-representative-Engineer with:
-            type: "routing"
-            completed_skill_output: {full task_completion_output YAML from this skill}
-            next_task_based_skill: "{from output}"
-            context: "Skill completed. Study the context and full output to decide best next action."
-          → DAO studies the complete context and decides the best next action
-        ELSE (interact-with-human):
-          → Present next task suggestion to human and wait for instruction
-      </action>
-      <constraints>
-        - BLOCKING (manual): Human MUST confirm or redirect before proceeding
-        - BLOCKING (auto): Proceed after DoD verification; auto-select next task via DAO
-      </constraints>
-      <output>Next action decided with execution context</output>
-    </step_6_1>
-    <step_6_2>
-      <name>Execute Next Action</name>
-      <action>
-        Based on the decision from Step 6.1:
-        1. Load the target task-based skill's SKILL.md
-        2. Generate an execution plan from the skill's Execution Flow table
-        3. Start execution from the skill's first phase/step
-      </action>
-      <constraints>
-        - MUST load the skill before executing — do not skip skill loading
-        - Execution follows the target skill's procedure, not this skill's
-      </constraints>
-      <output>Next task execution started</output>
-    </step_6_2>
-  </phase_6>
-
+  <step_1>
+    <name>Reuse current feature context</name>
+    <action>
+      1. Load board manager; validate readable inventory before feature_query.py --feature-id ID. Consume data.feature, not guessed task envelope. Reuse full title/version/status/description/dependencies/specification_link context; do not create missing features here.
+      2. Compare SHA256 source/specification/mockup/board revisions and actual affected coverage. Reuse fresh business/user/risk findings; read dependency specs/integration points and architecture only where implicated. Research domain/compliance/accessibility only for real missing facts, not every execution.
+      2a. Locate parent requirement/source and subgoal stakeholder/outcome/contribution. Reuse stable FR/US/AC or optional doc-local G IDs; for legacy use only explicit story so-that intent labeled inferred with source. Ambiguity blocks the pertinent claim, not historical acceptance or unrelated verified delivery.
+      3. Analyze every scoped mockup for layout, styling, components, interactions, flows, responsiveness and error/loading/empty states. Decide current/outdated from content and approved scope; dates alone do not decide precedence. Material spec/mockup conflicts require a documented decision under actual mode policy.
+      4. Keep valid shared Epic links; if a local copy is actually needed, copy only scope-relevant missing authorized files into selected feature mockups, preserving extension and foreign bytes. Existing copies still need scope/freshness analysis. Outdated mockups are directional only and never generate comparison ACs.
+    </action>
+    <output>Revision-bound context, dependencies and analyzed current/outdated mockup map or confirmed N/A</output>
+  </step_1>
+  <step_2>
+    <name>Resolve gaps and validate acceptance</name>
+    <action>
+      1. Review affected personas/stories, functional and nonfunctional coverage, dependencies, business rules, error/loading/empty/boundary/security/accessibility cases. Ask only unresolved material questions, up to 3-5 per batch, no padding or re-interview of confirmed unchanged facts. Human asks the human within skill and waits; full DAO and hybrid use bounded common message_context/instruction_units/execution_plan guidance. Record answers, assumptions and unresolved blockers.
+      2. Every new/changed AC has a stable unique ID, specific observable achievable story-linked result and Given/When/Then syntax, with AND for extra clauses. Known justified measures or qualitative scenarios are valid. Preserve established EN/ZH prose and unaffected legacy ACs; retain GWT tokens for authored leaf ACs. Classify primary Test Type as exactly UI, API, Unit or Integration; Manual is not allowed. Never convert a vague requirement into an invented threshold.
+      2a. Map each new/changed goal/subgoal to source, parent requirement, stories, ACs and planned/actual validation evidence. Explain indirect enabling contribution, all-required decomposition or selected bounded alternatives, constraints/non-goals and outcome gaps. Coherent scope bounds count; no arbitrary metrics, fixed minimum or three-goal cap. Means remain adaptable within contracts; material scope/acceptance changes use authorized CR/human intent.
+      3. Map each current in-scope mockup element/interaction to story, UI/UX requirement and AC, including layout/styling/interactive comparison ACs with UI type. Uncovered current in-scope elements block. Out-of-feature elements are excluded explicitly, not copied into scope. Outdated links remain directional and never become acceptance authority.
+      4. Decide in/out scope, deferred work and edge behaviors. Preserve breakdown coverage and stable AC IDs; append new IDs after highest reserved identifier, never reuse deleted IDs. Changed/retired ACs retain CR rationale, mapping/history and downstream acceptance invalidation; no silent deletion or wholesale rewording.
+      5. Human and hybrid must confirm specification completeness and completion/route before Technical Design. Reuse a recorded confirmation only for exact unchanged scope/specification revisions; material edits invalidate it. Full DAO uses bounded guidance, verified DoD and only authorized routing, not invented human approval. Explicit domain human approval binds in every mode. If scope grows beyond one coherent feature, return recommendation to lifecycle for authorized breakdown, not batch/split execution here.
+    </action>
+    <output>Resolved targeted decisions, complete GWT/primary-type acceptance and revision-bound scope confirmation</output>
+  </step_2>
+  <step_3>
+    <name>Author one complete specification delta</name>
+    <action>
+      1. Create/update specification.md in the resolved owning feature folder; never specification-v2.md or a second competing file. New version follows actual board v1.0; authorized minor/major CR updates only this feature's approved version. Keep old Version History and Change Request links/records; no gratuitous version bump on unchanged resume.
+      2. Fill every scaffold domain: Version History, Linked Mockups, Overview, User Stories, Acceptance Criteria, Functional Requirements, Non-Functional Requirements, UI/UX Requirements, Dependencies, Business Rules, Edge Cases and Constraints, Out of Scope, Technical Considerations, Open Questions and Acceptance Traceability. N/A requires explicit rationale; material open questions block completion. Describe WHAT, not implementation HOW.
+      3. AC groups use table columns AC ID, Criterion (Given/When/Then), Test Type. Map source FR/AC and stories to specification ACs, mockup elements and planned primary validation; do not invent passing tests. Record approved deferrals with reasons. Validate every changed AC plus affected cross-references without regenerating unchanged acceptance.
+      3a. Fill Goal / Subgoal Coverage and separate engineering delivery from stakeholder outcome state in existing Context and Verification Evidence. not measured is an honest gap, verified engineering delivery needs actual current checks, observed stakeholder outcome needs an actual sourced observation. Parent goal delta invalidates affected evidence; preserve unaffected IDs and history, never fake confirmation or observation.
+      4. Linked Mockups retain type/path/description/status current or outdated/Linked Date MM-DD-YYYY. Record actual date when first linked or changed, not every resume. Current mockups drive stories/UI/ACs; outdated are explicitly directional. Preserve project-root-relative Markdown links; no ../, ./ or absolute filesystem paths. Validate local kind/containment/content and actual URL reachability where required.
+      5. Preserve stable US/FR/AC IDs, existing language and unaffected section bytes. Delta-only CR adds/changes only approved affected content, version/CR records, traceability and evidence. Recheck referenced older requirement parts, dependent acceptance/design/test evidence and board link handoff; do not falsely relabel old evidence current.
+    </action>
+    <output>One complete specification with stable acceptance, CR/version records and actual artifact links</output>
+  </step_3>
+  <step_4>
+    <name>Verify integration and return</name>
+    <action>
+      1. Verify full DoD, actual artifact identity/content, all GWT/type/traceability/scope/mockup gates and current SHA256 revisions. Meaningful workflow/public-contract/risky changes require independent review; unavailable review blocks the relevant claim, not drafting. Missing confirmation returns blocked, never Technical Design execution.
+      2. Free-mode has no application mutation and workflow_action_updated false. Workflow-mode requires unique matching feature entry, feature_breakdown actually done with valid artifacts, both resolved context tags and mandatory gates. Do not mark prerequisites skipped/done to unlock refinement.
+      3. With one agreed action owner, use installed workflow_update_action.py --workflow NAME --action feature_refinement --status done --feature-id ID --deliverables keyed JSON --format json. Supply BOTH specification = actual populated matching file and feature-docs-folder = scalar existing owning directory. Do not pass --features or create another workflow feature. Preserve context; populate required missing selected tags through supported --context JSON only when authorized.
+      4. Read workflow_get_state.py; matching features[].implement.actions.feature_refinement must be done with exact both artifacts and selected context, no duplicate identity, unrelated entries/status/history unchanged. Writer success alone is insufficient. Completed unchanged resume verifies prior actual write evidence without replay; changed specification invalidates downstream design/implementation/acceptance evidence, never silently resets or claims it current.
+      5. Return exact full output and actual links once. Lifecycle owns category/feature board handoff (verified specification_link and authorized Refined transition for new refinement; no downgrade of advanced CR state), task closure/Git and one conditional Technical Design suggestion boundary. If required handoff or supported invalidation cannot be verified, return blocked with actual partial artifacts, not false completion.
+    </action>
+    <output>Verified full feature result, board-link handoff and action evidence or honest blocked output</output>
+  </step_4>
 </procedure>
 ```
-
----
 
 ## Output Result
 
@@ -406,8 +173,8 @@ task_completion_output:
   execution_mode: "{from input}"
   workflow:
     name: "{from input}"
-  workflow_action: "{workflow.action}"   # triggers workflow status update when execution_mode == workflow-mode
-  workflow_action_updated: true | false # true if workflow_update_action.py was run
+  workflow_action: "{workflow.action}"
+  workflow_action_updated: true | false
   task_output_links:
     - "x-ipe-docs/requirements/FEATURE-XXX/specification.md"
   feature_id: "FEATURE-XXX"
@@ -415,83 +182,51 @@ task_completion_output:
   feature_version: "{version}"
   feature_phase: "Feature Refinement"
   mockup_list: "{updated with copied paths if mockups were copied}"
-  linked_mockups:  # if applicable
+  linked_mockups:
     - mockup_name: "Description of mockup function"
       mockup_link: "x-ipe-docs/requirements/FEATURE-XXX/mockups/mockup-name.html"
 ```
 
----
+Keep exact original keys/order/category/conditional successor; illustrative legacy
+paths above become the actual resolved EPIC/FEATURE or legacy paths, and shared
+mockup links remain shared when no copy is needed. N/A means absent optional
+mockups, not fabricated files. workflow_action_updated is true only with actual
+verified write/prior write evidence; blocked output retains real partial links.
 
 ## Definition of Done
 
-CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
-
 ```xml
 <definition_of_done>
-  <checkpoint required="true">
-    <name>Specification file created</name>
-    <verification>x-ipe-docs/requirements/FEATURE-XXX/specification.md exists</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>All specification sections completed</name>
-    <verification>Check all template sections are present and filled</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Acceptance criteria are testable and in GWT format</name>
-    <verification>Each criterion uses Given/When/Then format and is specific and measurable</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Dependencies documented</name>
-    <verification>Internal and external dependencies listed</verification>
-  </checkpoint>
-  <checkpoint required="if-applicable">
-    <name>Mockups copied to feature folder</name>
-    <verification>If mockups found in idea folder, copied to FEATURE-XXX/mockups/</verification>
-  </checkpoint>
-  <checkpoint required="if-applicable">
-    <name>Mockup list analyzed</name>
-    <verification>If mockups provided or copied, UI/UX requirements extracted</verification>
-  </checkpoint>
-  <checkpoint required="if-applicable">
-    <name>Linked Mockups section populated</name>
-    <verification>If mockups exist, Linked Mockups table in specification with freshness status (current/outdated)</verification>
-  </checkpoint>
-  <checkpoint required="if-applicable">
-    <name>Mockup-comparison ACs added</name>
-    <verification>If current (non-outdated) mockups exist, acceptance criteria reference mockup comparison for UI layout, styling, and interactive elements</verification>
-  </checkpoint>
-  <checkpoint required="if-applicable">
-    <name>Workflow Action Updated</name>
-    <verification>If execution_mode == "workflow-mode", ran `workflow_update_action.py` script with status "done" and deliverables keyed dict</verification>
-  </checkpoint>
+  <checkpoint required="true"><name>Identity and one specification</name><verification>Matching feature and owning legacy/new folder, real populated single specification and resolved board link handoff.</verification></checkpoint>
+  <checkpoint required="true"><name>Full domain</name><verification>All scaffold sections filled, user/functional/nonfunctional/business/edge/dependency/out-of-scope coverage and justified N/A; no unresolved material questions.</verification></checkpoint>
+  <checkpoint required="true"><name>Acceptance and traceability</name><verification>Unique stable story/FR/AC IDs, new/changed observable GWT tables with exactly UI/API/Unit/Integration types, source/parent/goal/story/mockup/validation mappings, explicit outcome gaps and approved deferrals; legacy unchanged content preserved.</verification></checkpoint>
+  <checkpoint required="true"><name>Delta preservation</name><verification>Existing language, unaffected content/IDs, version/CR history and advanced board state preserved; affected downstream evidence invalidated, not falsely current.</verification></checkpoint>
+  <checkpoint required="if-applicable"><name>Mockups</name><verification>Scoped analysis and valid current/outdated links/dates; all current in-scope elements covered by stories/UI/ACs, UI comparison types; outdated directional only; no foreign overwrite.</verification></checkpoint>
+  <checkpoint required="true"><name>Confirmation</name><verification>Human/hybrid completeness and completion/route confirmation or exact-revision prior confirmation; full DAO bounded guidance/DoD and only authorized routing; explicit human approval binds in every mode without invented authority.</verification></checkpoint>
+  <checkpoint required="if-applicable"><name>Application action</name><verification>Actual per-feature done/readback, specification and scalar feature-docs-folder, both selected contexts/prerequisites verified; no replay/duplicate/reset.</verification></checkpoint>
+  <checkpoint required="true"><name>Fresh honest return</name><verification>Checks/review and hashes current; output fields/links and category handoff retained; one return to lifecycle, no child task/Git/next execution.</verification></checkpoint>
 </definition_of_done>
 ```
 
-MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution` to continue the task execution flow.
-
----
+MANDATORY: Return to `x-ipe-workflow-task-execution` for its single completion boundary.
 
 ## Patterns & Anti-Patterns
 
 | Pattern | When | Then |
-|---------|------|------|
-| Mockup-Driven | Mockup list provided | Assess freshness, extract UI elements, add mockup-comparison ACs for current mockups |
-| Well-Defined Feature | Clear scope from breakdown | Query board → read requirements → create specification |
-| Feature with Dependencies | Depends on other features | Read dependent specs, identify integration points, document assumptions |
-| Complex Domain | Unfamiliar domain rules | Web research, document compliance, include domain glossary |
+| --- | --- | --- |
+| Fresh clear feature | Breakdown decisions current | Reuse findings, full domain/AC validation, no ceremonial questions |
+| Approved CR/resume | Existing spec and bounded delta | Stable IDs/language/history, affected-only updates and evidence invalidation |
+| Current/outdated mockups | Applicable scoped references | Current traceable stories/UI/ACs; outdated directional, dates not precedence |
 
-| Anti-Pattern | Why Bad | Do Instead |
-|--------------|---------|------------|
-| Skip board query | Missing context | Always query feature board first |
-| Vague acceptance criteria | Untestable | Make criteria specific and measurable using Given/When/Then format |
-| AC without GWT format | Not standardized, harder to automate | Every AC criterion MUST use GIVEN/WHEN/THEN syntax |
-| Technical implementation details | Wrong focus | Focus on WHAT, not HOW |
-| Ignore dependencies | Integration failures | Document all dependencies |
-| Ignore mockup when provided | Missing UI requirements | Always analyze mockup_list |
-| Compare against outdated mockup | Wrong ACs | Check freshness; only add ACs for current mockups |
-
----
+| Anti-pattern | Consequence | Correction |
+| --- | --- | --- |
+| Rewrite all ACs or use latest part blindly | Lost identity/coverage | Preserve stable IDs and owning artifact links |
+| Auto-copy all Epic mockups/newer always wins | Scope bloat or false authority | Scope/content review and recorded conflict decision |
+| Writer success/child routing replaces lifecycle | False done or duplicate actions | Exact state/artifact readback and one owner |
 
 ## Examples
 
-See [references/examples.md](.github/skills/x-ipe-task-based-feature-refinement/references/examples.md) for detailed examples.
+- [New, delta, mockup and blocked scenarios](.github/skills/x-ipe-task-based-feature-refinement/references/examples.md)
+- [Full specification scaffold](.github/skills/x-ipe-task-based-feature-refinement/references/specification-template.md)
+- [Specification quality and delta guide](.github/skills/x-ipe-task-based-feature-refinement/references/specification-writing-guide.md)
+- [Artifact/board/workflow integration](.github/skills/x-ipe-task-based-feature-refinement/references/integration.md)

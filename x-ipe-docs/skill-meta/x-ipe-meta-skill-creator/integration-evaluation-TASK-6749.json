@@ -1,0 +1,66 @@
+{
+  "schema": 1,
+  "task_id": "TASK-6749",
+  "date": "2026-10-14",
+  "operation": "candidate-integration-evaluation",
+  "publication_state": "candidate_pending_independent_review_after_corrections",
+  "production_changed": false,
+  "independent_review": "Current reviewer inspected prior creator lesson/validator and representative deltas; rejected unauthorized hybrid inversion. Reviewer-authored template/lifecycle and instruction corrections require later independent review. No packages promoted.",
+  "current_review": "review-TASK-6749.md",
+  "creator": {
+    "installed_version": "1.2.1",
+    "installed_distributable_files": 32,
+    "installed_distributable_hash": "762d5ef4818aba6ca16ad1dfb75b646b74eddcc2f46f3ef90252829c5d5ea271",
+    "installed_physical_files": 34,
+    "installed_physical_hash": "72caec919101f8333dbaacc6ec504756c31b9facc607d9d764d314ca29b92cfd",
+    "candidate_files": 33,
+    "candidate_body_lines": 259,
+    "candidate_hash": "934eb129a59b92f9947c04f7fcb03cdbbcacd9679cc179757e2d6735dbda9752",
+    "changed": ["SKILL.md", "references/validation-publication.md", "scripts/validate_skill.py", "templates/x-ipe-task-based.md"],
+    "added": ["references/consumer-integration.md"],
+    "removed_distributables": [],
+    "unchanged_distributables": 28,
+    "protected_physical_only": ["scripts/__pycache__/publish_skill.cpython-312.pyc", "scripts/__pycache__/validate_skill.cpython-312.pyc"],
+    "installed_validator_result": "creator candidate passes; representative identity remains rejected by installed validator",
+    "candidate_validator_result": "creator and exact representative assistant candidates pass; zero errors or warnings",
+    "live_lesson_selection": {"summaries": [], "critical_overflow": [], "protected": [{"id": "LL-001", "reason": "legacy dates/status require reviewed migration"}], "notices": []},
+    "real_lesson_settlement": "not invoked; no selected applicable finite record; historical queue untouched"
+  },
+  "representative": {
+    "installed_version": "1.0.0",
+    "installed_files": 7,
+    "installed_body_lines": 333,
+    "installed_hash": "9ec07b8bb2a7c5e99dced66bdc9950e1befa5e78be6d091203fce8cdae27962f",
+    "candidate_files": 8,
+    "candidate_body_lines": 339,
+    "candidate_hash": "37b3921d4486ecce4c0fb49a0ca2b6c374c6d2dadeef2740fed8246c3022e8e8",
+    "changed": ["SKILL.md"],
+    "added": ["references/decision-boundaries.md"],
+    "removed": [],
+    "unchanged_resources": 6,
+    "original_input_output_phase_log_fallback_contracts": "preserved; automated parsed contract and phase comparison",
+    "live_lesson_selection": {"summaries": [], "critical_overflow": [], "protected": [], "notices": []}
+  },
+  "historical_tests_before_current_review": {
+    "final_broad_python": {"passed": 1439, "failed": 9, "seconds": 47.44, "exit": 1, "baseline_failures_only": true, "skipped": 0, "deselected": 0},
+    "final_focused_python": {"passed": 1041, "failed": 0, "seconds": 44.83, "exit": 0, "skipped": 0, "deselected": 0},
+    "final_npm": {"files": 51, "passed": 1016, "failed": 0, "duration_seconds": 7.88, "exit": 0},
+    "evidence_scope": "actual installed helper/API/CLI/publication mechanics in disposable projects plus authored contract checks; not autonomous agent behavior or stakeholder outcome"
+  },
+  "review_tests": {
+    "before_corrections": {"new_integration_passed": 22, "focused_passed": 1041, "new_review_failed": 10, "new_review_passed": 1},
+    "current_focused_python": {"files": 19, "passed": 1058, "failed": 0, "seconds": 32.20, "exit": 0, "skipped": 0, "deselected": 0},
+    "current_broad_python": {"files": 30, "passed": 1457, "failed": 8, "seconds": 33.73, "exit": 1, "baseline_failures_only": true, "skipped": 0, "deselected": 0},
+    "current_npm": {"files": 51, "passed": 1016, "failed": 0, "seconds": 4.92, "exit": 0},
+    "limits": "Disposable helper/scaffold/upgrade and contract checks, not autonomous representative routing or stakeholder observation"
+  },
+  "pending": [
+    "Later independent review of reviewer-authored creator template and workflow/instruction corrections before promotion/certification",
+    "Installed validator adoption of exact legacy representative identity exception",
+    "Instruction revisions edited and actual generation/upgrade tested; later independent review remains pending, protected mirrors unsynced",
+    "Corrected workflow candidate preserves current spec/UI hybrid semantics; installed workflow and ten adopting child policies remain incompatible and need reviewed candidate changes or explicit adapters",
+    "Actual representative end-to-end task pilots and stakeholder observation if outcome claims are needed",
+    "Eight pre-existing baseline test failures remain; canonical instruction sync failure repaired by authorized instruction integration",
+    "Main TASK-6749 completion remains withheld"
+  ]
+}

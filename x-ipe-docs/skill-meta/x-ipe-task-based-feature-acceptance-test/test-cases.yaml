@@ -1,0 +1,87 @@
+skill_name: x-ipe-task-based-feature-acceptance-test
+task_id: TASK-6749
+date: 2026-10-13
+publication_state: published
+independent_review: completed_main_reviewer
+candidate_hash: 04872899595a2e65bfa11eb54024f349cf35fe812d8f59694eb451b8f57d3843
+scope: authored package coverage and actual temporary helper contracts; not autonomous feature acceptance
+fresh_runs:
+  - name: unchanged downstream readiness
+    passed: 138
+    failed: 1
+    seconds: 16.49
+    finding: unclosed metadata YAML fence
+  - name: new cross-type regression before helper repair
+    passed: 6
+    failed: 5
+    deselected: 139
+    seconds: 0.27
+    finding: assertions incorrectly borrowed across each of five original types
+  - name: new regression schema and authored report after repair
+    passed: 19
+    failed: 0
+    deselected: 139
+    seconds: 0.21
+  - name: final five unfiltered focused suites
+    passed: 465
+    failed: 0
+    skipped: 0
+    deselected: 0
+    exit: 0
+    seconds: 24.56
+    suites:
+      tests/test_skill_goal_downstream.py: 158
+      tests/test_goal_oriented_skills.py: 22
+      tests/test_skill_pipeline_refactor.py: 113
+      tests/test_skill_lifecycle.py: 27
+      tests/test_skill_creator_foundation.py: 145
+cases:
+  - id: PKG-01
+    covers: [AC-S01, AC-C01, AC-L01]
+    evidence: complete six-file installed validator and parsed original output equality; same-owner all-resource assertions
+    state: passed_automated_contract
+  - id: GOAL-01
+    covers: [AC-G01, AC-G02, AC-H01]
+    evidence: upstream badge frame and all-type source frame render same report; missing clauses and false delivery/outcome negatives reject
+    state: passed_authored_artifact_checks
+  - id: TYPE-01
+    covers: [AC-T01, AC-T02]
+    evidence: five original type schemas; real config/declarations and browser/test-only contracts inspected; seven all-type original assertion negatives
+    state: passed_contract_checks_not_feature_execution
+  - id: REUSE-01
+    covers: [AC-E01, AC-E02]
+    evidence: actual read-only API/CLI success and stale/error fixtures; required roles/files/ACs/types/assertions/provenance; five cross-type negatives and same-type split
+    state: passed_temporary_helper_execution
+  - id: APP-01
+    covers: [AC-I01, AC-I02, AC-H01]
+    evidence: actual temporary acceptance_testing tags/context/readback and Tested/Completed preservation; permissive helper versus genuine locked feedback gate
+    state: passed_temporary_consumer_execution
+validation:
+  exit: 0
+  ok: true
+  files: 6
+  body_lines: 239
+  errors: 0
+  warnings: 0
+  receipt: validation-receipt-goal-TASK-6749.json
+preservation:
+  implementation_receipt_and_four_file_live_parity: verified
+  acceptance_live_baseline: checked_before_authorized_editor_promotion
+  acceptance_live_candidate_parity: six_files_exact_bytes_verified
+  protected_files: 2775
+  protected_fingerprint: 20a3346ba1ab28c991856a7f46f419b0711069ceea5335a9306d649a43be0a54
+  existing_assertions_weakened: false
+  board_memory_git_operations: none
+limits:
+  - Acceptance independently reviewed and authorized editor-promoted; publication receipt and current parity verified, not an atomic publisher transaction.
+  - Shared document-local schema is not a new board or task-output schema.
+  - Helper hashes and coverage cannot authenticate logs or discover omitted dependencies.
+  - Authored all-type plans are not actual fictional UI API library CLI execution.
+  - Temporary board/workflow fixture writes do not mutate the actual project board.
+  - No autonomous feature acceptance pilot or stakeholder observation claimed.
+  - Mandatory code_refactor closing blocker retained; app/config unchanged.
+continuation:
+  independent_five_suite_run: {passed: 465, failed: 0, skipped: 0, deselected: 0, exit: 0, seconds: 24.49}
+  normalization: user-authorized EOF-only integration change; validator/hash refreshed, unchanged executable scenarios reused
+  review: review-main-TASK-6749.md
+  publication: publication-receipt-goal-TASK-6749.json

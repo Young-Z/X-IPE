@@ -34,8 +34,12 @@ class TestMetaSkillCreatorDaoSupport:
         assert "x-ipe-dao" in meta_creator_content
 
     def test_creator_routes_dao_to_dedicated_templates(self, meta_creator_content):
-        assert "templates/x-ipe-dao.md" in meta_creator_content
-        assert "templates/skill-meta-x-ipe-dao.md" in meta_creator_content
+        row = next(line for line in meta_creator_content.splitlines()
+                   if line.startswith("| x-ipe-dao (legacy) |"))
+        templates = [cell.strip().strip("`") for cell in row.split("|")[2:4]]
+        assert templates == ["x-ipe-dao.md", "skill-meta-x-ipe-dao.md"]
+        assert "resolve under" in meta_creator_content and "/templates)" in meta_creator_content
+        assert all((META_CREATOR_DIR / "templates" / name).is_file() for name in templates)
 
     def test_dao_skill_template_exists(self):
         assert (META_CREATOR_DIR / "templates" / "x-ipe-dao.md").exists()

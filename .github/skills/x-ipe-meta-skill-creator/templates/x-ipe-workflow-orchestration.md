@@ -1,9 +1,9 @@
 # Workflow Orchestration Skill Template
 
-Use this template when creating a skill that orchestrates multiple other skills in a coordinated workflow. Workflow orchestration skills manage the execution order, data flow, and decision points across multiple skills.
+Use this template when creating a skill that orchestrates multiple other skills in a coordinated workflow. Workflow orchestration skills manage the execution order, data flow, and decision points across multiple skills. Task-category skills share this procedure/registry/output scaffold; substitute the canonical `x-ipe+{category}+{name}` identity and category-completion inputs. They do not own board CRUD.
 
 **Section Order (Cognitive Flow):**
-1. CONTEXT: Purpose → Important Notes
+1. CONTEXT: Purpose → Important Notes → About
 2. DECISION: Input Parameters → Definition of Ready
 3. ACTION: Execution Flow Summary → Execution Procedure
 4. VERIFY: Output Result → Definition of Done
@@ -93,7 +93,6 @@ BLOCKING: All input fields with non-trivial initialization MUST be documented he
 
 ## Definition of Ready
 
-CRITICAL: DoR at most 5 checkpoints. DoD at most 10 checkpoints. Keep only the most critical checks.
 ```xml
 <definition_of_ready>
   <checkpoint required="true">
@@ -184,41 +183,6 @@ BLOCKING: Skills in same parallel group must have no data dependencies.
 
 ---
 
-## Skill Registry
-
-MANDATORY: List all skills this workflow orchestrates with their role.
-
-| Skill | Role in Workflow | Required Input | Produced Output |
-|-------|------------------|----------------|-----------------|
-| `{skill-1}` | {Role description} | {input fields} | {output fields} |
-| `{skill-2}` | {Role description} | {input fields} | {output fields} |
-| `{skill-3}` | {Role description} | {input fields} | {output fields} |
-| `{skill-4}` | {Role description} | {input fields} | {output fields} |
-
-### Data Flow Diagram
-
-```yaml
-data_flow:
-  phase_1:
-    input: shared_context
-    skill: {skill-1}
-    output: result_1
-    
-  phase_2:
-    input: result_1
-    skills: [{skill-2}, {skill-3}]
-    output: [result_2a, result_2b]
-    merge: merged_result
-    
-  phase_3:
-    input: merged_result
-    decision: condition_check
-    branch_a: {skill-5} → final_result_a
-    branch_b: {skill-6} → final_result_b
-```
-
----
-
 ## Output Result
 
 ```yaml
@@ -253,6 +217,40 @@ workflow_output:
     <verification>failed_skills array is empty OR failures handled by rollback</verification>
   </checkpoint>
 </definition_of_done>
+```
+
+---
+
+## Skill Registry
+
+MANDATORY: List all skills this workflow orchestrates with their role. Load the
+registry before the DoR availability check even though it is a reference section.
+
+| Skill | Role in Workflow | Required Input | Produced Output |
+|-------|------------------|----------------|-----------------|
+| `{skill-1}` | {Role description} | {input fields} | {output fields} |
+| `{skill-2}` | {Role description} | {input fields} | {output fields} |
+| `{skill-3}` | {Role description} | {input fields} | {output fields} |
+| `{skill-4}` | {Role description} | {input fields} | {output fields} |
+
+### Data Flow Diagram
+
+```yaml
+data_flow:
+  phase_1:
+    input: shared_context
+    skill: {skill-1}
+    output: result_1
+  phase_2:
+    input: result_1
+    skills: [{skill-2}, {skill-3}]
+    output: [result_2a, result_2b]
+    merge: merged_result
+  phase_3:
+    input: merged_result
+    decision: condition_check
+    branch_a: {skill-5} → final_result_a
+    branch_b: {skill-6} → final_result_b
 ```
 
 ---
@@ -295,12 +293,12 @@ See [references/examples.md](references/examples.md) for workflow orchestration 
 
 ### Naming Convention
 
-Workflow orchestration skills use compound names:
-- `{category}+{operation}` format
-- Examples:
-  - `feature+full-pipeline` - Full feature development pipeline
-  - `requirement+breakdown` - Requirement to feature breakdown
-  - `code+review-merge` - Code review and merge workflow
+Workflow orchestration uses `x-ipe-workflow-{name}` (for example,
+`x-ipe-workflow-full-pipeline`). Category orchestration uses
+`x-ipe+{category}+{name}` (for example, `x-ipe+feature-stage+release`).
+Use the task-category metadata template for category completion gates and child
+outputs. Board persistence belongs to `x-ipe-tool-task-board-manager`; do not
+instantiate a Markdown board or reinterpret category completion as CRUD.
 
 ### Section Order (v2 Cognitive Flow)
 
@@ -312,20 +310,20 @@ workflow_orchestration_skills:
     # CONTEXT
     1: Purpose
     2: Important Notes
+    3: About (Domain Concepts)
     # DECISION
-    3: Input Parameters
-    3a: "  └─ Input Initialization (### subsection)"
-    4: Definition of Ready (DoR)
+    4: Input Parameters
+    4a: "  └─ Input Initialization (### subsection)"
+    5: Definition of Ready (DoR)
     # ACTION
-    5: Execution Flow Summary (DAG/Sub-agent)
-    6: Execution Procedure (Steps)
+    6: Execution Flow Summary (DAG/Sub-agent)
+    7: Execution Procedure (Steps)
     # VERIFY
-    7: Output Result
-    8: Definition of Done (DoD)
+    8: Output Result
+    9: Definition of Done (DoD)
     # REFERENCE
-    9: Registry (Task-Based Skills / Skill Mapping)
-    10: Error Handling
-    11: Templates
+    10: Skill Registry
+    11: Error Handling
     12: Examples
 ```
 

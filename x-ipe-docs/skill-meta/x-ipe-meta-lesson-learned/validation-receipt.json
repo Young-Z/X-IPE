@@ -1,0 +1,19 @@
+{
+  "body_lines": 221,
+  "candidate_hash": "8ace7fd65ed5aaaf8a7b0611ccc15e03d1887c2cf2d7598a042b8bc919400c01",
+  "errors": [],
+  "excluded_files": {},
+  "files": {
+    "SKILL.md": "40c53f44b504f4aaa1f79184db9e35cf949e8be9de58d463d5b35471c077f08e",
+    "references/examples.md": "8962b1aa0bf7df7a73dd9778bf3abefd4a1457ba5664ed93c69e422f05feba6e",
+    "references/lifecycle.md": "d70e88cec44d69dba3d48086742479a79051dd36e28d2a89db07327645009e58",
+    "scripts/lesson_ops.py": "be1079da26331beb8640a05d2637ac408ca8de7633630c5c9794800f908dfc8c",
+    "templates/lesson-learned.md": "2e6e53edff3a0d0323c8fa8be2c7c1fe2bd9cbbea3b46101dfac0249f3d102f6"
+  },
+  "name": "x-ipe-meta-lesson-learned",
+  "ok": true,
+  "operation": "validate",
+  "schema": 1,
+  "skill_type": "x-ipe-meta",
+  "warnings": []
+}

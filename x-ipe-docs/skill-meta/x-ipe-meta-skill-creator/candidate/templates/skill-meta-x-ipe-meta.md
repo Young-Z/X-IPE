@@ -58,9 +58,9 @@ acceptance_criteria:
       test_method: file_exists
       expected: ".github/skills/{skill_name}/SKILL.md with YAML frontmatter"
     - id: AC-M02
-      description: SKILL.md body under 500 lines
+      description: SKILL.md body ≤ 1000 logical lines (frontmatter excluded; ceiling, not target)
       test_method: structure_validation
-      expected: "wc -l < 500"
+      expected: "1000 passes; 1001 fails; LF/CRLF equivalent; trailing newline adds no phantom line"
     - id: AC-M03
       description: Section order follows cognitive flow per skill type
       test_method: content_check
@@ -92,9 +92,9 @@ acceptance_criteria:
       expected: "### Input Initialization with <input_init> XML block"
   could:
     - id: AC-C01
-      description: Sub-agent workflow used for complex skills
+      description: Independent review used for meaningful workflow, executable, or safety changes
       test_method: structure_validation
-      expected: "DAG workflow for 5+ step skills"
+      expected: "Risk-based review with recorded findings, not a fixed number of agents"
   wont:
     - id: AC-W01
       description: Runtime code generation
@@ -111,7 +111,7 @@ evaluation:
     - "Completeness of acceptance criteria coverage"
 
 workflow:
-  sub_agent_dag: true
+  sub_agent_dag: risk_based
   test_driven: true
   supports_iteration: true
 

@@ -1,0 +1,20 @@
+{
+  "body_lines": 240,
+  "candidate_hash": "9d5a17709cb1f911fd32fa3eb07b338c43eccbafeb064836debaa8485e77fee4",
+  "errors": [],
+  "excluded_files": {},
+  "files": {
+    "SKILL.md": "3e4f03636eebe3fd579aaef50bc1755917781c4e5555b06d887af100b99d2880",
+    "references/examples.md": "5a94b5d5785b93246f828d33eeab73ad86199438d698a47cbe6e8404269115aa",
+    "references/integration.md": "c4e8559cd45ce933fcbc37a0db6bcdacfe2a19180d9f4a791c1402060f0019d4",
+    "references/templates/changelog-template.md": "2259cadc910e9fa7f79b080f34fffa161e71446db2a5615ed59f09a47f1c588d",
+    "references/templates/pr-template.md": "4625aec829719b8112252d58eb458bd523500fb86a4626c4d57181c56a2d5c9a",
+    "templates/closing-report.md": "e3b261cf19a8df0db2ff7903edbb0dd5d0105fa6de768b22bb7a83d85f233d5a"
+  },
+  "name": "x-ipe-task-based-feature-closing",
+  "ok": true,
+  "operation": "validate",
+  "schema": 1,
+  "skill_type": "x-ipe-task-based",
+  "warnings": []
+}

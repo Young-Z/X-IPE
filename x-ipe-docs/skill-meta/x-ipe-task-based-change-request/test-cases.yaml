@@ -1,0 +1,127 @@
+skill_name: x-ipe-task-based-change-request
+task_id: TASK-6749
+date: 2026-10-13
+publication_state: published
+independent_review: passed_inherited_candidate_review
+candidate_hash: 7e7604fbaa558da5e881ad82e1efc49bef4a27a832afc2480fa263e1423eb5c2
+scope: complete CR candidate, authored fixtures and actual installed helpers in disposable projects; not autonomous CR processing
+fresh_runs:
+  - name: unchanged five-suite prework baseline
+    passed: 499
+    failed: 4
+    exit: 1
+    seconds: 31.81
+    suites: [tests/test_skill_goal_downstream.py, tests/test_goal_oriented_skills.py, tests/test_skill_pipeline_refactor.py, tests/test_skill_lifecycle.py, tests/test_skill_creator_foundation.py]
+    failures: three stale closing candidate-only/baseline assertions and one obsolete closing-report tag assertion; excluded tests unchanged
+  - name: dedicated new coverage before CR changes
+    passed: 0
+    failed: 25
+    errors: 12
+    exit: 1
+    seconds: 0.30
+    meaning: real candidate readiness gaps and absent authored fixtures/metadata, not TDD for application behavior
+  - name: first complete draft checks
+    passed: 27
+    failed: 9
+    deselected: 1
+    exit: 1
+    seconds: 0.72
+    findings: editor retained/restored legacy entry/template after ambiguous replacement; new tests had renderer/case/wrapping assumptions
+  - name: corrected domain/helper checks before readiness receipt
+    passed: 36
+    failed: 0
+    deselected: 1
+    exit: 0
+    seconds: 0.65
+    scope: all domain/helper checks, readiness metadata test deliberately awaits this receipt
+  - name: six focused suites together before EOF-only formatting correction
+    passed: 536
+    failed: 4
+    skipped: 0
+    deselected: 0
+    exit: 1
+    seconds: 32.23
+    suites: [tests/test_skill_goal_change_quality.py, tests/test_skill_goal_downstream.py, tests/test_goal_oriented_skills.py, tests/test_skill_pipeline_refactor.py, tests/test_skill_lifecycle.py, tests/test_skill_creator_foundation.py]
+    dedicated_new_tests: 37 passed; no dedicated failures
+    failures:
+      - tests/test_skill_goal_downstream.py::test_closing_complete_inventory_output_schema_and_lifecycle
+      - tests/test_skill_goal_downstream.py::test_closing_metadata_receipt_and_no_promotion
+      - tests/test_skill_goal_downstream.py::test_closing_readiness_records_bind_current_receipt_without_claiming_review
+      - tests/test_skill_lifecycle.py::test_known_deliverable_mismatches_are_recorded_not_waived
+    regression: identical four prework failures; existing test bytes unchanged; no new CR regression
+  - name: formatting follow-up detected editor-indented historical fence
+    passed: 535
+    failed: 5
+    skipped: 0
+    deselected: 0
+    exit: 1
+    seconds: 32.21
+    finding: dedicated exact-snapshot hash detected six editor-added spaces before closing fence; fence indentation corrected without changing original historical bytes
+  - name: final six-suite run at current validated candidate and test revision
+    passed: 536
+    failed: 4
+    skipped: 0
+    deselected: 0
+    exit: 1
+    seconds: 32.23
+    dedicated_new_tests: 37 passed; zero dedicated failures
+    regression: identical four unchanged prework failures listed above
+    revision: candidate_hash and dedicated_test_sha256 in this record; exact validator receipt recomputed and all 2866 protected files rechecked
+readiness:
+  current_review: Sequential main-agent review of inherited worker package passed; no blocking findings
+  current_focused_run: 37 passed in 0.67s before exact edit promotion; exit 0
+  final_combined_run: 550 passed / four identical inherited closing/lifecycle failures in 32.30s; all 51 dedicated tests passed; no skipped/deselected
+  current_dedicated_test_sha256: f16de0d8aa10c667922dfbafc5c2e053a46e231e1981a256d80213add08e6f74
+  publication: publication-receipt-goal-TASK-6749.json; exact six-file byte parity; tracked HEAD provenance and read-only publisher dry-run
+  new_suite_final: 37 passed in combined fresh final run; zero new failures
+  focused_regression_final: 536 passed / 4 unchanged prework failures in 32.23s; exit 1; no skipped/deselected
+  independent_review: inherited candidate reviewed by fresh main reviewer; prior unavailable worker reviewer is historical
+  repository_wide_green_claimed: false
+cases:
+  - id: PKG-01
+    covers: [AC-S01, AC-S02, AC-S03, AC-C01, AC-B02, AC-L01]
+    evidence: installed validator, original five-path inventory plus integration, complete original output equality/key order, five action XML, obsolete lifecycle/Git block absence
+    state: passed_automated_contract
+  - id: GOAL-01
+    covers: [AC-G01, AC-G02, AC-G03, AC-E01, AC-B01]
+    evidence: complete authored delta/matrix/conflict/GWT AC scaffold; unchanged row retention; 13 negative mutations; original five use cases plus enabling/chain case
+    state: passed_authored_artifact_checks
+  - id: AUTH-01
+    covers: [AC-C02, AC-C03, AC-C04, AC-D01]
+    evidence: actual-clause conflict table, major retirement example, before-edit human authority in all three mode contracts, exact-revision no-repeat approval and pending independent review handoff
+    state: passed_contract_checks_not_actual_human_approval
+  - id: APP-01
+    covers: [AC-I01, AC-I02, AC-I03]
+    evidence: actual template/ACTION_MAP/config; installed temp CLI in EPIC and legacy layouts; exact done/context/tags and optional report absence; 8 rejected bad-tag/folder/feature/locked writes preserve bytes; 2 permissive missing-file/tag checks characterize gap
+    state: passed_temporary_consumer_execution
+validation:
+  ok: true
+  files: 6
+  body_lines: 241
+  errors: 0
+  warnings: 0
+  receipt: validation-receipt-goal-TASK-6749.json
+preservation:
+  worker_snapshot_notice: Original worker fingerprints/counts below are historical prepublication evidence; current authorized CR production matches six-file publication receipt, and bug candidate is separately scoped
+  production_manifest: baseline-goal-TASK-6749.json retained; authorized six-file promotion recorded separately
+  original_candidate_manifest: prework-candidate-goal-TASK-6749.json; five files, preexisting entry/example differences recorded
+  original_metadata_sha256: 697a68566911ac8eaf912d5233df8e3e332eae18d5a5d00138240d549d58f0fb
+  old_metadata: verbatim retained historical suffix; tested exact SHA256
+  protected_files: 2866
+  protected_fingerprint: 7f51c39f57d628a32f86ff5007d8c7d08df2d35020b819a0586a7dddf622a73b
+  protected_scope: .github/src/tests/config/skill-meta/planning excluding CR metadata tree and only new dedicated test
+  existing_assertions_weakened: false
+  protected_final_unchanged: true
+  production_final_unchanged: false
+  dedicated_test_sha256: 5f6a523b95e4922c9e8cbf884532c5d01daf3b75380c948204103d2c90d59904
+  formatting_correction: integration terminal newline only; historical raw metadata fenced as text with exact byte hash retained
+  resource_removals: []
+  board_memory_git_operations: none
+  owned_test: tests/test_skill_goal_change_quality.py
+limits:
+  - Inherited CR candidate independently reviewed and exactly published; no broader TASK-6749 completion.
+  - Authored consistency fixtures and textual gate assertions are not autonomous classification, executed feature tests, actual approval or stakeholder observation.
+  - Source containment/ambiguity policies are contract-inspected; two layout fixtures do not execute an autonomous source resolver.
+  - Helper missing-file/tag/context permissiveness cannot establish domain completion; independent required artifact/status/authority checks remain mandatory.
+  - No app/config/board/Git mutation or other production/source changes; only explicitly authorized CR skill publication and bug candidate/dedicated tests/root metadata; no application workflow gate migration.
+  - Four existing closing/lifecycle baseline failures remain in untouched tests; no repository-wide all-green claim.

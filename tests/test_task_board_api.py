@@ -240,6 +240,38 @@ class TestServiceListPagination:
 class TestServiceGetTask:
     """AC-055C-04: Get by ID."""
 
+    @pytest.mark.parametrize("envelope", [False, True])
+    @pytest.mark.parametrize("index_kind", ["dict", "string", "missing", "stale", "malformed", "escaping", "archived"])
+    def test_get_reads_daily_formats_and_safe_index_fallback(self, tasks_dir, service, client, envelope, index_kind):
+        """CLI envelopes and legacy lists work through service AND HTTP."""
+        task = _make_task("TASK-CLI", status="completed")
+        filename = f"tasks-{_today_str()}.json"
+        (tasks_dir / filename).write_text(json.dumps({"_version": "1.0", "tasks": [task]} if envelope else [task]))
+        if index_kind != "missing":
+            entry = {"file": filename}
+            if index_kind == "string":
+                entry = filename
+            elif index_kind == "stale":
+                entry = {"file": "tasks-2000-01-01.json"}
+            elif index_kind == "escaping":
+                outside = tasks_dir.parent / "outside.json"
+                outside.write_text(json.dumps([dict(task, description="OUTSIDE")]))
+                entry = {"file": "../outside.json"}
+            elif index_kind == "archived":
+                archived = f"tasks-{_today_str()}.archived.json"
+                (tasks_dir / archived).write_text(json.dumps([dict(task, description="ARCHIVED")]))
+                entry = {"file": archived}
+            _write_index(tasks_dir, {"TASK-CLI": entry})
+            if index_kind == "malformed":
+                (tasks_dir / "tasks-index.json").write_text('{"entries": []}')
+        before = {p.name: p.read_bytes() for p in tasks_dir.glob("*.json")}
+        assert service.get_task("TASK-CLI") == {"success": True, "data": task}
+        response = client.get("/api/tasks/get/TASK-CLI")
+        assert response.status_code == 200
+        assert response.json == {"success": True, "data": task}
+        assert response.headers["Cache-Control"] == "no-store"
+        assert {p.name: p.read_bytes() for p in tasks_dir.glob("*.json")} == before
+
     def test_found_via_index(self, seeded):  # AC-04a
         result = seeded.get_task("TASK-100")
         assert result["success"] is True

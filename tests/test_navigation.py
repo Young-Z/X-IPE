@@ -17,19 +17,29 @@ from pathlib import Path
 class TestProjectService:
     """Unit tests for ProjectService class"""
 
-    def test_get_structure_returns_five_sections(self, app, project_service):
-        """AC-2: Five top-level menu sections exist (including Workplace and Themes)"""
+    def test_get_structure_returns_current_sections(self, app, project_service):
+        """Preserve original sections plus the Skill Meta folder navigation extension."""
         structure = project_service.get_structure()
         
         assert 'sections' in structure
-        assert len(structure['sections']) == 5
-        
         section_ids = [s['id'] for s in structure['sections']]
-        assert 'workplace' in section_ids
-        assert 'themes' in section_ids  # FEATURE-012 AC-4.1
-        assert 'planning' in section_ids
-        assert 'requirements' in section_ids
-        assert 'code' in section_ids
+        assert section_ids == ['workplace', 'themes', 'planning', 'requirements', 'skill-meta', 'code']
+
+    def test_skill_meta_section_contains_real_supported_files(self, project_service, temp_project):
+        """Skill Meta exposes the actual hierarchy without leaking hidden/unsupported files."""
+        skill_dir = temp_project / 'x-ipe-docs' / 'skill-meta' / 'test-skill'
+        skill_dir.mkdir(parents=True)
+        (skill_dir / 'skill-meta.md').write_text('# Skill contract')
+        (skill_dir / '.private.md').write_text('private')
+        (skill_dir / 'payload.bin').write_bytes(b'\x00')
+        section = next(s for s in project_service.get_structure()['sections'] if s['id'] == 'skill-meta')
+        assert section['path'] == 'x-ipe-docs/skill-meta'
+        assert section['label'] == 'Skill Meta'
+        assert section['exists'] is True
+        assert [c['name'] for c in section['children']] == ['test-skill']
+        assert [c['path'] for c in section['children'][0]['children']] == [
+            'x-ipe-docs/skill-meta/test-skill/skill-meta.md'
+        ]
 
     def test_get_structure_themes_section_maps_correctly(self, app, project_service, temp_project):
         """FEATURE-012 AC-4.2: Themes menu shows folder tree of x-ipe-docs/themes/"""
@@ -217,11 +227,11 @@ class TestProjectStructureAPI:
         data = json.loads(response.data)
         
         planning = next(s for s in data['sections'] if s['id'] == 'planning')
-        if planning['children']:
-            file_node = planning['children'][0]
-            assert 'name' in file_node
-            assert 'type' in file_node
-            assert 'path' in file_node
+        assert len(planning['children']) == 1
+        file_node = planning['children'][0]
+        assert file_node['name'] == 'test.md'
+        assert file_node['type'] == 'file'
+        assert file_node['path'] == 'x-ipe-docs/planning/test.md'
 
 
 class TestPathSecurity:

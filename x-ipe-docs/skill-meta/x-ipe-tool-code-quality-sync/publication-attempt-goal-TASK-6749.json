@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "task_id": "TASK-6749",
+  "name": "x-ipe-tool-code-quality-sync",
+  "date": "2026-10-14",
+  "publication_state": "recovery_required",
+  "method": "apply_patch only; non-atomic",
+  "independent_review": "passed_final_revision_review",
+  "candidate_hash": "71216a960fbbc21cd967a89b2a9447e23590d341cb0ebbbe490da6b8e0ef517d",
+  "baseline_hash": "7a1d4b305d74bc129edd5eb8ce0a705fc08c2da19fce45ad4b0e10fd202f3efc",
+  "byte_parity": false,
+  "exact_files": ["references/detailed-procedures.md", "references/output-schema.md", "templates/validation-report.md"],
+  "mismatches": {
+    "SKILL.md": {"candidate_bytes": 18056, "production_bytes": 18057, "difference": "one extra EOF newline"},
+    "references/examples.md": {"candidate_bytes": 5095, "production_bytes": 5096, "difference": "one extra EOF newline"}
+  },
+  "attempt_history": [
+    "Initial delete/add patches unexpectedly retained legacy suffixes and omitted new-file EOF newlines; parity check exit 1.",
+    "First correction removed legacy suffixes and restored new-resource terminal newlines; legacy replacements retained an extra EOF newline; parity check exit 1.",
+    "Second correction removing final blank lines did not alter actual EOF bytes; parity check exit 1.",
+    "Third correction replacing terminal paragraphs still retained extra EOF newlines; parity check exit 1. Stopped at the required three-correction limit."
+  ],
+  "recovery": "recovery-goal-TASK-6749.md; exact original bytes decoded and verified against live baseline before publication",
+  "publication_receipt_issued": false,
+  "version_history_updated": false,
+  "last_successful_tests": {"passed": 397, "seconds": 8.26, "exit": 0, "revision": "reviewed candidate and corrected tests before promotion"},
+  "postpublication_tests": "not run; parity gate failed; no postpublication green claim",
+  "next_action": "Historical failure record; resolved by the separately authorized candidate newline adoption, not another production-removal attempt.",
+  "resolution": {
+    "date": "2026-10-14",
+    "publication_state": "published",
+    "candidate_hash": "a9e1adf0066f237d4600b78be44f9ba205afba2fd9af3514488fc49768074753",
+    "byte_parity": true,
+    "fresh_receipt_parity": true,
+    "postpublication_tests": {"passed": 397, "failed": 0, "seconds": 8.58, "exit": 0},
+    "receipt": "publication-receipt-goal-TASK-6749.json"
+  }
+}

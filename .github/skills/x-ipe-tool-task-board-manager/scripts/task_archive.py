@@ -23,6 +23,7 @@ from _board_lib import (
     resolve_data_path,
     with_file_lock,
 )
+from _task_store import read_daily, read_index
 
 
 def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -58,26 +59,29 @@ def main(argv: list[str] | None = None) -> None:
 
     # Lock daily → lock index (nested) → rename + update index
     with with_file_lock(tasks_dir / f"{daily_name}.lock", timeout=args.lock_timeout):
+        if archived_path.exists():
+            exit_with_error(EXIT_VALIDATION_ERROR, "ALREADY_ARCHIVED",
+                            f"File {daily_name} is already archived")
         result = atomic_read_json(daily_path)
         if not result["success"]:
             exit_with_error(EXIT_FILE_NOT_FOUND, "READ_ERROR",
                             f"Cannot read {daily_name}")
 
-        task_ids = [t["task_id"] for t in result["data"].get("tasks", []) if "task_id" in t]
+        _, daily_tasks = read_daily(daily_path)
+        task_ids = [t["task_id"] for t in daily_tasks]
 
         with with_file_lock(tasks_dir / "tasks-index.json.lock", timeout=args.lock_timeout):
+            # Validate before rename; never archive then silently ignore a bad index.
+            index_data = read_index(tasks_dir)
             os.rename(daily_path, archived_path)
 
             removed_count = 0
-            idx_result = atomic_read_json(index_path)
-            if idx_result["success"]:
-                index_data = idx_result["data"]
-                entries = index_data.get("entries", {})
-                for tid in task_ids:
-                    if tid in entries:
-                        del entries[tid]
-                        removed_count += 1
-                atomic_write_json(index_path, index_data)
+            entries = index_data["entries"]
+            for tid in task_ids:
+                if tid in entries:
+                    del entries[tid]
+                    removed_count += 1
+            atomic_write_json(index_path, index_data)
 
     output_result({
         "success": True,

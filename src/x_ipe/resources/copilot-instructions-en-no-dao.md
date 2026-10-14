@@ -1,166 +1,113 @@
 # AI Agent Instructions
 
-> **⚠️ CRITICAL RULE FOR AI AGENTS EXECUTING SUGGESTED SKILLS:**
-> Follow the steps EXACTLY in the skill to execute! Do NOT skip, reorder, or improvise.
-> Follow the steps EXACTLY in the skill to execute! Do NOT skip, reorder, or improvise.
-> Follow the steps EXACTLY in the skill to execute! Do NOT skip, reorder, or improvise.
-
-> **Scope:** These rules apply only when working on the X-IPE project codebase. General programming questions, explanations, or conversations that don't modify X-IPE files are exempt from the skill/task-board workflow.
+> **Scope:** X-IPE project work only. General programming conversations are exempt.
+> Follow the selected skill procedure and domain gates; never claim unavailable evidence.
 
 ## Before You Start
 
-**When:** Starting first x-ipe workflow task in a new session
-**Then:**
-1. **Generate a random nickname** from this pool:
-   - Nova, Echo, Flux, Bolt, Sage, Pixel, Cipher, Spark, Drift, Pulse, Vex, Atom, Onyx, Rune, Zephyr, Quill, Ember, Frost, Haze, Ink
-2. **Validate nickname against task board:**
-   - Query active tasks via `x-ipe-tool-task-board-manager` (task_query.py --status in_progress)
-   - If another session has `🔄 in_progress` tasks with the same nickname → pick a different name from the pool
-   - If the in_progress task was started by your current session (same context) → keep the name
-   - Repeat until you find an unused name
-3. Introduce yourself: "Hi, I'm [nickname]"
-4. This nickname is your assignee identifier
-5. Check for open tasks assigned to you
-6. Only work on tasks assigned to you or unassigned
+For the first workflow task in a session, choose a nickname from Nova, Echo, Flux,
+Bolt, Sage, Pixel, Cipher, Spark, Drift, Pulse, Vex, Atom, Onyx, Rune, Zephyr,
+Quill, Ember, Frost, Haze, Ink and introduce it. Where board access is authorized,
+use `x-ipe-tool-task-board-manager` queries across dates/pages to check ownership.
+Nickname alone does not establish session ownership. Resume supplied identity and
+context; never take another session's task. Explicit exclusions (including no
+board, memory or Git operations) remain binding; return evidence to the owner.
 
----
+## Skill-First — One Lifecycle Owner
 
-## ⚠️ CRITICAL: Skill-First, Not Code-First
+Do NOT jump straight into coding or making changes. Before edit/create:
+1. Classify from discovered task-based/assistant descriptions.
+2. Load `x-ipe-workflow-task-execution`, its common lifecycle and the selected skill.
+3. Reuse supplied task/readiness; direct entry calls Orient/Plan once and returns
+   to the same child, without recursion or duplicate registration.
+4. Reach the selected implementation step, retaining domain DoR/DoD, design,
+   failing-before/fixed-after bug tests and acceptance gates.
 
-**Do NOT jump straight into coding or making changes.**
-
-### 🚫 HARD GATE: No `edit` / `create` Tool Calls Without a Loaded Skill
-
-Before calling **any** file-editing tool (`edit`, `create`, or writing code via `bash`), you MUST have:
-1. ✅ Classified the request into a task-based skill (from auto-discovery)
-2. ✅ Created a task on the task board (via `x-ipe-tool-task-board-manager`)
-3. ✅ Loaded the corresponding skill (via `skill` tool or by reading its `SKILL.md`)
-4. ✅ Reached the skill's implementation step that permits code changes
-
-If ANY of these are missing → **STOP. Do not touch code.**
-
-
-### ⛔ Real-World Lesson:
-
-```
-❌ What happened:
-   User: "CLI adapter returns copilot instead of opencode"
-   Agent: *immediately found _read_active_cli(), added isinstance check,
-           wrote test AFTER the fix, no task board entry*
-
-✅ What should have happened:
-   Agent: *classifies as bug fix → loads x-ipe-task-based-bug-fix →
-           Phase 0: creates TASK-681 on board via x-ipe-tool-task-board-manager →
-           diagnoses root cause → writes FAILING test first →
-           implements fix → verifies test passes →
-           final step: updates board (task done) via x-ipe-tool-task-board-manager*
-```
-
----
-
-## ⚠️ CRITICAL: Task Board is THE Source of Truth
-
-**The task board (JSON-based, managed by `x-ipe-tool-task-board-manager`) is MANDATORY for ALL work.**
-
-### Before ANY Work:
-1. **Create task** using `x-ipe-tool-task-board-manager` skill (each task-based skill does this in its Phase 0)
-2. **Verify task exists** on board before proceeding
-3. **Only then** proceed to actual work
-
-### After Completing Work:
-1. **Update task status** — set to completed via `x-ipe-tool-task-board-manager`
-
-### ⛔ NEVER:
-- Use `manage_todo_list` as a substitute for the JSON task board (that's VS Code internal only)
-- Start work without a task ID on the board
-- Complete work without updating the board
-
----
-
-## ⚠️ STRICT: Task Matching & Skill Enforcement
-
-### Mandatory Workflow
-
-All work follows the Pre-Flight Checklist below. Use `x-ipe-tool-task-board-manager` to create/update tasks.
-
-### Task-Based Skill Identification
+The lifecycle owner alone ensures/resumes, persists verified status and resolves
+one completion/successor boundary. Supplied IDs use `task_ensure.py --task` with
+original ID/type/description/role only where board access is authorized. Genuine
+new work allocates once; retries ensure that ID. Children return full original
+outputs/evidence, without automatic board/Git/successor execution. No upfront task
+chain, duplicate per-unit task, terminal replay or false completion of a partial
+slice. Another owner/context or conflicting child lifecycle policy blocks without
+mutation; agree a bounded compatibility adapter before invoking that child.
+`manage_todo_list` is not a JSON board substitute. Completion writes require all
+domain, action/category, fresh evidence and required review gates to pass.
 
 ## Task-Based Skills Auto-Discovery
 
-BLOCKING: Do NOT maintain a hardcoded registry. Skills are auto-discovered.
+BLOCKING: Do NOT maintain a hardcoded registry. Use attached descriptions or scan
+`.github/skills/x-ipe-task-based-*/SKILL.md` and
+`.github/skills/x-ipe-assistant-*/SKILL.md` frontmatter. Match triggers and load
+actual procedures/outputs. `x-ipe-knowledge-*` is coordinated by
+`x-ipe-assistant-knowledge-librarian-DAO`, not directly task-matched.
 
-**Discovery rule:**
-1. If the skills attachment is available in context, use it for matching (no filesystem scan needed)
-2. Otherwise, scan `.github/skills/x-ipe-task-based-*/SKILL.md`
-3. Each skill's `description` contains trigger keywords for request matching
+## Interaction Policy and Authority
 
-**Request matching:** Match user request against trigger keywords in each skill's description (e.g., "fix bug" → `x-ipe-task-based-bug-fix`, "implement feature" → `x-ipe-task-based-code-implementation`).
+Resolve `process_preference.interaction_mode` from explicit current user/task
+override, then workflow configuration, then supported legacy mapping/default.
+Re-read at actual decisions and boundaries; mode is not permission.
 
-> **Note:** When **Interaction Mode is DAO-based** (global or task-level), `require_human_review` is **skipped** regardless of the skill's default. The `process_preference.interaction_mode` enum (`interact-with-human | dao-represent-human-to-interact | dao-represent-human-to-interact-for-questions-in-skill`) controls this behavior.
+| Mode | Actual within-skill question | Completion / routing |
+| --- | --- | --- |
+| `interact-with-human` | Ask human and wait | Human review and route confirmation |
+| `dao-represent-human-to-interact` | DAO handles within-skill questions | DAO selects only authorized successors |
+| `dao-represent-human-to-interact-for-questions-in-skill` | DAO handles within-skill questions | Human review and route confirmation |
 
-> **Note:** The `interaction_mode` controls whether *within-skill* decision points go through the `x-ipe-assistant-user-representative-Engineer` skill (acting as a human representative) or ask the human directly. This is a within-skill concern — skills call DAO at their own decision points when `interaction_mode == "dao-represent-human-to-interact"`.
+Hybrid is DAO inner-skill only with human completion/route confirmation, matching
+current FEATURE-044-E specification, app UI/config and transport tests. Earlier
+lifecycle review claimed an unauthorized inversion. Conflicting installed wording
+is a blocking compatibility finding, not authority to invert UI or silently
+migrate children. Clear within-skill inputs need neither ceremonial questions nor forced DAO.
+At DAO-routed questions use `x-ipe-assistant-user-representative-Engineer` with
+existing `message_context`, preserving `operation_output` and caller mode.
+Suggestions/approval-like guidance cannot supply explicit user authority for
+scope/acceptance changes, publication, release, destructive actions, commit, push
+or PR. Explicit human approval and independent review bind in every mode;
+`require_human_review` is never a blanket safety-gate bypass.
 
-### 🛑 STOP AND THINK: Pre-Flight Checklist
+## Goals, Evidence and Selective Learning
 
-**Before touching ANY code or making ANY changes, ask yourself:**
+At an adopting domain gate read
+`.github/skills/x-ipe-workflow-task-execution/references/goal-contract.md`.
+Use existing artifacts: source/parent → stakeholder goal/subgoal → stable story,
+Given/When/Then AC/type/assertion → planned and actual revision-bound checks.
+Cover all-required branches; alternatives are selected bounded means, not an
+automatic backlog. Label legacy inference with its source. Missing intent blocks
+only the pertinent claim. No new board/output/action fields or goal database.
+Delivery checks are not observed stakeholder outcome; unobserved is not measured.
+No fake ground truth, receipt, approval or KPI.
 
-```
-1. What task-based skill is this? → Scan `.github/skills/x-ipe-task-based-*/` descriptions
-2. Did I create a task on the task board? → If NO, STOP and create it
-3. Did I load the corresponding skill? → If NO, STOP and load it
-4. Am I following the skill's procedure? → If NO, STOP and read it
-5. Has the skill reached the step that permits code changes? → If NO, STOP
-```
+Use `x-ipe-meta-lesson-learned` for a verified consequential reusable gap or
+explicit finite-retention request: selective admission, not capture-everything.
+Select bounded applicable summaries read-only; protected legacy/expired records
+are not fresh lessons. Planning/settlement needs authorized owned queue writes.
+reading is not application: applied requires actual publication and relevant
+passing production verification at the same revision. Do not normalize editor-only
+or partial receipts into publisher receipts. No historical migration, TTL refresh,
+pruning, memory/board writes or invented ground truth without separate authority.
 
-**If you catch yourself about to call `edit`, `create`, or write code via `bash` without completing steps 1–5 above — STOP IMMEDIATELY. Go back and follow the process.**
+## Development and Record Safety
 
-**Common Mistakes to Avoid:**
-- User says "refactor this" → You must use `x-ipe-task-based-code-refactor` skill, NOT just start coding
-- User says "fix this" → You must use `x-ipe-task-based-bug-fix` skill, NOT just fix it
-- User says "add this feature" → You must identify the right task-based skill first
+Follow SOLID, DRY, YAGNI and KISS. One writer handles app action/category updates;
+writer success alone is not domain completion. Mandatory workflow gates remain.
+Preserve preexisting files/staging/mirrors; no implicit switch/stash/reset/commit
+or network operations. Git needs explicit authority and exact owned paths, never
+broad staging. Rehash relevant sources/tests/config before evidence claims.
 
----
+## Knowledge Search
 
-## Development Principles
-
-Always follow:
-1. **SOLID** - Design principles
-2. **DRY** - Don't Repeat Yourself
-3. **YAGNI** - You Aren't Gonna Need It
-4. **KISS** - Keep It Simple
-
----
+When lookup is authorized use `x-ipe-knowledge-extractor-memory` first for
+graph-aware search; `x-ipe-tool-ontology` Operation C is deprecated. Lookup does
+not authorize memory writes or override task exclusions.
 
 ## Skill Management
 
-### Creating, Updating, or Validating X-IPE Skills
-
-**When:** Creating a new skill, updating an existing skill, or validating skill structure for any of the defined skill types (task-based, tool, workflow-orchestration, task-category, meta)
-**Then:** MANDATORY: Always use the `x-ipe-meta-skill-creator` skill
-
-CRITICAL: Any modification to a skill of a defined type (x-ipe-task-based, x-ipe-tool, x-ipe-workflow-orchestration, x-ipe-task-category, x-ipe-meta) MUST go through `x-ipe-meta-skill-creator`. Do NOT directly edit SKILL.md files without loading and following the skill creator process.
-
-⛔ **NEVER directly edit files in `.github/skills/{skill-name}/`.** All changes MUST be made in the candidate folder (`x-ipe-docs/skill-meta/{skill-name}/candidate/`) first, validated, then merged to production. Direct edits to live skills bypass validation and risk breaking production behavior.
-
-```
-1. Load skill: `x-ipe-meta-skill-creator`
-2. Follow the skill creation process defined in the skill
-3. Use appropriate template based on skill type:
-   - Task-Based → templates/x-ipe-task-based.md
-   - Tool Skill → templates/x-ipe-tool.md
-   - Workflow Orchestration → templates/x-ipe-workflow-orchestration.md
-   - Meta Skill → templates/x-ipe-meta.md
-4. Validate against skill-creator checklist before completing
-```
-
-### Capturing Lessons for Skill Improvement
-
-**When:** A skill execution has problems, human provides feedback, or agent observes suboptimal behavior
-**Then:** Use the `x-ipe-meta-lesson-learned` skill
-
-```
-1. Load skill: `x-ipe-meta-lesson-learned`
-2. Follow the lesson capture process
-3. Lessons are stored in x-ipe-docs/skill-meta/{skill}/lesson-learned.md
-4. Next time skill is updated, lessons will be incorporated
-```
+Creating/updating/validating X-IPE skills MUST use `x-ipe-meta-skill-creator`.
+Load guidelines/subtype templates and preserve contracts/resources. Edit complete
+`x-ipe-docs/skill-meta/{skill-name}/candidate/` packages first, never directly edit
+`.github/skills/{skill-name}/`. Validate and independently review meaningful
+workflow/executable/safety changes at the exact hash before authorized promotion.
+Version history advances only after exact production parity. Candidate readiness
+is not publication or larger-task completion. Do not sync AGENTS/CLAUDE/.claude/
+codex mirrors without explicit separate authority.

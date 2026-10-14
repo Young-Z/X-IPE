@@ -1,0 +1,69 @@
+{
+  "schema": 1,
+  "operation": "authorized_patch_promotion",
+  "task_id": "TASK-6749",
+  "date": "2026-10-14",
+  "name": "x-ipe+feature+quality-board-management",
+  "skill_type": "x-ipe-task-category",
+  "version": "2.0.0",
+  "state": "published",
+  "ok": true,
+  "authorization": "Current user approval unchanged; seven-file exact patch promotion; no deletion",
+  "review": "../x-ipe-meta-skill-creator/main-independent-review-TASK-6749.md",
+  "baseline": {
+    "source_commit": "eba31134078af8bfea70dcc8a25e24ccdf1409f9",
+    "source_method": "Read-only git ls-tree and per-path git show, independently SHA256-hashed; exact saved baseline and live equality before patch",
+    "managed_manifest": "baseline-goal-TASK-6749.json",
+    "files": 5,
+    "hash": "8fd3c4caa237d08739256920deecd67af5def1378f155716eeff677e8eda81d6",
+    "dirty_managed_paths": [],
+    "unmanaged_paths": []
+  },
+  "promotion": {
+    "method": "apply_patch",
+    "changed": ["SKILL.md", "references/evaluation-principles.md", "references/evaluation-procedures.md", "references/quality-report-template.md"],
+    "added": ["references/examples.md", "references/goal-reporting.md"],
+    "unchanged": ["references/quality-evaluation-data-model.yaml"],
+    "removed": [],
+    "publisher_apply": false,
+    "cooperative_lock": false,
+    "atomic_swap": false,
+    "transaction": null,
+    "recovery": "Trusted Git blobs and exact baseline retained; interrupted edits require inspection and explicit editor repair"
+  },
+  "candidate_normalization": {
+    "prior_hash": "ea8c58acee6ef66712e557c554223889eabc33f6bcf9682e0cc26af4922eddf3",
+    "change": "Exactly one final LF in candidate SKILL.md for patch-byte parity; no semantic/body-line change; fresh actual installed validator receipt"
+  },
+  "post_promotion": {
+    "files": 7,
+    "body_lines": 259,
+    "byte_parity": true,
+    "candidate_hash": "d0a801c33c3daff2c9d31c30c5012dc9ee067f6bd80264060c786bb73dc6a137",
+    "production_hash": "d0a801c33c3daff2c9d31c30c5012dc9ee067f6bd80264060c786bb73dc6a137",
+    "validation_receipt": "validation-category-TASK-6749.json",
+    "real_installed_validator_api_cli_equal": true,
+    "process_local_adaptation": false,
+    "publisher_read_only_noop_after_promotion": true,
+    "publisher_pre_promotion_success_claimed": false,
+    "original_declarations_model_reference_prefixes_template_content_placeholders_preserved": true
+  },
+  "published_files": {
+    "SKILL.md": "4b95d0c62712a020559c4979abeab520a9832b876499b46b1b2a58c3b2e6f3f2",
+    "references/evaluation-principles.md": "a9ef85859c070ea90bebe1e6fcf7f70f3f8a54e71e0edcbdd7ed7ca1b4d84e3d",
+    "references/evaluation-procedures.md": "7ad7932b37770a047ebe13fcb7772115d2324fa0d1609d196a48932ae6f894ab",
+    "references/examples.md": "bf44b17b5bfb37391f29d21c8ec1a0a2f62876ea6fc46db62713936e65c7b0be",
+    "references/goal-reporting.md": "0b2adda1237c99d1182a7d4e1063b8a8489edec49928354b8ec7b54a82780a35",
+    "references/quality-evaluation-data-model.yaml": "4cd2911d8752875ed9f7e9661c4a3e787cf9d4889a709343c2ce3ccc1a122dbf",
+    "references/quality-report-template.md": "4f08a399166512aef0b98644321b833c8d3b04c6b3b5d04fd7ccaab00eac6d62"
+  },
+  "tests": {"bounded_python_passed": 464, "bounded_python_failed": 0, "frontend_passed": 10, "frontend_failed": 0},
+  "final_revision_tests": {
+    "bounded_python": {"passed": 464, "failed": 0, "skipped": 0, "deselected": 0, "seconds": 13.06, "exit": 0},
+    "frontend": {"passed": 10, "failed": 0, "files": 1, "duration_ms": 409, "exit": 0},
+    "saved_receipts_source_blob_baseline_metadata_original_test_service_hashes_rechecked": true
+  },
+  "blockers": [],
+  "limits": ["No autonomous scoring or retention execution", "No observed stakeholder outcome", "Strict query/compare consumers unverified", "Original fractional-status/severity ambiguity retained", "Per-file promotion is not atomic"],
+  "excluded_actions": ["board_writes", "memory_writes", "git_mutation", "commits", "cache_deletion"]
+}

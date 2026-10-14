@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "task_id": "TASK-6749",
+  "name": "x-ipe-task-based-requirement-gathering",
+  "publication_state": "published",
+  "method": "user-authorized apply_patch-only exact-package publication; not publisher swap",
+  "review": "independent-review-TASK-6749.md",
+  "candidate_hash": "fda78fe5234e0d054a4b720e0773ed30cac8f1e39a10215ce277882576ab294b",
+  "production_hash": "fda78fe5234e0d054a4b720e0773ed30cac8f1e39a10215ce277882576ab294b",
+  "baseline_hash": "8654d1669e3fa05e86c64df237bf1d197eff6ec9f7a784b121558b9fa9705234",
+  "files_manifest": "validation-receipt.json#files",
+  "byte_parity": true,
+  "validation_ok": true,
+  "tests": {"passed": 215, "failed": 0},
+  "counts": {"entry_total_lines": 250, "entry_body_lines": 246, "resource_lines": 356, "package_lines": 606, "package_files": 6},
+  "added": ["references/context-review.md"],
+  "changed": ["SKILL.md", "references/examples.md", "references/file-splitting.md", "references/requirement-details-template.md", "templates/requirement-details.md"],
+  "removed": [],
+  "version": "2.1.0",
+  "historical_managed_manifest_claimed": false
+}

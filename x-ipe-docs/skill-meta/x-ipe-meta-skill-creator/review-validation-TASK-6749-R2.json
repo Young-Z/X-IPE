@@ -1,0 +1,76 @@
+{
+  "task_id": "TASK-6749",
+  "date": "2026-10-14",
+  "status": "blocked",
+  "record_kind": "read_only_validation_summaries_and_revision_binding_not_publication_receipt",
+  "validator": "x-ipe-docs/skill-meta/x-ipe-meta-skill-creator/candidate/scripts/validate_skill.py",
+  "validator_sha256": "db8b54d0894c31e8fa74cf818188d9599e412732e5a45575e44b0dbc2ed7f94e",
+  "tooling_resolution": "explicit creator-candidate bootstrap; actual API equals actual CLI for all thirteen candidates in test_modes_integration_6749.py",
+  "goal_contract_sha256_unchanged": "fd007a0f946ee3ccf60507f88c898358de9ea045b18de6446b65079d62911074",
+  "validation_summaries": [
+    {"name": "x-ipe-workflow-task-execution", "ok": true, "candidate_hash": "b79761fd9d6c36700b1312dc98b7e6b69c7099e14e05d8a10ded9f6ef21dcc00", "production_hash": "b79761fd9d6c36700b1312dc98b7e6b69c7099e14e05d8a10ded9f6ef21dcc00", "files": 6, "body_lines": 250, "warning_count": 0},
+    {"name": "x-ipe-meta-skill-creator", "ok": true, "candidate_hash": "2716c799849a49686a4c83c86c35ba5c2f84e41d870f25258e359906141fbcf8", "production_hash": "72caec919101f8333dbaacc6ec504756c31b9facc607d9d764d314ca29b92cfd", "files": 33, "body_lines": 259, "warning_count": 0},
+    {"name": "x-ipe-assistant-user-representative-Engineer", "ok": true, "candidate_hash": "b4c1f55fde3ffea168b8204a4095653faabe98db753c132b5b7815e3d2e029d5", "production_hash": "9ec07b8bb2a7c5e99dced66bdc9950e1befa5e78be6d091203fce8cdae27962f", "files": 8, "body_lines": 339, "warning_count": 0},
+    {"name": "x-ipe-task-based-requirement-gathering", "ok": true, "candidate_hash": "1aed46f6ca4829599fd330117b0dc400d4a8d36c3bd493e03458991da6a51a27", "production_hash": "c020a439d33be6e4653d954d644ed183b01ca05ce7cb6a0adaed1ee0a41ab6e0", "files": 6, "body_lines": 253, "warning_count": 2},
+    {"name": "x-ipe-task-based-feature-breakdown", "ok": true, "candidate_hash": "98f6245afee8bfd64bb58ef9be50f20b3a727fea5c145b4db479a2dcd96dd466", "production_hash": "9cae32f8fb61fafbec7cfc712a91626b2ae05e34df2f86ae3ac05ad690f20fdc", "files": 8, "body_lines": 245, "warning_count": 0},
+    {"name": "x-ipe-task-based-feature-refinement", "ok": true, "candidate_hash": "176ca77478fb25292817d8288c9fd78b012e30202cea3f8e5280bc66b8da8b96", "production_hash": "094644928517509cd6818629cb00ce5ab9908829c18dcdd32dfaf241b6d48ccc", "files": 5, "body_lines": 228, "warning_count": 3},
+    {"name": "x-ipe-task-based-technical-design", "ok": true, "candidate_hash": "8a542b7595b566778f29127307fdcdcf00c740820e15063d070bebba5dd90aca", "production_hash": "7df91e86fe0264b67730e891af1b3a1196b07e18067d86757303ca0aee55944d", "files": 5, "body_lines": 248, "warning_count": 4},
+    {"name": "x-ipe-task-based-code-implementation", "ok": true, "candidate_hash": "2a7786151253ccd3d6ef0817f9e7c52a06403efcfcfbc8299279dbf8e04ed720", "production_hash": "90e610664b20308b105c9839c3bbf82a082d2d3d7b2f7525b4f7095e0d213cf0", "files": 4, "body_lines": 264, "warning_count": 0},
+    {"name": "x-ipe-task-based-feature-acceptance-test", "ok": true, "candidate_hash": "1914c1922c58995fa5380e995c312e1a6b811313acd40c74ea01db73d1170644", "production_hash": "04872899595a2e65bfa11eb54024f349cf35fe812d8f59694eb451b8f57d3843", "files": 6, "body_lines": 239, "warning_count": 0},
+    {"name": "x-ipe-task-based-feature-closing", "ok": true, "candidate_hash": "f297a531cdd72120073a585ba1a5158cb67ee8c4d4df9546fce84efd063e9899", "production_hash": "9d5a17709cb1f911fd32fa3eb07b338c43eccbafeb064836debaa8485e77fee4", "files": 6, "body_lines": 240, "warning_count": 0},
+    {"name": "x-ipe-task-based-change-request", "ok": true, "candidate_hash": "55ad88aaac927844d8019abe350b1c2f273bd007e89b7bca0f4a47128a0bd578", "production_hash": "7e7604fbaa558da5e881ad82e1efc49bef4a27a832afc2480fa263e1423eb5c2", "files": 6, "body_lines": 241, "warning_count": 0},
+    {"name": "x-ipe-task-based-bug-fix", "ok": true, "candidate_hash": "e3410950f38bb6e6b987302d77176220e1e22519d61d0d589b31b7719740f2e0", "production_hash": "72e377126dbd984e21186d513de7358941b7a69ec3aea3f2841995c909990b6c", "files": 4, "body_lines": 258, "warning_count": 0},
+    {"name": "x-ipe-task-based-code-refactor", "ok": true, "candidate_hash": "618798d24f0c149069d3ddbd50e3f0e92730840b75e595a1c05842a5733ae691", "production_hash": "10be4133be03f6c4c1a654c17232ed6e3edd0d23c32b0717ff980056c9232e3e", "files": 5, "body_lines": 270, "warning_count": 0}
+  ],
+  "tests": {
+    "focused": {"files": 7, "passed": 335, "failed": 0, "exit": 0, "seconds": 4.94},
+    "broad": {"files": 32, "passed": 1474, "failed": 32, "exit": 1, "seconds": 32.92, "pending_candidate_parity_or_metadata_failures": 21, "unchanged_baseline_assertions": 11},
+    "frontend": {"files": 51, "passed": 1016, "failed": 0, "exit": 0, "seconds": 5.10}
+  },
+  "test_hashes": {
+    "tests/test_modes_integration_6749.py": "81b4a8df16ade30fbd2b79e798b4788b5f82f6058893ad999e86228656685dc5",
+    "tests/test_goal_oriented_skills.py": "d01f9ae714ffa4f8fa8ba64796ec04f246b7af2b83a5df532b38a2d4eb3cd3a8",
+    "tests/test_skill_pipeline_refactor.py": "f25379518ef91b4fcd796cb348a228c4225da9e6e1f0f2bdef2ae42308ac4762",
+    "tests/test_skill_goal_downstream.py": "35ac8a36ac28eedabb8f207d960d97b2bbab1067dd639dc6266c5d493b4d826b",
+    "tests/test_skill_goal_change_quality.py": "c0b47ed74f3e001e5f27b1c7d248671325959443e495be63d20ea80daefc5f36",
+    "tests/test_goal_promotion_inventory_6749.py": "3004bec25fa2cd24e40f68a5f89673f5c470e4efb97cccfd48910804540c9376",
+    "tests/test_review_6749.py": "bdcc7e13458f055dce9e62c31d2caaeb07140371c78b84576c0a5e3d3c074468",
+    "tests/test_final_integration_6749.py": "e507ee8f4fffbd3cc23e77f77a2c9b9c84c0529ba0f5778fca43abe090c976f4",
+    "tests/test_workflow_settings.py": "662cca7336a50345c99a54cfc2f275d9ffd3cb49281b7ffafd770e6e03c7bd6a",
+    "tests/test_feature_047b_dao_migration.py": "5ed550ed807a33ac5121ba85d8ef35667ecffe6d346464dd8828aa77a5771e8f",
+    "tests/frontend-js/action-execution-modal-cr001.test.js": "e944904531bfd5bfecbb41afcf4ae50d279824f1e4d2148c67f77bd7bdb69eb7",
+    "tests/frontend-js/workflow-panel-actions.test.js": "0760785c6f5283049eefda84ec9230590357d7b3fdc4c955f6a7d31c712593a4"
+  },
+  "instruction_hashes": {
+    ".github/copilot-instructions.md": "db317ea5dceaf0fc567a814250e4ed348b1543af8e989b35c92abc5000bb8962",
+    "src/x_ipe/resources/copilot-instructions-en.md": "daaf513fb1ebe8ccc3892e7ff62d40f950c6b493b5b91ce901a508bbb4106f0c",
+    "src/x_ipe/resources/copilot-instructions-en-no-dao.md": "db317ea5dceaf0fc567a814250e4ed348b1543af8e989b35c92abc5000bb8962",
+    "src/x_ipe/resources/copilot-instructions-zh.md": "09c77db462e80c845d82adaf9f9f805028ec6cf95f9e4dc63434165abd09d0a2",
+    "src/x_ipe/resources/copilot-instructions-zh-no-dao.md": "b4657d305b8035787a9de709e068939c691cd1999988b0619b3e0ed5817119c7",
+    "src/x_ipe/resources/templates/instructions-template.md": "daaf513fb1ebe8ccc3892e7ff62d40f950c6b493b5b91ce901a508bbb4106f0c",
+    "src/x_ipe/resources/templates/instructions-template-no-dao.md": "db317ea5dceaf0fc567a814250e4ed348b1543af8e989b35c92abc5000bb8962"
+  },
+  "source_hashes": {
+    "src/x_ipe/services/workflow_manager_service.py": "5610462d114f8ef9e05f1f73fbe60efe410378b8b020f7a4f90d53458b48f1f5",
+    "src/x_ipe/static/js/features/workflow.js": "55245b33555a4c2790ee388de550a18280e273476d82782edeca424a31afe1da",
+    "x-ipe-docs/config/workflow-template.json": "ab2e1563a0d4a9246b050b7cf779c676035345e78e29d88c10a0d556e20f6db1",
+    "src/x_ipe/resources/config/workflow-template.json": "229c12240690c738f750aac2e719e9261f85644dfb7020421e6947427aca81ad",
+    "x-ipe-docs/config/tools.json": "6df39210e203507a79023cc9c3d4aff4e93456f63f623e9b01c58a091b49e36d"
+  },
+  "protected": {
+    "AGENTS.md": "44623afbbab53bad175960ca54c942e644aeca0768c133af86685bcb62dfb1a7",
+    "CLAUDE.md": "44623afbbab53bad175960ca54c942e644aeca0768c133af86685bcb62dfb1a7",
+    ".claude": {"files": 1492, "hash": "67508b3224a9d493ad4be37fb99a2af2e41648ba57671243cc022a06cbe8bfda"},
+    "codex": {"files": 1711, "hash": "6b3dca304a7bd22d87b3cad247aad6cb8f0655e55d682d5f571c8f36a9b68cca"}
+  },
+  "blockers": [
+    "Independent review of newly authored ten-child and creator/representative reference corrections unavailable in this session; no self-approval or second reviewer claimed",
+    "Native creator publisher refuses deletion of two preserved unmanaged caches absent from candidate; no deletion or ownership relabeling authorized",
+    "Native publisher paths still reject the exact existing Engineer identity although candidate validator accepts it; no bypass/rename or unreviewed publisher change"
+  ],
+  "workflow_publication_receipt": "x-ipe-docs/skill-meta/x-ipe-workflow-task-execution/publication-receipt-mode-TASK-6749-R2.json",
+  "real_lesson_settlement": false,
+  "autonomous_pilots": "not run",
+  "stakeholder_outcome": "not measured",
+  "board_memory_git_operations": false
+}

@@ -1,0 +1,19 @@
+{
+  "body_lines": 223,
+  "candidate_hash": "a9e1adf0066f237d4600b78be44f9ba205afba2fd9af3514488fc49768074753",
+  "errors": [],
+  "excluded_files": {},
+  "files": {
+    "SKILL.md": "8e3cf72ae97d3187797a3710cd787a610d7b4fa6f6f668729c1392359c56d0e0",
+    "references/detailed-procedures.md": "01ed1648c4a6411799ac268a7366dc56a999a7314a9eee3dc743c496d9e7ae60",
+    "references/examples.md": "cd273f4943d8e265ef78a844fb11503c49666d9d17cc0c462bd45e3f210f7d30",
+    "references/output-schema.md": "16b04449d8908d7069df967bb1d224903879c508c2b85306ddb261904141d89d",
+    "templates/validation-report.md": "ade9a14c555cbd29da9a54039a43cf19650343a75c323cf7574cad8bded96ebd"
+  },
+  "name": "x-ipe-tool-code-quality-sync",
+  "ok": true,
+  "operation": "validate",
+  "schema": 1,
+  "skill_type": "x-ipe-tool",
+  "warnings": []
+}

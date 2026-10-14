@@ -1,0 +1,76 @@
+schema: 1
+task_id: TASK-6749
+round: 2
+role: Reflector & Test Generator
+status: authored_not_executed
+bootstrap: old_creator_four_round_process
+test_file: tests/test_skill_creator_foundation.py
+test_functions: 44
+expanded_cases: 145
+count_method: AST parameter-list lengths multiplied per function; not pytest collection
+expected_run_command: PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -B -m pytest -p no:cacheprovider tests/test_skill_creator_foundation.py -q
+execution_boundary:
+  - No tests imported, collected, or executed in Round 2
+  - Every validate/publish/recover invocation in the suite uses a resolved temporary project
+  - Repository reads are limited to script loading and copying the candidate bundle
+  - No live publication, board, memory, lesson, version-history, or git writes
+source_plan:
+  - x-ipe-docs/refactoring/analysis-TASK-6747.md sections 5 and 7 / P1 creator matrix
+  - x-ipe-docs/refactoring/lesson-management-plan-TASK-6748.md creator evidence boundaries
+  - x-ipe-docs/skill-meta/x-ipe-meta-skill-creator/skill-meta.md AC-M01 through AC-M16
+  - Current production creator step_6; step_7 execution and step_8 evaluation remain pending
+scenarios:
+  - {test: test_importlib_interfaces, cases: 1, ac: [AC-M10], expected: exact publisher signature and read-only defaults}
+  - {test: test_body_boundary, cases: 12, ac: [AC-M03], expected: 999/1000 pass and 1001 fails across LF/CRLF and final-newline variants; header excluded and blanks counted}
+  - {test: test_invalid_frontmatter, cases: 9, ac: [AC-M06], expected: missing/malformed/nonmapping/name/description/UTF8 failures with no writes}
+  - {test: test_invalid_identity, cases: 5, ac: [AC-M06, AC-M14], expected: traversal/case/length/type/prefix rejected}
+  - {test: test_applicable_subtype_contract, cases: 8, ac: [AC-M01, AC-M10], expected: all eight subtype identities accept their applicable minimal contracts; tools and knowledge need no task routing}
+  - {test: test_task_output_fields_required, cases: 4, ac: [AC-M10], expected: each missing task routing field is rejected}
+  - {test: test_missing_section, cases: 7, ac: [AC-M02, AC-M10], expected: each required tool section is enforced}
+  - {test: test_contract_prefix_lookalike_rejected, cases: 2, ac: [AC-M10], expected: input_init_fake and operation_fake cannot satisfy exact tags, finding: R2-F01}
+  - {test: test_checkpoint_limits, cases: 4, ac: [AC-M09], expected: DoR 5 and DoD 10 pass; one above fails}
+  - {test: test_section_order_and_fenced_heading, cases: 1, ac: [AC-M02, AC-S01], expected: fenced headings ignored and reversed real sections rejected}
+  - {test: test_missing_self_and_external_resources, cases: 2, ac: [AC-M10, AC-M16], expected: live-only self resource cannot mask missing candidate file; missing external source fails}
+  - {test: test_self_external_encoded_and_reference_links, cases: 1, ac: [AC-M10], expected: encoded/image/reference-style/self/external links resolve; placeholder is a warning}
+  - {test: test_unsafe_markdown_targets, cases: 5, ac: [AC-M14], expected: traversal/decoded traversal/absolute/file/network paths fail}
+  - {test: test_manifest_traversal_rejected, cases: 9, ac: [AC-M14], expected: noncanonical or escaping manifest keys fail}
+  - {test: test_invalid_manifest, cases: 4, ac: [AC-M11, AC-M12], expected: invalid mapping/hash types fail}
+  - {test: test_symlink_protection, cases: 6, ac: [AC-M14], expected: candidate/ancestor/resource/production/store/root links fail before mutation}
+  - {test: test_nonprivate_and_special_resources, cases: 2, ac: [AC-M14], expected: hard links and FIFO rejected without reading FIFO}
+  - {test: test_dry_run_no_mutations, cases: 2, ac: [AC-M13, AC-M14], expected: new/update delta correct and whole temporary tree unchanged including directories and modes}
+  - {test: test_successful_new_and_update_publish, cases: 2, ac: [AC-M13, AC-M15, AC-M16], expected: complete hidden/resource bytes and modes installed; update backup retained; journal published; lock released}
+  - {test: test_preflight_fingerprint_concurrency, cases: 2, ac: [AC-M11], expected: stale baseline and stale candidate review rejected without mutation}
+  - {test: test_staged_concurrency_preserves_edits, cases: 2, ac: [AC-M11, AC-M15], expected: staged candidate/target edits stop swap and preserve target edits/evidence}
+  - {test: test_protected_files_cannot_change_or_delete, cases: 4, ac: [AC-M12, AC-M13], expected: dirty/unmanaged change/removal blocked even when deletion explicitly listed}
+  - {test: test_identical_protected_bytes_retained, cases: 2, ac: [AC-M12], expected: identical dirty/unmanaged bytes retained; supplied ownership not silently adopted}
+  - {test: test_preexisting_deleted_managed_file_not_restored, cases: 1, ac: [AC-M12], expected: existing deletion cannot be restored by refreshed baseline}
+  - {test: test_deletion_review_exactness, cases: 3, ac: [AC-M13], expected: absent/wrong/duplicate reviewed deletion lists fail}
+  - {test: test_explicit_clean_managed_deletion, cases: 1, ac: [AC-M13, AC-M15], expected: exactly reviewed clean managed resource removal succeeds and original bytes remain backed up}
+  - {test: test_existing_lock_not_stolen, cases: 1, ac: [AC-M11, AC-M15], expected: active cooperative lock unchanged; no new transaction}
+  - {test: test_fault_rollback, cases: 6, ac: [AC-M15], expected: staged/backed_up/installed faults restore existing bytes or original new-skill absence}
+  - {test: test_failed_rollback_retains_evidence, cases: 2, ac: [AC-M11, AC-M15], expected: unexpected target/backup edits retained with lock and journal; destructive recovery blocked}
+  - {test: test_interrupted_recovery_and_replay, cases: 6, ac: [AC-M15], expected: modeled journal interruptions at three boundaries dry-run without writes then roll back safely and replay idempotently}
+  - {test: test_recovery_requires_matching_lock, cases: 2, ac: [AC-M15], expected: missing/foreign lock prevents recovery writes}
+  - {test: test_recovery_backup_safety, cases: 2, ac: [AC-M15], expected: missing or corrupted required backup blocks recovery without writes}
+  - {test: test_new_recovery_rejects_impossible_backup_or_baseline, cases: 2, ac: [AC-M15], expected: new-skill journal cannot install an unexpected backup or contain baseline hashes, finding: R2-F02}
+  - {test: test_recovery_journal_identity, cases: 5, ac: [AC-M14, AC-M15], expected: wrong schema/state/type/name/target rejected before writes}
+  - {test: test_recovery_conflicting_failed_tree, cases: 1, ac: [AC-M15], expected: preexisting failed evidence tree never overwritten}
+  - {test: test_published_recovery_retained_lock_and_concurrent_edit, cases: 1, ac: [AC-M11, AC-M15], expected: terminal replay leaves target bytes unchanged; matching lock can be released; later edits block recovery}
+  - {test: test_durable_published_journal_failure_not_reported_as_rollback, cases: 1, ac: [AC-M15], expected: exception after terminal journal reports published rather than fictitious rollback, finding: R2-F03}
+  - {test: test_staged_byte_parity_failure, cases: 1, ac: [AC-M15], expected: unequal staged inventory prevents swap and leaves production untouched}
+  - {test: test_install_rename_failure_restores_backup, cases: 1, ac: [AC-M15], expected: failed stage-to-target rename restores baseline}
+  - {test: test_rollback_rename_failure_then_explicit_recovery, cases: 1, ac: [AC-M15], expected: failed restoration retains backup/failed tree/lock; explicit retry restores baseline}
+  - {test: test_wrong_publication_root_or_identity, cases: 4, ac: [AC-M14], expected: wrong root/candidate/name/traversal rejected without any temporary-project changes}
+  - {test: test_wrong_recovery_root, cases: 1, ac: [AC-M14, AC-M15], expected: transaction outside supplied project rejected before writes}
+  - {test: test_cli_json_exit_and_read_only_default, cases: 6, ac: [AC-M06, AC-M14], expected: both CLIs emit parseable success/failure/argument receipts with exits 0/1/2 and no default writes}
+  - {test: test_creator_candidate_contract_resources_and_policy, cases: 1, ac: [AC-M01, AC-M04, AC-M05, AC-M07, AC-M08, AC-M09, AC-M16, AC-S02, AC-S05], expected: copied creator bundle validates with templates/resources; entry retains bootstrap/review/lesson/publication boundaries}
+manual_review_pending:
+  - AC-M02 full template section-order/semantic comparison is not proven by minimal fixtures
+  - AC-M06 discovery trigger quality is not proven by a nonempty description
+  - AC-M08 release permission and reviewer independence remain workflow gates, not script-enforced claims
+  - AC-M10 actual subtype output-schema and workflow/config consumers need separate compatibility review
+  - AC-M12 trusted managed-manifest provenance must be established outside publisher
+  - AC-M16 production revision plus passing verification and lesson settlement remain unauthorized/pending
+  - AC-S01 through AC-S05 full manual rubric; AC-C01 through AC-C03 optional semantic review
+  - Process-kill and power-loss durability and hostile TOCTOU writers are not covered by modeled journals
+next_gate: Round 3 execute these scenarios in temporary projects; then Round 4 evaluate; no promotion authorized here

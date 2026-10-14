@@ -1,6 +1,6 @@
 [project]
 name = "x-ipe"
-version = "1.1.52"
+version = "1.1.53"
 description = "An AI native integrated project environment for end to end business value delivery"
 requires-python = ">=3.12"
 dependencies = [
@@ -31,13 +31,59 @@ x-ipe = "x_ipe.cli:main"
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[tool.hatch.build]
+# Explicit roots below, not .gitignore, define release content. This preserves
+# intentional offline skill dependencies otherwise hidden by node_modules/.
+ignore-vcs = true
+exclude = [
+    "**/__pycache__/**", "**/*.py[cod]", "**/.DS_Store", "**/Thumbs.db",
+    "**/.pytest_cache/**", "**/.ruff_cache/**", "**/.cache/**",
+    "**/.coverage*", "**/htmlcov/**", "**/.tox/**", "**/.venv/**",
+    "**/.git/**", "**/.claude/**", "**/.copilot/**", "**/codex/**",
+    "**/instance/**", "**/*.log",
+    "**/.env", "**/.env.*", "!**/.env.example",
+    "**/.pypirc", "**/.npmrc", "**/id_rsa", "**/id_ed25519",
+    "**/*.pem", "**/*.key", "**/credentials.json",
+]
+
+[tool.hatch.build.targets.sdist]
+# Keep everything required to rebuild the wheel from the sdist, plus source
+# tests/tooling. Local workspaces, agent mirrors and root node_modules stay out.
+only-include = [
+    "src/x_ipe", "src/__init__.py", "src/app.py", "main.py", "scan.sh",
+    ".github/skills", ".github/copilot-instructions.md", "x-ipe-docs/config",
+    "tests", "resources", "pyproject.toml", "README.md", "LICENSE",
+    "uv.lock", "package.json", "package-lock.json", "vitest.config.js",
+    ".gitignore", ".x-ipe.yaml.example",
+]
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/x_ipe"]
-exclude = ["src/x_ipe/resources/config"]
+only-include = [
+    "src/x_ipe", ".github/skills", ".github/copilot-instructions.md",
+    "x-ipe-docs/config",
+]
+# Target exclude replaces (does not extend) the global list in Hatch. Keep the
+# safety filters here too; choose docs config once, without duplicate paths.
+exclude = [
+    "**/__pycache__/**", "**/*.py[cod]", "**/.DS_Store", "**/Thumbs.db",
+    "**/.pytest_cache/**", "**/.ruff_cache/**", "**/.cache/**",
+    "**/.coverage*", "**/htmlcov/**", "**/.tox/**", "**/.venv/**",
+    "**/.git/**", "**/.claude/**", "**/.copilot/**", "**/codex/**",
+    "**/instance/**", "**/*.log",
+    "**/.env", "**/.env.*", "!**/.env.example",
+    "**/.pypirc", "**/.npmrc", "**/id_rsa", "**/id_ed25519",
+    "**/*.pem", "**/*.key", "**/credentials.json",
+    # These must follow the .env.example exception to avoid re-including the
+    # bundled example under the same destination as the authoritative config.
+    "src/x_ipe/resources/config",
+    "src/x_ipe/resources/config/**",
+    "src/x_ipe/resources/copilot-instructions.md",
+]
 
-[tool.hatch.build.targets.wheel.force-include]
-".github/skills" = "x_ipe/resources/skills"
-".github/copilot-instructions.md" = "x_ipe/resources/copilot-instructions.md"
+[tool.hatch.build.targets.wheel.sources]
+"src" = ""
+".github" = "x_ipe/resources"
 "x-ipe-docs/config" = "x_ipe/resources/config"
 
 [dependency-groups]

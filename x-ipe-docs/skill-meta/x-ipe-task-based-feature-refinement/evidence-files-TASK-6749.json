@@ -1,0 +1,23 @@
+{
+  "files": {
+    "tests/test_skill_pipeline_refactor.py": "cff7740f79383e8aa12ca38c4f41855fe418c30f9b43f8da0053d9892a1c1ba5",
+    ".github/skills/x-ipe-meta-skill-creator/SKILL.md": "ac21f35b8d9a5cc17b95cb33cf44d7e3a6660b573e0aea5f7b5ae4d0be45f305",
+    ".github/skills/x-ipe-meta-skill-creator/scripts/validate_skill.py": "21fbb19a17e3f8d80657936be66843af55fe047d910fb599831c0571dbab856f",
+    ".github/skills/x-ipe-meta-skill-creator/templates/x-ipe-task-based.md": "aad668151b567802c0f8d0135ba41c92e653de8f5f2eda935a3a4c24780152ef",
+    ".github/skills/x-ipe-meta-skill-creator/templates/skill-meta-x-ipe-task-based.md": "dacb27a311487b2d2309625895e0d1d389a4fc72b00028548614cb8e643b8bc8",
+    ".github/skills/x-ipe-workflow-task-execution/SKILL.md": "903ebceae22cb3a1fd7667f2503fd20ff2cc8005b003dcfc83c115fdce477d0a",
+    ".github/skills/x-ipe-workflow-task-execution/references/lifecycle.md": "191ccb1d4752d345590171a3cb7d8516992df47b85e67418e5d024d777373e38",
+    ".github/skills/x-ipe-tool-task-board-manager/scripts/feature_query.py": "b20db3305afc93057dccd7ae6b8358257452e190b5fa0f32b3db6a460a9dff9c",
+    ".github/skills/x-ipe-tool-task-board-manager/scripts/feature_create.py": "2ef6a7fc25df81a8f3b1445fd425eac8938e9b63a44ea6a99cbab4f023f73bb6",
+    ".github/skills/x-ipe-tool-task-board-manager/scripts/feature_update.py": "cc01c54e3f56fd209eb97024281b47681f13e410d8bf12c7dc8e505295c9f1d1",
+    ".github/skills/x-ipe-tool-x-ipe-app-interactor/scripts/workflow_update_action.py": "fdf7f8ec3d706acd11ce7019cd5051df0c9ea3c2f8cc60e1751ca5d2d57953a0",
+    ".github/skills/x-ipe-tool-x-ipe-app-interactor/scripts/workflow_get_state.py": "1715e5067efc97bf9eebb709b90291e2bfd92413b150478e62d2ed9fc621b150",
+    "x-ipe-docs/config/workflow-template.json": "ab2e1563a0d4a9246b050b7cf779c676035345e78e29d88c10a0d556e20f6db1",
+    "x-ipe-docs/config/copilot-prompt.json": "02c89bf193e0c30fbc6cc8cbf7096790e0335ee4339acb9e8add5d6c47749895",
+    "src/x_ipe/static/js/features/workflow-stage.js": "caaf689bac011047abe360c5bb205ea5b9e8fb141238d3d72066b2b0c3de83af"
+  },
+  "baseline_hash": "df22cd0e7c750ee170dfc9f541968f07a79eac54076d20fd1c17a9b16ea3a30d",
+  "candidate_hash": "8c863e8f8e5a35b60a259e49ce32b024a764b51f2a567959c18fefd7ebb46b5e",
+  "counts": {"entry_total_lines": 224, "entry_body_lines": 220, "resource_lines": 713, "package_files": 5},
+  "scope": "read-only evidence sources; helper writes exclusively in temporary test projects; no real board, memory, Git or unrelated source mutation"
+}

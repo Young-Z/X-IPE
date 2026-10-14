@@ -1,32 +1,49 @@
 ---
 name: x-ipe-tool-code-quality-sync
-description: Sync documentation and tests with actual code state before refactoring. Use after refactoring analysis to align requirements, features, technical design, and reach 80%+ test coverage. Triggers on requests like "sync docs with code", "improve quality before refactoring", "update specs for refactoring".
+description: Align affected documentation and preservation tests to authoritative user goals and approved behavior before refactoring, with study/local/broad scope and honest revision-bound evidence. Triggers on "sync docs with code", "improve quality before refactoring", "update specs for refactoring", "align documentation".
 ---
 
 # Code Quality Sync Tool
 
 ## Purpose
 
-AI Agents follow this skill to sync documentation with actual code state by:
-1. Syncing requirements with implemented behavior
-2. Syncing feature specs with actual functionality
-3. Syncing technical design with real architecture
-4. Updating tests to reach 80%+ coverage
+Prepare a trustworthy refactoring baseline: reconcile requirements, feature specs
+and technical design against source-authoritative user goals and approved behavior;
+characterize critical affected paths; return honest evidence and remaining gaps.
+Current implementation is evidence of what happens, not authority for what ought
+to happen. Sync is an enabling means for the caller's named quality goal, not proof
+of stakeholder gain or an opportunity to rewrite acceptance to bless faulty code.
 
 ## Important Notes
 
-BLOCKING: This is a **tool skill** — it performs doc/test sync only, no task board interaction.
-CRITICAL: Called by `x-ipe-task-based-code-refactor` as Step 2 of the refactoring workflow.
-CRITICAL: Requires output from `x-ipe-tool-refactoring-analysis` as input.
+BLOCKING: Tool operation only. No task registration, board, Git, app writes,
+lifecycle duplication, successor execution or approval choreography. Called by
+x-ipe-task-based-code-refactor Step 2; return operation_output once to its owner.
+Requires actual analysis scope/quality/suggestions/principles, not invented success.
+
+BLOCKING: Preserve approved goals, source/parent links, story/GWT AC IDs and test
+types, behavior, constraints and non-goals. Do not weaken assertions, delete or
+automatically skip failing tests. Bugs return as findings for bug-fix; changed
+scope/acceptance/behavior needs actual human CR authority, not DAO or code inference.
+Never perform implementation repair as documentation/test sync.
+
+CRITICAL: Inspection scope is not write authority. Study-only is read-only except
+the authorized report; local affects approved docs/tests; broad includes relevant
+integration/full-suite checks within authorized scope, not unrelated global repair.
+No forced new infrastructure for skills/documents, compile gates or tracing setup.
+Load the [goal contract](.github/skills/x-ipe-workflow-task-execution/references/goal-contract.md)
+for document-local goal/evidence semantics, not a second lifecycle.
 
 ## About
 
-Before refactoring, documentation must accurately reflect the current code state. This tool bridges the gap between what docs say and what code does, ensuring a safe refactoring baseline.
-
 **Key Concepts:**
-- **Doc Sync** — Update requirements, specs, and designs to match actual code behavior
-- **Test Baseline** — Reach 80%+ coverage so refactoring changes can be validated
-- **Gap Resolution** — Handle undocumented, unimplemented, and deviated behaviors
+- **Authoritative intent** — Actual user/source goal and approved requirement/AC;
+  implementation observations and historical analysis remain evidence, not approval.
+- **Doc drift** — Stale descriptive docs inconsistent with approved, verified behavior.
+- **Preservation baseline** — Unchanged approved public contract assertions exercised
+  at base and target revisions, including implicated callers and failure paths.
+- **Evidence state** — aligned, divergent or unavailable; absence, non-applicability,
+  not measured and executed failure are distinct dispositions, never assumed green.
 
 ## When to Use
 
@@ -36,55 +53,58 @@ triggers:
   - "improve quality before refactoring"
   - "update specs for refactoring"
   - "align documentation"
-
 not_for:
-  - "analyze for refactoring" → use x-ipe-tool-refactoring-analysis
-  - "execute refactoring" → use x-ipe-task-based-code-refactor
+  - "analyze for refactoring: x-ipe-tool-refactoring-analysis"
+  - "execute refactoring: x-ipe-task-based-code-refactor"
+  - "fix a deviation: x-ipe-task-based-bug-fix"
+  - "change approved intent: x-ipe-task-based-change-request"
 ```
 
 ## Input Parameters
 
 ```yaml
 input:
-  operation: "full_sync"
+  operation: full_sync
   refactoring_scope:
     scope_level: "feature | custom"
     feature_id: "{FEATURE-XXX or null}"
-    refactoring_purpose: "<purpose>"
-    files: [<file list>]
-    modules: [<module list>]
+    refactoring_purpose: "<caller quality goal and source/parent contribution>"
+    files: []
+    modules: []
   code_quality_evaluated:
-    requirements_alignment: { status: "<aligned|needs_update|not_found>", gaps: [], related_docs: [] }
-    specification_alignment: { status: "<aligned|needs_update|not_found>", gaps: [], spec_docs: [] }
-    test_coverage: { status: "<sufficient|insufficient|no_tests>", line_coverage: "<XX%>", critical_gaps: [] }
-    code_alignment: { status: "<aligned|needs_attention|critical>" }
-    overall_quality_score: "<1-10>"
-  refactoring_suggestion: "{from analysis — pass-through}"
-  refactoring_principle: "{from analysis — pass-through}"
+    requirements_alignment: {status: "<analysis status>", gaps: [], related_docs: []}
+    specification_alignment: {status: "<analysis status>", gaps: [], spec_docs: []}
+    technical_spec_alignment: {status: "<analysis status>", gaps: [], spec_docs: []}
+    test_coverage: {status: "<analysis status>", line_coverage: null, critical_gaps: []}
+    code_alignment: {status: "<analysis status>"}
+    overall_quality_score: null
+  refactoring_suggestion: "{analysis pass-through, including goals/target_structure}"
+  refactoring_principle: "{analysis pass-through, including constraints}"
+  refactoring_mode: "study-only | local | broad"
+  program_type: "<actual domain, including skills/documents>"
+  sync_context:
+    authorized_paths: []
+    exclusions: []
+    source_links: []
+    base_revision: "<actual fingerprint or unavailable>"
+    target_revision: "<actual fingerprint or unavailable>"
+    report_path: "<authorized report path>"
+    required_checks: []
+    coverage_policy: "<applicable authoritative policy or broad guideline>"
 ```
 
 ### Input Initialization
 
 ```xml
 <input_init>
-  <field name="operation" source="Caller specifies — currently only full_sync" />
-
-  <field name="refactoring_scope" source="x-ipe-tool-refactoring-analysis output">
-    <steps>
-      1. IF analysis output contains refactoring_scope → use directly
-      2. ELSE → ERROR: analysis must run first
-    </steps>
-  </field>
-
-  <field name="code_quality_evaluated" source="x-ipe-tool-refactoring-analysis output">
-    <steps>
-      1. IF analysis output contains code_quality_evaluated → use directly
-      2. ELSE → ERROR: analysis must run first
-    </steps>
-  </field>
-
-  <field name="refactoring_suggestion" source="x-ipe-tool-refactoring-analysis output (pass-through)" />
-  <field name="refactoring_principle" source="x-ipe-tool-refactoring-analysis output (pass-through)" />
+  <field name="operation" source="Caller specifies; full_sync only, including read-only study disposition" />
+  <field name="refactoring_scope"><steps>Require actual analysis scope; preserve purpose/files/modules/feature identity/dependencies/goals/extensions exactly. Expanded inspection does not authorize edits. Missing material input returns MISSING_ANALYSIS.</steps></field>
+  <field name="code_quality_evaluated"><steps>Require actual analysis quality object; retain original fields and domain extensions. Recheck dates/hashes/applicability, never import historical alignment as fresh. Preserve separate requirements/specification/feature/technical/tracing records and alias provenance; absent technical record is unavailable, not aligned.</steps></field>
+  <field name="refactoring_suggestion" source="Required analysis pass-through including summary/goals/target_structure; no substituted goals" />
+  <field name="refactoring_principle" source="Required analysis pass-through including primary/secondary principles and constraints" />
+  <field name="refactoring_mode"><steps>Use exact caller study-only/local/broad; reject unknown. Legacy omitted mode defaults broad full_sync guideline within existing authorized scope; it grants no edits or scope expansion. Never upgrade explicit local/study.</steps></field>
+  <field name="program_type"><steps>Caller or inspected actual domain and affected layers; not file extension alone. Skills/documents use existing applicable validators/scenarios, no forced runtime instrumentation.</steps></field>
+  <field name="sync_context"><steps>Resolve caller-approved doc/test/report paths, exclusions, base/target revision evidence, required checks and coverage policy. Explicit selected sources first, declared links then unique EPIC/FEATURE or legacy identity; validate anchors/kind/content/containment/symlink escape. Broken/ambiguous explicit source fails, never silent fallback. Missing authority permits inspection/report only, not mutation. Missing pertinent intent or check is a disclosed gap.</steps></field>
 </input_init>
 ```
 
@@ -92,14 +112,9 @@ input:
 
 ```xml
 <definition_of_ready>
-  <checkpoint required="true">
-    <name>Analysis output provided</name>
-    <verification>refactoring_scope and code_quality_evaluated contain valid data from analysis</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Write access to documentation</name>
-    <verification>Can write to x-ipe-docs/requirements/ and x-ipe-docs/refactoring/</verification>
-  </checkpoint>
+  <checkpoint required="true"><name>Analysis contract</name><verification>Actual full_sync inputs, original scope/purpose/quality/suggestions/principles and extensions retained.</verification></checkpoint>
+  <checkpoint required="true"><name>Authority and sources</name><verification>Mode, approved paths/exclusions/report, readable authoritative intent and preservation boundaries resolved or pertinent gaps recorded.</verification></checkpoint>
+  <checkpoint required="true"><name>Evidence plan</name><verification>Domain/risk base-to-target checks, required versus optional evidence and baseline failures known; no all-green prerequisite for study.</verification></checkpoint>
 </definition_of_ready>
 ```
 
@@ -107,74 +122,38 @@ input:
 
 ### Operation: Full Sync
 
-**When:** After refactoring analysis — sync all docs and tests with code before refactoring.
+**When:** After analysis; assess in study-only or reconcile authorized docs/tests
+in local/broad mode. Full means all relevant domain perspectives are considered,
+not that every project file is rewritten or every perspective becomes aligned.
 
 ```xml
 <operation name="full_sync">
   <action>
-    Phase 1 — Sync Requirements:
-      IF requirements_alignment.status == "needs_update":
-        FOR EACH gap in gaps, handle by type:
-        - "undocumented": Document implemented behavior, add "Discovered Behavior" section
-        - "unimplemented": Ask human to defer, implement, or remove
-        - "deviated": Ask human to update requirement or note as bug
-        SET status to "aligned", gaps to empty
-      IF status == "not_found":
-        Ask human: create from code, skip, or block
-        If create: generate requirement docs from code behavior
-
-    Phase 2 — Sync Feature Specs:
-      IF specification_alignment.status == "needs_update":
-        FOR EACH gap, read specification.md for affected features
-        Handle by type:
-        - "missing": Add acceptance criteria, mark "Added during refactoring prep"
-        - "extra": Ask human to add to spec or mark for removal
-        - "deviated": Update specification to match code, note in change log
-        SET status to "aligned", gaps to empty
-      IF status == "not_found":
-        Create feature docs from code for each module in scope
-
-    Phase 3 — Sync Technical Design:
-      IF technical_spec_alignment.status == "needs_update":
-        FOR EACH gap, read technical-design.md
-        Handle by type:
-        - "structure": Update component list and directory structure
-        - "interface": Update interface definitions, add new public APIs
-        - "data_model": Update data model with actual field names/types
-        - "pattern": Document actual patterns, note deviations
-        Add entry to Design Change Log: date, "Pre-Refactor Sync", summary
-        SET status to "aligned", gaps to empty
-      IF status == "not_found":
-        Create technical design from code analysis as baseline
-
-    Phase 4 — Update Tests:
-      FOR EACH file in test_coverage.critical_gaps:
-        1. Analyze untested code (signatures, types, edge cases)
-        2. Generate tests: happy path, edge cases, error handling
-        3. Write tests following project conventions
-      RUN all tests — must pass (testing existing behavior)
-      RUN coverage — repeat adding tests until ≥ 80%
-      CRITICAL: If test fails due to code bug, DO NOT fix the bug.
-        Document it, mark test as @skip, add to refactoring scope.
-
-    Phase 5 — Compile Output:
-      1. VERIFY all alignments are "aligned" and coverage ≥ 80%
-      2. CALCULATE new overall_quality_score
-      3. COMPILE validation_summary: docs_created, docs_updated, tests_added
-      4. SAVE report to x-ipe-docs/refactoring/validation-{context}.md
+    1. Inspect source-authoritative user goals/subgoals, source/parent contribution, baseline/target and preservation/story/GWT AC/type. Use the existing validation report to map all-required checks and selected alternatives, constraints/non-goals, named success comparison and trade-off. Explicit legacy so-that intent may be inferred with source anchor; missing intent blocks pertinent claims, not unrelated evidence. Delivery and stakeholder outcome remain separate; fixture checks are not stakeholder observations.
+    2. Compare each requirements gap (undocumented/unimplemented/deviated) to approved intent and actual evidence. Update only authorized descriptive drift when verified behavior is already approved. Undocumented observations belong in a labeled current-state note, not automatic requirements or acceptance. Keep unimplemented/deviated intent intact, record bug/CR/ambiguity for caller. Missing docs are not_found; propose an observational draft only when authorized, never manufacture approval or goal IDs.
+    3. Reconcile affected feature/specification gaps (missing/extra/deviated) independently. Retain stories, GWT AC IDs/types, parent constraints and unaffected evidence. Correct stale links/descriptions against approved behavior; do not add/remove ACs from code or mark tests passing by changing expected results. Conflict between approval sources returns to caller; do not choose code as authority. Preserve supplied feature_alignment separately from specification summary.
+    4. Reconcile technical design gaps (structure/interface/data_model/pattern) to inspected approved implementation, callers and interfaces. Correct affected descriptive architecture/API/schema/pattern references with actual date/source hashes and Design Change Log. Observed deviations remain labeled findings, not a replacement intended design. Missing design may be an authorized observed baseline draft with intent/evidence gaps; it is not verified alignment. Preserve existing tracing/redaction/config; disabled/absent instrumentation needs no new infrastructure.
+    5. Characterize critical changed paths and affected callers/dependencies, not just lines: public results/imports/errors/data/side effects plus implicated security/concurrency/external boundaries. Identify base-to-target paths from actual fingerprints/diff evidence without Git mutation; check approved assertions at base and target with unchanged expected behavior. Cover happy path, error handling and edge cases. Study assesses/plans only; local adds targeted authorized preservation tests and applicable checks; broad runs planned relevant integration/full suite and coverage. A broad line coverage target of 80% is a default guideline, not an arbitrary blocking threshold or proof of goal coverage. Only an applicable authoritative requirement makes a numeric threshold mandatory. Unrelated failures/coverage do not force code changes or block independent study/local delivery.
+    6. Record actual commands/exits/results/dates and source/test/doc/config fingerprints, denominator/method/scope for measured coverage. New regressions and unresolved required critical preservation failures block readiness; retain relevant base failures and unavailable checks without skipping or relabeling them. Return bugs to owner; no repair or adding bugs to authorized refactor scope. Capture insufficient evidence and safely approved dispositions with exact authority/risk, never blanket waiver. Characterize existing domain contracts for skills/docs with installed validators and real fixtures where pertinent, not forced new infrastructure.
+    7. Re-evaluate each affected alignment only from current evidence. Keep aligned/divergent/unavailable separate from legacy statuses and precise absent/unmeasured/not_applicable/failed reasons; never clear unresolved gaps after editing. Keep code_alignment unchanged from input and record newly found deviations in report. Preserve measured historical values/provenance separately; unknown coverage or numeric quality score is actual null, not zero or a string sentinel. Numeric scores require an actual comparable authoritative rubric, not synthetic weights or automatic improvement.
+    8. Compile original operation_output fields, actual doc/test counts, pass-through scope/goals/targets/suggestions/principles/extensions, evidence mapping and report path. success means the authorized sync/assessment deliverable is complete, not ready_for_refactoring, aligned code or achieved outcome. Required operation inputs/report/write/check failures return false with partial evidence/errors. Required preservation gaps may allow a completed assessment with ready_for_refactoring=false. Study never asserts mutation readiness. Self-check freshness, links, authority and counts; return once to caller.
   </action>
   <constraints>
-    - BLOCKING: Coverage must reach 80% before completing
-    - BLOCKING: All alignment statuses must be "aligned" before completing
+    - BLOCKING: No requirements/AC rewriting to bless faulty implementation, source repair or unauthorized writes
+    - BLOCKING: No new regressions hidden by weakened assertions, automatic skips or invented evidence
+    - CRITICAL: All original operation result fields and supplied domain extensions retained
     - MANDATORY: All markdown links use project-root-relative paths
   </constraints>
-  <output>
-    Updated code_quality_evaluated with aligned statuses, pass-through refactoring_suggestion and refactoring_principle
-  </output>
+  <output>Updated evidence-backed quality records, unchanged code_alignment, actual summary/report/errors and exact analysis pass-through fields.</output>
 </operation>
 ```
 
 ## Output Result
+
+Original fields and nesting remain; statuses now explicitly allow honest evidence
+states, line_coverage is percentage string | null and overall_quality_score is
+number | null. This is a schema delta, not proven strict-consumer compatibility.
+See [complete schema](.github/skills/x-ipe-tool-code-quality-sync/references/output-schema.md).
 
 ```yaml
 operation_output:
@@ -182,21 +161,21 @@ operation_output:
   result:
     code_quality_evaluated:
       requirements_alignment:
-        status: "aligned"
+        status: "<evidence status>"
         gaps: []
-        updates_made: [<list of doc updates>]
+        updates_made: []
       specification_alignment:
-        status: "aligned"
+        status: "<evidence status>"
         gaps: []
-        updates_made: [<list of spec updates>]
+        updates_made: []
       test_coverage:
-        status: "sufficient"
-        line_coverage: "<XX% — should be ≥ 80>"
+        status: "<evidence status>"
+        line_coverage: "<percentage string | null>"
         tests_added: "<count>"
         tests_updated: "<count>"
       code_alignment:
         status: "{from input — not modified in this phase}"
-      overall_quality_score: "<improved score>"
+      overall_quality_score: "<number 1-10 | null>"
       validation_summary:
         docs_created: "<count>"
         docs_updated: "<count>"
@@ -213,67 +192,36 @@ operation_output:
 
 ```xml
 <definition_of_done>
-  <checkpoint required="true">
-    <name>Requirements synced</name>
-    <verification>requirements_alignment.status == "aligned" and gaps is empty</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Feature specs synced</name>
-    <verification>specification_alignment.status == "aligned" and gaps is empty</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Technical design synced</name>
-    <verification>technical_spec_alignment.status == "aligned" and gaps is empty</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Test coverage ≥ 80%</name>
-    <verification>Run coverage tool, verify line_coverage ≥ 80</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>All tests passing</name>
-    <verification>Run full test suite, zero failures</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Validation report generated</name>
-    <verification>File exists at x-ipe-docs/refactoring/validation-{context}.md</verification>
-  </checkpoint>
+  <checkpoint required="true"><name>Goal authority preserved</name><verification>Source/parent/goals/ACs/types/constraints mapped; drift distinguished from bugs/CRs; no changed acceptance or invented stakeholder outcome.</verification></checkpoint>
+  <checkpoint required="true"><name>All relevant docs considered</name><verification>Requirements, features/specification and technical design each have current evidence, authorized actual updates or honest gaps; no forced aligned state for missing docs.</verification></checkpoint>
+  <checkpoint required="true"><name>Mode-aware tests</name><verification>Critical changed paths and implicated callers characterized base-to-target as required; study plans/local targeted/broad relevant integration/full suite and justified coverage; required gaps block readiness, unrelated checks do not.</verification></checkpoint>
+  <checkpoint required="true"><name>Fresh evidence</name><verification>Dates/commands/exits/fingerprints and comparable measurement methods retained; failed distinct from unavailable; coverage/score nullable when unmeasured.</verification></checkpoint>
+  <checkpoint required="true"><name>Original handoff</name><verification>Actual report/counts, original result fields and supplied extensions/pass-throughs retained; success distinct from readiness; one operation no task/lifecycle/Git duplication.</verification></checkpoint>
 </definition_of_done>
 ```
 
 ## Error Handling
 
 | Error | Cause | Resolution |
-|-------|-------|------------|
-| `MISSING_ANALYSIS` | Analysis output not provided | Run x-ipe-tool-refactoring-analysis first |
-| `COVERAGE_UNREACHABLE` | Cannot reach 80% (e.g., untestable code) | Document reason, ask human to accept lower threshold |
-| `BUG_FOUND` | Test fails due to code bug | Mark test @skip, document bug, add to scope |
-| `WRITE_DENIED` | Cannot write to documentation folders | Check filesystem permissions |
+| --- | --- | --- |
+| MISSING_ANALYSIS | Missing required scope/quality/suggestions/principles | Return partial result; caller supplies actual analysis |
+| SOURCE_INVALID | Broken, ambiguous or escaping explicit source | Fail pertinent operation; no fallback or repair |
+| AUTHORITY_GAP | Intent/write permission or approval conflict | Assess only permitted scope; return exact gap to caller |
+| BUG_FOUND | Observed behavior violates approved intent | Preserve failing test/requirement; owner considers bug-fix, no automatic skip |
+| CR_REQUIRED | Desired behavior/acceptance/scope differs from approval | Caller obtains actual human CR authority before changes |
+| EVIDENCE_UNAVAILABLE | Required critical check cannot execute or revision missing | Disclose unavailable, no fabricated pass; readiness false |
+| CHECK_FAILED | Applicable executed check fails | Record base/target failure and impact; block relevant readiness, no unrelated repair |
+| COVERAGE_UNREACHABLE | Applicable mandatory threshold not evidenced | Return measured value/null and scoped gap; guideline shortfall alone is not failure |
+| WRITE_DENIED | Authorized doc/test/report cannot be written | Return false with retained partial evidence and exact path |
+| CONSUMER_INCOMPATIBLE | Downstream rejects nullable/status contract | Block that handoff; do not coerce metrics or claim integration |
 
-## Patterns & Anti-Patterns
+## Templates
 
-### Pattern: Handle Bugs Found During Testing
+- [Validation report](.github/skills/x-ipe-tool-code-quality-sync/templates/validation-report.md): existing artifact for goal-to-doc-to-test evidence and gaps.
 
-**When:** New test fails because code is buggy
-**Then:**
-```
-1. DO NOT fix the bug now
-2. Document bug with test as evidence
-3. Mark test as @skip with reason
-4. Add to refactoring_scope as bug to fix
-5. Continue with coverage target
-```
+## Examples
 
-### Anti-Patterns
+- [Examples](.github/skills/x-ipe-tool-code-quality-sync/references/examples.md): API doc drift, bug boundary, absent docs and skill study.
+- [Detailed procedures](.github/skills/x-ipe-tool-code-quality-sync/references/detailed-procedures.md): authority, domain alignment, mode/risk checks and freshness.
+- [Output schema](.github/skills/x-ipe-tool-code-quality-sync/references/output-schema.md): preserved fields, nullable metrics and readiness semantics.
 
-| Anti-Pattern | Why Bad | Do Instead |
-|--------------|---------|------------|
-| Skip doc sync | Refactoring without context | Always sync docs first |
-| Fix bugs during sync | Scope creep | Document bugs, fix in refactor phase |
-| Lower coverage target | Risk during refactoring | Keep 80% minimum |
-| Delete failing tests | Lose behavior contracts | Fix or document as bug |
-
-## References
-
-| File | Purpose |
-|------|---------|
-| [references/examples.md](.github/skills/x-ipe-tool-code-quality-sync/references/examples.md) | Concrete usage examples |

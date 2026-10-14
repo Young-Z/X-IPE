@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "operation": "validate",
+  "name": "x-ipe-task-based-technical-design",
+  "skill_type": "x-ipe-task-based",
+  "ok": true,
+  "body_lines": 248,
+  "candidate_hash": "7df91e86fe0264b67730e891af1b3a1196b07e18067d86757303ca0aee55944d",
+  "errors": [],
+  "excluded_files": {},
+  "files": {
+    "SKILL.md": "2d978e0496f48c6104862a189919de542772b1201b1a6524a9a5e6b4516bf398",
+    "references/design-principles.md": "3a6c385adacd2fc62893bb5350e2cee09a5622d0320d0168217f45bde80ab06b",
+    "references/design-templates.md": "98631178fa938385c43e1dde47da26b2b2acd3ee531ec0f88db829f6d16d20b6",
+    "references/examples.md": "9971a0a4e3ac31c0ad20eddb51df299c3c0ddf4899c2129f0a37fcbaf543ddbb",
+    "references/integration.md": "51d57510597cdf64dbba796fbcc37e12859d314aa01c4e53375b2779e48c0226"
+  },
+  "warnings": [
+    "Uninstantiated template link: references/design-templates.md: {dependency_design_path}",
+    "Uninstantiated template link: references/design-templates.md: {configuration_design_path}",
+    "Uninstantiated template link: references/design-templates.md: {dependency_design_path}",
+    "Uninstantiated template link: references/design-templates.md: {database_design_path}"
+  ]
+}

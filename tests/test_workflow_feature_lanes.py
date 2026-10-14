@@ -46,11 +46,18 @@ class TestFeatureLaneModuleMethods:
         content = js_path.read_text(encoding="utf-8")
         assert "_drawDepArrows" in content
 
-    def test_has_feature_selector(self):
-        """Module has _renderFeatureSelector method."""
+    def test_has_lane_focus_and_dependency_toolbar(self):
+        """Current lane-click focus means, exercised at runtime in release-ui-contracts.
+
+        FEATURE-036-D AC-3.1's literal dropdown remains a documentation/acceptance
+        discrepancy; this structural test does not claim that AC is satisfied.
+        """
         js_path = Path(__file__).parent.parent / "src" / "x_ipe" / "static" / "js" / "features" / "workflow-stage.js"
         content = js_path.read_text(encoding="utf-8")
-        assert "_renderFeatureSelector" in content
+        assert "_renderToolbar(stages, nextAction, wfName, workflowState)" in content
+        assert "lane.onclick =" in content
+        assert "lane.classList.add('highlighted')" in content
+        assert "l.classList.remove('highlighted')" in content
 
     def test_has_dep_badge_renderer(self):
         """Module has _renderDepBadge method."""

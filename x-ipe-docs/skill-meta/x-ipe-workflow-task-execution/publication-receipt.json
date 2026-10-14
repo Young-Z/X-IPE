@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "operation": "patch_publication",
+  "state": "published",
+  "task_id": "TASK-6749",
+  "name": "x-ipe-workflow-task-execution",
+  "version": "2.0.0",
+  "date": "2026-10-13",
+  "authority": "Explicit user request to independently review, narrowly correct and promote complete workflow files via apply_patch only",
+  "method": "apply_patch in-place updates and additions only; no publisher apply or tree swap",
+  "review": "review-report.md",
+  "validation": "validation-receipt.json",
+  "dry_run": "dry-run-receipt.json",
+  "baseline_hash": "7d6cafa429bab2a4f52abbea8c29f239c317ff8cc733a5098b9fea9ba3e90980",
+  "baseline_manifest": "baseline.json",
+  "prepublication_managed_manifest": "baseline.json",
+  "prepublication_managed_equals_baseline": true,
+  "published_managed_manifest": "managed.json",
+  "candidate_hash": "90b220f8d92463eae43e18f7f2157c1cfd6ecb90a6f7fce0531173233186ed25",
+  "added": ["references/lifecycle.md", "templates/task-board.md"],
+  "changed": ["SKILL.md", "references/examples.md", "templates/task-record.yaml"],
+  "removed": [],
+  "files": {
+    "SKILL.md": "903ebceae22cb3a1fd7667f2503fd20ff2cc8005b003dcfc83c115fdce477d0a",
+    "references/examples.md": "60c7d05c4bd72ac45138fdff9d6d78f738ede848daf1cb16be86ccf58d4dd931",
+    "references/lifecycle.md": "191ccb1d4752d345590171a3cb7d8516992df47b85e67418e5d024d777373e38",
+    "templates/task-board.md": "521f08a73e475efe950d9167bd33ca174730535387a178fcc813caf1d889bc41",
+    "templates/task-record.yaml": "062f4e547db2dca988b39e49feb8862bc8ce266a9859e26aef0b8f1ab08ed96b"
+  },
+  "byte_parity": true,
+  "lengths": {
+    "SKILL.md": {"lines": 248, "body_lines": 244, "bytes": 19767},
+    "references/examples.md": {"lines": 59, "bytes": 3373},
+    "references/lifecycle.md": {"lines": 196, "bytes": 11948},
+    "templates/task-board.md": {"lines": 10, "bytes": 594},
+    "templates/task-record.yaml": {"lines": 29, "bytes": 974}
+  },
+  "protected_tree": {
+    "roots": [".github/skills", "x-ipe-docs/planning", "src", "x-ipe-docs/config", "tests"],
+    "excluded": [".github/skills/x-ipe-workflow-task-execution", "tests/test_skill_lifecycle.py", "node_modules"],
+    "existing_caches_included": true,
+    "file_count": 1361,
+    "before_sha256": "5ddb9d2ca6d321425c9dac50c3763d41b88e6fab61cca6df73f49f59a8facc5e",
+    "after_sha256": "5ddb9d2ca6d321425c9dac50c3763d41b88e6fab61cca6df73f49f59a8facc5e",
+    "method": "SHA256 of sorted compact JSON relative-path-to-SHA256 map"
+  },
+  "existing_target_cache_files": {},
+  "recovery": {
+    "mode": "manual concurrency-checked patch only",
+    "automatic_transaction_backup": false,
+    "instruction": "Retain baseline and publication manifests; on interruption compare every current path against baseline and proposed hashes, do not overwrite divergent edits or remove caches. Resume exact reviewed patches only with permission. No atomic swap/rollback guarantee is claimed."
+  },
+  "board_access": false,
+  "memory_access": false,
+  "git_commands": false,
+  "children_modified": false,
+  "known_consumer_mismatches": "review-report.md"
+}

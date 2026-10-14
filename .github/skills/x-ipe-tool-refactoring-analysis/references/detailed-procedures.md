@@ -1,294 +1,131 @@
-# Detailed Procedures Reference
+# Detailed analysis procedures
 
-This document contains detailed step-by-step procedures for the Refactoring Analysis skill.
-Content moved from SKILL.md to keep the main file under 500 lines.
+## Baseline and goal frame
 
----
+Keep actual refactoring_purpose, goal/subgoal/source/parent/stakeholder contribution,
+approved roots, non-goals, preservation/story/AC/type and authorized report path.
+An enabling quality goal contributes to safe changes, not observed business gain.
+all-required branches need each obligation checked; alternatives select a bounded
+means, not a backlog. Legacy explicit so-that can anchor inferred intent; missing
+intent blocks pertinent outcome claims, not all engineering study.
 
-## Step 0: Check Quality Baseline - Detailed Procedure
+Retain quality_baseline exists/date/overall_score/code_violations/feature_gaps/
+test_coverage and report provenance. Absent report: exists=false, overall_score=null.
+Existing report: preserve historical values separately from fresh comparable
+measurement; inspect relevant paths/revisions. Missing method, changed hashes or
+denominator prevents fresh numeric comparison. Recheck changed evidence rather
+than skipping violations just because a baseline exists.
 
-**Action:** Check if project quality evaluation exists and use as baseline.
+## Bounded scope reflection
 
-```
-1. CHECK for existing quality evaluation:
-   - Path: x-ipe-docs/planning/project-quality-evaluation.md
+Record authorized targets separately; inspection is not write permission. Canonical
+project-root paths/ownership; reject traversal/symlink escape. Resolve initial
+feature artifacts once: explicit selected links, declared links, unique EPIC/FEATURE
+then legacy folder. Explicit invalid/ambiguous links block, not silent fallback.
 
-2. IF file exists:
-   a. READ the quality report
-   b. EXTRACT relevant baseline data:
-      - Overall quality score
-      - Code alignment violations (file size, SOLID, KISS, modular design)
-      - Test coverage metrics
-      - Feature-by-feature gaps
-      - Files approaching threshold
-   c. STORE as quality_baseline:
-      quality_baseline:
-        exists: true
-        evaluated_date: <from report>
-        overall_score: <from report>
-        code_violations:
-          file_size: [<files exceeding 800 lines>]
-          approaching_threshold: [<files 500-800 lines>]
-        feature_gaps: [<features with violations>]
-        test_coverage: <percentage if available>
-   d. LOG: "Using existing quality baseline from {evaluated_date}"
+1. Initialize frontier from resolved targets; visited tracks canonical inspected paths.
+2. For passes 1 through 10 inspect only new frontier. Verify actual outgoing imports,
+   inverse callers, shared types/interfaces/state, manifests/config/tests/linked docs.
+   Record directed source/target, reason, anchor/revision and resolution. No guessed
+   paths or filename mistaken for a consumer; use language resolution when available.
+3. Admit new paths only for demonstrated goal/preservation risk inside approved
+   inspection roots; log exclusions and unresolved external/dynamic dependencies.
+   no sibling inclusion by proximity; parent/child coupling requires evidence.
+   Do not recursively ingest independent modules or every third-party library.
+4. Deduplicate, remove visited, log iteration/files_added/modules_added/reason,
+   checked edges and remaining frontier. Stable means no admissible new frontier
+   and relevant inspected edges resolved or explicitly bounded. Retain known edges.
+5. At pass 10 disclose capped/incomplete frontier, not proof of a cycle. Verified
+   cycles are actual edges; visited prevents endless revisits. Hidden uncertainty
+   survives stable known closure. Required unresolved scope yields error/partial
+   result, not false full closure; bounded study can succeed with explicit limits.
 
-3. IF file does not exist:
-   a. SET quality_baseline.exists = false
-   b. LOG: "No quality baseline found, will perform full analysis"
+## Five perspectives and structural findings
 
-4. CONTINUE to Step 1
-```
+Evaluate all five against scoped goals, not all repository documents:
 
-**Benefits of Using Baseline:**
-- Skip re-evaluating already documented violations
-- Focus analysis on scope-specific gaps
-- Provide delta comparison in output
-- Faster analysis with consistent metrics
+| Perspective | Source and risk focus | Original gap vocabulary |
+| --- | --- | --- |
+| Requirements | Approved outcomes/constraints and related anchors | undocumented, unimplemented, deviated |
+| Features | Specification/GWT AC/type and behavior/callers | missing, extra, deviated |
+| Tech Spec | Design/interfaces/data model/responsibilities | structure, interface, data_model, pattern |
+| Test Coverage | Actual scoped tests, missing scenario assertions, comparable line/branch measurement | business_logic, error_handling, edge_case |
+| Tracing | Config/infrastructure/ignored APIs and existing redaction/levels | untraced, unredacted, wrong_level |
 
----
+Keep Features and Tech Spec separate in report/domain fields; legacy
+specification_alignment summary cannot replace either. Code alignment assesses
+SOLID/KISS/modular design/smells/size, not a sixth invented goal score.
 
-## Step 2: Scope Reflection Loop - Detailed Procedure
+Every perspective has applicability/status/sources/hashes/method/findings/limits.
+not_found: expected artifact absent. not_measured: applicable evidence unmeasured.
+not_applicable: justified domain/exclusion. failed: attempted applicable check
+actually failed with command/exit/output. Unavailable tooling is not an executed
+failure. Verified unmet requirements are needs_attention/critical with cited risk,
+not absence fiction. aligned needs scoped evidence and limits. Absent docs/tests
+are not zero coverage, critical behavior defects or invented numerical scores.
 
-**Action:** Iteratively expand scope until no new related code is found.
+Skills/docs use creator schema/scenario/public-instruction preservation checks,
+not language compilation. Runtime refactors may justify scoped tests/build/lint;
+baseline failures are findings, never repaired here or blanket study prerequisites.
+Record commands/exits/source/test/config hashes. Missing pertinent verification
+can block owner's mutation/release, not honest analysis. No unapproved check-tool
+side effects on source/test/config; disposable targets for caches/artifacts.
 
-```
-iteration = 0
-REPEAT:
-  iteration += 1
-  new_items_found = false
+Tracing observes tracing_enabled/infrastructure/tracing_ignored_apis and actual
+domain equivalents. Disabled/absent/irrelevant can be not_applicable, not automatic
+untraced failure or install demand. Existing redaction stays a preservation/security
+constraint. Python decorator counts are not universal safe tracing evidence.
 
-  1. FOR EACH file in working_scope.files:
-     a. ANALYZE imports and dependencies
-     b. IDENTIFY files that:
-        - Import from this file
-        - Are imported by this file
-        - Share interfaces/types with this file
-     c. FOR EACH discovered file:
-        IF file NOT in working_scope.files:
-          - Add to working_scope.files
-          - new_items_found = true
-          - Log expansion reason
+## Configuration and progressive consultation
 
-  2. FOR EACH module in working_scope.modules:
-     a. IDENTIFY related modules:
-        - Sibling modules
-        - Parent modules
-        - Child modules
-     b. ASSESS if module should be included:
-        - Tight coupling? -> Include
-        - Shared state? -> Include
-        - Independent? -> Skip
-     c. Add qualifying modules
+Read existing stages.validation.refactoring_analysis in tools.json, not a new
+analysis key. stages.validation.code_refactor belongs to later owner execution,
+not this tool. _extra_instruction is consultation context, not operation refactor,
+source mutation, Git checkpoint or task workflow authority.
 
-  3. REFLECT on current scope:
-     a. Are there hidden dependencies?
-     b. Are there configuration files?
-     c. Are there test files?
-     d. Are there documentation files?
+Discover metadata first from supplied metadata/frontmatter. Detect runtime/layers/
+manifests, not every enabled stack. Read and parse the selected configuration;
+unreadable/invalid JSON, a non-mapping route or non-boolean tool flags return
+CONFIG_INVALID with path/key and no consultation. Never treat strings, numbers
+or null as booleans, silently fall back on malformed data, or repair config here.
+Only non-metadata tool flags activate opt-in filtering: explicit true
+allows, explicit false denies; _order/_extra_instruction are not tools. missing/empty
+or metadata-only routes use discovery availability, not an all-enabled execution
+claim. An all-false tool map consults no tool; it is not an empty/default route.
+Absent configuration is a disclosed discovery default, not malformed configuration.
+This policy retains legacy discovery availability, not full loading of all available packages.
+Filter semantically matched tools, then relevant Built-In Practices excerpts only,
+sequentially as needed. General fallback only if relevant/allowed; no force-enable
+of disabled general or consultation of every enabled tool. Missing match is a gap,
+not inline mutation permission. MCP/protocol and language may both be relevant;
+unrelated frameworks are not loaded. Record selected names/excerpts and rationale.
 
-  4. LOG expansion:
-     scope_expansion_log.append({
-       iteration: iteration,
-       files_added: [<new files>],
-       modules_added: [<new modules>],
-       reason: "<why expanded>"
-     })
+consultation only: conventions inform suggestions; declarations are not execution
+evidence or proof a practice was enforced. Never declare a gap fixed by reading it.
 
-UNTIL new_items_found = false OR iteration > 10
+## Suggestions, scoring and self-check
 
-IF iteration > 10:
-  - WARN: "Scope expansion exceeded 10 iterations. Review for circular dependencies."
-```
+Each suggestion: gap/source/revision, goal/source/parent contribution, baseline,
+selected means/success evidence, preservation and trade-off. Prioritize actual
+goal/preservation risk. No justified gap: empty goals with reason, not forced plan.
+Behavior/requirements defects return to owner, not changed acceptance/source repair.
 
----
+SRP needs evidenced mixed responsibility; DRY repeated semantic decisions; KISS
+unnecessary complexity; YAGNI verified consumers including dynamic/public exports;
+SoC actual coupling. Large coherent files need no automatic split. Fewer lines/files
+alone is not success. Name useful measurable or qualitative comparison and costs
+of extra indirection/coupling; no arbitrary weights or guaranteed stakeholder gain.
 
-## Steps 3-6: Quality Evaluation - Detailed Procedures
+Numeric only with actual inputs and authoritative explicit comparable rubric,
+method/denominator/revisions. No arbitrary weighted score from missing weights,
+default severity deductions or smell counts. Aggregate only if rubric defines all
+weights/applicable dimensions/comparability; missing inputs mean null, not zero
+filling or invented reweighting. Five evidence perspectives mandatory, five numbers
+not mandatory. Legacy 80%/800/50 is contextual, not global gate or creator body cap.
 
-### Step 3 - Requirements Alignment
-
-```
-1. SEARCH x-ipe-docs/requirements/**/*.md for related docs
-2. FOR EACH: Extract criteria, compare with code, identify gaps
-3. COMPILE requirements_alignment: {status, gaps[], related_docs[]}
-```
-
-### Step 4 - Features Alignment
-
-```
-1. SEARCH x-ipe-docs/requirements/FEATURE-XXX/ for feature specs
-2. FOR EACH: Read spec, compare behavior, identify gaps
-3. COMPILE feature_alignment: {status, gaps[], feature_ids[]}
-```
-
-### Step 5 - Technical Spec Alignment
-
-```
-1. SEARCH for technical-design.md and architecture docs
-2. FOR EACH: Extract structure/interfaces/patterns, compare, identify deviations
-3. COMPILE technical_spec_alignment: {status, gaps[], spec_docs[]}
-```
-
-### Step 6 - Test Coverage
-
-```
-1. RUN coverage: pytest --cov | npm test --coverage | go test -cover
-2. FOR EACH file: Get line/branch coverage, identify untested functions
-3. IDENTIFY critical gaps: business logic, error handlers, edge cases
-4. COMPILE test_coverage: {status, current_percentage, critical_gaps[]}
-```
-
-### Step 6b - Tracing Coverage (FEATURE-023-D)
-
-```
-1. SCAN code files for @x_ipe_tracing decorator usage:
-   - grep -r "@x_ipe_tracing" src/
-   - Count decorated vs total public functions
-
-2. FOR EACH file in scope:
-   - List public functions (def/async def at module level, class methods)
-   - Check if decorated with @x_ipe_tracing
-   - Flag missing decorators
-
-3. CHECK sensitive parameter redaction:
-   - Search for password, token, secret, key, auth parameters
-   - Verify redact=[] is specified for these
-
-4. COMPILE tracing_coverage: {
-     status: passed|warning|failed,
-     coverage_percentage: X%,
-     untraced_functions: [],
-     unredacted_params: []
-   }
-```
-
----
-
-## Gap Types by Perspective
-
-| Perspective | Gap Types |
-|-------------|-----------|
-| Requirements | undocumented, unimplemented, deviated |
-| Features | missing, extra, deviated |
-| Tech Spec | structure, interface, data_model, pattern |
-| Test Coverage | business_logic, error_handling, edge_case |
-| Tracing Coverage | untraced, unredacted, wrong_level |
-
----
-
-## Step 7: Generate Refactoring Suggestions - Detailed Procedure
-
-```
-1. ANALYZE quality gaps to derive suggestions:
-   FOR EACH gap in code_quality_evaluated:
-     - requirements gaps -> Suggest documentation sync or code alignment
-     - feature gaps -> Suggest feature compliance refactoring
-     - tech spec gaps -> Suggest structural refactoring
-     - test coverage gaps -> Suggest test-first refactoring approach
-
-2. IDENTIFY applicable principles:
-   a. SCAN code for principle violations:
-      - Large files/classes -> SRP, SOLID
-      - Duplicated code -> DRY
-      - Complex logic -> KISS
-      - Unused code -> YAGNI
-      - Mixed concerns -> SoC (Separation of Concerns)
-
-   b. PRIORITIZE principles:
-      - Primary: Core principles that MUST be applied
-      - Secondary: Nice-to-have principles
-
-3. FORMULATE goals:
-   FOR EACH identified improvement:
-     - Define specific, measurable goal
-     - Assign priority based on impact
-     - Document rationale
-
-4. DEFINE target structure:
-   - Describe desired code organization
-   - Note key structural changes needed
-   - List preserved elements (what NOT to change)
-
-5. IDENTIFY constraints:
-   - Backward compatibility requirements
-   - API stability requirements
-   - Performance constraints
-   - External dependencies to preserve
-```
-
----
-
-## Step 8: Scoring and Output - Detailed Procedure
-
-### Dimension Scoring
-
-```
-1. CALCULATE dimension scores (1-10 each):
-   FOR EACH dimension (requirements, features, tech_spec, test_coverage, tracing):
-     score = 10 - SUM(violations x importance_weights)
-     score = MAX(1, MIN(10, score))  # Clamp to 1-10
-
-     # Derive status from score
-     IF score >= 8: status = "aligned"
-     ELSE IF score >= 6: status = "needs_attention"
-     ELSE: status = "critical"
-
-   Importance weights:
-   - Critical (no tests, hardcoded secrets): 3
-   - High (missing coverage, SRP/DRY violations): 2
-   - Medium (outdated specs, missing docs): 1
-   - Low (minor style issues): 0.5
-
-2. CALCULATE overall_quality_score:
-   overall_quality_score = weighted_average(
-     requirements_score x 0.20,
-     features_score x 0.20,
-     tech_spec_score x 0.20,
-     test_coverage_score x 0.20,
-     tracing_score x 0.10,
-     code_alignment_score x 0.10
-   )
-```
-
-### Self-Review Checklist
-
-```
-1. READ the generated report completely
-2. CHECK for:
-   - Missing content or sections
-   - Inconsistencies between summary and details
-   - Scope items not evaluated
-   - Gaps without proper severity assignment
-   - Suggestions that don't match identified gaps
-   - Principles without clear applications
-3. IF problems found:
-   - FIX the issues in the report
-   - Note corrections made
-```
-
-### Human Presentation Format
-
-```
-Refactoring Analysis Complete
-
-Scope: {file_count} files, {module_count} modules
-Expansions: {expansion_count} iterations
-
-Quality Assessment (Score -> Status):
-- Requirements: {req_score}/10 -> {status}
-- Features: {feature_score}/10 -> {status}
-- Tech Spec: {tech_score}/10 -> {status}
-- Test Coverage: {test_score}/10 ({current}%)
-- Tracing: {tracing_score}/10
-
-Score-to-Status: 8-10 aligned, 6-7 needs_attention, 1-5 critical
-
-Overall Score: {score}/10
-
-Refactoring Suggestion:
-- Summary: {summary}
-- Goals: {goal_count} identified
-- Primary Principles: {principle_list}
-
-Approve to proceed to Improve Code Quality Before Refactoring?
-```
+Report contains authorized/inspected scope, goal/baseline, expansion/known edges/
+frontier, all five perspectives/code findings, suggestion trace/principles,
+preservation, commands/exits/hashes, original operation_output and missing/failed
+evidence. Self-check links/correct paths/trace/unknown values/success before return.
+No task approval or successor. Recommendations are not achieved improvements;
+stakeholder outcome remains not measured absent observation.

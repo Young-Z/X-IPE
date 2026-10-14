@@ -1,0 +1,62 @@
+schema: 1
+operation: authorized_patch_promotion
+task_id: TASK-6749
+date: '2026-10-14'
+name: x-ipe-meta-skill-creator
+skill_type: x-ipe-meta
+state: published
+ok: true
+authorization: Current user request; approval unchanged; per-file apply_patch only, preserve caches
+review: main-independent-review-TASK-6749.md
+version: 1.2.1
+baseline:
+  trusted_managed_manifest: promotion-receipt.yaml published_files
+  managed_files: 32
+  managed_hash: d548972671b39a8a7a0940fe30fa6d7e143b68ba32e8919b4192c640c14bca39
+  physical_files: 34
+  physical_hash: b680bcbe343e7280804dd74fb3ffa1f245e3454ca52dcc9d8cd2dfeda82035e4
+promotion:
+  method: apply_patch
+  additions: []
+  changes: [SKILL.md, references/skill-type-comparison.md, references/validation-publication.md, scripts/validate_skill.py]
+  removals: []
+  unchanged_distributables: 28
+  publisher_apply: false
+  cooperative_lock: false
+  atomic_swap: false
+  backup_transaction: null
+  recovery: Prior managed manifest and reviewed delta retained; inspect and explicitly repair via editor after interruption
+post_promotion:
+  distributable_byte_parity: true
+  distributable_files: 32
+  physical_files: 34
+  full_physical_tree_candidate_parity_claimed: false
+  production_distributable_hash: 762d5ef4818aba6ca16ad1dfb75b646b74eddcc2f46f3ef90252829c5d5ea271
+  production_physical_hash: 72caec919101f8333dbaacc6ec504756c31b9facc607d9d764d314ca29b92cfd
+  installed_api_cli_saved_receipt_equal: true
+  receipt: validation-legacy-category-TASK-6749.json
+published_manifest:
+  construction: Prior promotion-receipt.yaml published_files with exactly the four replacements below; no other additions/deletions
+  replacements:
+    SKILL.md: 943454c1bdd2fe8d4ae0f3bcdd1b9181d5224e8c114bc316383f4967ef9694ad
+    references/skill-type-comparison.md: 18f9846c86edfb2181e66ae673d71d0b77648aa4324e8e69402e92f69f1538cd
+    references/validation-publication.md: 594402b6c0d2a1dbc1763a1e72fcc7a8ccc0c2f7ba88dfd311e24c6784e27d2c
+    scripts/validate_skill.py: 94b375c46ae0061c036d264cd4e4ddd287786901d7201d2025d5771cf3beabfe
+  full_manifest: validation-legacy-category-TASK-6749.json files
+preserved_unmanaged:
+  scripts/__pycache__/publish_skill.cpython-312.pyc: 321ec290ef10e9b9502da4f5d7b3751fc30f587dbd04530d5742a1be95a9d14d
+  scripts/__pycache__/validate_skill.cpython-312.pyc: 0c5774ed366ce7f1f30042162e19ede41e79f5ff4c5c8be42d081dae9789a4ea
+cache_adoption_or_deletion: false
+tests:
+  focused_before: {passed: 182, failed: 2, seconds: 2.80}
+  obsolete_assertions_corrected: 2
+  focused_after: {passed: 184, failed: 0, seconds: 2.67}
+  new_regressions: 21
+  bounded_python: {passed: 464, failed: 0, seconds: 13.04}
+  frontend: {passed: 10, failed: 0, files: 1, duration_ms: 410}
+final_revision_tests:
+  bounded_python: {passed: 464, failed: 0, skipped: 0, deselected: 0, seconds: 13.06, exit: 0}
+  frontend: {passed: 10, failed: 0, files: 1, duration_ms: 409, exit: 0}
+  receipts_and_cache_hashes_rechecked: true
+blockers: []
+excluded_actions: [board_writes, memory_writes, git_mutation, commits, mirrors, cache_deletion]

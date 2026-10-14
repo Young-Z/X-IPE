@@ -212,3 +212,47 @@ This document contains detailed evaluation procedures for each perspective.
    - Set has_suggestions: false for that feature
    - Skip suggestion generation
 ```
+
+## Current Execution Boundaries
+
+The original procedures above remain domain checklists, not alternate output
+schemas. Internal diagnostic words (not_found, sufficient, drifted, passed,
+warning, failed) do not extend QualityEvaluation status enums. Serialize original
+score-derived statuses only with a justified numeric score. Otherwise return
+EVALUATION_INCOMPLETE using the existing error envelope and explain diagnostic
+states in report prose. Do not force unavailable scores into planned or zero.
+
+1. **Discover scope and authority first.** Resolve actual feature folder, including
+   x-ipe-docs/requirements/EPIC-*/FEATURE-* as well as legacy flat folders. Inspect
+   imports/callers/routes/tests for ownership. Filename matching alone is not proof
+   of AC coverage. Read approved intent, parent/subgoal, source story so-that,
+   stable GWT AC and domain test type before comparing implementation.
+2. **Evaluate intent independently.** Docs and code agreeing on wrong behavior is
+   still deviated/unimplemented approved intent. Missing specification plus absent
+   code is planned only when inspected future-work records support that conclusion;
+   a failed search or inaccessible directory is not proof. Separate descriptive
+   drift, actual bug and changed acceptance, and recommend the appropriate owner.
+3. **Execute existing capabilities only.** Use the project's actual configured
+   interpreter/test commands and current coverage tooling when available. Record
+   command, exit, counts/failures/skips, date and source/test/doc/config hashes.
+   No package/infrastructure installation without separate authority. No tool,
+   missing denominator or stale result is unavailable evidence, never zero
+   coverage, no_tests, clean or ten. An executed failing check is failed evidence,
+   not merely unavailable. Preserve actual exits and critical negative/error-path results.
+4. **Inspect tracing/security in context.** Scope to actual relevant functions and
+   endpoints; inspect redaction values, not merely presence of an empty redact
+   argument. Retain approved auth boundaries and redact sensitive evidence itself.
+   A heuristic secret match is a finding to verify, not a disclosed secret value.
+5. **Justify suggestions.** Keep original summary/goals/priority/rationale/
+   target_structure/principles/applications/constraints/source/has_suggestions
+   model. Tie internal quality goals to inspected baseline and parent contribution;
+   compare unchanged preservation assertions before/after at actual revisions.
+   No fabricated improvement percentage or stakeholder gain; no automatic bug
+   repair, requirements rewrite, CR approval or successor execution.
+6. **Update/compare narrowly.** Invalidate changed goals/ACs/dependencies and their
+   evidence, preserve unaffected IDs/history. Different scope/rubric/denominator
+   makes a numeric delta incomparable; narrative limits remain explicit. Retaining
+   a historical entry does not freshly verify its delivery or outcome.
+
+See [goal reporting](.github/skills/x-ipe+feature+quality-board-management/references/goal-reporting.md)
+for the document-local mapping, legacy inference and evidence-state procedure.

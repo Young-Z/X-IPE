@@ -1,178 +1,81 @@
-# Refactoring Analysis Examples
+# Analysis examples — authored fixtures
 
-## Example 1: API Module Refactoring Analysis
+Contracts, not executed agent decisions, human approval or observed stakeholder
+outcome. Dedicated tests separately inspect disposable actual imports/byte hashes
+and serialize authored reports/outputs. No production source changes.
 
-**Initial Request:** "Analyze src/api/users.py for refactoring"
+## 1. API module: correct known dependencies
 
-### Step 1: Parse Initial Scope
+Study mixed CRUD/auth responsibilities for safer independent maintenance; preserve
+public exports/errors/data/redaction. An 800-line file alone is no split criterion.
+Authored directed edges, not claims about this repository:
 
-```yaml
-initial_refactoring_scope:
-  files: [src/api/users.py]
-  modules: [api.users]
-  description: "Refactor user API module - too large"
-  reason: "File is 800 lines, multiple responsibilities"
-```
+| Source | Target | Reason |
+| --- | --- | --- |
+| src/api/users.py | src/models/user.py | imported model |
+| src/api/users.py | src/services/auth.py | called auth service |
+| src/api/users.py | src/utils/validation.py | imported validation |
+| src/routes/v1.py | src/api/users.py | inverse public caller |
+| tests/test_users.py | src/api/users.py | preservation tests |
+| src/services/auth.py | src/models/session.py | imported session model |
+| src/services/profile.py | src/models/user.py | inverse model consumer |
 
-### Step 2: Scope Reflection Loop
+Pass 1 adds direct imports and relevant inverse callers/tests; pass 2 session and
+profile under shared-model risk; pass 3 no new paths, stable known closure. Correct
+src/models/user.py paths consistently retained; independent siblings excluded with
+reasons. No all-hidden-dependencies claim. Outside-root required consumers stay
+unresolved for owner, not ignored. Requirements/Features/Tech Spec separate; test
+coverage command/method/denominator if measured else null/not_measured; tracing
+configuration/redaction/applicability. Invented 62% or total 6 is not evidence.
+Each boundary suggestion cites responsibility/caller sources, checks and extra
+import-edge trade-off. Recommendations only, not achieved improvement or app done.
 
-**Iteration 1:**
-```
-Analyzing src/api/users.py...
-- Imports: models/user.py, services/auth.py, utils/validation.py
-- Imported by: routes/v1.py, tests/test_users.py
+## 2. No documentation: legacy/payment.js
 
-Added to scope:
-- src/models/user.py (shared data model)
-- src/services/auth.py (tight coupling - user auth)
-- src/utils/validation.py (shared utilities)
-```
+Missing documents (requirements/spec/design) are not_found, not behavior failure.
+Unavailable coverage tool: null/not_measured, not zero coverage. No tests found is
+a verified test gap, not measured zero. Missing baseline: exists=false/score=null.
+Inspect public behavior/risk; explicit legacy so-that anchors inferred intent only
+if actually present. Suggest bounded characterization for actual risky payment/
+error branches. No create-all-docs, coverage80 or global compile prerequisite.
+Executed failing check is failed with command/exit/output/hash, unlike unavailable.
+Read-only analysis may succeed; later mutation needs pertinent preservation evidence.
+No spec/source repair or tool-level approval question.
 
-**Iteration 2:**
-```
-Analyzing newly added files...
-- src/services/auth.py imports: models/session.py
-- src/models/user.py imported by: services/profile.py
+## 3. Qualitative goal: fewer divergent price decisions
 
-Added to scope:
-- src/models/session.py (related to auth flow)
-```
+Fixture US-PRICE-01/AC-PRICE-01: same retail/wholesale results/TypeError, no authorized
+performance change. Maintainer safe-change confidence is the enabling quality goal;
+extraction is one means, retaining duplication is an alternative with divergence cost.
 
-**Iteration 3:**
-```
-No new dependencies found.
-Scope expansion complete.
-```
+| Suggestion | Gap / Source | Goal / Parent | Baseline | Success Evidence | Preservation | Trade-off | Outcome State |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| S-01 extract shared price decision | G-01; price.py repeated expression; fixture revision | Q-DUP-01; US-PRICE-01; maintainer safe-change confidence | two repeated decisions; public results/errors unchanged | one shared decision; same public contract checks planned | AC-PRICE-01; Unit; keep exports/results/TypeError | extra internal call; no performance claim | not measured |
 
-**Final refactoring_scope:**
-```yaml
-refactoring_scope:
-  files:
-    - src/api/users.py
-    - src/models/user.py
-    - src/models/session.py
-    - src/services/auth.py
-    - src/utils/validation.py
-  modules: [api.users, models, services.auth, utils.validation]
-  dependencies:
-    - src/api/users.py → src/models/user.py
-    - src/api/users.py → src/services/auth.py
-    - src/services/auth.py → src/models/session.py
-  scope_expansion_log:
-    - iteration: 1
-      files_added: [models/user.py, services/auth.py, utils/validation.py]
-      reason: "Direct imports from target file"
-    - iteration: 2
-      files_added: [models/session.py]
-      reason: "Auth service dependency"
-    - iteration: 3
-      files_added: []
-      reason: "Stable - no new dependencies"
-```
+all-required: same outputs/errors and fewer repeated decision points; alternatives:
+selected extraction versus retaining duplication. Planned checks are not achieved
+results. No numeric rubric measured: scores null, report not measured. Size-only
+restructuring and invented parent are invalid. Stakeholder outcome not observed.
 
-### Steps 3-6: Quality Evaluation
+## 4. Cycle, cap and unavailable boundary
 
-```yaml
-code_quality_evaluated:
-  requirements_alignment:
-    status: aligned
-    gaps: []
-    related_docs: [x-ipe-docs/requirements/user-management.md]
-    
-  feature_alignment:
-    status: needs_update
-    gaps:
-      - feature_id: FEATURE-012
-        type: extra
-        description: "Password reset logic not in feature spec"
-    feature_ids: [FEATURE-012, FEATURE-015]
-    
-  technical_spec_alignment:
-    status: needs_update
-    gaps:
-      - type: structure
-        description: "Tech design shows UserService class, code uses functions"
-        spec_location: "technical-design.md:45"
-        code_location: "src/api/users.py:120"
-    spec_docs: [x-ipe-docs/requirements/FEATURE-012/technical-design.md]
-    
-  test_coverage:
-    status: insufficient
-    current_percentage: 62
-    target_percentage: 80
-    file_coverage:
-      - file: src/api/users.py
-        line_coverage: 58
-        untested_functions: [reset_password, bulk_update]
-      - file: src/services/auth.py
-        line_coverage: 75
-        untested_functions: [refresh_token]
-    critical_gaps:
-      - file: src/api/users.py
-        gap_type: business_logic
-        description: "Password reset flow untested"
-        
-  overall_quality_score: 6
-```
+Real disposable a.py imports b.py, b.py imports a.py, caller.py imports a.py; first
+pass adds b.py/caller.py, second no new paths. Verified cycle terminates with visited;
+unrelated.py excluded. Tests read actual fixture AST/edges and unchanged bytes;
+not a general resolver or autonomous skill execution.
 
-### Final Output
+Pending frontier after pass 10 hits cap: incomplete, not guessed cycle. Record
+frontier/exclusions/risk. Unsatisfied required full analysis returns success=false/
+partial result; authorized bounded study can succeed with limits. Never claim full
+closure when dynamic dependencies remain unresolved.
 
-```
-Refactoring Analysis Complete
+## 5. skills/documents and selective consultation
 
-Scope: 5 files, 4 modules
-Expansions: 3 iterations
-
-Quality Assessment:
-- Requirements: ✅ Aligned
-- Features: ⚠️ Needs Update (1 gap)
-- Tech Spec: ⚠️ Needs Update (1 gap)
-- Test Coverage: 62% (target: 80%)
-
-Overall Score: 6/10
-
-Approve to proceed to Validate Quality Before Refactoring?
-```
-
----
-
-## Example 2: No Documentation Scenario
-
-**Initial Request:** "Analyze legacy/payment.js for refactoring"
-
-```yaml
-code_quality_evaluated:
-  requirements_alignment:
-    status: not_found
-    gaps:
-      - type: missing
-        description: "No requirement documentation exists for payment module"
-    related_docs: []
-    
-  feature_alignment:
-    status: not_found
-    gaps:
-      - type: missing
-        description: "Payment module has no associated feature documentation"
-    feature_ids: []
-    
-  technical_spec_alignment:
-    status: not_found
-    gaps:
-      - type: missing
-        description: "No technical design document for payment processing"
-    spec_docs: []
-    
-  test_coverage:
-    status: no_tests
-    current_percentage: 0
-    target_percentage: 80
-    critical_gaps:
-      - file: legacy/payment.js
-        gap_type: business_logic
-        description: "Entire module untested"
-        
-  overall_quality_score: 3
-```
-
-**Recommendation:** Create documentation and tests before proceeding with refactoring.
+Schema/scenario/public-instruction checks, not runtime compilation. Disabled tracing
+without applicable infrastructure: not_applicable; existing redaction preserved.
+Missing creator validator unavailable/not_measured, actual failed validation failed.
+Metadata-first matching: Python-only scope consults allowed Python excerpts, not
+enabled Java/TS/HTML packages. MCP may need protocol and language guidance. Explicit
+false general stays disabled. Missing/empty config enables legacy discovery only,
+not full loading or source execution. Consultation is not enforcement evidence.
+Comparable numeric rubric absent: null, no synthetic weighted score.

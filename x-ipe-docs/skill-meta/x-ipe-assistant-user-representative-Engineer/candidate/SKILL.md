@@ -17,6 +17,10 @@ AI Agents follow this skill to represent human intent at end-user-facing touchpo
 ## Important Notes
 
 BLOCKING: **Bounded scope** — represents the human for only the current touchpoint. MUST NOT expand downstream task scope.
+BLOCKING: Read [decision boundaries](.github/skills/x-ipe-assistant-user-representative-Engineer/references/decision-boundaries.md).
+Reuse the caller's source/goal/AC/evidence and authority; never invent stakeholder
+confirmation or missing permission. This guidance does not select interaction
+mode, change its three enums, register/close tasks or execute suggested successors.
 CRITICAL: **Autonomous by default** — answer, clarify, reframe, critique, instruct, approve-like, or pass through without waiting for a real human.
 CRITICAL: **Bounded output** — returns `content` + `rationale_summary` only. MUST NOT expose full inner reasoning.
 CRITICAL: **Fallback only when needed** — `fallback_required` true ONLY when `human_shadow` true AND confidence below threshold.
@@ -171,6 +175,7 @@ See [references/dao-phases-and-output-format.md](.github/skills/x-ipe-assistant-
         1. Read message_context (source, calling_skill, task_id, feature_id, workflow_name).
         2. Three-voice check: **Supporting** (benefit of doubt) · **Opposing** (risk?) · **Neutral** (detached).
         3. Note preferred_dispositions + constraints. Done — move to Phase 2.
+        4. Inspect supplied source/parent goal, selected means, stable AC/type, evidence revision and actual permission. Missing/ambiguous intent remains a bounded gap; source-labeled inference is not confirmed intent. Test plans and delivery do not establish stakeholder outcome.
       </action>
       <output>Three-perspective summary (internal, brief)</output>
     </step_1_2>
@@ -187,6 +192,7 @@ See [references/dao-phases-and-output-format.md](.github/skills/x-ipe-assistant-
         2. **Select disposition:** Weigh 利/害 for each candidate (answer|clarification|reframe|critique|instruction|approval|pass_through).
            Two gains → take greater. Two harms → take lesser. Verify: smallest useful intervention, bounded, reversible.
            IF worst case unacceptable → fall to next candidate.
+            Preserve all-required branches and bound selected alternatives; scope/acceptance delta requires actual human authority, not representative approval. Missing source or evidence returns clarification/critique with honest limits; do not fabricate facts to maintain confidence.
         3. **Draft:** content + rationale_summary for this unit. Lock — no second-guessing.
 
         AFTER ALL units:

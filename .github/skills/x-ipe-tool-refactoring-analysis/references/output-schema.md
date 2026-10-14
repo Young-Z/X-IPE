@@ -1,175 +1,162 @@
-# Output Schema Reference
+# Refactoring analysis operation schema
 
-This document contains the complete output data model schema for the Refactoring Analysis task type.
+Entry operation_output is authoritative. This reference expands retained domain
+fields, not a task result/next-task instruction/approval workflow. Preserve all
+original keys and supplied extensions; historical optional fields remain available.
 
----
+## Types and evidence status
 
-## Complete Output Attributes
+Scores: number | null, 1–10 only with actual measured inputs, authoritative comparable
+rubric, method/scope/denominator/revisions. Actual null, not the string "null" or
+"not measured" in numeric fields. Explain not measured with reason in report.
+Percentages: legacy percentage string | null; measured zero is "0%", unknown null.
+Absent tests/docs do not measure zero. Retain historical values/provenance separately
+from fresh measurements. Unknown SOLID/KISS/modular status is null with notes, not good.
+
+Evidence status (explicit schema delta): aligned | needs_attention | critical |
+not_found | not_measured | not_applicable | failed. Original alignment/attention/
+critical values require findings, not score bands. not_found is absence;
+not_measured missing applicable measurement; not_applicable justified domain;
+failed attempted applicable failed check with exit/output. Unavailable versus
+executed failure stays distinguishable in evidence/limitations.
+
+success=true: authorized analysis delivered, all five dispositions, traceable
+suggestions (possibly empty), actual report and transparent limits. Not approval,
+runtime preservation, aligned code or achieved outcome. success=false: required
+input/scope/report cannot be satisfied, errors exact reason/path/revision and actual
+partial result retained. Optional missing docs/coverage alone is not failure.
+Strict consumers rejecting nullable/status delta receive compatibility blocker,
+never fabricated values. Operation remains full_analysis; no new mode operation.
+
+## Complete domain declaration
+
+This is a declaration, not instantiated successful analysis evidence.
 
 ```yaml
-Output:
-  category: code-refactoring-stage
-  status: completed | blocked
-  next_task_based_skill: Improve Code Quality Before Refactoring
-  require_human_review: Yes
-  interaction_mode: {from input Auto Proceed}
-  task_output_links: [<path to analysis report>]
-  
-  # Dynamic attributes - MUST be passed to next task
-  quality_baseline:
-    exists: true | false
-    evaluated_date: <date from report if exists>
-    overall_score: <1-10 if exists>
-    code_violations:
-      file_size: [<files exceeding 800 lines>]
-      approaching_threshold: [<files 500-800 lines>]
-    feature_gaps: [<features with violations>]
-    test_coverage: <percentage if available>
-  
-  refactoring_scope:
-    scope_level: feature | custom
-    feature_id: <FEATURE-XXX or null>
-    refactoring_purpose: "<purpose string>"
-    files: [<expanded list of files>]
-    modules: [<expanded list of modules>]
-    dependencies: [<identified dependencies>]
-    scope_expansion_log: [<log of scope expansions>]
-    
-  code_quality_evaluated:
-    # Each dimension uses score grid: 8-10 aligned, 6-7 needs_attention, 1-5 critical
-    # Score = 10 - SUM(violations × importance_weight)
-    # Importance weights: critical=3, high=2, medium=1, low=0.5
-    
-    requirements_alignment:
-      score: <1-10>  # Calculated from violations × importance
-      status: aligned | needs_attention | critical  # Derived: 8-10=aligned, 6-7=needs_attention, 1-5=critical
-      gaps: [<list of gaps>]
-      related_docs: [<paths to requirement docs>]
-      violations:
-        - type: <undocumented | unimplemented | deviated>
-          importance: critical | high | medium | low
-          weight: <3 | 2 | 1 | 0.5>
-       
-    specification_alignment:
-      score: <1-10>
-      status: aligned | needs_attention | critical
-      gaps: [<list of gaps>]
-      feature_ids: [<FEATURE-XXX>]
-      spec_docs: [<paths to tech design docs>]
-      violations:
-        - type: <missing | outdated | incorrect>
-          importance: critical | high | medium | low
-          weight: <3 | 2 | 1 | 0.5>
-       
-    test_coverage:
-      score: <1-10>
-      status: aligned | needs_attention | critical
-      line_coverage: <XX%>
-      branch_coverage: <XX%>
-      target_percentage: 80
-      critical_gaps: [<untested areas>]
-      external_api_mocked: true | false
-      violations:
-        - type: <no_tests | low_coverage | critical_untested>
-          importance: critical | high | medium | low
-          weight: <3 | 2 | 1 | 0.5>
-       
-    code_alignment:
-      score: <1-10>
-      status: aligned | needs_attention | critical
-      
-      # File Size Analysis (threshold: ≤800 lines)
-      file_size_violations:
-        - file: <path>
-          lines: <count>
-          severity: high | medium
-          recommendation: "<split suggestion>"
-      files_approaching_threshold:
-        - file: <path>
-          lines: <count>
-          buffer: <lines remaining>
-      
-      # SOLID Principles Assessment
-      solid_assessment:
-        srp: { status: good | partial | violation, notes: "<details>" }
-        ocp: { status: good | partial | violation, notes: "<details>" }
-        lsp: { status: good | partial | violation, notes: "<details>" }
-        isp: { status: good | partial | violation, notes: "<details>" }
-        dip: { status: good | partial | violation, notes: "<details>" }
-      
-      # KISS Principle Assessment
-      kiss_assessment:
-        over_engineering: { status: good | violation, notes: "<details>" }
-        straightforward_logic: { status: good | violation, notes: "<details>" }
-        minimal_dependencies: { status: good | violation, notes: "<details>" }
-        clear_intent: { status: good | violation, notes: "<details>" }
-      
-      # Modular Design Assessment
-      modular_design_assessment:
-        module_cohesion: { status: good | partial | violation, notes: "<details>" }
-        module_coupling: { status: good | partial | violation, notes: "<details>" }
-        single_entry_point: { status: good | partial | violation, notes: "<details>" }
-        folder_structure: { status: good | partial | violation, notes: "<details>" }
-        reusability: { status: good | partial | violation, notes: "<details>" }
-        testability: { status: good | partial | violation, notes: "<details>" }
-      
-      # Code Smell Detection
-      code_smells:
-        - smell: god_class | long_method | large_file | deep_nesting | too_many_params | duplicate_code
-          file: <path>
-          severity: high | medium | low
-          details: "<description>"
-      
-    overall_quality_score: <1-10>
-    
-  refactoring_suggestion:
-    summary: "<high-level description of suggested refactoring>"
-    goals:
-      - goal: "<specific improvement goal>"
-        priority: high | medium | low
-        rationale: "<why this goal matters>"
-        principle: "<SOLID | DRY | KISS | YAGNI | Modular Design | etc.>"
-    target_structure: "<description of desired structure after refactoring>"
-    
-  refactoring_principle:
-    primary_principles:
-      - principle: <SOLID | DRY | KISS | YAGNI | SoC | Modular Design | etc.>
-        rationale: "<why this principle applies>"
-        applications:
-          - area: "<code area>"
-            action: "<specific application>"
-    secondary_principles:
-      - principle: <name>
-        rationale: "<supporting rationale>"
-    constraints:
-      - constraint: "<what to avoid or preserve>"
-        reason: "<why this constraint exists>"
+operation_output:
+  success: true | false
+  result:
+    quality_baseline:
+      exists: true | false
+      overall_score: "<number 1-10 | null>"
+      evaluated_date: "<report date | null>"
+      code_violations: {file_size: [], approaching_threshold: []}
+      feature_gaps: []
+      test_coverage: "<percentage string | null>"
+      provenance: {report_path: null, hash: null, method: null, scope: [], comparable: false}
+    refactoring_scope:
+      scope_level: feature | custom
+      feature_id: "<actual identity | null>"
+      refactoring_purpose: "<caller quality goal>"
+      files: []
+      modules: []
+      dependencies: []
+      scope_expansion_log: []
+      authorized_files: []
+      expansion_state: stable | capped | bounded | unresolved
+      remaining_frontier: []
+      exclusions: []
+    code_quality_evaluated:
+      requirements_alignment:
+        score: "<number 1-10 | null>"
+        status: "<evidence status>"
+        gaps: []
+        related_docs: []
+        violations: []
+      specification_alignment:
+        score: "<number 1-10 | null>"
+        status: "<summary evidence status>"
+        gaps: []
+        feature_ids: []
+        spec_docs: []
+        violations: []
+      feature_alignment: {score: null, status: not_measured, gaps: [], feature_ids: []}
+      technical_spec_alignment: {score: null, status: not_measured, gaps: [], spec_docs: []}
+      test_coverage:
+        score: "<number 1-10 | null>"
+        line_coverage: "<percentage string | null>"
+        critical_gaps: []
+        status: "<evidence status>"
+        branch_coverage: "<percentage string | null>"
+        current_percentage: "<legacy percentage number 0-100 | null when supplied>"
+        target_percentage: "<applicable authoritative number | null>"
+        external_api_mocked: "<observed boolean | null>"
+        violations: []
+        file_coverage: []
+      tracing_coverage:
+        score: "<number 1-10 | null>"
+        status: "<evidence status>"
+        coverage_percentage: "<measured percentage number | null>"
+        untraced_functions: []
+        unredacted_params: []
+        gaps: []
+      code_alignment:
+        score: "<number 1-10 | null>"
+        file_size_violations: []
+        solid_assessment: {}
+        kiss_assessment: {}
+        status: "<evidence status>"
+        files_approaching_threshold: []
+        modular_design_assessment: {}
+        code_smells: []
+      overall_quality_score: "<number 1-10 | null>"
+    refactoring_suggestion:
+      summary: "<findings/limits>"
+      goals: []
+      target_structure: "<selected means or no justified change>"
+    refactoring_principle:
+      primary_principles: []
+      secondary_principles: []
+      constraints: []
+    report_path: "<actual authorized report | null if not produced>"
+  errors: []
 ```
 
----
+Each perspective records applicability/reason, source/anchor/hash, check command/
+exit when executed, limitations and measurement method/scope/denominator/rubric.
+Report-linked records suffice, no new database. Specification summary keeps
+separate feature/technical evidence; one source alone cannot substantiate both.
 
-## Evaluation Thresholds
+The historical optional test_coverage.current_percentage remains available and
+passes through when supplied. Do not silently drop or overwrite it with
+line_coverage: retain its original method/scope/provenance, and identify conflicts
+if the two are not comparable. An absent alias need not be invented; absence is
+not measured zero. Only an actual same-method measurement may populate an alias.
+The original example uses a numeric percentage (62, not "62%"); retain that
+number type for current_percentage, unlike line_coverage's percentage string.
 
-> These thresholds align with `x-ipe+feature+quality-board-management` skill.
+## Retained structured records
 
-| Category | Principle | Threshold |
-|----------|-----------|-----------|
-| Test | Line Coverage | ≥ 80% |
-| Test | Branch Coverage | ≥ 70% |
-| Test | Mock External APIs | Required |
-| Code | File Size | ≤ 800 lines |
-| Code | Function Size | ≤ 50 lines |
-| Code | Class Size | ≤ 500 lines |
-| Code | Cyclomatic Complexity | ≤ 10 |
+- Dependencies: directed canonical source/target, verified reason/anchor/revision/
+  resolution; unresolved explicit, not fictitious files. Log iteration/files_added/
+  modules_added/reason plus checked edges/remaining frontier/exclusions.
+- Violations: original type/importance/weight retained; weight number | null only
+  from authoritative rubric, no invented severity mapping.
+- Size: file/lines/severity/recommendation and approaching file/lines/buffer retained.
+  Applicable threshold only; no automatic risk defect from size alone.
+- SOLID srp/ocp/lsp/isp/dip status/notes retains good/partial/violation when inspected;
+  KISS over_engineering/straightforward_logic/minimal_dependencies/clear_intent;
+  modular module_cohesion/module_coupling/single_entry_point/folder_structure/
+  reusability/testability. Unknown status null with notes.
+- Smells retain smell/file/severity/details and god_class/long_method/large_file/
+  deep_nesting/too_many_params/duplicate_code with evidence of actual goal risk.
+- Goals retain goal/priority/rationale/principle, trace gap/source/revision/parent/
+  baseline/success_evidence/preservation/trade_off/outcome_state in linked report.
+  No size-only goal or automatic stakeholder outcome claim.
+- Principles retain principle/rationale/applications area/action, constraints retain
+  constraint/reason with API/backward behavior/security/performance/external boundaries.
 
----
-
-## Gap Types by Perspective
+## Original gap vocabulary and contextual thresholds
 
 | Perspective | Gap Types |
-|-------------|-----------|
+| --- | --- |
 | Requirements | undocumented, unimplemented, deviated |
 | Features | missing, extra, deviated |
 | Tech Spec | structure, interface, data_model, pattern |
 | Test Coverage | business_logic, error_handling, edge_case |
 | Tracing Coverage | untraced, unredacted, wrong_level |
+
+Legacy quality-board context: line 80%, branch 70%, file 800, function 50, class
+500, complexity 10. Only under applicable authoritative rubric, never universal
+gates or safe preservation proof. External mocks depend on isolation contract;
+integration may need real service evidence. No default weighted aggregate.

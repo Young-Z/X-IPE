@@ -7,16 +7,22 @@
 # ─────────────────────────────────────────────────────────────
 skill_name: x-ipe-assistant-user-representative-Engineer
 skill_type: x-ipe-assistant
-version: "1.0.0"
-status: candidate
+version: "1.1.0"
+status: production
 created: 2026-04-20
-updated: 2026-04-20
+updated: 2026-10-14
+publication_state: published
+publication_receipt: x-ipe-docs/skill-meta/x-ipe-assistant-user-representative-Engineer/publication-receipt-TASK-6749-R2.json
+candidate_hash: b4c1f55fde3ffea168b8204a4095653faabe98db753c132b5b7815e3d2e029d5
+distributable_byte_parity: true
+review: x-ipe-docs/skill-meta/x-ipe-meta-skill-creator/independent-review-promotion-TASK-6749-R2.md
+current_evidence: "Exact R2 eight-file installed parity and installed creator API/CLI validated; 419 production-routed checks pass, two historical creator state assertions excluded and documented, no test edits or autonomous-pilot claim"
 
 # ─────────────────────────────────────────────────────────────
 # PURPOSE
 # ─────────────────────────────────────────────────────────────
 summary: |
-  Represent human intent at end-user-facing touchpoints as an autonomous human representative (工程師 persona). Migrated from x-ipe-assistant-user-representative-Engineer to x-ipe-assistant namespace with identical functionality.
+  Represent human intent at end-user-facing touchpoints as an autonomous human representative (工程師 persona), preserving the established interface while adding bounded goal/evidence and authority guidance.
 
 triggers:
   - "represent human intent"

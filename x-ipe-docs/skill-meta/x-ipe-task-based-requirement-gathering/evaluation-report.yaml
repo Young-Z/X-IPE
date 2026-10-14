@@ -1,0 +1,80 @@
+task_id: TASK-6749
+skill_name: x-ipe-task-based-requirement-gathering
+skill_type: x-ipe-task-based
+date: 2026-10-13
+publication_state: published
+promoted: true
+scope: independently reviewed requirement-gathering promotion; first sequential step complete
+candidate_hash: fda78fe5234e0d054a4b720e0773ed30cac8f1e39a10215ce277882576ab294b
+version: "2.1.0"
+promotion_receipt: promotion-receipt-TASK-6749.json
+counts:
+  entry_total_lines: 250
+  entry_body_lines: 246
+  package_files: 6
+  resources: 5
+  resource_lines: 356
+  package_lines: 606
+  retained_updated_paths: 5
+  added_paths: 1
+  removed_paths: 0
+resources:
+  - {path: references/context-review.md, lines: 117, disposition: added}
+  - {path: references/examples.md, lines: 78, disposition: updated}
+  - {path: references/file-splitting.md, lines: 79, disposition: updated}
+  - {path: references/requirement-details-template.md, lines: 68, disposition: updated}
+  - {path: templates/requirement-details.md, lines: 14, disposition: retained compatibility path to canonical form}
+validation:
+  installed_creator: passed
+  receipt: validation-receipt.json
+  errors: 0
+  warnings: 2
+  warnings_disposition: uninstantiated previous-part/mockup template paths, not broken concrete resources
+  exact_receipt_match: verified
+  requirement_tests: {passed: 43, failed: 0, contracts: 35, temporary_cli_scenarios: 8}
+  focused_regressions: {passed: 163, failed: 0, includes_requirement_tests: true}
+  evidence: independent-review-TASK-6749.md; promotion-receipt-TASK-6749.json
+  current_promotion_suite: {passed: 215, failed: 0, suites: [pipeline, creator_foundation, lifecycle]}
+  historical_builder_log: execution-log-TASK-6749.yaml; superseded for final hash and publication status
+  revisions: evidence-files.json
+contract_review:
+  type: builder inspection plus deterministic schema/resource/consumer assertions
+  preserved:
+    - Complete original task_completion_output key order, narrower status set and conditional successor form
+    - Input/init action/context/mockups, actual keyed app deliverables and shared mandatory action
+    - Epic and legacy/new feature IDs, EN/ZH language, active requirement parts/index/split handling
+    - Conflicts, CR impacts, agreed minor updates/major retirement and unrelated FR/AC protection
+    - All three interaction enums and common lifecycle authority boundaries
+  removed:
+    - Duplicate child board lifecycle, obsolete DAO routing and successor execution
+    - Forced full semantic reanalysis/research/interview when input and coverage are fresh
+  evidence_limit: text contracts and real helper mechanics, not complete agent/domain execution
+independent_review:
+  status: approved_main_distinct_from_prior_author
+  performed: true
+  blocks_promotion: false
+  report: independent-review-TASK-6749.md
+  focus:
+    - Delta-review freshness and complete cross-part coverage without unbounded rescan
+    - One-owner direct entry and same-task resume without recursion
+    - Real app write prerequisites and both output checks despite installed helper permissiveness
+    - Epic-per-intake and CR impacts without premature new feature IDs or unintended downstream work
+    - Requested language, mockup/URL sources and split consumer integrity
+preservation:
+  live_requirement_package: verified byte-identical to final candidate and validation-receipt.json
+  existing_candidate_difference: recorded in prework-candidate.json and plan.md
+  historical_execution_log: retained; not current evidence
+  legacy_test_cases: explicitly superseded by test-cases-TASK-6749.yaml
+  version_history_updated: true; 2.1.0 after byte parity
+  trusted_managed_ownership: no historical managed manifest invented; exact-path user-authorized patch publication
+  board_writes: false
+  memory_operations: false
+  git_commands: false
+  app_source_or_config_edits: false
+  other_skill_edits: false
+  production_workflow_actions: false
+  publication_commands: false
+unresolved_issues:
+  - Installed helper semantic gaps remain unchanged; candidate requires domain verification.
+  - Patch publication is not an atomic publisher transaction; final exact byte parity was verified.
+next_action: Begin the separately authorized feature-breakdown candidate; no breakdown promotion before separate review.

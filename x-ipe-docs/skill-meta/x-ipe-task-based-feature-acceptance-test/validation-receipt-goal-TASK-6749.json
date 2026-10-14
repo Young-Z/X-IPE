@@ -1,0 +1,20 @@
+{
+  "body_lines": 239,
+  "candidate_hash": "04872899595a2e65bfa11eb54024f349cf35fe812d8f59694eb451b8f57d3843",
+  "errors": [],
+  "excluded_files": {},
+  "files": {
+    "SKILL.md": "5710bfe3401fe099d7be1823e0a1aca5c79718b9e1b56206b883e3719ffd3404",
+    "references/detailed-procedures.md": "9577fa75fc674b6b5494c093356be0d6c4b76e4924bb500066324a5c038111d4",
+    "references/examples.md": "0220ecd13e842e982debb0e4c00d0e0c94c216f0a0f7a2f991ea592072a28c57",
+    "references/integration.md": "38f23a462939d0df1228c7a62dd8f90d4790cbe8ed23473f84e07794fb896630",
+    "scripts/verify_evidence.py": "9b9473189b12d1228a7b204fe73074e53e579ee03e35f643cf115f398b1c4fed",
+    "templates/acceptance-test-cases.md": "4593fe8176404ca3fec4037c1f404ab28a6e0b1d5383e300e50aa248f7549038"
+  },
+  "name": "x-ipe-task-based-feature-acceptance-test",
+  "ok": true,
+  "operation": "validate",
+  "schema": 1,
+  "skill_type": "x-ipe-task-based",
+  "warnings": []
+}

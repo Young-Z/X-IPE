@@ -1,64 +1,10 @@
-# Task Board
+# Legacy Task Board Template — Historical Only
 
-> Task Execution Guideline - Task Tracking
+DO NOT USE this retained compatibility resource for persistence or lifecycle
+control. JSON board CLI is authoritative; load the
+[common lifecycle contract](.github/skills/x-ipe-workflow-task-execution/references/lifecycle.md) instead.
+Retained to avoid deleting a historical tracked candidate resource before review.
 
-## Global Settings
-
-```yaml
-interaction_mode: "interact-with-human"  # Set to "dao-represent-human-to-interact" for automatic task chaining
-```
-
----
-
-## Active Tasks
-
-| Task ID | Task | Description | Category | Role | Status | Next Task | Workflow |
-|---------|-----------|-------------|----------|------|--------|-----------|----------|
-| | | | | | | | |
-
----
-
-## Completed Tasks
-
-| Task ID | Task | Description | Category | Completed | Category Changes | Workflow |
-|---------|-----------|-------------|----------|-----------|------------------|----------|
-| | | | | | | |
-
----
-
-## Cancelled Tasks
-
-| Task ID | Task | Description | Reason | Cancelled | Workflow |
-|---------|-----------|-------------|--------|-----------|----------|
-| | | | | | |
-
----
-
-## Status Legend
-
-| Status | Symbol | Description |
-|--------|--------|-------------|
-| pending | ⏳ | Waiting to start |
-| in_progress | 🔄 | Working |
-| blocked | 🚫 | Waiting for dependency |
-| deferred | ⏸️ | Paused by human |
-| completed | ✅ | Done |
-| cancelled | ❌ | Stopped |
-
----
-
-## Category Legend
-
-| Category | Description | Additional Skill |
-|----------|-------------|------------------|
-| Standalone | No category-level tracking | (none) |
-| feature-stage | Feature board tracking | x-ipe+feature+feature-board-management |
-
----
-
-## Quick Stats
-
-- **Total Active:** 0
-- **In Progress:** 0
-- **Blocked:** 0
-- **Completed Today:** 0
+No Markdown board is created or updated. Use installed task_query.py,
+task_ensure.py and task_update.py with actual JSON task fields. This tombstone
+retains the resource path only; it contains no registry or execution policy.

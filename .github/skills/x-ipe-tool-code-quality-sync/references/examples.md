@@ -1,310 +1,77 @@
-# Validate Quality Before Refactoring Examples
+# Quality sync examples — illustrative contracts, not observed production outcomes
 
-## Example 1: Syncing Documentation for API Module
+## 1. Local API descriptive drift against approved goals
 
-**Input from Refactoring Analysis:**
-```yaml
-refactoring_scope:
-  files: [src/api/users.py, src/models/user.py, src/services/auth.py]
-  modules: [api.users, models, services.auth]
-  
-code_quality_evaluated:
-  requirements_alignment:
-    status: needs_update
-    gaps:
-      - type: undocumented
-        description: "Password reset with email verification"
-        file: src/api/users.py
-  feature_alignment:
-    status: needs_update
-    gaps:
-      - feature_id: FEATURE-012
-        type: extra
-        description: "Bulk user import not in spec"
-  technical_spec_alignment:
-    status: needs_update
-    gaps:
-      - type: structure
-        description: "Design shows class, code uses functions"
-  test_coverage:
-    status: insufficient
-    current_percentage: 62
-```
+Approved FR-USER-01 / US-USER-01 / AC-USER-01 says password reset requires a valid
+token; the approved functional API is already implemented and characterized in
+src/api/users.py with src/models/user.py and src/services/auth.py as inspected
+dependencies, not added write permission. An old design describes a class.
+Authorized local sync corrects only the stale design description/links and adds
+targeted happy/error/edge preservation tests. No invented five-second SLA, token
+lifetime or complexity requirements. Technical Design Change Log records actual
+date/hashes. Undocumented bulk import stays an observed note until approved, not
+automatic acceptance. All numbers below are illustrative, not measurements.
 
-### Step 2: Sync Requirements
+| Goal / Parent / Source | Baseline / Target | Docs Considered | Preservation / Type | Evidence / Limits | Disposition |
+| --- | --- | --- | --- | --- | --- |
+| Q-USER-01; US-USER-01; FR-USER-01#AC-USER-01 | approved token boundary unchanged; stale class description | requirements; specification; technical design | AC-USER-01; Unit; same results/errors at base and target | source/test/doc/config hashes and actual date required; outcome not measured | descriptive drift only; no changed requirement |
 
-```
-Processing requirement gaps...
+Example instantiated handoff: original result keys, exact scope/suggestion/goals/
+target_structure/principles, doc count from changed design, tests counted from
+actual tests, line_coverage=null and overall_quality_score=null when unmeasured.
+Local optional coverage does not block independently evidenced preservation.
 
-Gap 1: undocumented - Password reset with email verification
-→ Analyzing src/api/users.py:reset_password()
-→ Found: Sends email, validates token, resets password
-→ Creating requirement entry in x-ipe-docs/requirements/user-management.md
+## 2. Bug is not documentation drift
 
-Added to requirements:
----
-### Password Reset (Discovered Behavior)
-*Documented from code during refactoring prep*
+Approved token boundary: expiry == now is expired. Code accepts equality; a test
+that accepts equality can pass while violating AC-USER-01. Keep requirement/AC
+unchanged, add the authorized expected-rejection characterization and retain its
+actual failure evidence. alignment_state=divergent, BUG_FOUND and readiness=false.
+Do not rewrite requirement to equality-valid, automatically skip/xfail the test,
+fix source, or add repair to pass-through refactor scope. User-requested grace
+period changes approved behavior and requires actual human CR authority instead.
 
-**Flow:**
-1. User requests password reset with email
-2. System sends reset token via email
-3. User submits new password with token
-4. System validates token and updates password
+## 3. Missing requirements, features or technical design
 
-**Acceptance Criteria:**
-- [x] Email sent within 5 seconds
-- [x] Token expires after 24 hours
-- [x] Password meets complexity requirements
----
+No approved goal documents exist for a legacy user module. Record not_found and
+unavailable alignment, not zero score, measured zero coverage or aligned after
+creating files. A caller-authorized draft may describe observed user CRUD,
+authentication and notifications but is explicitly observational, not approved
+requirements/ACs. Reuse an explicit legacy story so-that only as inferred anchored
+intent. Missing pertinent intent blocks that goal/coverage claim, not unrelated
+established delivery. success can mean completed assessment with readiness=false.
 
-requirements_alignment updated:
-  status: aligned
-  gaps: []
-  updates_made:
-    - doc: x-ipe-docs/requirements/user-management.md
-      change: "Added Password Reset section"
-```
+## 4. Broad scoped preservation, not global repair
 
-### Step 3: Sync Features
+Approved cross-module payment API refactor has stable imports/results/errors/data
+and redaction. Run planned relevant integration/full suite; map every critical
+changed path and affected caller at base and target. Suppose actual comparable
+coverage is 62% then 84%: record those values only with method/scope/denominator/
+dates/hashes. 84% does not waive an untested security boundary; 62% alone is not
+an arbitrary block if critical evidence and applicable policy permit proceeding.
+Broad default line80 is a guideline; mandatory thresholds require an applicable
+authoritative source. Unrelated suite failure stays reported, not silently repaired.
+No synthetic score 10 from adding tests or docs. Preserve existing tracing/redaction.
 
-```
-Processing feature gaps...
+## 5. Skill/document study with unavailable metrics
 
-Gap 1: extra - Bulk user import not in spec (FEATURE-012)
-→ Asking human...
+Caller selects study-only, skill/document targets and one read-only report. Inspect
+entry/resource/output contracts with the installed validator and relevant disposable
+fixtures if authorized. No source/doc/test mutation or production promotion;
+line_coverage=null, overall_quality_score=null, coverage not_applicable with reason.
+No forced newinfra, compile, tracing or coverage framework. Base/target missing
+fingerprints mean preservation unavailable, not automatically maintained. Passing
+fixtures establish their engineering observations, not autonomous tool execution,
+caller compatibility or observed stakeholder outcome. Readiness=false for study;
+success=true only when the authorized assessment/report actually exists.
 
-"Code has feature not in spec:
-Bulk user import with CSV support
-Options:
-1. Add to specification
-2. Mark for removal during refactoring"
+## 6. Evidence invalidation and honest boundaries
 
-Human chose: 1. Add to specification
+After a targeted design or assertion change, recompute relevant hashes and rerun
+affected checks; do not reuse earlier green. Required critical checker unavailable
+has exit=null; attempted failure has actual nonzero exit. Keep historical metrics
+with provenance and optional legacy current_percentage numeric alias even when
+its scope differs from current line_coverage. Explain divergence/unavailability,
+retain code_alignment exact input and unaffected evidence. A strict downstream
+consumer rejecting null returns a compatibility gap, not coerced score or success.
 
-→ Reading x-ipe-docs/requirements/FEATURE-012/specification.md
-→ Adding acceptance criteria:
-
-Added to specification:
----
-### Bulk User Import
-
-**User Story:** As an admin, I can import multiple users via CSV.
-
-**Acceptance Criteria:**
-- [ ] Accept CSV file upload
-- [ ] Validate email format for all rows
-- [ ] Report errors per row
-- [ ] Create valid users
----
-
-feature_alignment updated:
-  status: aligned
-  gaps: []
-  updates_made:
-    - doc: x-ipe-docs/requirements/FEATURE-012/specification.md
-      change: "Added Bulk User Import section"
-```
-
-### Step 4: Sync Technical Design
-
-```
-Processing technical spec gaps...
-
-Gap 1: structure - Design shows class, code uses functions
-→ Reading x-ipe-docs/requirements/FEATURE-012/technical-design.md
-
-Original design (Part 1):
-```python
-class UserService:
-    def create_user(self, data): ...
-    def get_user(self, id): ...
-```
-
-Actual code:
-```python
-def create_user(data): ...
-def get_user(id): ...
-```
-
-→ Updating technical design to match code:
-
-Updated design:
----
-## User API Functions
-
-The user module uses functional approach:
-
-```python
-# src/api/users.py
-def create_user(data: UserCreate) -> User
-def get_user(id: int) -> User
-def update_user(id: int, data: UserUpdate) -> User
-def delete_user(id: int) -> None
-def reset_password(email: str) -> None
-def bulk_import(file: UploadFile) -> ImportResult
-```
----
-
-Added to Design Change Log:
-| Date | Phase | Change Summary |
-| 2024-01-15 | Pre-Refactor Sync | Updated to functional pattern matching actual implementation |
-
-technical_spec_alignment updated:
-  status: aligned
-  gaps: []
-  updates_made:
-    - doc: x-ipe-docs/requirements/FEATURE-012/technical-design.md
-      change: "Updated to functional pattern"
-```
-
-### Step 5: Update Tests
-
-```
-Current coverage: 62%
-Target: 80%
-
-Analyzing critical gaps:
-- src/api/users.py:reset_password - 0% covered
-- src/api/users.py:bulk_import - 0% covered
-- src/services/auth.py:refresh_token - 0% covered
-
-Generating tests...
-
-Created: tests/test_users_password.py
----
-def test_reset_password_sends_email():
-    # Test email is sent when valid user requests reset
-    ...
-
-def test_reset_password_invalid_email():
-    # Test error when email not found
-    ...
-
-def test_reset_password_token_validation():
-    # Test token validation flow
-    ...
----
-
-Created: tests/test_users_bulk.py
----
-def test_bulk_import_valid_csv():
-    # Test successful import
-    ...
-
-def test_bulk_import_invalid_rows():
-    # Test partial failure handling
-    ...
----
-
-Running all tests... ✅ All pass
-
-Running coverage...
-- Before: 62%
-- After: 84%
-
-test_coverage updated:
-  status: sufficient
-  current_percentage: 84
-  tests_added: 8
-  tests_updated: 0
-```
-
-### Step 6: Final Output
-
-```
-Quality Validation Complete
-
-Documentation Sync:
-- Requirements: ✅ Aligned (1 update)
-- Features: ✅ Aligned (1 update)
-- Tech Design: ✅ Aligned (1 update)
-
-Test Coverage: 62% → 84%
-- Tests Added: 8
-- All tests passing: ✅
-
-Ready for Refactoring: ✅
-
-Approve to proceed to Code Refactor V2?
-```
-
-**Updated code_quality_evaluated:**
-```yaml
-code_quality_evaluated:
-  requirements_alignment:
-    status: aligned
-    gaps: []
-    updates_made:
-      - doc: x-ipe-docs/requirements/user-management.md
-        change: "Added Password Reset section"
-  feature_alignment:
-    status: aligned
-    gaps: []
-    updates_made:
-      - doc: x-ipe-docs/requirements/FEATURE-012/specification.md
-        change: "Added Bulk User Import section"
-  technical_spec_alignment:
-    status: aligned
-    gaps: []
-    updates_made:
-      - doc: x-ipe-docs/requirements/FEATURE-012/technical-design.md
-        change: "Updated to functional pattern"
-  test_coverage:
-    status: sufficient
-    current_percentage: 84
-    tests_added: 8
-    tests_updated: 0
-  overall_quality_score: 10
-  validation_summary:
-    docs_created: 0
-    docs_updated: 3
-    tests_added: 8
-    ready_for_refactoring: true
-```
-
----
-
-## Example 2: Creating Missing Documentation
-
-**Input:**
-```yaml
-code_quality_evaluated:
-  requirements_alignment:
-    status: not_found
-    gaps:
-      - type: missing
-        description: "No requirement documentation exists"
-  feature_alignment:
-    status: not_found
-    gaps:
-      - type: missing
-        description: "No feature documentation exists"
-  technical_spec_alignment:
-    status: not_found
-```
-
-**Action:**
-```
-All documentation missing. Creating from code...
-
-1. Analyzing code behavior...
-   - Found: User CRUD operations
-   - Found: Authentication flow
-   - Found: Email notifications
-
-2. Generating requirement doc:
-   x-ipe-docs/requirements/user-module-requirements.md
-   [Generated from code - requires review]
-
-3. Generating feature spec:
-   x-ipe-docs/requirements/FEATURE-NEW-001/specification.md
-   [Generated from code - requires review]
-
-4. Generating technical design:
-   x-ipe-docs/requirements/FEATURE-NEW-001/technical-design.md
-   [Generated from code - requires review]
-
-⚠️ Note: All documentation was reverse-engineered from code.
-Human review recommended before refactoring proceeds.
-```

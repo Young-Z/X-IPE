@@ -60,26 +60,23 @@ class TaskBoardService:
         index_path = self.tasks_dir / "tasks-index.json"
         index_data = self._read_json(index_path)
 
-        if index_data is not None:
+        if isinstance(index_data, dict):
             entries = index_data.get("entries", {})
-            entry = entries.get(task_id)
-            if entry:
-                file_path = self.tasks_dir / entry["file"]
-                tasks = self._read_json(file_path)
-                if isinstance(tasks, list):
-                    for task in tasks:
-                        if task.get("task_id") == task_id:
-                            return {"success": True, "data": task}
+            entry = entries.get(task_id) if isinstance(entries, dict) else None
+            filename = entry.get("file") if isinstance(entry, dict) else entry
+            # Legacy string entries are valid; escaping/archived paths are not.
+            if isinstance(filename, str) and _DATE_PATTERN.fullmatch(filename):
+                for task in self._read_all_tasks([self.tasks_dir / filename]):
+                    if isinstance(task, dict) and task.get("task_id") == task_id:
+                        return {"success": True, "data": task}
 
         # Fallback: scan daily files if index missing or stale
         for fp in sorted(self.tasks_dir.glob("tasks-*.json"), reverse=True):
             if fp.name.endswith(".archived.json") or not _DATE_PATTERN.match(fp.name):
                 continue
-            tasks = self._read_json(fp)
-            if isinstance(tasks, list):
-                for task in tasks:
-                    if task.get("task_id") == task_id:
-                        return {"success": True, "data": task}
+            for task in self._read_all_tasks([fp]):
+                if isinstance(task, dict) and task.get("task_id") == task_id:
+                    return {"success": True, "data": task}
 
         return {
             "success": False,

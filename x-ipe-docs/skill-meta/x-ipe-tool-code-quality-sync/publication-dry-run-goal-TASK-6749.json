@@ -1,0 +1,21 @@
+{
+  "added": ["references/detailed-procedures.md", "references/output-schema.md", "templates/validation-report.md"],
+  "baseline_hash": "7a1d4b305d74bc129edd5eb8ce0a705fc08c2da19fce45ad4b0e10fd202f3efc",
+  "candidate_hash": "71216a960fbbc21cd967a89b2a9447e23590d341cb0ebbbe490da6b8e0ef517d",
+  "changed": ["SKILL.md", "references/examples.md"],
+  "excluded_files": {},
+  "files": {
+    "SKILL.md": "9df97e94deeff65cc5f8b14af295d6dad4e384784edbe4e92321ac95b4a9a55d",
+    "references/detailed-procedures.md": "01ed1648c4a6411799ac268a7366dc56a999a7314a9eee3dc743c496d9e7ae60",
+    "references/examples.md": "54efd9c39893ff36afa55e605ca2a84d63148c53075e3527f581e5e5fe247e96",
+    "references/output-schema.md": "16b04449d8908d7069df967bb1d224903879c508c2b85306ddb261904141d89d",
+    "templates/validation-report.md": "ade9a14c555cbd29da9a54039a43cf19650343a75c323cf7574cad8bded96ebd"
+  },
+  "name": "x-ipe-tool-code-quality-sync",
+  "ok": true,
+  "operation": "publish",
+  "protected": [],
+  "removed": [],
+  "schema": 1,
+  "state": "dry_run"
+}

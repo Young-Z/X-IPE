@@ -1,0 +1,27 @@
+{
+  "body_lines": 216,
+  "candidate_hash": "96f1f688853aeaac6c5bcd9bdb8dc9be97c6720b0abdbc20d4ade3f915bcdc84",
+  "errors": [],
+  "excluded_files": {},
+  "files": {
+    "SKILL.md": "8da7eb352fcda583cba25b2a3cdedc843723709b45af74563f06792d04a74e86",
+    "references/examples.md": "49b35684cc8365abb121fb2d76e4a72622494e1cdb6ffc9a593b220cda18df44",
+    "scripts/_board_lib.py": "9d73e3a7e8f78d4c54415e50a6fb981c38b331b23a152028de0e3053c041f7f3",
+    "scripts/_task_store.py": "46507264ee67371b1f4371e59208e166b4a029d478ca9275db53ccd8f6149150",
+    "scripts/feature_create.py": "2ef6a7fc25df81a8f3b1445fd425eac8938e9b63a44ea6a99cbab4f023f73bb6",
+    "scripts/feature_query.py": "b20db3305afc93057dccd7ae6b8358257452e190b5fa0f32b3db6a460a9dff9c",
+    "scripts/feature_update.py": "cc01c54e3f56fd209eb97024281b47681f13e410d8bf12c7dc8e505295c9f1d1",
+    "scripts/migrate.py": "d6bf9c5d676f55303748ad5986db47564909030e235b95ffa59dcf4110d2cc22",
+    "scripts/task_archive.py": "3d027ca71cc80a5a72fd3158052ded98d46b5b877e310069ab869b7a6675f188",
+    "scripts/task_create.py": "edfd94edf6e75be3768775f2bab14c0d76cd94d4851f1a42436321c0b49d35e4",
+    "scripts/task_ensure.py": "94a0818e1d77cf84396a3db2db761f878e83c43c2a5d7260453984a0ea39682c",
+    "scripts/task_query.py": "f5352ecf32bc3e146201f682d7f3880e3d0f6fc8b42927df4ddc0080e95ca2b0",
+    "scripts/task_update.py": "8eaeadc54c02d17adfe30f01878ac83029d59d7080e934152509928d37c8514c"
+  },
+  "name": "x-ipe-tool-task-board-manager",
+  "ok": true,
+  "operation": "validate",
+  "schema": 1,
+  "skill_type": "x-ipe-tool",
+  "warnings": []
+}

@@ -1,0 +1,41 @@
+task_id: TASK-6749
+suite: tests/test_skill_pipeline_refactor.py
+scope: requirement-gathering candidate only
+historical_evidence: execution-log.yaml and test-cases.yaml are superseded historical evidence
+test_cases:
+  - id: TC-6749-STRUCTURE
+    acceptance_criteria: [AC-S01, AC-S02]
+    method: installed creator validator; candidate body/resource inventory
+    expected: complete six-file candidate, 200-300 body lines, valid local links
+  - id: TC-6749-OUTPUT
+    acceptance_criteria: [AC-C01]
+    method: YAML schema comparison to production Output Result
+    expected: all original keys, category, narrower statuses and conditional successor retained
+  - id: TC-6749-OWNER
+    acceptance_criteria: [AC-C02, AC-C05]
+    method: common lifecycle/input XML/mode contract assertions
+    expected: one lifecycle link and no duplicate child task/route/Git mutations
+  - id: TC-6749-DOMAIN
+    acceptance_criteria: [AC-C03, AC-C04, AC-C06, AC-C07, AC-R01, AC-R02]
+    method: candidate entry/canonical template/compatibility reference/examples assertions
+    expected: delta freshness/risk/questions, all-part conflict coverage, impact edits, ID/language/mockup/split contracts
+    limitation: no simulated agent conflict judgment or document-authoring pilot
+  - id: TC-6749-CONSUMERS
+    acceptance_criteria: [AC-I01]
+    method: read actual action map, workflow template, prompt and tools configuration
+    expected: mandatory shared requirement_gathering, refined-idea required, two keyed outputs, EN/ZH prompts, metadata-only gathering config
+  - id: TC-6749-HELPER-PASS
+    acceptance_criteria: [AC-I02]
+    method: installed update/read CLIs in isolated temporary projects
+    expected: single/numbered file outputs persisted/read back; feature_breakdown pending; no production state writes
+  - id: TC-6749-HELPER-BLOCK
+    acceptance_criteria: [AC-I03]
+    method: extra tags, folder array, missing workflow/action and locked prerequisite CLI scenarios
+    expected: nonzero result with original temporary state bytes preserved
+  - id: TC-6749-HELPER-LIMIT
+    acceptance_criteria: [AC-I04]
+    method: real writer accepts missing-tag/nonexistent-file scenario; candidate safety guard inspection
+    expected: observed helper gap is recorded, not interpreted as completed requirement gathering
+independent_review:
+  status: pending_main_next
+  blocks_promotion: true

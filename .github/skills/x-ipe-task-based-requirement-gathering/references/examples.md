@@ -1,133 +1,101 @@
-# Requirement Gathering - Examples
+# Requirement gathering examples
 
-> **Note:** Examples below use legacy FEATURE-{nnn} IDs (pre-Epic convention). New requirements use EPIC-{nnn} headers with FEATURE-{nnn}-{X} IDs. See SKILL.md for current format.
+## Worked outcome frame — authored requirement artifact excerpt
 
-## Example 1: New Feature — No Conflicts
+This is fixture content, not verified delivery or observed operator behavior.
+The explicit source request is: operators need to distinguish available from
+unavailable current state without changing that state. FR-061-01 is the stable
+requirement identity reused as the root goal, not a persisted goal record.
 
-**Request:** "Add user authentication"
+| Goal ID | Parent / Source | Stakeholder | Desired Observable Outcome | Contribution / Selection | Success Evidence | Constraints / Non-goals | AC Links | Outcome State |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| FR-061-01 | explicit request above | Operator | Distinguish available from unavailable current state | all-required: current-state label and unavailable-state handling | planned scenario: operator sees the available label with current state, unavailable label with absent state | Read-only; no state controls or arbitrary time target | AC-061-A-01, AC-061-A-02 (planned refinement) | not measured |
 
-**Execution:**
-```
-1. Execute Task Flow from x-ipe-workflow-task-execution skill
+| Requirement ID | Goal ID | Source / Evidence | Constraints |
+| --- | --- | --- | --- |
+| FR-061-01 | FR-061-01 | explicit request above; planned available/absent-state scenario | Read-only; no state mutation |
 
-2. Understand Request:
-   - WHAT: User authentication system
-   - WHO: End users of the application
-   - WHY: Security, user management
+Delivery evidence: no tests run in this example; not yet verified engineering
+delivery. Alternatives badge versus text are means, selected at breakdown; they
+are not two additional required product outcomes or separate feature mandates.
 
-3. Ask Clarifying Questions:
-   - "Should we support OAuth (Google/GitHub)?" -> Yes, Google
-   - "Password reset needed?" -> Yes, via email
-   - "Remember me functionality?" -> Yes
+## Domain scenarios
 
-4. Conflict Review:
-   - Scanned requirement-details-part-1.md through part-3.md
-   - No existing features cover authentication
-   - Result: "No conflicts found with existing requirements"
+Examples illustrate domain decisions, not recorded successful agent executions.
+The caller supplies one lifecycle readiness context. Each example returns the
+same task_completion_output schema; none creates/closes tasks, commits or starts
+a successor. Completion/routing is handled once by the common lifecycle.
 
-5. (Skipped — no conflicts)
+## Example 1 — Small clear new requirement, free-mode
 
-6. Create EPIC-{nnn}/ folder with mockups/ sub-directory
-   Create/update x-ipe-docs/requirements/requirement-details.md:
-   Use ## EPIC-{nnn}: User Authentication as section header
-   # Requirement Summary
-   ... (fill all sections) ...
+Request: add a read-only status badge; upstream idea already states users, business
+value, scope, acceptance and language. Existing conflict baseline covers every
+part with current hashes and scope/dependency summaries.
 
-7. Return Task Completion Output:
-   category: requirement-stage
-   status: completed
-   next_task_based_skill: Feature Breakdown
-   require_human_review: Yes
-   conflict_review_completed: true
-   conflicts_found: 0
-   impacted_features: []
+1. Reuse fresh intent and compare this delta against all covered scopes. Inspect
+   only affected dependencies; no full reanalysis, compulsory web research or
+   ceremonial clarification. Record reviewed zero conflicts and reuse provenance.
+2. Allocate next EPIC-061 (if 060 is highest), create its mockups directory even
+   with mockup_list N/A, and fill a concise complete Epic section in the active
+   requirement-details file. Feature Breakdown later assigns FEATURE-061-A;
+   requirement gathering does not put EPIC-061 in a Feature ID row.
+3. At 473 or 500 current lines append in place; at 501 follow the split procedure.
+   Record actual output path/part and verify links, language and acceptance.
+4. Free-mode: no app action write, workflow_action_updated false. Return documents
+   and suggested Feature Breakdown; the lifecycle applies its actual boundary.
 
-8. Resume Task Flow from x-ipe-workflow-task-execution skill
-```
+## Example 2 — Standard new work, workflow-mode, ZH
 
-## Example 2: New Feature — Overlap Found → CR Decision
+Resolved Chinese refined idea requests a session explorer separate from terminal
+I/O. Required idea path and optional mockup content are valid; no reusable conflict
+baseline exists. Read all current parts once and record a complete baseline.
 
-**Request:** "Add session explorer sidebar to the console"
+Comparison finds existing legacy FEATURE-005 (terminal I/O) and FEATURE-028-B
+(settings) but only a dependency, not a changed responsibility. Present any real
+choice under current policy with coupling/cohesion rationale. Document the actual
+independent-work decision and Related Features root-relative links in Chinese;
+stable IDs/tags remain unchanged. New intake uses an EPIC header, not a premature
+FEATURE-029 assignment from the old examples.
 
-**Execution:**
-```
-1. Understand Request:
-   - WHAT: Session explorer with sidebar for managing multiple terminal sessions
-   - WHO: Developers using the console
-   - WHY: Replace limited 2-pane split with up to 10 sessions
+Copy validated local mockup into EPIC-061/mockups without overwriting foreign
+bytes; URL-only mockups remain checked/linked. Verify domain gates, then write
+requirement_gathering done using BOTH requirement-doc active file and scalar
+requirements-folder. Read shared.requirement.actions.requirement_gathering back
+and verify exact artifacts/prerequisites before returning true. Do not mark
+feature_breakdown done, execute it or precreate its task.
 
-2. Ask Clarifying Questions:
-   - "Right-side or left-side?" → Right-side, collapsible
-   - "Max sessions?" → 10
-   - "Preview on hover?" → Yes, live mini-terminal
+## Example 3 — Existing-feature CR delta and conflicts
 
-3. Conflict Review:
-   - Scanned all requirement-details files
-   - Found overlap with FEATURE-005 (Console Terminal):
-   
-   | Aspect | New Requirement | Existing Feature (FEATURE-005) | Overlap Type |
-   |--------|----------------|-------------------------------|--------------|
-   | Terminal management | Session explorer with 10 sessions | 2-pane split terminal | Scope overlap |
-   | Terminal switching | Click to switch active session | Split-pane layout | Functional overlap |
-   
-   - Recommendation: "The session explorer is an INDEPENDENT feature with its
-     own lifecycle (new UI component, new interaction patterns). FEATURE-005
-     handles terminal I/O and PTY management which remains unchanged.
-     Recommend: New standalone feature."
-   - Human decision: "Agreed, new standalone feature FEATURE-029"
+Request: add persistent dark/light toggle to FEATURE-028-B theme settings.
+Reuse an authorized CR delta and complete fresh coverage map. A changed part
+requires reading affected settings FRs/ACs plus dependencies, not regenerating
+all prior analyses. Compare against all unchanged scope summaries too.
 
-4. Update Impacted Features:
-   - No CR markers needed (human chose "new feature")
-   - Added cross-reference dependency note for Step 6
+Record recommendation: same responsibility, UI, users and store → CR. Human
+answers real within-skill questions; full DAO and hybrid get bounded guidance.
+Human and hybrid wait for human completion/route confirmation; explicit human
+approval remains binding in every mode.
+Allocate this intake's next Epic; existing FEATURE-028-B identity stays intact.
+Append idempotent marker with date/task/ref, change, FR-028-B.1/FR-028-B.3 and
+specification follow-up. Minor conflict updates only agreed text inline. A major
+contradiction instead retains old sections under [RETIRED by EPIC-061] with reason,
+date and linked replacement. Preserve unrelated FRs/ACs and list actual updated
+and retired paths in conflicting_docs_updated/conflicting_docs_retired.
 
-5. Check File: part-6 has 473 lines → create part-7
+## Example 4 — Material uncertainty or invalid sources
 
-6. Document in requirement-details-part-7.md:
-   - FEATURE-029: Console Session Explorer
-   - Related Features section: "Related to FEATURE-005 (Console Terminal)
-     but independent lifecycle. FEATURE-005 provides terminal I/O;
-     FEATURE-029 provides session management UI."
+An explicit selected idea path is broken or escapes the root: blocked, no fallback
+to a newer unrelated idea. A required workflow refined idea of N/A also blocks.
+No response to a material question/conflict means blocked, not an invented answer.
+DAO guidance cannot substitute for explicitly required human authority.
 
-7. Complete: DoD verified, human approved
-```
+## Example 5 — Incomplete app output or stale evidence
 
-## Example 3: New Feature — Overlap Found → CR Decision
+Writer may accept only requirement-doc or paths to nonexistent files. Its exit 0
+does NOT justify workflow_action_updated true or domain completed. Verify both
+real artifacts, exact state and gates; otherwise return blocked, false flag and
+actual partial links. Never set a missing prerequisite skipped/done to unlock.
+Changed idea/part/config invalidates affected checks/decisions; timestamps alone
+cannot authorize reuse. Keep independent-review availability separate from
+contract tests and helper evidence; candidate-ready is not promoted.
 
-**Request:** "Add dark mode toggle to settings"
-
-**Execution:**
-```
-1. Understand: Dark mode toggle in settings panel
-
-2. Clarify: Theme applies globally, persists in localStorage
-
-3. Conflict Review:
-   - Found overlap with FEATURE-028-B (Settings Theme):
-   
-   | Aspect | New Requirement | Existing Feature (FEATURE-028-B) | Overlap Type |
-   |--------|----------------|--------------------------------|--------------|
-   | Theme switching | Dark mode toggle | Theme configuration panel | Scope overlap |
-   
-   - Recommendation: "Dark mode is part of the SAME responsibility as
-     theme configuration (single responsibility principle). It shares
-     the same UI location, same user, same data store. High cohesion
-     with existing feature. Recommend: CR on FEATURE-028-B."
-   - Human decision: "Agreed, CR on FEATURE-028-B"
-
-4. Update Impacted Features:
-   - Located FEATURE-028-B in requirement-details-part-6.md
-   - Appended CR impact marker:
-     > **⚠️ CR Impact Note** (added 2026-02-11, ref: dark-mode-toggle)
-     > - **Change:** Add dark/light mode toggle to theme settings
-     > - **Affected FRs:** FR-028-B.1, FR-028-B.3
-     > - **Action Required:** Feature specification refactoring needed
-     > - **New Feature Ref:** See requirement-details-part-7.md
-
-5. Check File: part-6 at 473 lines → create part-7
-
-6. Document: New requirement with "Related Features" section
-   referencing CR on FEATURE-028-B
-
-7. Complete: DoD verified, human approved
-   impacted_features: [FEATURE-028-B]
-```
