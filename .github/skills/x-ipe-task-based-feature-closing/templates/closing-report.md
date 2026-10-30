@@ -79,7 +79,7 @@ not obtained/not required; do not invent stakeholder acknowledgment.}
 - Current template/runtime: feature_closing deliverables [], owner deliverables {}.
 - Closing report task artifact only, no pretend closing-report extract tag.
 - Required specification, optional refactor-report; prior mandatory gates done
-  with actual evidence or blocker. Current mandatory code_refactor not bypassed.
+  with actual evidence or blocker. Default optional code_refactor requires no fabricated completion.
 - Change-request optional closing-report absent compatible; specification required.
 - Actual one owner write/readback or current read-only resume; no duplicate writes.
 - Feature actual Implemented/Tested with full acceptance or preserved Completed;

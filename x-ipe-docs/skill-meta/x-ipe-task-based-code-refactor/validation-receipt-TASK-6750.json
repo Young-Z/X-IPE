@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "operation": "validate",
+  "name": "x-ipe-task-based-code-refactor",
+  "skill_type": "x-ipe-task-based",
+  "ok": true,
+  "errors": [],
+  "warnings": [],
+  "excluded_files": {},
+  "body_lines": 275,
+  "files": {
+    "SKILL.md": "efdc5fc70f27db47362a04313d5aaeb38cec3de9c94bbf1fee43002b0e636230",
+    "references/examples.md": "e1a6d1320d9422684d60f8eadfa8bb16a1ad059306c4ed67eef870f9e1e76a9a",
+    "references/integration.md": "94f091c42524e793587d254d8ce3c880c6c83348d7705f0037f7795782e505ce",
+    "references/refactoring-techniques.md": "b7590d94de7ae44f0e2e5d712b85ff069b5d3a7c83929c5b561fee6e1f60b218",
+    "templates/refactor-report.md": "caf7d1704ed4bbc5eee96bf4278fdd760226e9c1661cc327e4cd56e6125e732c"
+  },
+  "candidate_hash": "40c0cdd5c16ef4faeb8419f85256bb4b6195fdaa8281da370df7e28916fe2422"
+}

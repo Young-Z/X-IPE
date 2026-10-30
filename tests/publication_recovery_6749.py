@@ -3,6 +3,7 @@ import hashlib
 import importlib.util
 import json
 from pathlib import Path
+import re
 
 from tests.skill_validation_harness_6749 import source_cache
 
@@ -57,12 +58,75 @@ def recovered_publication(name, live=None):
     assert hashlib.sha256(review.read_bytes()).hexdigest() == receipt["review_sha256"]
     assert receipt["candidate_hash"] in review.read_text()
     assert fingerprint(receipt["files"]) == receipt["candidate_hash"] == receipt["production_hash"]
+    latest = directory / "publication-receipt-TASK-6750.json"
+    if latest.exists():
+        # R2 stays immutable history; the next real publisher's backup must
+        # prove precisely which reviewed release it replaced.
+        current_publication(name, live)
+        assert json.loads((directory / "baseline-TASK-6750.json").read_text()) == receipt["files"]
+        first = json.loads(latest.read_text())
+        assert first["baseline_hash"] == receipt["candidate_hash"]
+    else:
+        assert resource_inventory(ROOT / ".github/skills" / name) == receipt["files"]
+        assert resource_inventory(directory / "candidate") == receipt["files"]
+        if live is not None:
+            assert live == receipt["files"]
+    history = (directory / "skill-meta.md").read_text().split("## R2 recovered publication history", 1)[1]
+    assert receipt["version"] in history and receipt["candidate_hash"] in history
+    return receipt
+
+
+def publication_chain(root, directory, name):
+    """Verify successive real transactions without hardcoding the latest task.
+
+    Allocation order is required for this local history convention. A fork or
+    out-of-order publication fails instead of selecting whichever receipt is newest.
+    """
+    paths = []
+    for path in directory.glob("publication-receipt-TASK-*.json"):
+        match = re.fullmatch(r"publication-receipt-TASK-(\d+)\.json", path.name)
+        if match:
+            paths.append((int(match[1]), path))
+    receipts = []
+    for task, path in sorted(paths):
+        receipt = json.loads(path.read_text())
+        baseline = json.loads((directory / f"baseline-TASK-{task}.json").read_text())
+        assert receipt["ok"] is True and receipt["name"] == name
+        assert receipt["operation"] == "publish" and receipt["state"] == "published"
+        assert receipt["byte_parity"] is True and receipt["removed"] == []
+        assert fingerprint(baseline) == receipt["baseline_hash"]
+        assert fingerprint(receipt["files"]) == receipt["candidate_hash"]
+        if receipts:
+            assert baseline == receipts[-1]["files"], "Broken or forked publication chain"
+        assert receipt["changed"] == sorted(k for k in baseline.keys() & receipt["files"].keys()
+                                            if baseline[k] != receipt["files"][k])
+        assert receipt["added"] == sorted(receipt["files"].keys() - baseline.keys())
+        recorded_transaction = Path(receipt["transaction"])
+        assert recorded_transaction.is_absolute()
+        assert recorded_transaction.parent.name == ".skill-publication"
+        assert recorded_transaction.parent.parent.name == ".github"
+        transaction = (root / ".github/.skill-publication" / recorded_transaction.name).resolve()
+        assert transaction.parent == (root / ".github/.skill-publication").resolve()
+        assert transaction.name.startswith(name + "-")
+        journal = json.loads((transaction / "journal.json").read_text())
+        assert journal["state"] == "published" and journal["name"] == name
+        assert journal["baseline"] == baseline and journal["proposed"] == receipt["files"]
+        assert resource_inventory(transaction / "backup") == baseline
+        receipts.append(receipt)
+    return receipts
+
+
+def current_publication(name, live=None):
+    """Validate installed bytes against the terminal verified transaction."""
+    directory = META / name
+    receipts = publication_chain(ROOT, directory, name)
+    if not receipts:
+        return recovered_publication(name, live)
+    receipt = receipts[-1]
     assert resource_inventory(ROOT / ".github/skills" / name) == receipt["files"]
     assert resource_inventory(directory / "candidate") == receipt["files"]
     if live is not None:
         assert live == receipt["files"]
-    history = (directory / "skill-meta.md").read_text().split("## R2 recovered publication history", 1)[1]
-    assert receipt["version"] in history and receipt["candidate_hash"] in history
     return receipt
 
 

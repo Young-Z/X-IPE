@@ -756,7 +756,8 @@ class TestWorkflowTemplateMigration:
         val_actions = refreshed["features"][0]["validation"]["actions"]
 
         assert "code_refactor" in val_actions, "code_refactor should be backfilled"
-        assert val_actions["code_refactor"]["status"] == "pending"
+        assert val_actions["code_refactor"]["status"] == "skipped"
+        assert val_actions["code_refactor"]["optional"] is True
         assert "feature_closing" in val_actions, "feature_closing should be backfilled"
         assert val_actions["feature_closing"]["status"] == "pending"
 

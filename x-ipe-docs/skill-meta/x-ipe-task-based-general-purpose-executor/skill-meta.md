@@ -190,3 +190,13 @@ evaluation:
     - "Referencer called for manual-dependent steps"
     - "Human feedback requested when clarity_score < 0.6"
     - "DoD checkpoints verified"
+
+## TASK-6750 single-loop delivery revision
+
+Published after deterministic validation, bounded workflow safety review, and real manifest-safe publication; prior metadata above remains version history.
+
+- Current revision: `782e09739dee02d5c3c651165e2d6e3a85d89dacae59c99a2e276e128282eee3`
+- Previous revision: `fc1d0df9a0986f7d01e2106b0baba98f2a6d7fc7f5b261077f8af99fd5a0378b`
+- Evidence: `single-loop-TASK-6750.json`, `publication-receipt-TASK-6750.json`, `validation-receipt-TASK-6750.json`.
+- Same-loop delivery/default risk-based verification; unchanged resources and protected bytes retained.
+- Token/latency savings not measured; no live-agent efficacy claim.

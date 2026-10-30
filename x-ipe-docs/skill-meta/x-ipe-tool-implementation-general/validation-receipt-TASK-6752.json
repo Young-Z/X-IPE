@@ -1,0 +1,16 @@
+{
+  "body_lines": 296,
+  "candidate_hash": "d04f8b43d5da08ede625a39cfcf2ff4a6f946a93fdfad2a473f7b34cef176a27",
+  "errors": [],
+  "excluded_files": {},
+  "files": {
+    "SKILL.md": "1762d5a4c05188962b697671f222728fc0c5b59119fb4b17ad3c720be1471f56",
+    "references/examples.md": "7c36f05a2fcd1656d7b7e8067a6bb34d053a80ceda9f360bc95929c28644bdff"
+  },
+  "name": "x-ipe-tool-implementation-general",
+  "ok": true,
+  "operation": "validate",
+  "schema": 1,
+  "skill_type": "x-ipe-tool",
+  "warnings": []
+}

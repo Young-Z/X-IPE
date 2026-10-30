@@ -32,6 +32,10 @@ AI Agents follow this skill to perform knowledge operations:
 
 ## Important Notes
 
+Default to one model/context open-ended loop; apply tool skills in the same loop.
+Use [authoring policy](.github/skills/x-ipe-meta-skill-creator/references/single-loop-authoring.md)
+for bounded delegation and risk-triggered independent review, not per-operation agents.
+
 BLOCKING: Operations are stateless services — the assistant orchestrator passes full context per call. Do NOT maintain internal state across operations.
 CRITICAL: Each operation MUST define typed input/output contracts with a `writes_to` field.
 CRITICAL: This skill is NOT directly task-matched. It is called by the Knowledge Librarian assistant (`x-ipe-assistant-knowledge-librarian-DAO`) or another assistant orchestrator.

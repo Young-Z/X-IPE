@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "ok": true,
+  "operation": "publish",
+  "state": "published",
+  "name": "x-ipe-task-based-change-request",
+  "added": [],
+  "changed": [
+    "SKILL.md"
+  ],
+  "removed": [],
+  "protected": [],
+  "baseline_hash": "55ad88aaac927844d8019abe350b1c2f273bd007e89b7bca0f4a47128a0bd578",
+  "candidate_hash": "30caca6cdb12431f48a6b0196ad30857650969e618709b068d78f7a88d455482",
+  "files": {
+    "SKILL.md": "7839edba632810f28bd7589607763ce6aff0124a411a34ca9cbfb7f91ff59999",
+    "references/examples.md": "fcf36a13b1dde3f26247c34b5accbb3a56273364b8b317cfad0addc7e821a6d8",
+    "references/integration.md": "0e03e9d3fd51a872b108a2655d4a4cb41d0450ea0b6ef7c8ef4305586920f679",
+    "references/patterns.md": "231ea68f760f9b4d94dd13dc2d6ad98f3f6fb654b816a4bd1ae1f1a6bcb9d2d4",
+    "references/version-history-template.md": "f6681980e47de797118f11526d4645ad33237eb0a275fe189ca637d54521b110",
+    "templates/change-request.md": "d894f7e5ee2fa367227139256c701df102c8802eb566deb835f6b3ba75118dcb"
+  },
+  "excluded_files": {},
+  "transaction": "/Users/yzhang/Documents/projects/X-IPE/.github/.skill-publication/x-ipe-task-based-change-request-0s2oom3k",
+  "byte_parity": true
+}

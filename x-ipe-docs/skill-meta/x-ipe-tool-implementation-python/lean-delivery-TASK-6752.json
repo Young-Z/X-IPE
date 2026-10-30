@@ -1,0 +1,87 @@
+{
+  "added": [],
+  "changed": [
+    "SKILL.md"
+  ],
+  "lessons": "Read-only selection found no applicable summaries; protected legacy retained, no queue/memory writes.",
+  "limits": "Live-agent trials not run; token/latency and stakeholder outcomes not measured.",
+  "owner": "Ember",
+  "post_publication_test_adjustment": "Historical goal test inventory now includes only additions from fully verified real publication-chain receipts. Added actual new-resource transaction coverage; historical receipts/requirements/assertions unchanged. Main-loop verification, no safety waiver.",
+  "previous_revision": "7464871ca6271e199f4fd2fa2c0698d82967ba8d129010781c4ddfa0276d986f",
+  "production_and_candidate_byte_parity": true,
+  "protected": [],
+  "publication_state": "published",
+  "recorded_at": "2026-10-30T04:03:17.553620+00:00",
+  "regressions": {
+    "inputs": {
+      ".github/copilot-instructions.md": "07bcb94ff039b103f6c72402eb1d8b728738dd467640ce9c02a1ff07d0c70a2b",
+      "README.md": "1353cdc61b8256448a8e39aea2ed3e5e12499677f0256eba4e23aa9b56b7fec5",
+      "tests/publication_recovery_6749.py": "7f92433967bd4e4d75c3070070154123fe1aa1b5ba5130ae745b99fa3cab16c6",
+      "tests/test_goal_oriented_skills.py": "f798050d5a07912fd844c03c87df810da219ba9a8bd7252f1c688bc0818c0aee",
+      "tests/test_lean_delivery.py": "6a5a6f22c2624d4ece083c57fd2aa06e31ab8874d298a6d5aecb5e1ad8e34e57",
+      "tests/test_publication_chain.py": "4e622d5f743a0196372cc5f3762f8932b27d190e24fe4100b3b66706d794244f",
+      "tests/test_single_loop_authoring.py": "fb578264d7fd83ad73b3d6cb6549855caf2dfd552cab6b44d40952fe4cecf5c2",
+      "tests/test_single_loop_delivery.py": "bbdd6b4655c8aa6ac1dccc36cdac83382f313054c04a3ab1f857bb9990b1a658",
+      "tests/test_skill_creator_foundation.py": "6e7c0c655b990b9ff25f1e1ad66569cbd4618976449caa8e9e289a2c6180fa05",
+      "tests/test_skill_goal_change_quality.py": "16c748cf3827ac76cf4b49b6a45651eee6de67df9819de9c73869a090b6e672e",
+      "tests/test_skill_goal_downstream.py": "381d9f6da6259d7ec0f61525f042453c6f5276d1e20cc36f1eff67023b89205f",
+      "tests/test_skill_lifecycle.py": "1db87f9732b0da7ab08c8aceac0589e967c9bbfd29a356290936e120d8b58676",
+      "x-ipe-docs/config/tools.json": "6df39210e203507a79023cc9c3d4aff4e93456f63f623e9b01c58a091b49e36d"
+    },
+    "log_sha256": "9be0daef5840dca578bae3e9255e569d083ee3ca3f8b268ae8b594aec56a33dd",
+    "passed": 599
+  },
+  "removed": [],
+  "review": {
+    "finding": "TypeScript refactor baseline referenced undeclared test_file",
+    "kind": "bounded independent code-review",
+    "regression": {
+      "after": "included in 237 passing selected tests",
+      "before": "1 failed",
+      "command": ".venv/bin/python -B -m pytest -q tests/test_lean_delivery.py::test_typescript_refactor_uses_declared_test_path"
+    },
+    "remaining_blockers": [],
+    "resolution": "Only command placeholder changed to declared test_code_path; same-loop verification of bounded correction",
+    "reviewed_typescript_hash": "f7151624f977e33ddcd08e68f92637302ca3997e547fbf8658077b533c5b1428",
+    "scope": [
+      "x-ipe-workflow-task-execution",
+      "x-ipe-task-based-bug-fix",
+      "x-ipe-task-based-code-refactor",
+      "x-ipe-task-based-code-implementation",
+      "x-ipe-task-based-technical-design",
+      "x-ipe-task-based-human-playground",
+      "x-ipe-tool-implementation-general",
+      "x-ipe-tool-implementation-html5",
+      "x-ipe-tool-implementation-java",
+      "x-ipe-tool-implementation-mcp",
+      "x-ipe-tool-implementation-python",
+      "x-ipe-tool-implementation-typescript",
+      ".github/copilot-instructions.md",
+      "README.md",
+      "tests/test_lean_delivery.py",
+      "tests/test_publication_chain.py",
+      "tests/publication_recovery_6749.py",
+      "tests/test_skill_goal_downstream.py"
+    ],
+    "trigger": "instruction compatibility, capability disablement and publication-history safety"
+  },
+  "review_limit": "Post-review bounded test-path correction verified in main loop; no second reviewer round.",
+  "revision": "1206f640bb1df07fe35ab0a3982189381583a3a1ff718e76a4322907d144c6eb",
+  "task_id": "TASK-6752",
+  "validation": {
+    "body_lines": 302,
+    "candidate_hash": "1206f640bb1df07fe35ab0a3982189381583a3a1ff718e76a4322907d144c6eb",
+    "errors": [],
+    "excluded_files": {},
+    "files": {
+      "SKILL.md": "63a49a7d3e61af9bd13254be79359ef045f754f70804a7550df1a2ef2703288a",
+      "references/examples.md": "70292a00df3ee19a37c7ff6168d86cb7ce693897ac9ceaef8752636ab22b68f0"
+    },
+    "name": "x-ipe-tool-implementation-python",
+    "ok": true,
+    "operation": "validate",
+    "schema": 1,
+    "skill_type": "x-ipe-tool",
+    "warnings": []
+  }
+}

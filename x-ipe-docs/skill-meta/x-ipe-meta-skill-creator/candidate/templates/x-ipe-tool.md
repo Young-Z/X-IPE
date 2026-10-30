@@ -32,6 +32,10 @@ AI Agents follow this skill to {use tool/service} to:
 
 ## Important Notes
 
+Default to one model/context open-ended loop; apply tool skills in the same loop.
+Use [authoring policy](.github/skills/x-ipe-meta-skill-creator/references/single-loop-authoring.md)
+for bounded delegation and risk-triggered independent review, not per-operation agents.
+
 BLOCKING: {Critical rule that must not be skipped}
 CRITICAL: {Important consideration}
 

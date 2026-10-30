@@ -153,59 +153,27 @@ gate_format:
   pattern: "GATE: {assertion}"
   examples:
     - "GATE: files_analyzed == true"
-    - "GATE: tests_passing AND coverage >= 80%"
+    - "GATE: affected_behavior_checks_pass"
     - "GATE: human_approval == received"
 ```
 
-## Principle 5: Sub-Agent Decomposition
+## Principle 5: Single-Loop First
 
-Delegate specific concerns to isolated sub-agents when the main agent benefits from separation of concerns.
+Use one model/context open-ended loop by default. Keep sequential planning, domain
+reasoning, drafting, verification, and revision together. Tool-skill invocation
+applies a procedure in the same loop; it is not spawning another agent.
 
-```yaml
-principle:
-  name: Sub-Agent Decomposition
-  rationale: Some tasks benefit from isolated execution with fresh context
+Use [single-loop authoring](.github/skills/x-ipe-meta-skill-creator/references/single-loop-authoring.md)
+for delegation and review decisions. Delegate only for measurable context degradation,
+substantial independent parallel work with discardable fresh context, or real
+instruction/tool-selection/permission isolation needs. Complexity alone is not
+a delegation trigger; do not generate mandatory scheduling blocks or model hints.
 
-when_to_apply:
-  validation:
-    use_when: Meaningful workflow, executable, safety, or public-contract changes need independent evaluation
-    why: Validator should not be influenced by the builder's context
-    example: "Spawn sub-agent to validate DoD after implementation"
-
-  feedback_and_reflection:
-    use_when: Output benefits from critique-and-revise cycle
-    why: Reviewer with fresh eyes catches what the author misses
-    example: "Spawn sub-agent to review technical design, main agent revises based on feedback"
-
-  parallel_work:
-    use_when: Independent work items have no data dependencies
-    why: Multiple sub-agents can work concurrently on separate concerns
-    example: "Spawn sub-agents to analyze 3 independent modules simultaneously"
-
-  no_decompose:
-    when: Steps are sequential with tight data coupling
-    when: Task is simple enough for single agent
-    when: Overhead of coordination exceeds benefit
-
-sub_agent_definition:
-  agent_id:
-    role: "{role_name}"
-    goal: "{what_agent_should_accomplish}"
-    inputs: ["{input_variables}"]
-    outputs: ["{output_names}"]
-    tools: ["{tool_list}"]
-    isolated: true | false  # true = fresh context, no builder bias
-
-usage_in_skills:
-  format: |
-    sub_agents:
-      - id: "{agent_id}"
-        role: "{role}"
-        goal: "{goal}"
-        trigger: "{when_to_spawn}"
-        isolated: true | false
-  note: "Model is NOT specified here — each skill defines its own default model"
-```
+Independent review is conditional on concrete security/trust/permission or
+destructive changes, explicit user review, or unresolved ambiguity/observed failures.
+Ordinary workflow, executable, and public-contract edits use affected deterministic
+checks and same-loop self-review, not automatic reviewers. Keep actual approvals
+and filesystem/data safeguards. No judge rounds, score or coverage-percentage gates.
 
 ## Principle 6: 5-Phase Learning Method (博学之，审问之，慎思之，明辨之，笃行之)
 
@@ -359,7 +327,9 @@ CRITICAL: Each step MUST have exactly ONE `<action>` block containing ALL action
 
 Task-based skills may use the existing phase variant or concise flat steps. Preserve task input/output, domain gates, and lifecycle routing; this guideline does not authorize deleting those contracts. Other types normally use flat steps or operations.
 
-Independent review is required for meaningful workflow, executable, safety, or public-contract changes; cosmetic/document-only updates may use deterministic checks plus documented self-review. Legacy `schedule_dod_checks_with_sub_agent_before_starting` tags below mean schedule a reviewer when risk warrants one, not force a new agent for every operation. Example DAGs are optional decomposition patterns.
+Use affected deterministic checks and same-loop self-review by default. Apply
+Principle 5 only when a concrete delegation or independent-review trigger arises;
+do not include a scheduling tag or reviewer DAG in the default scaffold.
 
 ### Pattern 1a: Flat Steps (tool, meta, workflow-orchestration, task-category skills)
 
@@ -367,9 +337,8 @@ Independent review is required for meaningful workflow, executable, safety, or p
 
 ```xml
 <procedure name="{procedure_name}">
-  <!-- Check DoR; schedule independent DoD review when semantic risk warrants it. -->
+  <!-- Check readiness in the same loop. -->
   <execute_dor_checks_before_starting/>
-  <schedule_dod_checks_with_sub_agent_before_starting/>
   
   <step_1>
     <name>{Step Name}</name>
@@ -407,24 +376,6 @@ Independent review is required for meaningful workflow, executable, safety, or p
     ...
   </step_3>
 
-  <sub-agent-planning>
-    <sub_agent_1>
-      <sub_agent_definition>
-        <role>{role_name}</role>
-        <prompt>{context, goal}</prompt>
-      </sub_agent_definition>
-      <workflow_step_reference>step_1, step_2</workflow_step_reference>
-    </sub_agent_1>
-    <sub_agent_2>
-      <sub_agent_definition>
-        <role>{role_name}</role>
-        <prompt>{context, goal}</prompt>
-      </sub_agent_definition>
-      <workflow_step_reference>step_3</workflow_step_reference>
-      <starting_condition>
-        - "START sub-agent after sub-agent_1 completes"
-      </starting_condition>
-    </sub_agent_2>
 </procedure>
 ```
 
@@ -454,9 +405,8 @@ CRITICAL: Only XML elements defined in the template below are allowed. Do NOT in
 
 ```xml
 <functions>
-  <!-- Check DoR; schedule independent DoD review when semantic risk warrants it. -->
+  <!-- Check readiness in the same loop. -->
   <execute_dor_checks_before_starting/>
-  <schedule_dod_checks_with_sub_agent_before_starting/>
   
   <function name="{function_name_1}">
     <purpose>{what this function accomplishes}</purpose>

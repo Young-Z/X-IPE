@@ -17,6 +17,11 @@ AI Agents follow this skill to implement Python code by:
 
 ## Important Notes
 
+Apply the caller's single risk/impact verification plan in the same agent loop.
+Run affected tests and implicated integrations; broaden for coupling, observed
+regressions or binding policy. Reuse current evidence at handoff, never claim an
+unrun suite passed. No child board/Git/checkpoint actions.
+
 BLOCKING: This skill is invoked by the `x-ipe-task-based-code-implementation` orchestrator. Do NOT invoke directly unless testing.
 
 CRITICAL: No research step is needed — Python best practices are built into this skill. Skip identification/research and go straight to learning existing code.
@@ -98,7 +103,7 @@ input:
   </checkpoint>
   <checkpoint required="true">
     <name>Feature context complete</name>
-    <verification>feature_id and technical_design_link are provided</verification>
+    <verification>For implement, feature_id and technical_design_link are provided; fix/refactor may omit feature_context as declared</verification>
   </checkpoint>
 </definition_of_ready>
 ```
@@ -187,7 +192,7 @@ input:
        - Only change what is necessary to make the test pass
        - Follow existing code conventions from Step 1
     6. RUN test: python -m pytest {test_code_path} -v → MUST PASS
-    7. RUN all existing tests: python -m pytest -v → no regressions
+    7. RUN affected regression selection: python -m pytest {test_code_path} -v; add implicated integrations and broaden when the verification plan requires it
     8. RUN linting: ruff check {source_code_path} && ruff format --check {source_code_path}
     9. RETURN standard output
   </action>
@@ -205,7 +210,7 @@ input:
   <action>
     1. LEARN existing code: scan source_code_path for conventions, patterns, imports
     2. IF feature_context is absent: generate synthetic context (feature_id: "REFACTOR-{task_id}", technical_design_link: "N/A")
-    3. RUN existing tests: python -m pytest -v → establish baseline (all must pass)
+    3. RUN affected preservation selection: python -m pytest {test_code_path} -v → establish baseline (all selected checks must pass)
        - IF any test fails → STOP, report: "Cannot refactor — baseline tests failing"
     4. RESTRUCTURE code per AAA scenario target state:
        a. FOR EACH AAA scenario:
@@ -213,7 +218,7 @@ input:
           - Apply structural changes following Python best practices (PEP 8, type hints)
           - Preserve external behavior
     5. UPDATE imports and references across affected files
-    6. RUN all tests: python -m pytest -v → MUST pass (behavior preserved)
+    6. RUN the same preservation selection plus affected integrations → MUST pass (behavior preserved); broaden for observed risk/failures or binding policy
        - IF tests fail → report failed scenarios with details; do NOT auto-revert (orchestrator decides)
     7. RUN linting: ruff check {source_code_path} && ruff format --check {source_code_path}
     8. RETURN standard output
@@ -221,7 +226,7 @@ input:
   <constraints>
     - BLOCKING: Baseline tests must pass before refactoring (Step 3)
     - CRITICAL: Preserve behavior — no functional changes
-    - CRITICAL: Do NOT manage git commits — orchestrator handles checkpointing
+    - CRITICAL: Do NOT manage git commits/checkpoints — only the owner may act with explicit authority
     - CRITICAL: No research step — Python best practices are built into Step 4
     - MANDATORY: Feature_context is OPTIONAL — use synthetic fallback if absent
     - MANDATORY: Use python -m pytest (not bare pytest) for virtual environment safety

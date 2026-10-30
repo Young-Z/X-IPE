@@ -164,3 +164,23 @@ completion is not claimed; no board write or acceptance promotion is authorized.
 - Current production/candidate fingerprint: 2a7786151253ccd3d6ef0817f9e7c52a06403efcfcfbc8299279dbf8e04ed720.
 - [Recovered verification receipt](publication-receipt-TASK-6749-R2.json); prior history above remains historical, not current parity evidence.
 - Hybrid inner guidance and human completion/route boundary independently reviewed at exact R2 hash; original assertion/TDD gates retained. Prior-worker promotion time is unknown; no production replay or atomic writer journal claimed.
+
+## TASK-6750 single-loop delivery revision
+
+Published after deterministic validation, bounded workflow safety review, and real manifest-safe publication; prior metadata above remains version history.
+
+- Current revision: `e8dfc5e09ace2e8763eaf50cbd5c39677229218efca2878f48c85ba8d7ea7c35`
+- Previous revision: `2a7786151253ccd3d6ef0817f9e7c52a06403efcfcfbc8299279dbf8e04ed720`
+- Evidence: `single-loop-TASK-6750.json`, `publication-receipt-TASK-6750.json`, `validation-receipt-TASK-6750.json`.
+- Same-loop delivery/default risk-based verification; unchanged resources and protected bytes retained.
+- Token/latency savings not measured; no live-agent efficacy claim.
+
+## TASK-6752 proportional-delivery revision
+
+Published through the installed manifest-safe publisher after bounded compatibility review, correction of its TypeScript test-path finding, deterministic validation and affected post-publication regressions. Prior metadata remains historical.
+
+- Current revision: `dbc498d7958b52bd95aa477cdcc6a0d04eef91623840613fb07822aa297934a4`
+- Previous revision: `e8dfc5e09ace2e8763eaf50cbd5c39677229218efca2878f48c85ba8d7ea7c35`
+- Evidence: `lean-delivery-TASK-6752.json`, `publication-receipt-TASK-6752.json`, `validation-receipt-TASK-6752.json`.
+- Verification: 599 selected checks passed; exact installed/candidate byte parity. No resource removals, mirror synchronization or Git mutation.
+- Live-agent efficacy, token/latency savings and stakeholder outcome remain unmeasured.

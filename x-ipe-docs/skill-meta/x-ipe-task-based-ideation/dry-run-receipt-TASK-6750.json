@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "ok": true,
+  "operation": "publish",
+  "state": "dry_run",
+  "name": "x-ipe-task-based-ideation",
+  "added": [],
+  "changed": [
+    "SKILL.md",
+    "references/examples.md",
+    "templates/idea-summary.md"
+  ],
+  "removed": [],
+  "protected": [],
+  "baseline_hash": "df76d4fe483fe3526be3fccbdbbcb7d4e58c6b7238542f083275d05701985c4f",
+  "candidate_hash": "0f5a885d43222f320617a26057b3f131a34bce87db6e5d47c7f531cf674fdcdf",
+  "files": {
+    "SKILL.md": "68cfef252a1b3c00df69fc8fa2746c3a10c0161b5c3d6ce6571645f8f1f0ce8f",
+    "references/examples.md": "114a04088200d74a544ef0e7afdf6cb2f3e9d0df76acf3d1dc859c7534bc81e3",
+    "references/tool-usage-guide.md": "bd99bc07cb5274eced5df6467e17b156968d09c2e09c9f052eea6038fb2d5f7e",
+    "references/visualization-guide.md": "ce9453d43187167e93610badfb6a95dfbe5bb408b335c0ef308b9db6f290c441",
+    "templates/idea-summary.md": "93da37eba913858730cfdbc41f073087455c5c38459cd69efbef65a88e2f7c91"
+  },
+  "excluded_files": {}
+}

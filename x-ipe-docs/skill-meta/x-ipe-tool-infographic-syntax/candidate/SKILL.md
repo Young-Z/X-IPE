@@ -17,6 +17,11 @@ AI Agents follow this skill to generate AntV Infographic DSL syntax to:
 
 ## Important Notes
 
+Load the [single-loop delivery policy](.github/skills/x-ipe-workflow-task-execution/references/agent-loop.md)
+once in the current context. Execute this skill in the same agent loop; another
+skill is expertise, not a new agent. Use proportional checks and reuse current
+evidence; independent review is conditional on concrete risk, not the skill name.
+
 BLOCKING: Read [references/prompt.md](.github/skills/x-ipe-tool-infographic-syntax/references/prompt.md) before generating syntax. It contains the complete DSL specification, template list, and data field rules.
 
 CRITICAL: Output MUST be a `plain` code block containing only infographic DSL. No JSON, no Markdown, no explanatory text.
@@ -113,6 +118,18 @@ input:
 
 ---
 
+### Input Initialization
+
+```xml
+<input_init>
+  <field name="operation" source="Caller; generate for new content, refine for an existing block." />
+  <field name="content" source="User-approved content; do not invent facts or numerical targets." />
+  <field name="template_hint" source="Optional caller hint; validate only if provided." />
+  <field name="theme" source="Optional caller theme; otherwise retain renderer defaults." />
+  <field name="existing_syntax" source="Required actual existing block for refine; omitted for generate." />
+</input_init>
+```
+
 ## Definition of Ready
 
 ```xml
@@ -205,7 +222,7 @@ operation_output:
 
 ## Definition of Done
 
-CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
+Verify the applicable outcomes in the current loop; use independent review only when concrete risk warrants it.
 
 ```xml
 <definition_of_done>
@@ -242,18 +259,11 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
     <verification>Output contains no JSON, Markdown formatting, or explanatory text — only DSL syntax</verification>
   </checkpoint>
 
-  <validation_sub_agent>
-    <instructions>
-      After generating infographic syntax, launch a sub-agent (model hint: haiku) to independently validate:
-      1. Parse the output and verify first line matches `infographic {template}` where {template} is in the available templates list from references/prompt.md
-      2. Verify only one primary data field is used and it matches the template prefix
-      3. For compare-binary-*/compare-hierarchy-left-right-*: verify exactly 2 root compares nodes
-      4. For hierarchy-* (non-structure): verify single root, no duplicate root
-      5. Verify 2-space indentation is consistent
-      6. Verify output contains no JSON, no markdown, no explanatory text
-      Report: PASS/FAIL per checkpoint with specific violations if any.
-    </instructions>
-  </validation_sub_agent>
+  <validation>
+    Check the generated syntax in this loop against the checkpoints above.
+    Use an available parser/render check when applicable; no new agent or
+    model-specific validator is required for a small DSL block.
+  </validation>
 </definition_of_done>
 ```
 

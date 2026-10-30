@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "ok": true,
+  "operation": "publish",
+  "state": "published",
+  "name": "x-ipe-task-based-general-purpose-executor",
+  "added": [],
+  "changed": [
+    "SKILL.md"
+  ],
+  "removed": [],
+  "protected": [],
+  "baseline_hash": "fc1d0df9a0986f7d01e2106b0baba98f2a6d7fc7f5b261077f8af99fd5a0378b",
+  "candidate_hash": "782e09739dee02d5c3c651165e2d6e3a85d89dacae59c99a2e276e128282eee3",
+  "files": {
+    "SKILL.md": "e190b8c0a1fed2efa06d72c0230f80941b2223a08ad0f1183a69a06b6adc8152",
+    "references/examples.md": "11da7cac87e8377f8ad8d4560a803ddcbed2fde716afde09a69045517b4c4062"
+  },
+  "excluded_files": {},
+  "transaction": "/Users/yzhang/Documents/projects/X-IPE/.github/.skill-publication/x-ipe-task-based-general-purpose-executor-pew4kfpc",
+  "byte_parity": true
+}

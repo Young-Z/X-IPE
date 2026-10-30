@@ -1,0 +1,66 @@
+{
+  "task_id": "TASK-6750",
+  "role": "Ember",
+  "recorded_at": "2026-10-30T01:50:10.489921+00:00",
+  "publication_state": "published",
+  "revision": "21f6be920a7568c8a1b3e2a9e39bda04d0152c20de10477290c6acfb972e2dc1",
+  "baseline_revision": "9970a327b4f64069db1ffb96fff8d89ae99af5cb198ec2bd718c5b3ba6066d32",
+  "changed": [
+    "SKILL.md",
+    "references/10. example-gate-conditions.md",
+    "references/11. reference-quality-standards.md",
+    "references/12. reference-production-patterns.md",
+    "references/2. reference-section-order.md",
+    "references/3. example-step-based-code-review.md",
+    "references/4. example-step-based-feature-implementation.md",
+    "references/5. example-function-based-validation.md",
+    "references/6. example-function-based-analysis.md",
+    "references/consumer-integration.md",
+    "references/examples.md",
+    "references/skill-general-guidelines-v2.md",
+    "references/skill-type-comparison.md",
+    "references/validation-publication.md",
+    "templates/skill-meta-x-ipe-meta.md",
+    "templates/skill-meta-x-ipe-task-based.md",
+    "templates/x-ipe-assistant.md",
+    "templates/x-ipe-dao.md",
+    "templates/x-ipe-knowledge.md",
+    "templates/x-ipe-meta.md",
+    "templates/x-ipe-task-based.md",
+    "templates/x-ipe-tool.md",
+    "templates/x-ipe-workflow-orchestration.md"
+  ],
+  "added": [
+    "references/single-loop-authoring.md"
+  ],
+  "removed": [],
+  "protected_preserved": [
+    "scripts/__pycache__/publish_skill.cpython-312.pyc",
+    "scripts/__pycache__/validate_skill.cpython-312.pyc",
+    "scripts/__pycache__/validate_skill.cpython-313.pyc"
+  ],
+  "body_lines": 266,
+  "review": {
+    "agent_id": "23bfb191-259d-4bb9-8b2f-c63242968134",
+    "result": "No blockers found in bounded workflow safety review",
+    "limit": "Reviewer environment could not collect Flask-dependent tests; main agent ran the installed regression suite successfully."
+  },
+  "validation": {
+    "python": {
+      "passed": 777,
+      "log_sha256": "41bb51cb63c4e9c5c8e9cae5e922d600c0d737508a39581c60ad647880dd89a1"
+    },
+    "frontend": {
+      "passed": 22,
+      "files": [
+        "single-loop-workflow.test.js",
+        "workflow-stage-suggestions.test.js",
+        "workflow-stage-running.test.js"
+      ]
+    },
+    "candidate_and_production_byte_parity": true,
+    "live_agent_trials": "not run",
+    "tokens_and_latency": "not measured"
+  },
+  "lesson_disposition": "Read-only select: zero summaries; protected creator LL-001 requires separate reviewed legacy migration. No planned/applied or queue writes."
+}

@@ -235,3 +235,13 @@ evaluation:
     - "DoD checkpoints all verified"
     - "Error scenarios handled gracefully"
     - "Sub-agent validates syntax against prompt.md specification"
+
+## TASK-6750 single-loop delivery revision
+
+Published after deterministic validation, bounded workflow safety review, and real manifest-safe publication; prior metadata above remains version history.
+
+- Current revision: `a228b72c9c09052ee4b36e9af01e026b31799fd6f237be7c3bdb5a52f5576671`
+- Previous revision: `e6063ebf70630eab8d8b80e10d960a5c9c572ccbc3aeee4b4f98952c612911c6`
+- Evidence: `single-loop-TASK-6750.json`, `publication-receipt-TASK-6750.json`, `validation-receipt-TASK-6750.json`.
+- Same-loop delivery/default risk-based verification; unchanged resources and protected bytes retained.
+- Token/latency savings not measured; no live-agent efficacy claim.

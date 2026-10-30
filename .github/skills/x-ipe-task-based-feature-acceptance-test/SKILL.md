@@ -15,6 +15,11 @@ Verify one approved capability, not successful activities:
 
 ## Important Notes
 
+Load the [single-loop delivery policy](.github/skills/x-ipe-workflow-task-execution/references/agent-loop.md)
+once in the current context. Execute this skill in the same agent loop; another
+skill is expertise, not a new agent. Use proportional checks and reuse current
+evidence; independent review is conditional on concrete risk, not the skill name.
+
 BLOCKING: Load `x-ipe-workflow-task-execution` and the
 [common lifecycle contract](.github/skills/x-ipe-workflow-task-execution/references/lifecycle.md).
 Direct entry calls Orient/Plan for supplied task/original context without recursively dispatching
@@ -154,7 +159,7 @@ input:
     1. Execute unproven/stale groups sequentially with safe data/cleanup; reuse only gated actual evidence with provenance. Continue independent groups after failures, preserve all gaps.
     2. UI actual enabled available browser/dedicated profile/reachable target: enabled UI skill execute_ui_tests or enabled direct Chrome MCP. Navigate, trigger relevant feature, inspect console/load/runtime errors, observe every original assertion/scoped mockup state. Failure screenshot/snapshot/errors; source/jsdom not UI evidence, unavailable browser Blocked.
     3. API actual requests/application route tests assert specified status/body/headers/auth/errors/side effects, disclose in-process/mocked/deployed limits. CLI actual subprocess in temporary cwd asserts exit/stdout/stderr/files/no-mutation. Library actual import/public API asserts return/error/side effects. Integration actual relevant setup/flow/state/cleanup; mocks cannot replace required real boundaries.
-    4. Structured checks read complete deliverable against each AC, cite sections/lines and consumer/source contracts. Run required enabled validator/temporary executable scenarios; keyword presence not behavioral proof. Independent review for meaningful workflow/executable/safety/public-contract risk; missing review blocks required completion/promotion, not drafting.
+    4. Structured checks inspect the deliverable against each AC and actual consumer contracts. Run required enabled validator/temporary executable scenarios once; keyword presence is not behavioral proof. Self-check by default; independent review only for explicit requests or concrete high-risk uncertainty under shared policy, reusing current suitable review.
     5. Record actual command/review, exit/expected-versus-actual, environment, artifacts/hashes per TC/AC and Fail/Blocked/Partial/Not Run. Report original types/totals/failure actions; no code fix/assertion relaxation during acceptance. pass_rate = passed / ALL planned cases including blocked/not-run/partial; zero cases N/A, not 100%. Measured comparison only with actual method/source, no invented scores/KPIs.
     6. Engineering delivery requires every scoped original assertion current suitable passing evidence plus required review. Test pass is not goal achievement; stakeholder outcome not measured unless actual cited stakeholder/context observation at relevant revision. Automation/fixtures/approval/DAO/document review not that observation; unobserved impact alone does not negate supported delivery.
     7. Rehash explicit dependencies and recheck environment/config before handoff; changed inputs invalidate affected checks/review/dependent claims. Failed/stale/partial/blocked evidence returns blocked with artifacts, preserve independent history/results, never fake success.
@@ -162,7 +167,7 @@ input:
   <phase_5 name="笃行之 — Practice Earnestly"><step_5_1><name>Return Same-Owner Conditional Handoff</name><action>
     1. Return original task_completion_output/report links/results/feature fields and two conditional successors. Owner alone persists category/task/feature/app/Git/routing. Successful new Implemented acceptance may transition to Tested; authorized advanced Completed stays Completed. Free-mode no app writes.
     2. Workflow owner verifies done implementation/preceding mandatory actions, actual specification/impl-files context/artifacts, current full acceptance and required review. Perform or verify ONE acceptance_testing done write with exact test-report real file/test-folder scalar real directory, matching validation action/readback; failed/blocked evidence never done. Writer success alone insufficient, prior fresh verified done supports read-only resume, not replay.
-    3. Refactor conditional on evidenced quality/preservation need, not unconditional compulsory code churn. No need may suggest closing only where gates permit. Current template code_refactor mandatory and app suggests it: record closing routing blocker until legitimate gate fulfillment or separately authorized later config migration. No fake skip/done/report or invented need. Supported acceptance delivery/action may coexist with downstream route blocker.
+    3. Refactor only for an evidenced quality/preservation need or explicit request. Default template code_refactor is optional and acceptance suggests feature_closing first; no need means route directly to closing. Respect a project's explicitly customized mandatory refactor action, without fake done/report or invented need. Never write skip records merely to unlock closing.
     4. Owner re-reads mode at one boundary: human and hybrid require human review and completion/route confirmation; hybrid uses DAO only within skill; full DAO bounded guidance and only authorized routing. Explicit human approval/release still binds in every mode. Return to caller, no child new task/Git/PR/successor execution.
   </action><output>Original output, actual owner adaptation and conditional route/blockers</output></step_5_1></phase_5>
 </procedure>
@@ -227,7 +232,7 @@ EPIC/FEATURE or legacy, never fabricated feature. No new goal/evidence schema.
 | Mixed/non-UI feature | API, CLI or library | Preserve all original types/assertions and actual boundaries |
 | Skills/non-code | Contract plus executable helper | Cited structured checks plus required actual temporary scenarios |
 | Reusable evidence | Explicit current dependencies/full ACs | Hash/case consistency then semantic review, rerun affected gaps |
-| No quality need | Conditional closing | Respect mandatory code_refactor app gate and record blocker |
+| No quality need | Conditional closing | Route directly to closing under default optional-refactor policy |
 
 | Anti-Pattern | Consequence | Correction |
 | --- | --- | --- |

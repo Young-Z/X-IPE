@@ -13,6 +13,11 @@ registration, lifecycle persistence, boundary decisions and authorized routing.
 
 ## Important Notes
 
+Load the [single-loop delivery policy](.github/skills/x-ipe-workflow-task-execution/references/agent-loop.md)
+once in the current context. Execute this skill in the same agent loop; another
+skill is expertise, not a new agent. Use proportional checks and reuse current
+evidence; independent review is conditional on concrete risk, not the skill name.
+
 BLOCKING: Load the [common lifecycle contract](.github/skills/x-ipe-workflow-task-execution/references/lifecycle.md)
 before invoking a child. Child skills entering directly must load this workflow
 and call its Orient/Plan ensure/resume entry before domain work.
@@ -34,7 +39,8 @@ current evidence and interaction boundary authorize it.
 
 CRITICAL: No automatic commit, implicit push, dirty branch switch, stash, reset,
 or broad staging. Preserve configured Git strategy without moving dirty work.
-No application workflow skips or mandatory-gate relaxations are introduced.
+Honor actual project workflow requirements. Default refactoring is optional;
+acceptance and closing remain required. Do not invent completion or skip records.
 
 ## About
 
@@ -118,7 +124,6 @@ input:
 ```xml
 <procedure name="x-ipe-workflow-task-execution">
   <execute_dor_checks_before_starting/>
-  <schedule_dod_checks_with_sub_agent_before_starting/>
   <phase_1>
     <name>Orient</name>
     <action>
@@ -154,7 +159,7 @@ input:
   <phase_4>
     <name>Verify</name>
     <action>
-      1. Validate common output fields and declared category; preserve dynamic attributes. Confirm domain DoD and tests, failed assertions and required review honestly. Independent review required for meaningful workflow/executable/safety/public-contract changes; unavailable review blocks publication, not candidate drafting.
+      1. Validate common output fields and declared category; preserve dynamic attributes. Verify domain DoD using suitable current evidence, without rerunning unchanged checks. Apply the single-loop risk policy: self-check and targeted tests by default; independent review only for explicit review requests or concrete high-risk uncertainty. Missing required review blocks the affected claim, not candidate drafting.
       2. Rehash relevant source/implementation/tests/config and compare evidence revision. Any edit invalidates affected tests, review and acceptance; rerun or report blocked. A passing receipt or timestamp alone is insufficient.
       2a. Where the child adopts the goal contract, verify source/goal/story/AC/validation coverage and authorized delta invalidation. Separate verified engineering delivery from observed stakeholder outcome or not measured; do not invent metrics, observations or confirmation.
       3. In workflow-mode, resolve state via workflow_get_state.py and inspect shared.stage.actions.action or the matching features[].stage.actions.action. Required completed action must be done, not merely non-pending. Verify keyed deliverables against extract tags, all required links/files and feature context; missing state/action or failed/skipped/in_progress is blocking, never warn-and-pass.
@@ -230,6 +235,10 @@ Authoritative action identity comes from [ACTION_MAP](src/x_ipe/static/js/featur
 with gates/tags from [workflow template](x-ipe-docs/config/workflow-template.json).
 Enabled tool routing comes separately from [tools configuration](x-ipe-docs/config/tools.json):
 the workflow action `implementation` is NOT the tool key `code_implementation`.
+Use [capability routing](.github/skills/x-ipe-workflow-task-execution/references/capability-routing.md)
+for implementation-family config resolution and independent-call batching.
+Use [opt-in evaluation](.github/skills/x-ipe-workflow-task-execution/references/evaluation.md)
+to audit byte drift and compare real delivery traces; neither helper syncs mirrors.
 See [common contract](.github/skills/x-ipe-workflow-task-execution/references/lifecycle.md)
 for exact schemas, modes, statuses, source resolution and child entry obligations.
 

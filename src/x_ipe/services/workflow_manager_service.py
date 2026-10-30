@@ -173,8 +173,8 @@ def _default_config():
         },
         "validation": {
             "type": "per_feature",
-            "mandatory_actions": ["acceptance_testing", "code_refactor", "feature_closing"],
-            "optional_actions": [],
+            "mandatory_actions": ["acceptance_testing", "feature_closing"],
+            "optional_actions": ["code_refactor"],
             "next_stage": "feedback",
         },
         "feedback": {
@@ -205,7 +205,7 @@ def _default_config():
         "feature_refinement": ["technical_design"],
         "technical_design": ["implementation"],
         "implementation": ["acceptance_testing"],
-        "acceptance_testing": ["code_refactor"],
+        "acceptance_testing": ["feature_closing", "code_refactor"],
         "code_refactor": ["feature_closing"],
         "feature_closing": ["human_playground", "change_request"],
         "human_playground": ["change_request"],
@@ -1322,6 +1322,12 @@ class WorkflowManagerService:
                     changed = True
                 
                 for action_name, action_data in current_actions.items():
+                    if action_name in template_optional and action_data.get("optional") is not True:
+                        action_data["optional"] = True
+                        changed = True
+                    elif action_name in template_mandatory and "optional" in action_data:
+                        del action_data["optional"]
+                        changed = True
                     deliverables = action_data.get("deliverables")
                     if isinstance(deliverables, dict):
                         expected_tags = set(self._get_template_tags(action_name))

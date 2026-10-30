@@ -24,52 +24,21 @@ scope. No whole-project retrofit or new goal database/board fields.
 
 ## Installed analysis and sync output — do not invent support
 
-The legacy descriptions below are the pre-migration dependency snapshot, not a
-permanent assertion about future installed revisions. Re-read each dependency's
-current entry/output schema before invocation and record its hash. A reviewed
-dependency update may support bounded analysis or nullable numeric evidence;
-consume that actual contract, never the old snapshot or guessed mode flags.
-Assess sync independently: analysis migration does not migrate full_sync or its
-consumers. Keep the disclosed scoped adapter when the current contract does not
-fit the authorized scope, and report unsupported consumer handoffs as gaps.
+Load the selected analysis or sync contract only when its expertise is needed.
+Current full_analysis/full_sync operations accept study-only/local/broad scope;
+invoke in the same agent loop, preserving actual operation_output and supplied
+goal/scope/quality/suggestion/principle fields. Full means relevant perspectives,
+not global rewrites, blanket alignment or new score/coverage work.
 
-Load both installed tool skills. Analysis accepts only operation full_analysis,
-scope and quality_baseline_path. It prescribes broad discovery, five perspectives,
-coverage/scoring. Sync accepts only full_sync with analysis scope/quality/
-suggestions/principles, prescribes full alignment and coverage. Neither installed
-tool declares study-only/local modes or a scoped operation. Do not pass invented
-mode flags, patch live tools or claim successful full operations after omitting
-their gates. Numeric schemas must not receive a not measured sentinel, invented
-score or synthetic metric. Policy: no synthetic metric. Their legacy reference
-Output is not task authority.
-
-When approved broad work fits their full contracts, invoke once and retain actual
-operation_output.success/result/errors, all original result fields and report_path.
-Validate source truth before any sync mutation: code deviations cannot authorize
-changed requirements/ACs. If full_sync proposes contract rewriting, automatic
-skips or unauthorized files, block that operation and use the authorized scoped
-adapter instead; do not report its success. do not skip failing tests.
-
-For study/local (or incompatible broad scope), the caller's explicit bounded
-adapter performs the relevant domain activities, NOT a successful tool invocation:
-
-1. Read actual source/design/requirements/spec/callers and scope dependencies;
-   record inspected scope, quality gaps and missing/not_found perspectives.
-2. Assemble analysis report using original semantic concepts refactoring_scope,
-   code_quality_evaluated findings, refactoring_suggestion goals/target_structure,
-   refactoring_principle constraints and actual report path. No fabricated
-   operation_output, numeric score or false aligned/sufficient status.
-3. Targeted sync consumes those findings, not a nonexistent tool success. Study
-   assesses gaps only; local edits existing affected references/design within
-   approved paths and adds preservation tests for real risks. Report actual counts,
-   updated paths, baseline commands/results and preserved acceptance.
-4. Record adapter identity, non-invocation, omitted full-tool activities and why,
-   applicability/gaps, permitted paths and current hashes. This is disclosed
-   orchestration policy, not a claim the installed tool contract has migrated.
-
-No scores guessed from smell counts or chosen weights. If a consumer requires a
-numeric score, block that consumer claim pending compatible schema/real authorized
-measurement; do not force global measurement as a local study prerequisite.
+Reuse fresh scoped analysis and preservation evidence rather than generating a
+second report pipeline. Inline bounded inspection is sufficient when the requested
+refactor is already clear and these tools add no information; record what was
+actually inspected, not a fictitious tool invocation. Study is read-only except
+its authorized report; local updates only affected approved docs/tests. Required
+numeric consumers need real comparable measurements; unknown is null/explicit
+not measured under their actual schema, never an invented success score.
+Unavailable tools or not_found source evidence are gaps, not a successful tool
+invocation. Use no synthetic metric and do not skip failing tests.
 
 ## Legacy task output typing and evidence
 
@@ -96,6 +65,8 @@ This candidate makes no blanket runtime-compatibility claim.
 ## Implementation routing and special skill route
 
 Read actual stages.validation.code_refactor in tools.json, including `_extra_instruction`.
+Use [capability routing](.github/skills/x-ipe-workflow-task-execution/references/capability-routing.md)
+to resolve eligible tools once, refreshing changed config/catalog revisions.
 Discover actual implementation tools, semantically match runtime/layer, group AAA
 preservation scenarios and route sequentially with operation: refactor, source/
 test paths and actual optional feature_context as permitted by each loaded tool.
@@ -120,33 +91,26 @@ Skill-package target is a special mandatory creator route, NOT an arbitrary enab
 language-tool selection: load x-ipe-meta-skill-creator, pass same task/readiness,
 complete candidate resources/root metadata, validate/review, and separately
 publish only with authority. This is not arbitrary production edits; no generic
-tool may bypass candidate staging or independent review. Code_refactor config
+tool may bypass candidate staging or a genuinely required review. Code_refactor config
 remains authoritative for ordinary implementation routes; no new config entry or
 silent enabling of creator required for this skill-management responsibility.
 
 ## Actual app association and conditional report
 
-Current ACTION_MAP maps this skill to code_refactor, validation per_feature.
-Template optional=false: mandatory until integration is explicitly changed and
-verified, even for study-only or small/local paths. Required contexts: tech-design
-and specification. test-report is optional; explicit broken selected link still
-blocks. Declared output is $output:refactor-report, a real report file path. No new
-analysis/quality tags, proxy actions or invented feature IDs.
+ACTION_MAP maps this skill to code_refactor, validation per_feature. Both default
+templates declare it optional. Refactor only for an evidenced need or explicit
+request; no-need delivery routes acceptance directly to closing. A project's
+explicit customized mandatory action still binds.
 
-Free-mode has no app writes. Workflow-mode owner must inspect actual state and all
-mandatory predecessor actions, required context identity/existence/content, exact
-refactor-report deliverable and feature identity. A study report is not automatic
-completion of required implementation/refactor gates. Conditional reporting means
-owner writes code_refactor done only when actual domain/action gates are met, not
-that the action became optional. Until compatible study/combined integration is
-verified, return report plus blocked action disposition; no fake done or skipped.
-
-Installed workflow_update_action.py receives --workflow, --action code_refactor,
---status done, --feature-id and --deliverables JSON {refactor-report: actual path}.
-Owner does one authorized write, checks exit/result, then reads workflow state and
-verifies exact action/tag/path/feature and files. Writer success alone is insufficient:
-it can accept nonexistent report paths and incomplete semantic context. No helper
-write in this child or production app write during candidate tests.
+When refactoring is actually performed, required contexts remain tech-design and
+specification; test-report is optional. Return a real refactor-report. Owner
+alone performs one authorized workflow_update_action.py --workflow actual-name
+--action code_refactor --status done --feature-id actual-id --deliverables keyed
+JSON and verifies readback/files/identity. Free-mode has no app writes. Study-only
+does not pretend structural work occurred or publish a fake done/report to unlock
+closing. Service-initialized optional skipped is not evidence of refactor execution.
+Writer success alone is insufficient to prove preservation or required
+predecessors. No fake done, skipped or report writes to unblock routing.
 
 ## Evidence, tracing and review
 
@@ -155,5 +119,4 @@ Changes invalidate affected evidence; preserve unrelated history. New regression
 block, baseline failures/unavailable checks stay named. UI evidence requires real
 configured/available browser when pertinent; no jsdom/fixture as browser proof.
 Consult tracing_enabled/infrastructure and retain existing decorators/redaction;
-disabled/absent does not force installation. Meaningful independent review absent
-blocks pertinent completion/publication, not analysis or candidate drafting.
+disabled/absent does not force installation. Use self-checks and targeted tests by default; independent review is required only for an explicit request or concrete high-risk uncertainty under the shared single-loop policy. Reuse suitable current review; missing required review blocks the affected claim, not drafting.

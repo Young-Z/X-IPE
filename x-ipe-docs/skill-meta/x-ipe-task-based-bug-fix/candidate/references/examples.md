@@ -45,7 +45,7 @@ operation. Synthetic fallback, if used internally by that tool, is not an actual
 feature allocation or returned task/workflow ID.
 
 Original full output example: blocked because this authored example has no real
-application reproduction/full-suite/review. No require_human_review field invented.
+application reproduction/planned regression/review. No require_human_review field invented.
 
 ```yaml
 task_completion_output:
@@ -83,7 +83,9 @@ its documented mechanism. Preserved regression tests may already pass; only the
 bug-specific test must fail. Never damage a passing constraint to manufacture red.
 JS implementation uses actual Vitest/Jest behavior, not Python string matching.
 Selected enabled tool operation fix owns red/fix/green and returns operation_output;
-review/verify original reproduction and full existing suite without invented totals.
+review/verify original reproduction and affected regression checks without invented
+totals. Broaden scope for coupling, observed failures or binding policy; reuse
+valid results at handoff.
 Original output includes all fields from example 1 and actual conflict records,
 not a truncated legacy schema. Optional caller-supplied require_human_review or
 other dynamic fields pass through unchanged; absence does not waive domain review.

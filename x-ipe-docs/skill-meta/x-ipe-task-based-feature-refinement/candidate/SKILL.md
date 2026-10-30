@@ -14,6 +14,11 @@ stable AC IDs, language, unrelated sections or the feature's execution history.
 
 ## Important Notes
 
+Load the [single-loop delivery policy](.github/skills/x-ipe-workflow-task-execution/references/agent-loop.md)
+once in the current context. Execute this skill in the same agent loop; another
+skill is expertise, not a new agent. Use proportional checks and reuse current
+evidence; independent review is conditional on concrete risk, not the skill name.
+
 BLOCKING: Load the [common lifecycle](.github/skills/x-ipe-workflow-task-execution/references/lifecycle.md).
 Caller provides readiness; direct entry loads the workflow and calls Orient/Plan
 once, returning here without recursively dispatching this child. Lifecycle owns
@@ -148,7 +153,7 @@ clear fresh scope needs no repeated interview, forced research or phase ceremony
   <step_4>
     <name>Verify integration and return</name>
     <action>
-      1. Verify full DoD, actual artifact identity/content, all GWT/type/traceability/scope/mockup gates and current SHA256 revisions. Meaningful workflow/public-contract/risky changes require independent review; unavailable review blocks the relevant claim, not drafting. Missing confirmation returns blocked, never Technical Design execution.
+      1. Verify full DoD, actual artifact identity/content, all GWT/type/traceability/scope/mockup gates and current SHA256 revisions. Use self-checks and targeted tests by default; independent review is required only for an explicit request or concrete high-risk uncertainty under the shared single-loop policy. Reuse suitable current review; missing required review blocks the affected claim, not drafting. Missing confirmation returns blocked, never Technical Design execution.
       2. Free-mode has no application mutation and workflow_action_updated false. Workflow-mode requires unique matching feature entry, feature_breakdown actually done with valid artifacts, both resolved context tags and mandatory gates. Do not mark prerequisites skipped/done to unlock refinement.
       3. With one agreed action owner, use installed workflow_update_action.py --workflow NAME --action feature_refinement --status done --feature-id ID --deliverables keyed JSON --format json. Supply BOTH specification = actual populated matching file and feature-docs-folder = scalar existing owning directory. Do not pass --features or create another workflow feature. Preserve context; populate required missing selected tags through supported --context JSON only when authorized.
       4. Read workflow_get_state.py; matching features[].implement.actions.feature_refinement must be done with exact both artifacts and selected context, no duplicate identity, unrelated entries/status/history unchanged. Writer success alone is insufficient. Completed unchanged resume verifies prior actual write evidence without replay; changed specification invalidates downstream design/implementation/acceptance evidence, never silently resets or claims it current.

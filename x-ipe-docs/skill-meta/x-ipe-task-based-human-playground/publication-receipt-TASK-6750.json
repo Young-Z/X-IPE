@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "ok": true,
+  "operation": "publish",
+  "state": "published",
+  "name": "x-ipe-task-based-human-playground",
+  "added": [],
+  "changed": [
+    "SKILL.md"
+  ],
+  "removed": [],
+  "protected": [],
+  "baseline_hash": "e0b8ee27a9f4126a9136e8c9caef372c5b231456eed1e8fe2cb1ed270a1220cf",
+  "candidate_hash": "99300e005ef5e062929f20013a09e6f35a7c639e46bc581426c74d06070899e7",
+  "files": {
+    "SKILL.md": "02224524c0c8994bfc269e2528fb050f0fc13c03a01f0888d54bd34d761d4260",
+    "references/examples.md": "f38a7d96d79187242fa64791327fa8cd2aa1832e13936ba781f9ba9f55ae36d7"
+  },
+  "excluded_files": {},
+  "transaction": "/Users/yzhang/Documents/projects/X-IPE/.github/.skill-publication/x-ipe-task-based-human-playground-upytf57v",
+  "byte_parity": true
+}

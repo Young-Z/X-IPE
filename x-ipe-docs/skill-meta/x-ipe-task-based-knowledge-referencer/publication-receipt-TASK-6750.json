@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "ok": true,
+  "operation": "publish",
+  "state": "published",
+  "name": "x-ipe-task-based-knowledge-referencer",
+  "added": [],
+  "changed": [
+    "SKILL.md"
+  ],
+  "removed": [],
+  "protected": [],
+  "baseline_hash": "66d8d3eb27b3a498c00cfda86ee2a2e2d887a9848c3a7a2fa4794be8d8b6bec3",
+  "candidate_hash": "7bc88bc331328fb0712471647e2816cc1b10d6ab036e0e34f760f71ffec7c698",
+  "files": {
+    "SKILL.md": "329409e1653de9a181f1332a31b246f6b209ce5c73d536ec70dc7cac849342f7",
+    "references/examples.md": "4b56f6d99e1a3d571eca552d2667c910b8f06985836d65fbe60813a0eb084e09"
+  },
+  "excluded_files": {},
+  "transaction": "/Users/yzhang/Documents/projects/X-IPE/.github/.skill-publication/x-ipe-task-based-knowledge-referencer-huh2mcgd",
+  "byte_parity": true
+}

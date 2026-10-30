@@ -263,14 +263,9 @@ evaluation:
     - "Output YAML validates against schema"
     - "DoD checkpoints all verified"
 
-  judge_agent:
-    - criterion: "Output quality meets production standards"
-      rubric: |
-        5: Excellent - ready for production
-        4: Good - minor improvements needed
-        3: Acceptable - some gaps
-        2: Poor - significant issues
-        1: Fail - does not meet requirements
+  independent_review:
+    trigger: "Security/trust/permission or destructive change, explicit user review, or unresolved ambiguity/observed failures"
+    evidence: "Bounded findings when triggered; otherwise same-loop self-review"
 ```
 
 ---
@@ -292,13 +287,13 @@ evaluation:
 | Interface | outputs.state | Yes | Task completion state |
 | Interface | outputs.artifacts | If applicable | Created files |
 | Acceptance | must | Yes | All must pass for merge |
-| Acceptance | should | Yes | 80% must pass |
+| Acceptance | should | Yes | Record unmet recommendations and their impact; no aggregate score gate |
 | Acceptance | could | Optional | Nice-to-have |
 | Acceptance | wont | Optional | Explicit out-of-scope |
 | Testing | happy_path | Yes | At least 1 scenario |
 | Testing | blocking | Yes | At least 1 scenario |
 | Evaluation | self_check | Yes | Automated checks |
-| Evaluation | judge_agent | Optional | Quality assessment |
+| Evaluation | independent_review | Conditional | Concrete risk/user/failure-triggered review, not an artifact-type gate |
 
 ---
 

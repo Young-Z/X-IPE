@@ -792,7 +792,7 @@ def test_creator_candidate_contract_resources_and_policy(tmp_path, api):
     assert result["body_lines"] <= 1000
     assert "TASK-6749" not in text and "OLD four-round procedure" not in text
     assert "Drafting alone does not authorize promotion" in text
-    assert "independent review" in text and "cosmetic/document-only" in text
+    assert "independent review" in text and "references/single-loop-authoring.md" in text
     assert "approximately 120 lines" in text and "up to five" in text
     assert "applied requires actual production fingerprint" in text
     assert "complete compatible publisher JSON receipt" in text

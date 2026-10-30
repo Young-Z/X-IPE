@@ -106,8 +106,8 @@ run enabled appropriate validator/temporary workflow helper scenarios when AC
 requires behavior. Structured review alone cannot turn keyword presence into
 browser/runtime/lifecycle proof. No fake executable RED for prose-only changes;
 existing implementation TDD/regression/assertions remain intact where applicable.
-Candidate_ready is not published capability. Required independent main review
-and explicit permission remain prerequisites for promotion. Automated helper/
+Candidate_ready is not published capability. Explicit publication permission
+remains required; independent review is conditional on concrete risk or request. Automated helper/
 content checks are fixture evidence, not autonomous agent execution or stakeholder
 observation. Outcome not measured explicitly; no forced manual observation metric.
 
@@ -115,11 +115,12 @@ observation. Outcome not measured explicitly; no forced manual observation metri
 
 Source acceptance passed at current revisions; inspected quality analysis finds
 no evidenced refactor need. Original output still suggests conditional closing.
-Free-mode may return that suggestion to owner. Workflow-mode current template
-code_refactor optional false and actual helper suggests code_refactor pending:
-record closing routing blocker; no fake skip/done/refactor-report, mandatory code
-churn or imaginary quality problem. Existing actual gate must legitimately finish
-or later authorized config migration resolves it. Acceptance action/delivery
+Free-mode may return that suggestion to owner. The default workflow template
+has code_refactor optional true and suggests feature_closing first, so route
+directly to closing without a refactor report or agent-authored skip.
+If a project explicitly customizes refactor as mandatory, record that route
+blocker rather than fake skip/done/refactor-report or invent a quality problem.
+The customized gate must legitimately finish or receive an authorized configuration change. Acceptance action/delivery
 evidence can be supported separately from downstream route availability.
 
 Temporary helper tests prove correct acceptance_testing tags/context/readback,

@@ -1,9 +1,8 @@
 # X-IPE Skill Creator - Examples
 
 Concrete subtype examples for the creator's scope → candidate → verify/review →
-dry-run/authorized publication → record process. Numbered drafting stages and
-parallel roles below are illustrative decomposition, not a fixed agent count or
-mandatory four-round procedure. Test results are hypothetical expected outcomes,
+dry-run/authorized publication → record process, all in the same agent loop by
+default. Skill/tool invocation is not an agent handoff. Test results are hypothetical expected outcomes,
 not execution evidence; record actual receipts outside the candidate.
 
 ---
@@ -49,9 +48,9 @@ resources_plan:
   scripts: null
 ```
 
-### Steps 4-5: Round 1 (Parallel)
+### Draft Metadata and Candidate in the Same Loop
 
-**Sub-agent 1 Output: skill-meta.md**
+**Metadata output: skill-meta.md**
 
 ```yaml
 skill_name: x-ipe-task-based-bug-fix
@@ -66,7 +65,7 @@ acceptance_criteria:
       description: All tests pass after fix
 ```
 
-**Sub-agent 2 Output: candidate/**
+**Package output: candidate/**
 
 ```
 candidate/
@@ -75,9 +74,9 @@ candidate/
     └── examples.md (bug fix examples)
 ```
 
-### Steps 6-7: Round 2 (Parallel)
+### Review and Prepare Affected Checks in the Same Loop
 
-**Sub-agent 3: Reflect**
+**Self-review**
 
 ```yaml
 gaps_found:
@@ -86,7 +85,7 @@ gaps_found:
     fix: "Added checkpoint: Reproduction steps documented"
 ```
 
-**Sub-agent 4: Generate Tests**
+**Prepare tests**
 
 ```yaml
 test_cases:
@@ -100,8 +99,9 @@ test_cases:
 
 ```yaml
 evaluation_result:
-  must_pass_rate: 100%
-  should_pass_rate: 85%
+  affected_checks: passed
+  independent_review: "No concrete trigger; same-loop self-review"
+  unmet_recommendations: []
   overall_pass: true
 ```
 
@@ -171,10 +171,9 @@ resources_plan:
 
 ```yaml
 workflow_execution:
-  round_1: "Created skill-meta.md + candidate/"
-  round_2: "Reflected, generated 5 test cases"
-  round_3: "Ran tests (PDF generation, extraction, merge)"
-  round_4: "Evaluated - all passed"
+  draft: "Created skill-meta.md + candidate/ in the same loop"
+  verify: "Ran affected tests (PDF generation, extraction, merge)"
+  review: "Same-loop self-review; no concrete independent-review trigger"
   
 publication_target: ".github/skills/x-ipe-tool-pdf/"  # Only after authorized publication
 ```
@@ -230,9 +229,9 @@ orchestrated_skills:
   - x-ipe-task-based-feature-closing
 ```
 
-### Steps 4-5: Round 1 (Parallel)
+### Draft Metadata and Candidate in the Same Loop
 
-**Sub-agent 1 Output: skill-meta.md**
+**Metadata output: skill-meta.md**
 
 ```yaml
 skill_name: x-ipe-workflow-full-pipeline
@@ -247,12 +246,12 @@ acceptance_criteria:
       description: Failure in any skill triggers appropriate handling
   should:
     - id: AC-S01
-      description: Parallel execution where dependencies allow
+      description: Parallel execution only for substantial independent work with a documented benefit
     - id: AC-S02
       description: Human review gates respected
 ```
 
-**Sub-agent 2 Output: candidate/**
+**Package output: candidate/**
 
 ```
 candidate/
@@ -301,10 +300,9 @@ skill_registry:
 
 ```yaml
 workflow_execution:
-  round_1: "Created skill-meta.md + candidate/"
-  round_2: "Reflected on skill coordination, generated 8 test cases"
-  round_3: "Ran tests (happy path, failure scenarios, data flow)"
-  round_4: "Evaluated - all passed"
+  draft: "Created skill-meta.md + candidate/ in the same loop"
+  verify: "Checked happy path, failures, data flow and preserved transitions"
+  review: "Same-loop self-review; workflow artifact type alone does not trigger a reviewer"
   
 publication_target: ".github/skills/x-ipe-workflow-full-pipeline/"  # Only after authorized publication
 ```
@@ -368,15 +366,16 @@ drafting, or a hypothetical test result is not lesson application.
 
 **Request:** "Create a skill for database migrations"
 
-### Round 1-2: Initial Creation
+### Initial Draft
 
-Created candidate skill for database migrations.
+Created candidate skill for database migrations in the same loop. Destructive
+database writes are a concrete independent-review trigger; obtain bounded review
+of backup/rollback/permission boundaries before promotion, not a reviewer per step.
 
-### Round 3-4: First Evaluation
+### First Verification
 
 ```yaml
 evaluation_result:
-  must_pass_rate: 80%  # FAIL - need 100%
   overall_pass: false
   failed_tests:
     - id: TC-003
@@ -390,15 +389,13 @@ fix_applied:
   section: Definition of Ready
   change: "Added checkpoint: Database connection available"
   
-action: "Re-run from Round 2"
+action: "Rerun checks affected by the prerequisite change"
 ```
 
-### Round 4: Second Evaluation
+### Second Verification
 
 ```yaml
 evaluation_result:
-  must_pass_rate: 100%  # PASS
-  should_pass_rate: 75%  # Below 80% threshold
   overall_pass: false
   failed_tests:
     - id: TC-007
@@ -412,15 +409,15 @@ fix_applied:
   section: Execution Procedure
   change: "Added rollback procedure steps"
   
-action: "Re-run from Round 2"
+action: "Rerun affected rollback scenarios and refresh required review evidence"
 ```
 
 ### Final Evaluation
 
 ```yaml
 evaluation_result:
-  must_pass_rate: 100%
-  should_pass_rate: 88%
+  affected_checks: passed
+  independent_review: "Destructive-operation findings resolved"
   overall_pass: true
 
 merge_target: ".github/skills/x-ipe-task-based-database-migration/"

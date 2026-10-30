@@ -123,7 +123,9 @@ does not apply to new/lookalike categories or make the name a tool alias.
 
 **When to use:** Coordination and orchestration skills that need nuanced reasoning. Human representation at decision points. Knowledge pipeline orchestration.
 
-**Key feature:** Best-Model Requirement — must use premium LLM for the 格物致知 reasoning backbone.
+**Execution:** Apply the backbone in the same agent loop by default; no model-tier
+requirement or automatic specialist handoff. Use the single-loop authoring policy
+for concrete delegation or independent-review triggers.
 
 **Naming:** `x-ipe-assistant-{name}` (e.g., `x-ipe-assistant-knowledge-librarian-DAO`)
 

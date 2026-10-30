@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "operation": "validate",
+  "name": "x-ipe-task-based-project-init",
+  "skill_type": "x-ipe-task-based",
+  "ok": true,
+  "errors": [],
+  "warnings": [],
+  "excluded_files": {},
+  "body_lines": 253,
+  "files": {
+    "SKILL.md": "97dc28a791627d910bf549fad733547e5db07ff85ea9e4b69106c34e68988adb",
+    "references/examples.md": "2a32593cfd8af98cfea23f8205a81933d992dcfe9779dd073b03a23213fa2a95"
+  },
+  "candidate_hash": "6710787b9306059c7a7c4a32f5d3999e9fe33b5800276ad0c970a404c6f8b157"
+}

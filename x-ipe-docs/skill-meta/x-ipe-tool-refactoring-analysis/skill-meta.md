@@ -98,3 +98,13 @@ evaluation:
 version_history:
   - {version: "2.0.0", date: 2026-10-14, task_id: TASK-6749, changes: Goal-risk bounded analysis with honest evidence and safe consultation plus legacy coverage preservation, receipt: publication-receipt-goal-TASK-6749.json}
 ```
+
+## TASK-6750 single-loop delivery revision
+
+Published after deterministic validation, bounded workflow safety review, and real manifest-safe publication; prior metadata above remains version history.
+
+- Current revision: `c0d56d08b5c3d2de3ec53e1deff4069ac52ae842c3fc2a40027ce7e1609a732e`
+- Previous revision: `f1c848402913264155e36e76397512d2ea9fa11a7571eb8e25a926b84ce17d97`
+- Evidence: `single-loop-TASK-6750.json`, `publication-receipt-TASK-6750.json`, `validation-receipt-TASK-6750.json`.
+- Same-loop delivery/default risk-based verification; unchanged resources and protected bytes retained.
+- Token/latency savings not measured; no live-agent efficacy claim.

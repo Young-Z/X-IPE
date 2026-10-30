@@ -172,6 +172,5 @@ recommended action to owner without editing implementation or expectations.
 Unsupported tool operation or unavailable browser blocks pertinent execution.
 No-op resume verifies current hashes/action/readback read-only, no replay writes.
 Owner alone handles verified test-report/test-folder acceptance_testing write,
-appropriate Tested transition and original conditional suggestions. Current app
-code_refactor remains mandatory; no quality need creates a routing blocker, not
-compulsory code change or fake skip/done/report. Later config migration is separate.
+appropriate Tested transition and original conditional suggestions. Default app code_refactor is optional; no quality need routes directly to
+closing without code churn, a new report or an agent-authored skip/done record.

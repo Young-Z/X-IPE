@@ -1,0 +1,29 @@
+# Task Data Model, not JSON CRUD input; no hardcoded category registry.
+task:
+  task_id: null
+  task_based_skill: ""
+  task_description: ""
+  category: ""                 # from child Output Result, preserve declared case
+  role_assigned: ""
+  status: pending
+  last_updated: ""             # board-generated
+execution_mode: free-mode
+workflow:
+  name: N/A
+  action: null
+  extra_context_reference: {}
+execution:
+  next_task_based_skill: null
+  process_preference:
+    interaction_mode: interact-with-human
+  task_output_links: []
+  dynamic_attributes: {}
+git:
+  strategy: main-branch-only
+  main_branch: ""
+closing:
+  category_level_change_summary: null
+# CRUD adapter: task_id/task_type/description/role/status/output_links/next_task.
+# task_type comes from original record or actual selected task type.
+# Null next_task -> empty string; nullable links -> list. Never persist this model
+# wholesale or invent category/assignee/session fields. Retain child dynamic fields.

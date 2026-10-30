@@ -15,6 +15,11 @@ Translate one specification into an implementable, two-part design:
 
 ## Important Notes
 
+Load the [single-loop delivery policy](.github/skills/x-ipe-workflow-task-execution/references/agent-loop.md)
+once in the current context. Execute this skill in the same agent loop; another
+skill is expertise, not a new agent. Use proportional checks and reuse current
+evidence; independent review is conditional on concrete risk, not the skill name.
+
 BLOCKING: Load `x-ipe-workflow-task-execution` and the
 [common lifecycle contract](.github/skills/x-ipe-workflow-task-execution/references/lifecycle.md).
 Direct entry calls Orient/Plan with the supplied task ID and original context,
@@ -133,7 +138,7 @@ approved solution, not every consulted tool.
       <name>Consult Capabilities and Resolve Options</name>
       <action>
         1. Discover actual x-ipe-tool-implementation-* descriptions/When to Use, Built-In Practices and Operations. Read tools.json stages.implement.technical_design and _extra_instruction, never code_implementation.
-        2. Exclude metadata keys before activation: missing/empty/metadata-only configuration enables discovered tools; explicit tool booleans activate opt-in filtering and force-enable general. Match enabled tools semantically to actual program_type/tech_stack/responsibility, not filename suffix alone. General is available fallback, not mandatory execution or automatic winner. Multiple relevant matches may be consulted (MCP protocol plus Python runtime); unrelated enabled tools need not be loaded.
+        2. Resolve configuration with [capability routing](.github/skills/x-ipe-workflow-task-execution/references/capability-routing.md): missing/empty/metadata-only preserves discovery; explicit booleans activate opt-in, no force-enable general. Match enabled tools semantically to actual program_type/tech_stack/responsibility, not filename suffix alone. Enabled general is fallback, not mandatory execution or automatic winner. Consult only relevant matches (e.g. MCP protocol plus Python runtime); refresh changed config/catalog revisions. No suitable capability is a disclosed design gap, not permission to execute a disabled tool.
         3. Read matched capabilities INFORMATIONAL ONLY; do not invoke implement/fix/refactor or run tool procedures. Record enabled/matched/excluded tools and applicability in Tool Capability Summary. Disabled specific tool means report gap and consult eligible fallback, not bypass config.
         4. Research official documentation and existing project/library patterns as needed; check runtime/version/license compatibility. Options are selected/rejected/deferred means bounded by authoritative outcome/AC/constraints, not extra goals or backlog mandates.
         5. For frontend/fullstack open and analyze all current provided/linked mockups: hierarchy/layout, spacing/colors, states/events, accessibility/responsiveness. Map mockup elements to components and acceptance in Part 2. Mockup is visual source of truth within approved scope; conflicts require bounded question, not scope expansion.
@@ -165,7 +170,7 @@ approved solution, not every consulted tool.
         1. Check each scoped source/parent goal/story/AC has a contribution chain, justified means and planned validation; outcome scenario respects source/constraints and labels unavailable observations. No orphan AC, invented KPI, false delivery or implicit outcome achievement.
         2. Check compatible technologies/patterns, complete interfaces/data/algorithms/tests and mockup fidelity; no speculative feature/dependency contradiction. Verify domain DoD and paths.
         3. Resolve only specific conflicts per actual mode; revise affected sections. Never ask broad is-this-correct questions or add approval loops when clear.
-        4. Obtain independent review for meaningful workflow/safety/public-contract risk; unavailable review blocks required completion/promotion claim, not drafting. Bind review/checks to source/design/config revisions; edits require affected reruns.
+        4. Self-check the design against scoped ACs and actual interfaces. Apply the shared risk policy before requesting independent review; a changed design alone is not a review trigger. Bind applicable evidence to relevant revisions and rerun only affected checks.
       </action>
       <output>Current verification with explicit unresolved gaps/review limits</output>
     </step_4_1>

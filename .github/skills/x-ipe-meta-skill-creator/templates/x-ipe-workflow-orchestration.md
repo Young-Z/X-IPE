@@ -31,6 +31,11 @@ Orchestrate a multi-skill workflow by:
 
 ## Important Notes
 
+Default to one model/context open-ended loop; apply tool skills in the same loop.
+Use [authoring policy](.github/skills/x-ipe-meta-skill-creator/references/single-loop-authoring.md)
+for bounded delegation and risk-triggered independent review, not per-skill agents.
+This policy also applies when this scaffold is used for task-category skills.
+
 BLOCKING: All orchestrated skills must exist and be valid before execution.
 
 CRITICAL: Workflow orchestration skills do NOT implement logic themselves - they coordinate existing skills.
@@ -41,7 +46,8 @@ CRITICAL: Workflow orchestration skills do NOT implement logic themselves - they
 
 ## About
 
-Workflow orchestration manages the execution of multiple skills in a defined sequence or parallel pattern.
+Workflow orchestration manages skills sequentially in shared context by default.
+Independent parallel work is an opt-in execution choice, not a mandatory agent topology.
 
 **Key Concepts:**
 - **Pipeline** - Sequential execution where output of one skill feeds the next
@@ -65,7 +71,7 @@ input:
   
   # Workflow options
   options:
-    parallel_execution: true | false
+    parallel_execution: false  # Opt in only for substantial independent work
     stop_on_first_failure: true | false
     max_retries: {number}
 ```
@@ -117,11 +123,11 @@ BLOCKING: All input fields with non-trivial initialization MUST be documented he
 | Phase | Skills | Mode | Gate |
 |-------|--------|------|------|
 | 1 | {skill-1} | Sequential | {skill-1} complete |
-| 2 | {skill-2}, {skill-3} | Parallel | Both complete |
+| 2 | {skill-2}, {skill-3} | Sequential by default | Both complete |
 | 3 | {skill-4} | Sequential | Decision: {condition} |
 | 4 | {skill-5} OR {skill-6} | Conditional | Based on Phase 3 decision |
 
-BLOCKING: Skills in same parallel group must have no data dependencies.
+BLOCKING: Opt-in parallel work must have no data dependencies or shared writes.
 
 ---
 
@@ -129,9 +135,8 @@ BLOCKING: Skills in same parallel group must have no data dependencies.
 
 ```xml
 <procedure name="{workflow-name}">
-  <!-- CRITICAL: Both DoR/DoD check elements below are MANDATORY -->
+  <!-- Check readiness in the same loop. -->
   <execute_dor_checks_before_starting/>
-  <schedule_dod_checks_with_sub_agent_before_starting/>
 
   <phase_1>
     <name>{Phase Name}</name>
@@ -150,7 +155,7 @@ BLOCKING: Skills in same parallel group must have no data dependencies.
 
   <phase_2>
     <name>{Phase Name}</name>
-    <mode>parallel</mode>
+    <mode>sequential</mode>
     <skills>
       <skill name="{skill-2}">
         <input_mapping>
@@ -166,7 +171,7 @@ BLOCKING: Skills in same parallel group must have no data dependencies.
     <merge_strategy>
       - Aggregate results into workflow_state.{merged_field}
     </merge_strategy>
-    <gate>All parallel skills complete</gate>
+    <gate>Both skills complete</gate>
   </phase_2>
 
   <phase_3>
@@ -316,7 +321,7 @@ workflow_orchestration_skills:
     4a: "  └─ Input Initialization (### subsection)"
     5: Definition of Ready (DoR)
     # ACTION
-    6: Execution Flow Summary (DAG/Sub-agent)
+    6: Execution Flow Summary (same-loop sequence by default)
     7: Execution Procedure (Steps)
     # VERIFY
     8: Output Result

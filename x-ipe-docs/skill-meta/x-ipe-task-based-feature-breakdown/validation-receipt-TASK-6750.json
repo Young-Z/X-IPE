@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "operation": "validate",
+  "name": "x-ipe-task-based-feature-breakdown",
+  "skill_type": "x-ipe-task-based",
+  "ok": true,
+  "errors": [],
+  "warnings": [],
+  "excluded_files": {},
+  "body_lines": 250,
+  "files": {
+    "SKILL.md": "36f1025acbb5638330c6a0d5523755137c87ea0225fab39c51c0edf64a9b4014",
+    "references/breakdown-guidelines.md": "7a179dc9efab728f278defa3ff42a4af54774683d5e5b31bba3a51d79b503f3c",
+    "references/examples.md": "dccbfecf7a54ceeb440f9cbc99b140a1451349c4e433a8516d5a30b195a23245",
+    "references/integration.md": "90d9ca71da51bfa2f86e6a03e98df7e33e3ebb670cf62b2d177781005b79ab3c",
+    "references/patterns.md": "73ee6d79491f594b4d6c661bb29a12cf9f2a4b7347b57365f85617897ce8230b",
+    "templates/features.md": "f54a2bf7bb8ef6ae52a9fdd770ebff1c07acb4cfaea7415f03147906cb227ae2",
+    "templates/requirement-details.md": "1919fb182b426e98b1720905eb724e0092f5792adb8d65a763a398c40bbfcb8c",
+    "templates/specification.md": "a182f39aaf60a7ddb73a2bd5f6160ff9eda1ace384631c8bea4ff366db8fd55a"
+  },
+  "candidate_hash": "e6410373de1e84d5f2e6d447f7ee0ac03f1086b4e730724af690f4f6cd9bd2a6"
+}

@@ -445,3 +445,13 @@ evaluation:
       - Current production/candidate fingerprint: 55ad88aaac927844d8019abe350b1c2f273bd007e89b7bca0f4a47128a0bd578.
       - [Recovered verification receipt](publication-receipt-TASK-6749-R2.json); prior history above remains historical, not current parity evidence.
       - Hybrid inner guidance and human completion/route boundary independently reviewed at exact R2 hash; actual human CR authority and affected-only invalidation retained. Prior-worker promotion time is unknown; no production replay or atomic writer journal claimed.
+
+## TASK-6750 single-loop delivery revision
+
+Published after deterministic validation, bounded workflow safety review, and real manifest-safe publication; prior metadata above remains version history.
+
+- Current revision: `30caca6cdb12431f48a6b0196ad30857650969e618709b068d78f7a88d455482`
+- Previous revision: `55ad88aaac927844d8019abe350b1c2f273bd007e89b7bca0f4a47128a0bd578`
+- Evidence: `single-loop-TASK-6750.json`, `publication-receipt-TASK-6750.json`, `validation-receipt-TASK-6750.json`.
+- Same-loop delivery/default risk-based verification; unchanged resources and protected bytes retained.
+- Token/latency savings not measured; no live-agent efficacy claim.

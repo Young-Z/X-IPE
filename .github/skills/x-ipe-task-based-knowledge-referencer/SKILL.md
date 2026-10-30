@@ -17,6 +17,19 @@ Search and reference knowledge from the knowledge base by:
 
 ## Important Notes
 
+Load the [single-loop delivery policy](.github/skills/x-ipe-workflow-task-execution/references/agent-loop.md)
+once in the current context. Execute this skill in the same agent loop; another
+skill is expertise, not a new agent. Use proportional checks and reuse current
+evidence; independent review is conditional on concrete risk, not the skill name.
+
+Load `x-ipe-workflow-task-execution` and its
+[common lifecycle](.github/skills/x-ipe-workflow-task-execution/references/lifecycle.md).
+Reuse the supplied task/readiness; direct entry calls Orient/Plan once without
+recursively dispatching this skill. One owner handles task/feature/app writes,
+Git and the next boundary. Return full output; do not register or execute a
+successor. Within-skill questions follow the three existing interaction modes;
+clear inputs need no question or DAO call. Explicit human approvals still bind.
+
 BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skill.
 
 **Note:** If Agent does not have skill capability, go to `.github/skills/` folder to learn skills. SKILL.md is the entry point.
@@ -26,7 +39,6 @@ BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skil
 - `x-ipe-tool-reference-user-manual` is **OPTIONAL** — only called when a user manual KB exists AND the query is about how-to/instructions
 - Results are ranked by cross-method hit count: files found by more search methods rank higher
 
-IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-interact"`, NEVER stop to ask the human. Instead, call `x-ipe-assistant-user-representative-Engineer` to get the answer.
 
 ---
 
@@ -56,7 +68,7 @@ input:
 
 ```xml
 <input_init>
-  <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
+  <field name="task_id" source="existing lifecycle task/readiness; no duplicate registration" />
   <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
   <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
   <field name="process_preference.interaction_mode" source="from caller (x-ipe-workflow-task-execution) or default 'interact-with-human'" />
@@ -103,8 +115,6 @@ input:
 | | 5.3 | Execute User Manual Lookup | IF include_user_manual AND manual KB exists: load x-ipe-tool-reference-user-manual | manual results collected (or skipped) |
 | | 5.4 | Combine & Consolidate | Merge results, deduplicate, rank by relevance, produce summary | consolidated output |
 | | 5.5 | Complete | Verify DoD | DoD validated |
-| 6. 继续执行 | 6.1 | Decide Next Action | DAO-assisted next task decision | Next action decided |
-| | 6.2 | Execute Next Action | Load skill, execute | Execution started |
 
 BLOCKING: Step 5.2 (ontology search) is MANDATORY — never skip it.
 BLOCKING: Step 5.4 must not run until steps 5.1, 5.2, and 5.3 (if applicable) are complete.
@@ -116,7 +126,6 @@ BLOCKING: Step 5.4 must not run until steps 5.1, 5.2, and 5.3 (if applicable) ar
 ```xml
 <procedure name="knowledge-referencer">
   <execute_dor_checks_before_starting/>
-  <schedule_dod_checks_with_sub_agent_before_starting/>
 
   <phase_1 name="博学之（Gather）">
     <step_1_1>
@@ -222,43 +231,6 @@ BLOCKING: Step 5.4 must not run until steps 5.1, 5.2, and 5.3 (if applicable) ar
     </step_5_5>
   </phase_5>
 
-  <phase_6 name="继续执行（Continue Execute）">
-    <step_6_1>
-      <name>Decide Next Action</name>
-      <action>
-        Collect the full context and task_completion_output from this skill execution.
-
-        IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-          → Invoke x-ipe-assistant-user-representative-Engineer with:
-            type: "routing"
-            completed_skill_output: {full task_completion_output YAML from this skill}
-            next_task_based_skill: "{from output}"
-            context: "Skill completed. Study the context and full output to decide best next action."
-          → DAO studies the complete context and decides the best next action
-        ELSE (interact-with-human):
-          → Present results and next task suggestion to human and wait for instruction
-      </action>
-      <constraints>
-        - BLOCKING (interact-with-human): Human MUST confirm or redirect before proceeding
-        - BLOCKING (auto): Proceed after DoD verification; auto-select next task via DAO
-      </constraints>
-      <output>Next action decided with execution context</output>
-    </step_6_1>
-    <step_6_2>
-      <name>Execute Next Action</name>
-      <action>
-        Based on the decision from Step 6.1:
-        1. Load the target task-based skill's SKILL.md
-        2. Generate an execution plan from the skill's Execution Flow table
-        3. Start execution from the skill's first phase/step
-      </action>
-      <constraints>
-        - MUST load the skill before executing — do not skip skill loading
-        - Execution follows the target skill's procedure, not this skill's
-      </constraints>
-      <output>Next task execution started</output>
-    </step_6_2>
-  </phase_6>
 
 </procedure>
 ```
@@ -291,7 +263,7 @@ task_completion_output:
 
 ## Definition of Done
 
-CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
+Verify the applicable outcomes in the current loop; use independent review only when concrete risk warrants it.
 
 ```xml
 <definition_of_done>

@@ -34,7 +34,9 @@ BLOCKING: {Critical mediation rule — use common language, avoid "DAO" terminol
 CRITICAL: {Bounded-output or safety rule}
 CRITICAL: {Fallback rule}
 
-CRITICAL: **Best-Model Requirement.** When this skill is delegated to a sub-agent (e.g., via the `task` tool), it MUST use the most capable (premium) LLM model available. The 格物致知 backbone requires nuanced reasoning — weighing perspectives, analyzing gains/losses, scenario planning — that benefits from the strongest model. Use the `model` parameter to select a premium model. Do NOT run this skill on fast/cheap models.
+Default to one model/context open-ended loop; apply tool skills in the same loop.
+Use [authoring policy](.github/skills/x-ipe-meta-skill-creator/references/single-loop-authoring.md)
+for bounded delegation and risk-triggered independent review, not per-phase agents.
 
 ---
 
@@ -174,8 +176,8 @@ BLOCKING: Phase 2 (致知) MUST produce exactly one disposition — not multiple
       <action>
         1. Print a greeting to the CLI identifying yourself as '道':
            "道 · {Skill Display Name} — ready."
-        2. This establishes the sub-agent's presence so the caller agent
-           (and any human observing logs) knows the skill is active.
+        2. This identifies the active skill for the caller and any human
+           observing logs; it does not require a separate agent.
         3. The greeting is a CLI-visible marker, not part of the operation_output.
       </action>
       <constraints>

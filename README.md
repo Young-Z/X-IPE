@@ -66,7 +66,7 @@
 │   ├─────────────────────────────────────────────────────────────────────────────────────────┤     │
 │   │                                                                                         │     │
 │   │  ┌────────────────────────────────────────────────────────────────────────────────┐     │     │
-│   │  │                         🎯 MAIN AGENT (Orchestrator)                           │     │     │
+│   │  │                       🎯 MAIN AGENT (Shared-context Loop)                      │     │     │
 │   │  │     Understands intent │ Plans tasks │ Coordinates workflow │ Reports status   │     │     │
 │   │  └────────────────────────────────────────────────────────────────────────────────┘     │     │
 │   │                                           │                                             │     │
@@ -75,7 +75,7 @@
 │   │              ▼                            ▼                            ▼                │     │
 │   │  ┌──────────────────┐       ┌──────────────────┐       ┌──────────────────┐             │     │
 │   │  │  📝 Requirement  │       │  🏗️ Design &      │       │  💻 Code &       │             │     │
-│   │  │     Sub-Agent    │       │  Test Sub-Agent  │       │  Docs Sub-Agent  │             │     │
+│   │  │      Skills      │       │    Test Skills   │       │    Docs Skills   │             │     │
 │   │  ├──────────────────┤       ├──────────────────┤       ├──────────────────┤             │     │
 │   │  │ • Breakdown      │       │ • Tech Design    │       │ • Implementation │             │     │
 │   │  │ • Refinement     │       │ • Test Gen       │       │ • Documentation  │             │     │
@@ -126,6 +126,27 @@
 3. **Value-Centric** — Focus on business outcomes, not just code output
 4. **AI-Human Collaboration** — Humans guide strategy; AI agents execute implementation
 5. **End-to-End Orchestration** — Manage the complete journey from idea to delivery
+
+### One Agent Loop, Proportional Work
+
+The same agent retains intent, design decisions, implementation and verification
+in a shared context. Skills supply expertise on demand; they are not a mandatory
+chain of specialist subagents. Delegate only for substantial independent work,
+observed context/tool conflicts, or a genuine isolation/review need.
+
+Use the smallest checks that cover changed behavior and affected consumers.
+Reuse current evidence through acceptance and closing; broaden validation for
+coupling, regressions or explicit policy. Keep clear acceptance, actual behavioral
+tests, configured permissions and required human approvals. The current workflow
+still requires its planning artifacts and stage gates; a compact-delivery path
+and consolidated approvals are proposals, not already-supported shortcuts.
+
+Canonical skill procedures live in `.github/skills/`. Other CLI installations
+can lag; audit drift before using or explicitly synchronizing them. See the
+[delivery policy](.github/skills/x-ipe-workflow-task-execution/references/agent-loop.md),
+[capability routing](.github/skills/x-ipe-workflow-task-execution/references/capability-routing.md)
+and [opt-in evaluation](.github/skills/x-ipe-workflow-task-execution/references/evaluation.md).
+Static checks and smaller instruction files alone do not prove token or latency savings.
 
 * I will share more details in the upcoming blog series on mindset shifts, process changes, and tool evolution needed to thrive in the AI age of software delivery.
 

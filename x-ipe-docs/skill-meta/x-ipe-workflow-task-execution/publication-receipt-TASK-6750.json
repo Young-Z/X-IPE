@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "ok": true,
+  "operation": "publish",
+  "state": "published",
+  "name": "x-ipe-workflow-task-execution",
+  "added": [
+    "references/agent-loop.md"
+  ],
+  "changed": [
+    "SKILL.md",
+    "references/lifecycle.md"
+  ],
+  "removed": [],
+  "protected": [],
+  "baseline_hash": "b79761fd9d6c36700b1312dc98b7e6b69c7099e14e05d8a10ded9f6ef21dcc00",
+  "candidate_hash": "effca4d4b3f58ebbeb749c4d13b6e0130a5a0152d769c4cfbcf8a08bd5002cb6",
+  "files": {
+    "SKILL.md": "668b02ce21328bcbec2588319221677d83ff3a35e3a2a435e664e706f87eb414",
+    "references/agent-loop.md": "9bd5ec698de00d7b9c31fe95c50039bfb6632c33cd868a671a4915af6cc22182",
+    "references/examples.md": "f4279ab78cfb3e910f55688286461de94ba5fd03bb6d9510a7dc06314982bbed",
+    "references/goal-contract.md": "fd007a0f946ee3ccf60507f88c898358de9ea045b18de6446b65079d62911074",
+    "references/lifecycle.md": "c0ec0816006e9666d8e8766ab847bec9303e1ef8849e46258ff7128c7e937e50",
+    "templates/task-board.md": "521f08a73e475efe950d9167bd33ca174730535387a178fcc813caf1d889bc41",
+    "templates/task-record.yaml": "062f4e547db2dca988b39e49feb8862bc8ce266a9859e26aef0b8f1ab08ed96b"
+  },
+  "excluded_files": {},
+  "transaction": "/Users/yzhang/Documents/projects/X-IPE/.github/.skill-publication/x-ipe-workflow-task-execution-phmsbt_8",
+  "byte_parity": true
+}

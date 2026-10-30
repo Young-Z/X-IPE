@@ -1,0 +1,8 @@
+{
+  "SKILL.md": "02e88d3d55d03e62fcc674ca8cfecab2464869e8fa7680b1b64edf03645d47ad",
+  "references/examples.md": "0220ecd13e842e982debb0e4c00d0e0c94c216f0a0f7a2f991ea592072a28c57",
+  "references/integration.md": "399048962a67703215c7860a378687fdb404202545aff0e7e39f228193d92e87",
+  "references/detailed-procedures.md": "5d4027f855b70f788170f72917b8f26de13bb622e5636518a9a65c9dbae62be7",
+  "scripts/verify_evidence.py": "9b9473189b12d1228a7b204fe73074e53e579ee03e35f643cf115f398b1c4fed",
+  "templates/acceptance-test-cases.md": "4593fe8176404ca3fec4037c1f404ab28a6e0b1d5383e300e50aa248f7549038"
+}

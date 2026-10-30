@@ -15,6 +15,11 @@ claim of achieved stakeholder benefit.
 
 ## Important Notes
 
+Load the [single-loop delivery policy](.github/skills/x-ipe-workflow-task-execution/references/agent-loop.md)
+once in the current context. Execute this skill in the same agent loop; another
+skill is expertise, not a new agent. Use proportional checks and reuse current
+evidence; independent review is conditional on concrete risk, not the skill name.
+
 BLOCKING: Load [shared workflow](.github/skills/x-ipe-workflow-task-execution/SKILL.md),
 [common lifecycle](.github/skills/x-ipe-workflow-task-execution/references/lifecycle.md)
 and [goal contract](.github/skills/x-ipe-workflow-task-execution/references/goal-contract.md).
@@ -124,7 +129,7 @@ input:
     <name>Analyze impact and actual conflicts</name>
     <action>
       1. Fill Users, Workflow, Data Model, UI Elements and API Endpoints matrix: before/proposed facts, artifact clauses/revisions, feature boundaries, callers/dependencies and reasoned N/A.
-      2. Examine actual requirement/specification/design/code/tests, dependent features, pending CRs and current mockup clauses. Conflict Detector independent review for meaningful workflow/executable/safety/public-contract risk; unavailable reviewer is recorded, not fabricated.
+      2. Examine actual requirement/specification/design/code/tests, dependent features, pending CRs and current mockup clauses. Use self-checks and targeted tests by default; independent review is required only for an explicit request or concrete high-risk uncertainty under the shared single-loop policy. Reuse suitable current review; missing required review blocks the affected claim, not drafting.
       3. Each conflict records type, affected feature/goal/AC, severity, expected/unexpected, exact source/anchor/hash, consequence and mitigation. No-conflict claim names inspected sources; unavailable artifacts are gaps, not empty conflicts.
       4. Distinguish minor inline delta from major contradiction/structural redesign needing retirement/replacement. Unanalyzed conflicts block classification; unresolved unexpected conflicts block application/completion until authorized mitigation, narrowed scope or approved bounded deferral with residual risk.
     </action>

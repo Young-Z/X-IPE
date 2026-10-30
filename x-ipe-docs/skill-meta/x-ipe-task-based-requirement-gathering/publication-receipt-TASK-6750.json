@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "ok": true,
+  "operation": "publish",
+  "state": "published",
+  "name": "x-ipe-task-based-requirement-gathering",
+  "added": [],
+  "changed": [
+    "SKILL.md"
+  ],
+  "removed": [],
+  "protected": [],
+  "baseline_hash": "1aed46f6ca4829599fd330117b0dc400d4a8d36c3bd493e03458991da6a51a27",
+  "candidate_hash": "8ca70bc159288e95f302ae3b00516edc3a875d96213046f9a95992cc95d855cc",
+  "files": {
+    "SKILL.md": "d437f544e75a6a7b9e9b48f14844edad1870704b8229f4677b358c573edd93b0",
+    "references/context-review.md": "893539b655fb3bbe3d6b1706a15aedbf3ce6f167499eaee7d015e28862d006df",
+    "references/examples.md": "1df898fde14673424c9b12036cc8487aea51af4682b55f75744540037719bc33",
+    "references/file-splitting.md": "d76a1b752f00582b75502eb0083b094bf5b3d042e80586b5aeab32ce2c62902c",
+    "references/requirement-details-template.md": "74babfdcd2cc893e65839fe47afe948754de0f63f3f7b7dd722809d9e66511b8",
+    "templates/requirement-details.md": "f41892e2aa97194e048127e9f61733ed78384682b6f55507bda396519652b530"
+  },
+  "excluded_files": {},
+  "transaction": "/Users/yzhang/Documents/projects/X-IPE/.github/.skill-publication/x-ipe-task-based-requirement-gathering-kc70e3gn",
+  "byte_parity": true
+}

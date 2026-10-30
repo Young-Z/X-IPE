@@ -132,8 +132,8 @@ not 100%. Counts/rate diagnostic, not goal achievement or stakeholder impact.
 
 Refactor need: {inspected issue and preservation need or no evidenced need; conditional}.
 Original conditional successors retained, no compulsory code churn. Current app
-code_refactor mandatory: closing route blocked until legitimately fulfilled or
-later authorized config migration. No fake skip/done/report. Acceptance delivery/
+code_refactor is optional: no-need delivery routes directly to closing.
+Honor explicit project customizations. No fake skip/done/report. Acceptance delivery/
 action evidence separate from route availability. Owner alone writes/verifies
 acceptance_testing with actual test-report/test-folder and specification/impl-files,
 done implementation and matching readback once. Free-mode no app mutation.

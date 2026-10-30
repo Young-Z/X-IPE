@@ -94,7 +94,7 @@ const workflowStage = {
             label: 'Validation',
             actions: {
                 acceptance_testing: { label: 'Acceptance Testing', icon: '✅', mandatory: true,  interaction: 'cli', skill: 'x-ipe-task-based-feature-acceptance-test' },
-                code_refactor:      { label: 'Code Refactor',      icon: '🔧', mandatory: true,  interaction: 'cli', skill: 'x-ipe-task-based-code-refactor' },
+                code_refactor:      { label: 'Code Refactor',      icon: '🔧', mandatory: false, interaction: 'cli', skill: 'x-ipe-task-based-code-refactor' },
                 feature_closing:    { label: 'Feature Closing',    icon: '🏁', mandatory: true,  interaction: 'cli', skill: 'x-ipe-task-based-feature-closing' },
             }
         },

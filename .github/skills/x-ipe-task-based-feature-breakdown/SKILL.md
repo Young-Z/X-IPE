@@ -14,6 +14,11 @@ consolidated Feature Lists and details without regenerating stable features.
 
 ## Important Notes
 
+Load the [single-loop delivery policy](.github/skills/x-ipe-workflow-task-execution/references/agent-loop.md)
+once in the current context. Execute this skill in the same agent loop; another
+skill is expertise, not a new agent. Use proportional checks and reuse current
+evidence; independent review is conditional on concrete risk, not the skill name.
+
 BLOCKING: Load the [common lifecycle](.github/skills/x-ipe-workflow-task-execution/references/lifecycle.md).
 Caller supplies readiness; direct entry loads the workflow and calls Orient/Plan
 once, returning here without recursively dispatching this child. Lifecycle owns
@@ -160,7 +165,7 @@ no forced re-interview, five-phase ceremony or duplicate upstream research.
   <step_4>
     <name>Verify action and return</name>
     <action>
-      1. Verify domain DoD and current source/document/board/config hashes, coverage, language, dependency order, actual new Planned records and preserved stable state. Meaningful workflow/public-contract/risky changes require independent review; unavailable review blocks the relevant claim, not drafting.
+      1. Verify domain DoD and current source/document/board/config hashes, coverage, language, dependency order, actual new Planned records and preserved stable state. Use self-checks and targeted tests by default; independent review is required only for an explicit request or concrete high-risk uncertainty under the shared single-loop policy. Reuse suitable current review; missing required review blocks the affected claim, not drafting.
       2. Workflow-mode checks requirement_gathering is actually done with valid artifacts and required context. Verify prerequisite states, not helper success or skipped flags. Free-mode makes no app write and returns workflow_action_updated false.
       3. Initial workflow action uses installed workflow_update_action.py --workflow NAME --action feature_breakdown --status done --deliverables keyed JSON --features JSON --format json. Supply BOTH features-list = actual populated Feature List file and breakdown-folder = scalar existing folder containing the breakdown; one requirement part/root requirements directory can satisfy these real artifacts.
       4. Workflow feature payload is id/name/depends_on, not board feature_id/title/dependencies. Query current state first; helper appends blindly. Send only absent new entries after validating collisions/edges; never resend existing entries or reset per-feature stages. Completed unchanged resume verifies without replay.

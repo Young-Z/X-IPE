@@ -1,0 +1,27 @@
+{
+  "added": [],
+  "baseline_hash": "5b94f2e36e2f29f127333603989b410126037d2b676411a1b78ee2acde1e9d7e",
+  "byte_parity": true,
+  "candidate_hash": "32704aa6dde1a64091e4ce3bbc86f225de8eda089bc7ae4d5deea995f7be4af3",
+  "changed": [
+    "SKILL.md",
+    "references/examples.md",
+    "references/integration.md",
+    "templates/bug-report.md"
+  ],
+  "excluded_files": {},
+  "files": {
+    "SKILL.md": "efe73fb69b0501d863074d4de1a50712758516104e7d087b312ea4431e9b4f60",
+    "references/examples.md": "031c9f4bb4a6af9597615ea4ccd110342a221f5a4c60fd82fe1453cbf1383f0d",
+    "references/integration.md": "75e5fbfd4eede5adc69d541bd85d1f0ecde46a3978c6ee0818342b92d8ebc7ee",
+    "templates/bug-report.md": "360ea1cd1d77f529197e0063410ece94dafe26e71901263cd804a8ca189f51ec"
+  },
+  "name": "x-ipe-task-based-bug-fix",
+  "ok": true,
+  "operation": "publish",
+  "protected": [],
+  "removed": [],
+  "schema": 1,
+  "state": "published",
+  "transaction": "/Users/yzhang/Documents/projects/X-IPE/.github/.skill-publication/x-ipe-task-based-bug-fix-mg_t8vrw"
+}

@@ -11,10 +11,15 @@ Deliver one approved feature capability, not an activity count:
 1. Follow authoritative outcome/parent/story/AC and both parts of its design.
 2. Select justified implementation means within approved contracts and constraints.
 3. Delegate special domains first, otherwise generate AAA tests and route enabled tools sequentially.
-4. Verify every scoped AC and original Assert clauses, regression, lint and relevant revision evidence.
+4. Verify every scoped AC and original Assert clauses with relevant regression/lint evidence, reused by later acceptance.
 5. Return original outputs and actual artifacts to the same lifecycle owner.
 
 ## Important Notes
+
+Load the [single-loop delivery policy](.github/skills/x-ipe-workflow-task-execution/references/agent-loop.md)
+once in the current context. Execute this skill in the same agent loop; another
+skill is expertise, not a new agent. Use proportional checks and reuse current
+evidence; independent review is conditional on concrete risk, not the skill name.
 
 BLOCKING: Load `x-ipe-workflow-task-execution` and the
 [common lifecycle contract](.github/skills/x-ipe-workflow-task-execution/references/lifecycle.md).
@@ -32,7 +37,7 @@ no invented KPIs, targets, scope or observed benefit; no chasing activity counts
 Keep mappings/evidence in existing design/testing artifacts, no new output/board
 schema, goal database, mandatory graph, action tag or approval ritual.
 
-Special skill-creator/MCP delegations happen before scenario generation and semantic routing.
+Special skill-creator/MCP skill loading happens in the current loop before scenario generation and semantic routing; it does not spawn another agent.
 They retain their own tests/DoD and full scoped AC coverage; they never bypass
 verification or later feature acceptance testing. Candidate readiness is not
 production promotion, implementation release or permission to alter live skills.
@@ -165,9 +170,9 @@ input:
       <name>Route and Implement Sequentially</name>
       <action>
         1. Discover x-ipe-tool-implementation-* descriptions/When to Use/operations. Read tools.json stages.implement.code_implementation and _extra_instruction, not app action implementation or technical_design consultation config.
-        2. Exclude metadata keys: missing/empty/metadata-only enables discovered tools. Explicit tool booleans activate opt-in: true enabled, false disabled, undeclared disabled; log disabled/undeclared rationale. Malformed values block the relevant config decision, not truthy enablement. Always force-enable general with warning if disabled/undeclared.
-        3. Match actual type/stack/responsibility semantically to enabled tools only, not suffix or hardcoded registry. General is fallback when no eligible specific match; if insufficient report new-tool gap and block affected implementation, do not continue ad hoc. Preserve _extra_instruction as supplementary context, never authority to weaken gates or disable assertions.
-        4. Invoke distinct matched skills sequentially, backend first then dependent frontend, never parallel. Pass standard operation implement, original layer aaa_scenarios, actual source_code_path/test_code_path, feature_context with source/design links and current frontend mockup_link. Tool calls carry agreed same-owner adapter; no child task CRUD/Git/routing.
+        2. Resolve enabled tools once through [capability routing](.github/skills/x-ipe-workflow-task-execution/references/capability-routing.md). Missing/empty/metadata-only preserves discovery; opt-in means true enabled, false and undeclared disabled. Malformed values block that decision. No force-enable general; refresh reused resolution when config/catalog revisions change.
+        3. Match actual type/stack/responsibility semantically to enabled tools only, not suffix or hardcoded registry. General is fallback only when enabled and suitable with no eligible specific match; otherwise report a capability gap and block affected implementation, do not continue ad hoc. Preserve _extra_instruction as supplementary context, never authority to weaken gates or disable assertions.
+        4. Invoke matched skills in the same context; order dependent work/shared writes sequentially, backend before dependent frontend. Batch independent read/test calls only with isolated data/environment/cleanup; no automatic worker agents. Pass standard operation implement, original layer aaa_scenarios, actual source_code_path/test_code_path, feature_context with source/design links and current frontend mockup_link. Tool calls carry agreed same-owner adapter; no child task CRUD/Git/routing.
         5. Collect implementation_files, test_files, test_results for each original assertion and lint_status/details. Deduplicate actual paths, preserve passing outputs. Retry a failed tool once with original scenarios plus error context; persistent failure blocks affected delivery. Adapt suitable means within approved design; design-contract changes require affected authorized update/reruns, not silent drift.
       </action>
       <output>Actual sequential tool outputs and revision-bound implementation/test inventory</output>
@@ -177,11 +182,11 @@ input:
     <step_4_1>
       <name>Verify Delivery and Relevant Evidence</name>
       <action>
-        1. Inspect actual tool/delegation outputs and run relevant unit/integration/UI/API/CLI/structured checks, all original Assert clauses and affected regression. Mocked integration alone cannot prove UI/API acceptance or stakeholder observation. Verify real paths/content/design/mockup fidelity, lint and new-code coverage at least 80% where executable coverage applies; keep simple code, never chase assertion/tool/component/activity counts or invent stakeholder targets.
+        1. Inspect actual skill/tool outputs and run the smallest checks covering all original scoped Assert clauses and affected regression. Record suitable unit/integration/UI/API/CLI/structured evidence for later acceptance reuse, not a second full test pipeline. Mocked integration alone cannot prove UI/API acceptance or stakeholder observation. Verify actual paths/content/design/mockup fidelity and relevant lint. Coverage thresholds apply only when the project or approved AC explicitly requires one; do not impose a universal 80% gate.
         2. With existing tracing infrastructure and applicable modified runtime functions, use x-ipe-tool-tracing-instrumentation for supported files: INFO public boundaries, DEBUG helpers, sensitive parameter/log redaction and opt-in behavior. Skip with rationale when absent/inapplicable or only tests/config/skills; no mandatory setup every task. Rerun affected tests after instrumentation; do not introduce tracing infrastructure implicitly.
         3. Record actual commands/exits/assertion results, relevant source/spec/design/mockup/config/implementation/test hashes, review and unavailable checks in existing artifacts. Engineering delivery may be verified while stakeholder outcome is not measured. Qualitative outcome scenario follows source intent; only actual cited observation supports observed stakeholder outcome.
         4. Rehash relevant inputs before claiming completion; changed intent/parent/means invalidates affected design/test/outcome evidence and dependent claims. Rerun affected checks/review; preserve unrelated evidence only when dependencies establish it is still valid. Timestamps alone or historical pass counts are insufficient.
-        5. Obtain independent DoD review for meaningful workflow/safety/public-contract risk; unavailable review blocks required completion/publication claim, not candidate drafting. Persisting failure/coverage gap/missing evidence is blocked, not done; do not hide partial artifacts or erase passing evidence.
+        5. Self-check DoD in the current loop. Obtain independent review only for an explicit request or concrete high-risk uncertainty under the shared policy; reuse suitable existing review. Missing required checks or unresolved failures block affected completion, not candidate drafting; preserve partial artifacts and passing evidence.
       </action>
       <output>Fresh delivery/AC evidence with honest outcome state and review limits</output>
     </step_4_1>
@@ -236,7 +241,7 @@ workflow tags separately. No goal/coverage/implementation_files board fields.
 <definition_of_done>
   <checkpoint required="true"><name>Authoritative context</name><verification>One designed feature, both design parts/spec/architecture/source goals/ACs/current mockups and actual path/config contracts inspected.</verification></checkpoint>
   <checkpoint required="true"><name>Full acceptance preserved</name><verification>Every scoped AC/original assertion/test type maps to selected means and suitable tests; TDD RED/GREEN and baseline/affected regression are real, no weakened/skipped checks.</verification></checkpoint>
-  <checkpoint required="true"><name>Correct delegation/routing</name><verification>Skill-creator/MCP first with own tests/DoD; ordinary tools enabled semantic matches sequentially with general fallback; actual outputs verified, gaps block.</verification></checkpoint>
+  <checkpoint required="true"><name>Correct delegation/routing</name><verification>Skill-creator/MCP first with own tests/DoD; ordinary tools are enabled semantic matches, dependent work/shared writes ordered, independent calls isolated; general fallback only when enabled/suitable. Actual outputs verified, gaps block.</verification></checkpoint>
   <checkpoint required="true"><name>Approved means</name><verification>Implementation stays within approved outcome/acceptance/design/constraints, KISS/YAGNI/DRY/800-line rule; authorized affected design log and reruns where contracts changed.</verification></checkpoint>
   <checkpoint required="if_applicable"><name>Mockup fidelity</name><verification>Actual frontend visuals/states/accessibility/responsiveness match current scoped mockups and acceptance; unavailable visual verification explicit.</verification></checkpoint>
   <checkpoint required="true"><name>Delivery verification</name><verification>Actual assertions/integration/regression/lint pass; new executable code coverage at least 80% where applicable, structured delegation checks otherwise; no activity-count surrogate.</verification></checkpoint>

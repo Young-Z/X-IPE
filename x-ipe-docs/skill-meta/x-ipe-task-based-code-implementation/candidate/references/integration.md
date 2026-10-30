@@ -15,16 +15,19 @@ Discover implementation tool descriptions, When to Use, Operations and actual
 type/stack/responsibility. Metadata `_order`, `_extra_instruction` and other
 underscore keys do not activate opt-in. Missing/empty/metadata-only means all
 discovered tools eligible. If explicit tool booleans exist, only true is enabled;
-false and undeclared are disabled with diagnostics. Always force-enable general
-even when false or undeclared and record warning. Malformed nonboolean values
+false and undeclared are disabled with diagnostics. No force-enable general,
+even when no specialized tool matches. Malformed nonboolean values
 are unresolved configuration, never truthy enablement.
 
 Match enabled declarations semantically (e.g. Python/Flask, vanilla HTML/CSS/JS,
 TypeScript/React, Java/Spring), not filename suffixes or a fixed registry. General
 is no-specific-match safety net, not mandatory extra work; insufficient fallback
 blocks affected scope. `_extra_instruction` is supplementary context, not authority
-to bypass tests/config/approval. Distinct tools run sequentially, backend before
-dependent frontend. Skill-creator and mcp-builder precede normal scenario/routing
+to bypass tests/config/approval. Use the shared
+[capability routing](.github/skills/x-ipe-workflow-task-execution/references/capability-routing.md)
+resolver and refresh changed config/catalog revisions. Dependent work/shared
+writes run sequentially, backend before dependent frontend; independent read/test
+calls may be batched with isolated data/environment/cleanup. Skill-creator and mcp-builder precede normal scenario/routing
 and have their own domain checks; separate ordinary code still obeys this config.
 
 ## Sources and paths

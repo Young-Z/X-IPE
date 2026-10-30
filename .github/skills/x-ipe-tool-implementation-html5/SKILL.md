@@ -17,6 +17,11 @@ AI Agents follow this skill to implement HTML5/CSS3/JS code by:
 
 ## Important Notes
 
+Apply the caller's single risk/impact verification plan in the same agent loop.
+Run affected tests and implicated integrations; broaden for coupling, observed
+regressions or binding policy. Reuse current evidence at handoff, never claim an
+unrun suite passed. No child board/Git/checkpoint actions.
+
 BLOCKING: Invoked by `x-ipe-task-based-code-implementation` orchestrator. Do NOT invoke directly unless testing.
 CRITICAL: No research step — HTML5/CSS3/JS best practices are built in. Go straight to learning existing code.
 MANDATORY: Follow the standard tool skill I/O contract in [implementation-guidelines.md](.github/skills/x-ipe-task-based-code-implementation/references/implementation-guidelines.md).
@@ -97,7 +102,7 @@ input:
   </checkpoint>
   <checkpoint required="true">
     <name>Feature context complete</name>
-    <verification>feature_id and technical_design_link are provided</verification>
+    <verification>For implement, feature_id and technical_design_link are provided; fix/refactor may omit feature_context as declared</verification>
   </checkpoint>
 </definition_of_ready>
 ```
@@ -208,7 +213,7 @@ input:
        - Semantic HTML, accessible markup, valid CSS
        - Only change what is necessary to make the test pass
     6. RUN test → MUST PASS
-    7. RUN all existing tests → no regressions
+    7. RUN affected regression selection and implicated integrations; broaden when the verification plan requires it
     8. RUN validation: HTML validation, CSS validation
     9. RETURN standard output
   </action>
@@ -225,7 +230,7 @@ input:
   <action>
     1. LEARN existing code: scan source_code_path for HTML structure, CSS patterns, JS conventions
     2. IF feature_context is absent: generate synthetic context (feature_id: "REFACTOR-{task_id}", technical_design_link: "N/A")
-    3. RUN existing tests → establish baseline (all must pass)
+    3. RUN affected preservation selection → establish baseline (all selected checks must pass)
        - IF any test fails → STOP, report: "Cannot refactor — baseline tests failing"
     4. RESTRUCTURE code per AAA scenario target state:
        a. FOR EACH AAA scenario:
@@ -233,7 +238,7 @@ input:
           - Apply structural changes (semantic HTML, CSS reorganization, JS patterns)
           - Preserve external behavior and visual appearance
     5. UPDATE references across affected HTML/CSS/JS files
-    6. RUN all tests → MUST pass (behavior preserved)
+    6. RUN the same preservation selection plus affected integrations → MUST pass (behavior preserved); broaden for observed risk/failures or binding policy
        - IF tests fail → report failed scenarios with details; do NOT auto-revert
     7. RUN validation: HTML validation, CSS validation
     8. RETURN standard output
@@ -241,7 +246,7 @@ input:
   <constraints>
     - BLOCKING: Baseline tests must pass before refactoring (Step 3)
     - CRITICAL: Preserve behavior and visual appearance — no functional changes
-    - CRITICAL: Do NOT manage git commits — orchestrator handles checkpointing
+    - CRITICAL: Do NOT manage git commits/checkpoints — only the owner may act with explicit authority
     - MANDATORY: Feature_context is OPTIONAL — use synthetic fallback if absent
   </constraints>
   <output>Standard tool skill output (implementation_files, test_files, test_results, lint_status)</output>
@@ -275,11 +280,15 @@ operation_output:
 
 ## Definition of Done
 
-- ✅ **Framework detected** — stack_identified contains "HTML5/{framework}"
-- ✅ **Implementation files created** — implementation_files array is non-empty
-- ✅ **Test files created** — test_files array is non-empty
-- ✅ **All AAA Assert clauses mapped** — test_results count equals total Assert clauses
-- ✅ **Lint passes** — lint_status == "pass" or "skipped"
+```xml
+<definition_of_done>
+  <checkpoint required="true"><name>Framework detected</name><verification>stack_identified contains "HTML5/{framework}"</verification></checkpoint>
+  <checkpoint required="true"><name>Implementation files created</name><verification>implementation_files array is non-empty</verification></checkpoint>
+  <checkpoint required="true"><name>Test files created</name><verification>test_files array is non-empty</verification></checkpoint>
+  <checkpoint required="true"><name>All AAA Assert clauses mapped</name><verification>test_results count equals total Assert clauses</verification></checkpoint>
+  <checkpoint required="true"><name>Lint passes</name><verification>lint_status == "pass" or "skipped"</verification></checkpoint>
+</definition_of_done>
+```
 
 ---
 

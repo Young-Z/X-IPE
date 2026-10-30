@@ -1,7 +1,8 @@
 # Common lifecycle contract — child entry and caller boundary
 
-MANDATORY: The workflow and every adopting child read this reference before
-domain execution. Existing children are not silently migrated by publication.
+MANDATORY: Load this reference once per agent context before domain execution;
+children reuse it rather than repeatedly rereading unchanged policy. Existing
+children are not silently migrated by publication.
 Adoption adds this link to child Important Notes and replaces duplicate lifecycle
 blocks in that child's own validated candidate; until then use an explicit
 bounded ownership adapter or block conflicting invocation.
@@ -187,8 +188,10 @@ Bind each claim to relevant source, implementation, test and config SHA256 hashe
 commands, exits, result and review scope. Verify hashes again before record/routing;
 any changed tested input invalidates affected receipts/review and requires rerun.
 Record unavailable checks as unavailable; content assertions do not prove agent
-decision behavior. Independent review required for meaningful safety/workflow/
-executable/public-contract changes; candidate_ready is not publication/release.
+decision behavior. Apply the [single-loop policy](.github/skills/x-ipe-workflow-task-execution/references/agent-loop.md):
+self-check and targeted tests by default, independent review for explicit requests
+or concrete high-risk uncertainty, not every changed workflow or executable file.
+candidate_ready is not publication/release.
 
 Capture branch and dirty/staged baseline before work. Respect .x-ipe.yaml Git
 strategy and real identity for dev-session-based; wrong branch plus dirty work

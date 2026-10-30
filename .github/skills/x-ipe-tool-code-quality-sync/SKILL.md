@@ -16,6 +16,11 @@ of stakeholder gain or an opportunity to rewrite acceptance to bless faulty code
 
 ## Important Notes
 
+Load the [single-loop delivery policy](.github/skills/x-ipe-workflow-task-execution/references/agent-loop.md)
+once in the current context. Execute this skill in the same agent loop; another
+skill is expertise, not a new agent. Use proportional checks and reuse current
+evidence; independent review is conditional on concrete risk, not the skill name.
+
 BLOCKING: Tool operation only. No task registration, board, Git, app writes,
 lifecycle duplication, successor execution or approval choreography. Called by
 x-ipe-task-based-code-refactor Step 2; return operation_output once to its owner.

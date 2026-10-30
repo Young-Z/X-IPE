@@ -78,7 +78,7 @@ OUTPUT: List of tagged AAA scenarios
 
 For large context (the >20 components heuristic is not a feature goal):
 1. Preserve a complete scoped AC/assertion/test-type map, including cross-layer cases.
-2. Generate per-layer batches; invoke distinct matched enabled tools sequentially, backend first.
+2. Generate per-layer batches; order dependent work/shared writes sequentially, backend before dependent frontend. Independent read/test calls may be batched only with isolated data/environment/cleanup; skills remain in the same context.
 3. Run integration with suitable mocking plus original UI/API/CLI/structured acceptance checks; mocking does not prove actual UI or stakeholder outcome.
 
 This prevents context overflow by processing one layer at a time.

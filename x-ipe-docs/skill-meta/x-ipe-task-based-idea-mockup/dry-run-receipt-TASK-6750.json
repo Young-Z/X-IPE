@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "ok": true,
+  "operation": "publish",
+  "state": "dry_run",
+  "name": "x-ipe-task-based-idea-mockup",
+  "added": [],
+  "changed": [
+    "SKILL.md",
+    "references/mockup-guidelines.md"
+  ],
+  "removed": [],
+  "protected": [],
+  "baseline_hash": "533696548bd43cc832b6473b562bdb3b30af9079664703566e4741991fdb982a",
+  "candidate_hash": "473d4d385b4b0feb01a0600b716a4ebf8fd3bc6bb7938e3549812d3fe4f9dcd1",
+  "files": {
+    "SKILL.md": "16b034fbfeb0f80babc362b636957412fffc3bc651f33942821ee372c44d3bb9",
+    "references/examples.md": "819430934cfc8e87e6dabd1166e0df9617911c17d9ede8611c0195e0cf3100ef",
+    "references/mockup-guidelines.md": "f10af386a80786cf9e2981db5afa697b2ec210f89bef2959f6a4fe5c932590b9"
+  },
+  "excluded_files": {}
+}

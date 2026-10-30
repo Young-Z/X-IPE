@@ -90,3 +90,13 @@ acceptance_criteria:
       criterion: Input Initialization subsection present under Input Parameters
       test: section_parse
       expected: "### Input Initialization with <input_init> XML block"
+
+## TASK-6750 single-loop delivery revision
+
+Published after deterministic validation, bounded workflow safety review, and real manifest-safe publication; prior metadata above remains version history.
+
+- Current revision: `473d4d385b4b0feb01a0600b716a4ebf8fd3bc6bb7938e3549812d3fe4f9dcd1`
+- Previous revision: `533696548bd43cc832b6473b562bdb3b30af9079664703566e4741991fdb982a`
+- Evidence: `single-loop-TASK-6750.json`, `publication-receipt-TASK-6750.json`, `validation-receipt-TASK-6750.json`.
+- Same-loop delivery/default risk-based verification; unchanged resources and protected bytes retained.
+- Token/latency savings not measured; no live-agent efficacy claim.

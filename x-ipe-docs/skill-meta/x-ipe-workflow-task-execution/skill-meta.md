@@ -130,3 +130,23 @@ required before conflicting invocation; existing children have not been edited.
   Review appended in review-mode-TASK-6749-R2.md; fresh exact evidence in
   policy-verification-receipt-TASK-6749.json. Only workflow metadata edited via
   apply_patch; no live package, other skill, test, board, memory or Git edits.
+
+## TASK-6750 single-loop delivery revision
+
+Published after deterministic validation, bounded workflow safety review, and real manifest-safe publication; prior metadata above remains version history.
+
+- Current revision: `effca4d4b3f58ebbeb749c4d13b6e0130a5a0152d769c4cfbcf8a08bd5002cb6`
+- Previous revision: `b79761fd9d6c36700b1312dc98b7e6b69c7099e14e05d8a10ded9f6ef21dcc00`
+- Evidence: `single-loop-TASK-6750.json`, `publication-receipt-TASK-6750.json`, `validation-receipt-TASK-6750.json`.
+- Same-loop delivery/default risk-based verification; unchanged resources and protected bytes retained.
+- Token/latency savings not measured; no live-agent efficacy claim.
+
+## TASK-6752 proportional-delivery revision
+
+Published through the installed manifest-safe publisher after bounded compatibility review, correction of its TypeScript test-path finding, deterministic validation and affected post-publication regressions. Prior metadata remains historical.
+
+- Current revision: `46b0e9b737e3e07077924f5d36abfa6b3558f09041d3f9f86a7883a0c0e195b9`
+- Previous revision: `effca4d4b3f58ebbeb749c4d13b6e0130a5a0152d769c4cfbcf8a08bd5002cb6`
+- Evidence: `lean-delivery-TASK-6752.json`, `publication-receipt-TASK-6752.json`, `validation-receipt-TASK-6752.json`.
+- Verification: 599 selected checks passed; exact installed/candidate byte parity. No resource removals, mirror synchronization or Git mutation.
+- Live-agent efficacy, token/latency savings and stakeholder outcome remain unmeasured.

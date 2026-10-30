@@ -31,6 +31,10 @@ description: {Brief description of what this task type does}. Use when {trigger 
 
 ## Important Notes
 
+Default to one model/context open-ended loop; apply tool skills in the same loop.
+Use [authoring policy](.github/skills/x-ipe-meta-skill-creator/references/single-loop-authoring.md)
+for bounded delegation and risk-triggered independent review, not per-skill agents.
+
 BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skill.
 
 Load [common lifecycle](.github/skills/x-ipe-workflow-task-execution/references/lifecycle.md)
@@ -178,9 +182,8 @@ BLOCKING: {Additional rule that must not be skipped}
 
 ```xml
 <procedure name="{skill-name}">
-  <!-- Check DoR; schedule independent DoD review when semantic risk warrants it. -->
+  <!-- Check readiness in the same loop. -->
   <execute_dor_checks_before_starting/>
-  <schedule_dod_checks_with_sub_agent_before_starting/>
 
   <phase_1 name="博学之 — Study Broadly">
     <step_1_1>
@@ -301,7 +304,9 @@ task_completion_output:
 
 ## Definition of Done
 
-CRITICAL: Validate DoD deterministically where possible. Require independent review for meaningful workflow, executable, safety, or public-contract changes; document a lightweight self-review rationale for cosmetic/document-only work.
+Validate DoD in the same loop using affected checks and self-review. Independent
+review requires a concrete security/trust/permission, destructive, user-requested,
+or unresolved ambiguity/failure trigger; artifact type alone is not a trigger.
 
 ```xml
 <definition_of_done>

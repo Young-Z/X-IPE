@@ -236,3 +236,13 @@ evaluation:
         3: Acceptable - basic search works but consolidation incomplete
         2: Poor - missing mandatory ontology search or broken consolidation
         1: Fail - search does not execute or returns no structured output
+
+## TASK-6750 single-loop delivery revision
+
+Published after deterministic validation, bounded workflow safety review, and real manifest-safe publication; prior metadata above remains version history.
+
+- Current revision: `7bc88bc331328fb0712471647e2816cc1b10d6ab036e0e34f760f71ffec7c698`
+- Previous revision: `66d8d3eb27b3a498c00cfda86ee2a2e2d887a9848c3a7a2fa4794be8d8b6bec3`
+- Evidence: `single-loop-TASK-6750.json`, `publication-receipt-TASK-6750.json`, `validation-receipt-TASK-6750.json`.
+- Same-loop delivery/default risk-based verification; unchanged resources and protected bytes retained.
+- Token/latency savings not measured; no live-agent efficacy claim.

@@ -84,13 +84,13 @@ Provides additional context or requirements for mockup creation.
 
 2. IF Current Idea Folder provided:
    → Validate folder exists
-   → Verify idea-summary-vN.md exists in folder
+   → Resolve the explicit summary or highest numeric version in refined-idea/ or the legacy folder
    → Proceed with mockup creation
 ```
 
 ### Usage
 - All mockups saved to `{Current Idea Folder}/mockups/`
-- Idea summary updates reference `{Current Idea Folder}/idea-summary-vN.md`
+- Idea summary updates reference the actual resolved summary, including refined-idea/ when used
 - Output links use `{Current Idea Folder}` as base path
 
 ---
@@ -116,7 +116,7 @@ Provides additional context or requirements for mockup creation.
 
 1. **File exists:** Load and parse the JSON configuration
 2. **File missing:** Inform user mockup tools not configured, proceed with manual description
-3. **Tool enabled (`true`):** Invoke corresponding skill/capability
+3. **Tool enabled (`true`):** Make available; load only the best matched capability actually needed
 4. **Tool disabled (`false`):** Skip the tool
 5. **Tool unavailable:** Log limitation and provide alternative
 
@@ -138,8 +138,10 @@ The `selected-theme` section in tools.json specifies an optional brand theme to 
    - Read `{theme-folder-path}/design-system.md`
    - Extract color palette, typography, spacing, component styles
    - Apply these tokens to all generated mockups
-2. IF `selected-theme` is absent or theme folder does not exist:
+2. IF `selected-theme` is absent:
    - Proceed with tool defaults (no theme constraints)
+3. IF an explicitly configured theme path is broken:
+   - Report the configuration gap; do not silently substitute another theme
 
 **Theme tokens typically include:** primary/secondary/accent colors, neutral scale, semantic colors (success/warning/error/info), font families, font sizes, spacing scale, border radius, and shadow definitions.
 
@@ -157,7 +159,9 @@ The `selected-theme` section in tools.json specifies an optional brand theme to 
 
 ### Design Reference Research
 
-When mockup needs from Step 4 are too vague or generic to produce a high-quality UI/UX design, research real-world design references online before creating mockups.
+Research design references only when an unresolved visual decision needs evidence
+and an enabled research capability is available. Reuse an adequate source design;
+do not add a research gate for every mockup or treat a plain description as HTML.
 
 **When to search:**
 - Needs are generic (e.g., "a dashboard" without layout specifics)

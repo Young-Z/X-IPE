@@ -1,0 +1,16 @@
+{
+  "body_lines": 317,
+  "candidate_hash": "9228dd7f590d247f4c64a41d323c566e7e0113aec7005960a074238c6c6188e1",
+  "errors": [],
+  "excluded_files": {},
+  "files": {
+    "SKILL.md": "ee58f3c9c5e7c5d2c95c4a19ba4b0508aa07abb93e49d27354de12464a4391fb",
+    "references/examples.md": "33e642204578266f1469d092f4d5a5919de539fe0be00acbe19de8a45b5abb4b"
+  },
+  "name": "x-ipe-tool-implementation-mcp",
+  "ok": true,
+  "operation": "validate",
+  "schema": 1,
+  "skill_type": "x-ipe-tool",
+  "warnings": []
+}

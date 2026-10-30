@@ -1,0 +1,670 @@
+# Skill General Guidelines
+
+Core principles, patterns, and standards for X-IPE skills.
+
+---
+
+# Part 1: Core Principles
+
+## Principle 1: Concise is Key
+
+```yaml
+principle:
+  name: Concise is Key
+  rationale: Context window is shared resource
+  
+default_assumption: AI Agent is already very smart
+rule: Only add context it doesn't already have
+
+guidelines:
+  - challenge_each_paragraph: "Does this justify its token cost?"
+  - prefer: examples over verbose explanations
+  - max_skill_body_lines: 1000  # All X-IPE subtypes; frontmatter excluded; ceiling, not target
+  - counting: "Logical lines including blanks; LF/CRLF equivalent; trailing newline adds no phantom line; 1000 passes, 1001 fails"
+```
+
+## Principle 2: Degrees of Freedom
+
+Match specificity to task fragility and variability.
+
+```yaml
+principle:
+  name: Degrees of Freedom
+  metaphor: "Narrow bridge with cliffs needs guardrails (low freedom), open field allows many routes (high freedom)"
+
+freedom_levels:
+  high:
+    use_when: Multiple approaches valid, decisions depend on context
+    format: Text instructions, prose
+    examples: [creative brainstorming, workflow decisions]
+    
+  medium:
+    use_when: Preferred pattern exists, some variation acceptable
+    format: Pseudocode with parameters, numbered steps with conditions
+    examples: [execution procedures, conditional logic]
+    
+  low:
+    use_when: Operations fragile/error-prone, consistency critical
+    format: Specific scripts, YAML schemas, explicit paths
+    examples: [data models, file operations, importance signals]
+```
+
+## Principle 3: Progressive Disclosure
+
+Three-level loading system to manage context efficiently.
+
+```yaml
+principle:
+  name: Progressive Disclosure
+  
+loading_levels:
+  level_1:
+    content: Metadata (name + description)
+    when_loaded: Always in context
+    token_budget: ~100 words
+    
+  level_2:
+    content: SKILL.md body
+    when_loaded: When skill triggers
+    line_ceiling: "≤1000 logical body lines for every X-IPE subtype; not a target"
+    
+  level_3:
+    content: Bundled resources (scripts/, references/, templates/)
+    when_loaded: As needed by AI Agent
+    token_budget: Unlimited (can execute without loading)
+```
+
+## Principle 4: Agent-Optimized Expression Formats
+
+Match content format to how AI Agents best consume information.
+
+```yaml
+principle:
+  name: Agent-Optimized Expression Formats
+  rationale: Agents parse structured data and keywords more reliably than prose and symbols
+
+format_selection:
+  # Low freedom - fragile operations need precision
+  data_models:
+    freedom: low
+    format: YAML with explicit types
+    rationale: Agents parse structured data reliably
+    
+  importance_signals:
+    freedom: low
+    format: "Keywords: BLOCKING:, MANDATORY:, CRITICAL:"
+    rationale: Pattern-matching more reliable than symbol recognition
+    avoid: ["⚠️", "⛔", "🔴", "🟢"]
+    
+  file_operations:
+    freedom: low
+    format: "Explicit paths with {variable} syntax"
+    rationale: Fragile operations need precision
+
+  diagrams:
+    freedom: low
+    format: Indented lists or YAML with branching
+    rationale: Agents struggle to parse 2D ASCII spatial relationships; tokens are expensive
+    avoid: ["ASCII Art", "Box drawings", "Mermaid", "PlantUML"]
+
+  llm_model_definitions:
+    freedom: low
+    format: "Reference via input parameter ({model})"
+    rationale: Hardcoding models reduces reusability and adaptability
+    avoid: ["Hardcoded model names in instructions"]
+    
+  # Medium freedom - balance readability and precision
+  conditional_logic:
+    freedom: medium
+    format: IF/THEN/ELSE in prose or pseudocode
+    
+  execution_procedures:
+    freedom: medium
+    format: Numbered steps with inline conditions
+    
+  quality_checklists:
+    freedom: medium
+    format: Tables with boolean descriptions
+    
+  # High freedom - multiple valid paths
+  examples:
+    freedom: high
+    format: Prose with code blocks
+    
+  workflow_decisions:
+    freedom: high
+    format: Prose with options
+
+importance_keywords:
+  BLOCKING: Must not skip, halts execution if violated
+  MANDATORY: Required, but can continue with warning
+  CRITICAL: High priority, affects correctness
+  REQUIRED: Needed for completion
+  OPTIONAL: Can skip without impact
+
+variable_syntax:
+  pattern: "{variable_name}"
+  examples:
+    - "{folder_path}"
+    - "{feature_id}"
+    - "{task_id}"
+
+gate_format:
+  pattern: "GATE: {assertion}"
+  examples:
+    - "GATE: files_analyzed == true"
+    - "GATE: tests_passing AND coverage >= 80%"
+    - "GATE: human_approval == received"
+```
+
+## Principle 5: Sub-Agent Decomposition
+
+Delegate specific concerns to isolated sub-agents when the main agent benefits from separation of concerns.
+
+```yaml
+principle:
+  name: Sub-Agent Decomposition
+  rationale: Some tasks benefit from isolated execution with fresh context
+
+when_to_apply:
+  validation:
+    use_when: Meaningful workflow, executable, safety, or public-contract changes need independent evaluation
+    why: Validator should not be influenced by the builder's context
+    example: "Spawn sub-agent to validate DoD after implementation"
+
+  feedback_and_reflection:
+    use_when: Output benefits from critique-and-revise cycle
+    why: Reviewer with fresh eyes catches what the author misses
+    example: "Spawn sub-agent to review technical design, main agent revises based on feedback"
+
+  parallel_work:
+    use_when: Independent work items have no data dependencies
+    why: Multiple sub-agents can work concurrently on separate concerns
+    example: "Spawn sub-agents to analyze 3 independent modules simultaneously"
+
+  no_decompose:
+    when: Steps are sequential with tight data coupling
+    when: Task is simple enough for single agent
+    when: Overhead of coordination exceeds benefit
+
+sub_agent_definition:
+  agent_id:
+    role: "{role_name}"
+    goal: "{what_agent_should_accomplish}"
+    inputs: ["{input_variables}"]
+    outputs: ["{output_names}"]
+    tools: ["{tool_list}"]
+    isolated: true | false  # true = fresh context, no builder bias
+
+usage_in_skills:
+  format: |
+    sub_agents:
+      - id: "{agent_id}"
+        role: "{role}"
+        goal: "{goal}"
+        trigger: "{when_to_spawn}"
+        isolated: true | false
+  note: "Model is NOT specified here — each skill defines its own default model"
+```
+
+## Principle 6: 5-Phase Learning Method (博学之，审问之，慎思之，明辨之，笃行之)
+
+```yaml
+principle:
+  name: 5-Phase Learning Method
+  origin: "《中庸》第二十章 (Doctrine of the Mean, Chapter 20)"
+  rationale: |
+    Systematic gap analysis revealed that while AI agent skills excel at
+    execution (笃行之, 10/10), they systematically underrepresent inquiry
+    (审问之, 3/10), reflection (慎思之, 3/10), and discernment (明辨之, 1/10).
+    The learning method supplies useful cognitive activities, not a compulsory
+    five-phase ceremony. Retain domain-specific inquiry and verification while
+    combining activities when the scope is simple and understood.
+
+phases:
+  1_study:    { chinese: "博学之", english: "Study Broadly", required_activity: true }
+  2_inquire:  { chinese: "审问之", english: "Inquire Thoroughly", required_activity: context_dependent }
+  3_think:    { chinese: "慎思之", english: "Think Carefully", required_activity: context_dependent }
+  4_discern:  { chinese: "明辨之", english: "Discern Clearly", required_activity: context_dependent }
+  5_practice: { chinese: "笃行之", english: "Practice Earnestly", required_activity: true }
+
+rules:
+  - "Context gathering and execution verification are required activities, not mandatory named phases"
+  - "Inquiry/reflection/discernment may combine with other steps or be omitted with rationale"
+  - "Existing phase templates remain valid; keep bilingual names/order when using that scaffold"
+  - "Short workflows may use flat steps without duplicating an overview and five named phases"
+  - "Resolve genuine questions under existing interaction-mode policy; no forced DAO call for clear inputs"
+
+applies_to: x-ipe-task-based skills only (not tool, meta, or workflow-orchestration)
+
+mapping_guidance:
+  - challenge: "Where does my step fit?"
+    rule: "Match by cognitive activity, not step name"
+    examples:
+      - "Read specification → Phase 1 (Study)"
+      - "Ask user questions → Phase 2 (Inquire)"
+      - "Evaluate trade-offs → Phase 3 (Think)"
+      - "Choose approach → Phase 4 (Discern)"
+      - "Write code / create file → Phase 5 (Practice)"
+  - challenge: "My skill only has 2 steps"
+    rule: "Use context then execution/verification steps; retaining the phase scaffold is optional."
+  - challenge: "interaction_mode mode and Phase 2?"
+    rule: "Preserve all three interaction modes; use representative only when policy routes an actual decision to it."
+```
+
+## Skill Types
+
+```yaml
+skill_types:
+  x-ipe-task-based:
+    purpose: Development lifecycle workflows
+    naming_convention: "x-ipe-task-based-{name}"
+    examples:
+      - x-ipe-task-based-ideation
+      - x-ipe-task-based-code-implementation
+      - x-ipe-task-based-bug-fix
+      
+  x-ipe-task-category:
+    purpose: Orchestration skill that is called when all related task-based skills in a category finish their work
+    naming_convention: "x-ipe+{category}+{name}"
+    examples:
+      - x-ipe+feature-stage+release
+      - x-ipe+all+completion
+      
+  x-ipe-tool:
+    purpose: Utility functions and tool integrations
+    naming_convention: "x-ipe-tool-{name}"
+    examples:
+      - x-ipe-tool-pdf
+      - x-ipe-tool-pptx
+      - x-ipe-tool-frontend-design
+
+  x-ipe-workflow-orchestration:
+    purpose: Multi-step workflow coordination across skill types
+    naming_convention: "x-ipe-workflow-{name}"
+    examples:
+      - x-ipe-workflow-task-execution
+
+  x-ipe-meta:
+    purpose: Skills used to create, validate, or manage other skills
+    naming_convention: "x-ipe-meta-{name}"
+    examples:
+      - x-ipe-meta-skill-creator
+```
+
+## Skill Anatomy
+
+```yaml
+skill_structure:
+  required:
+    SKILL.md:
+      frontmatter:
+        name: required
+        description: required  # Include trigger conditions here
+      body: Markdown instructions
+      
+  optional:
+    scripts/:
+      purpose: Executable code
+      when_to_include: Same code rewritten repeatedly, deterministic reliability needed
+      benefit: Token efficient, deterministic
+      
+    references/:
+      purpose: Documentation loaded as needed
+      when_to_include: Documentation AI Agent should reference while working
+      benefit: Keeps SKILL.md lean
+      
+    templates/:
+      purpose: Document templates for output
+      when_to_include: Skill produces standardized documents
+      benefit: Consistent output format
+
+directory_structure: |
+  skill-name/
+  ├── SKILL.md (required)
+  │   ├── YAML frontmatter (required)
+  │   │   ├── name: (required)
+  │   │   └── description: (required)
+  │   └── Markdown instructions (required)
+  └── Bundled Resources (optional)
+      ├── scripts/       - Executable code
+      ├── references/    - Documentation loaded as needed
+      └── templates/     - Document templates for output
+```
+
+## Section Order Reference
+
+See [2. reference-section-order.md](2.%20reference-section-order.md) for full section order by skill type.
+
+---
+
+# Part 3: Workflow Patterns
+
+## Pattern Selection Guide
+
+| Pattern | Best For | When to Use |
+|---------|----------|-------------|
+| Step-Based Workflow (XML) | Linear execution following exact steps | Task must be executed in specific order, steps have distinct constraints/outputs/success criteria |
+| Function-Based Workflow (XML) | Caller selects functions as needed | Skill provides library of capabilities, caller decides which to use and when |
+
+---
+
+## Pattern 1: Step-Based Workflow (XML-Tagged)
+
+**Use for:** Procedures that must be executed in exact step order.
+
+CRITICAL: Only XML elements defined in the template below are allowed. Do NOT introduce custom XML tags or modify the structure.
+
+CRITICAL: Each step MUST have exactly ONE `<action>` block containing ALL actions. Do NOT split actions into separate blocks (e.g., `<branch>`). Conditional logic (IF/THEN/ELSE) belongs inline within the `<action>` numbered list.
+
+Task-based skills may use the existing phase variant or concise flat steps. Preserve task input/output, domain gates, and lifecycle routing; this guideline does not authorize deleting those contracts. Other types normally use flat steps or operations.
+
+Independent review is required for meaningful workflow, executable, safety, or public-contract changes; cosmetic/document-only updates may use deterministic checks plus documented self-review. Legacy `schedule_dod_checks_with_sub_agent_before_starting` tags below mean schedule a reviewer when risk warrants one, not force a new agent for every operation. Example DAGs are optional decomposition patterns.
+
+### Pattern 1a: Flat Steps (tool, meta, workflow-orchestration, task-category skills)
+
+### Template
+
+```xml
+<procedure name="{procedure_name}">
+  <!-- Check DoR; schedule independent DoD review when semantic risk warrants it. -->
+  <execute_dor_checks_before_starting/>
+  <schedule_dod_checks_with_sub_agent_before_starting/>
+  
+  <step_1>
+    <name>{Step Name}</name>
+    <action>
+      1. {sub_action_1}
+      2. {sub_action_2}
+    </action>
+    <constraints>
+      - BLOCKING: {must_not_violate}
+      - CRITICAL: {important_consideration}
+    </constraints>
+    <success_criteria>
+      - {criterion_1}
+      - {criterion_2}
+    </success_criteria>
+    <output>{what_this_step_produces}</output>
+  </step_1>
+
+  <step_2>
+    <name>{Next Step}</name>
+    <requires>{output_from_step_1}</requires>
+    <action>
+      1. {action}
+    </action>
+    <constraints>
+      - {constraint}
+    </constraints>
+    <success_criteria>
+      - {criterion}
+    </success_criteria>
+    <output>{output}</output>
+  </step_2>
+
+  <step_3>
+    ...
+  </step_3>
+
+  <sub-agent-planning>
+    <sub_agent_1>
+      <sub_agent_definition>
+        <role>{role_name}</role>
+        <prompt>{context, goal}</prompt>
+      </sub_agent_definition>
+      <workflow_step_reference>step_1, step_2</workflow_step_reference>
+    </sub_agent_1>
+    <sub_agent_2>
+      <sub_agent_definition>
+        <role>{role_name}</role>
+        <prompt>{context, goal}</prompt>
+      </sub_agent_definition>
+      <workflow_step_reference>step_3</workflow_step_reference>
+      <starting_condition>
+        - "START sub-agent after sub-agent_1 completes"
+      </starting_condition>
+    </sub_agent_2>
+</procedure>
+```
+
+### Examples
+
+See examples in this folder:
+- [3. example-step-based-code-review.md](3.%20example-step-based-code-review.md) - Code review with multi-component steps
+- [4. example-step-based-feature-implementation.md](4.%20example-step-based-feature-implementation.md) - TDD-based feature implementation
+
+### Pattern 1b: Phase-Based Steps (x-ipe-task-based skills ONLY)
+
+OPTIONAL: Use this phase-based scaffold when it clarifies the domain procedure. See Principle 6 for proportional learning activities; flat procedures retain the same domain contracts.
+
+See the [x-ipe-task-based.md template](.github/skills/x-ipe-meta-skill-creator/templates/x-ipe-task-based.md) for the full phase-based procedure template with `<phase_N>` → `<step_N_M>` hierarchy.
+
+---
+
+## Pattern 2: Function-Based Workflow (XML-Tagged)
+
+**Use for:** Skills that provide a library of capabilities where the caller decides which functions to use and when.
+
+CRITICAL: This pattern defines available functions but does NOT prescribe execution order. Caller invokes functions based on their specific needs.
+
+CRITICAL: Only XML elements defined in the template below are allowed. Do NOT introduce custom XML tags or modify the structure.
+
+### Template
+
+```xml
+<functions>
+  <!-- Check DoR; schedule independent DoD review when semantic risk warrants it. -->
+  <execute_dor_checks_before_starting/>
+  <schedule_dod_checks_with_sub_agent_before_starting/>
+  
+  <function name="{function_name_1}">
+    <purpose>{what this function accomplishes}</purpose>
+    <when_to_use>{scenarios where this function is appropriate}</when_to_use>
+    <inputs>
+      - {input_parameter_1}: {description}
+      - {input_parameter_2}: {description}
+    </inputs>
+    <action>
+      1. {step_1}
+      2. {step_2}
+      3. {step_3}
+    </action>
+    <constraints>
+      - BLOCKING: {must_not_violate}
+      - CRITICAL: {important_consideration}
+    </constraints>
+    <outputs>
+      - {output_1}: {description}
+      - {output_2}: {description}
+    </outputs>
+  </function>
+
+  <function name="{function_name_2}">
+    <purpose>{what this function accomplishes}</purpose>
+    <when_to_use>{scenarios where this function is appropriate}</when_to_use>
+    <inputs>
+      - {input_parameter}: {description}
+    </inputs>
+    <action>
+      1. {step_1}
+      2. {step_2}
+    </action>
+    <constraints>
+      - {constraint}
+    </constraints>
+    <outputs>
+      - {output}: {description}
+    </outputs>
+  </function>
+
+  <function name="{function_name_3}">
+    <purpose>{what this function accomplishes}</purpose>
+    <when_to_use>{scenarios where this function is appropriate}</when_to_use>
+    <inputs>
+      - {input_parameter}: {description}
+    </inputs>
+    <action>
+      1. {step}
+    </action>
+    <outputs>
+      - {output}: {description}
+    </outputs>
+  </function>
+
+</functions>
+```
+
+### Usage Notes
+
+- Functions are **independent** - caller can invoke any function without prerequisites (unless explicitly stated in `<requires>` tag)
+- Functions can be invoked **multiple times** if needed
+- Functions can be invoked in **any order** based on caller's needs
+- If a function requires output from another function, add `<requires>{function_name} output</requires>` tag
+
+### Examples
+
+See examples in this folder:
+- [5. example-function-based-validation.md](5.%20example-function-based-validation.md) - Validation utilities library
+- [6. example-function-based-analysis.md](6.%20example-function-based-analysis.md) - Code analysis toolkit
+
+---
+
+# Part 4: Common Skill Section Patterns
+
+## Task Input
+
+```yaml
+task_input:
+  # Required attributes (from task board or previous task)
+  task_id: "{TASK-XXX}"
+  task_based_skill: "{task_based_skill}"
+  
+  # Context attributes (loaded from project)
+  "{context_attr_1}": "{value or path}"
+  "{context_attr_2}": "{value or path}"
+  
+  # Dynamic attributes (from previous task output)
+  "{dynamic_attr}": "{value}"
+```
+
+## Task Completion Output
+
+```yaml
+task_completion_output:
+  category: "{standalone | feature-stage | requirement-stage | ideation-stage}"
+  status: "{completed | blocked}"
+  next_task_based_skill: "{next_task_based_skill}"
+  require_human_review: "{yes | no}"
+  task_output_links:
+    - "{output_file_path_1}"
+    - "{output_file_path_2}"
+  # Dynamic attributes
+  "{attr_name}": "{value}"
+```
+
+See [7. example-task-io-code-implementation.md](7.%20example-task-io-code-implementation.md) for complete input/output example.
+
+## Structured Summary
+
+Use markdown table for skill outputs that summarize multiple items with consistent attributes.
+
+### Template
+
+```markdown
+| {Column1} | {Column2} | {Column3} | {Column4} |
+|-----------|-----------|-----------|-----------|
+| {value}   | {value}   | {value}   | {value}   |
+```
+
+See [8. example-structured-summary.md](8.%20example-structured-summary.md) for examples (Feature, Dependency, Requirement, Test Coverage).
+
+## DoR/DoD Pattern
+
+Use XML format for Definition of Ready (DoR) and Definition of Done (DoD) sections.
+
+CRITICAL: DoR MUST have at most 5 checkpoints. DoD MUST have at most 10 checkpoints.
+If a skill naturally generates more, keep only the most critical ones — those that prevent broken execution (DoR) or ensure delivery quality (DoD). Merge related checks into single checkpoints where possible.
+
+### Template
+
+```xml
+<definition_of_ready>
+  <checkpoint required="true">
+    <name>{Prerequisite Name}</name>
+    <verification>{How to verify}</verification>
+  </checkpoint>
+  <checkpoint required="true">
+    <name>{Another Prerequisite}</name>
+    <verification>{How to verify}</verification>
+  </checkpoint>
+  <checkpoint required="recommended">
+    <name>{Optional Prerequisite}</name>
+    <verification>{How to verify}</verification>
+  </checkpoint>
+</definition_of_ready>
+```
+
+```xml
+<definition_of_done>
+  <checkpoint required="true">
+    <name>{Output Name}</name>
+    <verification>{How to verify}</verification>
+  </checkpoint>
+</definition_of_done>
+```
+
+See [9. example-dor-dod.md](9.%20example-dor-dod.md) for examples (Code Implementation, Feature Refinement).
+
+## Gate Conditions
+
+Use Gate Conditions as an alternative to DoR/DoD when you have complex branching logic in entry/exit criteria.
+
+### Simple Gates (Inline)
+
+For simple pass/fail conditions, use inline format:
+
+```
+GATE: document_created == true
+GATE: all_tests_pass == true
+GATE: human_review == approved
+```
+
+### Complex Gates (YAML)
+
+For gates with multiple conditions, thresholds, or branching logic:
+
+```yaml
+gate:
+  name: "{Gate Name}"
+  conditions:
+    logic: AND | OR
+    checks:
+      - type: completion
+        condition: "{condition_1} == true"
+      - type: threshold
+        condition: "{metric} >= {value}"
+      - type: approval
+        condition: "{approver} == approved"
+  on_pass: "{action_if_pass}"
+  on_fail: "{action_if_fail}"
+```
+
+See [10. example-gate-conditions.md](10.%20example-gate-conditions.md) for examples (Quality Gate, Approval Gate, Release Gate).
+
+---
+
+# Part 5: Quality Reference
+
+CRITICAL: Use keywords (BLOCKING, CRITICAL, MANDATORY) for importance signals in skill content. Agents pattern-match keywords more reliably than Unicode symbols.
+
+| Keyword | Meaning |
+|---------|---------|
+| `BLOCKING:` | Must not skip, halts execution |
+| `CRITICAL:` | High priority, affects correctness |
+| `MANDATORY:` | Required, continue with warning if missing |
+
+See [11. reference-quality-standards.md](11.%20reference-quality-standards.md) for:
+- Full importance keywords reference
+- Common mistakes (anti-patterns)
+- What NOT to include in skills

@@ -15,6 +15,11 @@ Tracing with evidence and applicability, not arbitrary numerical quality gates.
 
 ## Important Notes
 
+Load the [single-loop delivery policy](.github/skills/x-ipe-workflow-task-execution/references/agent-loop.md)
+once in the current context. Execute this skill in the same agent loop; another
+skill is expertise, not a new agent. Use proportional checks and reuse current
+evidence; independent review is conditional on concrete risk, not the skill name.
+
 BLOCKING: Tool operation only: no task lifecycle, registration, closure, successors,
 approval choreography or execution of refactors. No source/test/config, board, Git
 or app mutation. Write only the caller-authorized analysis report; discovery is

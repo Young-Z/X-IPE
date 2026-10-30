@@ -94,8 +94,11 @@ The first migration must review this provenance and initial tracked candidate de
 - Same bytes may be retained without changing ownership; a receipt alone does not
   authorize a later publisher to adopt previously unmanaged work.
 
-Permission, meaningful review, lesson validity, and workflow/config semantics
-remain agent/reviewer gates. The script enforces filesystem/manifests, not those
+Permission, proportional review, lesson validity, and workflow/config semantics
+remain agent decisions. Independent review is required only for the concrete
+triggers in the [authoring policy](.github/skills/x-ipe-meta-skill-creator/references/single-loop-authoring.md),
+not every executable, workflow, or public-contract edit.
+The script enforces filesystem/manifests, not those
 human decisions; a deterministic pass is never an automatic release approval.
 
 ### Transaction and Recovery
@@ -143,6 +146,7 @@ Markdown resource scanning is a deliberately bounded parser, not a full CommonMa
 engine. Nested-parenthesis targets and unusual reference syntax need test fixtures
 or a documented supported-link convention. Anchors are optional and not checked.
 Semantic schema compatibility, discovery quality, code behavior, workflow actions,
-and config consumers require scenario evidence and independent review.
+and config consumers require applicable scenario evidence; independent review
+is conditional on concrete risk, explicit user review, or unresolved ambiguity/failures.
 Empty directories are not file-manifest entries; do not store meaningful unmanaged
 state solely in empty directories. No blanket application compatibility is claimed.

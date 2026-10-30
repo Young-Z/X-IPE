@@ -55,8 +55,10 @@ Non-feature synthetic context is tool-only, never persisted allocation.
 ## Verification
 
 Original reproduction fixed, unchanged test red then green, preserved regressions,
-full existing suite/smoke/lint and actual browser surrounding/console checks when
-required. Commands/exits/results and relevant source/test/design/config/review
+one risk/impact selection of affected tests/smoke/lint and actual browser
+surrounding/console checks when required. Broaden for coupling, regressions or
+binding policy; reuse current checks instead of rerunning at handoff.
+Commands/exits/results and relevant source/test/design/config/review
 SHA256. Pre-existing failure evidence versus new regression; neither hidden by
 skip/deselection/assertion weakening. Partial unavailable checks and blockers named.
 Independent review evidence or pending, never fabricated.

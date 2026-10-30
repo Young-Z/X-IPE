@@ -1,6 +1,8 @@
 # Creator consumer integration — explicit calls, not automatic learning
 
 Load the installed [lesson contract](.github/skills/x-ipe-meta-lesson-learned/references/lifecycle.md).
+Apply these tool-skill procedures in the same agent loop; this integration does
+not require a sub-agent, reviewer round, or new task registration.
 The helper exists and supplies `load`, `select`, `settle`. Do not use invented
 `get_lessons`, `mark_applied`, `adopt`, task fields or statuses. Resolve the
 configured Python interpreter. APIs accept explicit roots; no CWD inference.

@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "operation": "validate",
+  "name": "x-ipe-task-based-general-purpose-executor",
+  "skill_type": "x-ipe-task-based",
+  "ok": true,
+  "errors": [],
+  "warnings": [],
+  "excluded_files": {},
+  "body_lines": 419,
+  "files": {
+    "SKILL.md": "e190b8c0a1fed2efa06d72c0230f80941b2223a08ad0f1183a69a06b6adc8152",
+    "references/examples.md": "11da7cac87e8377f8ad8d4560a803ddcbed2fde716afde09a69045517b4c4062"
+  },
+  "candidate_hash": "782e09739dee02d5c3c651165e2d6e3a85d89dacae59c99a2e276e128282eee3"
+}

@@ -15,6 +15,11 @@ Close one approved feature, not merely finish activities:
 
 ## Important Notes
 
+Load the [single-loop delivery policy](.github/skills/x-ipe-workflow-task-execution/references/agent-loop.md)
+once in the current context. Execute this skill in the same agent loop; another
+skill is expertise, not a new agent. Use proportional checks and reuse current
+evidence; independent review is conditional on concrete risk, not the skill name.
+
 BLOCKING: Load `x-ipe-workflow-task-execution` and the
 [common lifecycle contract](.github/skills/x-ipe-workflow-task-execution/references/lifecycle.md).
 Direct entry calls Orient/Plan for supplied task/original context without recursively dispatching
@@ -146,7 +151,7 @@ input:
     5. Record verified engineering delivery only with complete actual suitable evidence; stakeholder outcome not measured unless cited actual stakeholder/context observation matches source scenario/current revision. Fixtures/tests/approval/DAO not observed benefit; qualitative scenario/gap suffices, no invented KPI or stakeholder approval.
   </action><output>Full goal/subgoal/AC/evidence map, justified reuse and explicit gaps</output></step_1_1></phase_1>
   <phase_2 name="审问之 — Inquire Thoroughly"><step_2_1><name>Proportionate Code-to-Docs and Risk Review</name><action>
-    1. Compare relevant actual implementation/spec/both design parts/tests/report/current mockups and consumer contracts. For low-risk bounded cosmetic/docs work, deterministic plus self-review with rationale suffices; meaningful workflow/executable/safety/public-contract change requires independent review. Reuse fresh independent review at same revision/scope, not a compulsory second reviewer. Missing required review blocks completion, not drafting.
+    1. Reuse current implementation/acceptance evidence and self-check the final result against scoped ACs. Independent review is warranted only by explicit request or concrete high-risk uncertainty under shared policy, not every executable/workflow change. Reuse suitable current review; do not commission another closing reviewer by default.
     2. Identify concrete misleading references, API/run instructions or omitted documentation of already approved behavior. Ignore harmless cosmetics. Behavioral code-versus-AC contradiction is a delivery defect, not documentation drift. Never modify AC/tests to match faulty code without an approved CR and fresh downstream validation; no implementation or refactoring here.
     3. Write bounded change report with actual review provenance, risk/scope/hash, gaps and dispositions. Human asks only genuine decisions and waits; full DAO and hybrid consume message_context/instruction_units/execution_plan, cannot invent approval or authorize scope/release.
   </action><output>Actual proportionate review and bounded misleading-doc delta</output></step_2_1></phase_2>
@@ -157,7 +162,7 @@ input:
   </action><output>Necessary documentation delta or no-change rationale, refreshed affected evidence</output></step_3_1></phase_3>
   <phase_4 name="明辨之 — Discern Clearly"><step_4_1><name>Resolve Release and Workflow Contract</name><action>
     1. Separate engineering closure from release. Default no commit/push/PR; owner executes only explicitly authorized exact paths with protected staged/unstaged baseline, actual branch/identity and strategy. No broad staging, dirty branch switch/stash/reset, implicit network or auto commit. Main-branch-only no new branch/PR; dev-session-based real identity, scoped meaningful PR description/test/feature/design links only if authorized. Required release without authority blocks release-scope completion; engineering-only may close uncommitted, release gap explicit.
-    2. Workflow-mode owner inspects actual ACTION_MAP/template/runtime and matching state: feature_closing under validation, required specification, optional refactor-report. Verify current acceptance and preceding mandatory implementation/validation gates done, not skipped; writer success alone insufficient. Current code_refactor mandatory remains a blocker until legitimate evidenced fulfillment or separately authorized later integration migration; no fake skip/done/report or invented need/churn.
+    2. Workflow-mode owner verifies actual ACTION_MAP/template/runtime and matching state: feature_closing under validation, required specification, optional refactor-report. Current acceptance and required implementation/validation actions must be evidenced done; writer success alone is insufficient. Default code_refactor is optional: no-need closure requires no refactor report, code churn or agent-authored skip. Honor a project's explicit customized mandatory action.
     3. Current feature_closing deliverables [] means owner uses deliverables {} with exact matching action/feature/status done readback, once, only after domain/gate evidence. Keep closing report as task artifact/task_output_links, NOT pretend closing-report tag. If a later approved template declares tags, resolve exact real paths and validate runtime before writing, not silently edit config here. Free-mode no app write; current verified done resume read-only, no replay.
     4. Change-request optional closing-report may be absent: preserve report task link for explicit handoff; required specification still resolves. No invented app tag, automatic discovery or claim that app extracts the task artifact. No application/config edits in this skill migration.
   </action><output>Engineering/release disposition and actual owner action mapping or blocker</output></step_4_1></phase_4>

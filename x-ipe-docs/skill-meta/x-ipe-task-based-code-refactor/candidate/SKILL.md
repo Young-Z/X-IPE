@@ -15,6 +15,11 @@ Study-only produces recommendations, not implementation or achieved improvement.
 
 ## Important Notes
 
+Load the [single-loop delivery policy](.github/skills/x-ipe-workflow-task-execution/references/agent-loop.md)
+once in the current context. Execute this skill in the same agent loop; another
+skill is expertise, not a new agent. Use proportional checks and reuse current
+evidence; independent review is conditional on concrete risk, not the skill name.
+
 BLOCKING: Load [shared workflow](.github/skills/x-ipe-workflow-task-execution/SKILL.md),
 [common lifecycle](.github/skills/x-ipe-workflow-task-execution/references/lifecycle.md)
 and [goal contract](.github/skills/x-ipe-workflow-task-execution/references/goal-contract.md).
@@ -32,7 +37,7 @@ bugs are findings for the owner, not incidental refactor repairs.
 This is the single refactor entry for study-only/local/broad. Read
 [integration](.github/skills/x-ipe-task-based-code-refactor/references/integration.md)
 for installed analysis/sync limitations, configuration gating, creator special
-routing and mandatory app action. Inspection expansion is not write permission.
+routing and the optional/customized app action. Inspection expansion is not write permission.
 
 ## Input Parameters
 
@@ -123,7 +128,7 @@ input:
     <name>Analyze Scope and Quality</name>
     <action>
       1. Read approved sources/requirements/spec/story/GWT AC/type/design and inspect actual code/callers/dependencies/config. Record inspected versus authorized scope and gaps; dependency discovery grants no write authority.
-      2. Load x-ipe-tool-refactoring-analysis. Receive/preserve actual full_analysis operation_output when its full contract is authorized and satisfied; otherwise use disclosed scoped analysis adapter in integration, never invented tool success or numeric metrics. Retain scope, code_quality_evaluated, refactoring_suggestion, refactoring_principle and report_path when actually returned.
+      2. Reuse suitable current scoped analysis or inspect the bounded gap directly. Load x-ipe-tool-refactoring-analysis only when its expertise adds information; if invoked retain its actual full_analysis result, scope, quality, suggestions, principles and report path. No new analysis report or tool call just to satisfy a stage label.
       3. In existing analysis/refactor report map goal/subgoal, source/parent/stakeholder, indirect contribution, inspected baseline, justified measure or qualitative success, constraints/non-goals and existing story/AC/type preservation links. all-required branches need checks; alternatives select one bounded means, not all options as backlog.
       4. Legacy explicit so-that only may supply inferred intent with anchor; missing intent blocks pertinent outcome/coverage claim, not unrelated delivery or whole-project retrofit. Separate engineering delivery from not measured stakeholder outcome.
       5. Self-check each suggestion against inspected gap/purpose/scope. For genuine decisions human asks the human within skill and waits; full DAO and hybrid use common message_context/instruction_units/execution_plan. Human and hybrid require human completion/route confirmation; full DAO selects only authorized successors. Clear authority needs no repeated confirmation; changed contract needs actual human CR authority in every mode.
@@ -133,7 +138,7 @@ input:
   <step_2>
     <name>Sync Affected Documentation and Tests</name>
     <action>
-      1. Feed Step 1 scope/quality/suggestions/principles into x-ipe-tool-code-quality-sync only under its supported authorized full_sync contract; otherwise use disclosed targeted adapter. Preserve actual result/errors/pass-through fields, not invented aligned status for absent documents.
+      1. Reconcile only affected docs and preservation tests. Load x-ipe-tool-code-quality-sync when a concrete alignment gap needs its expertise; reuse Step 1 context and actual results rather than starting a duplicate assessment. No invented aligned status for absent documents.
       2. Study-only performs read-only gap assessment; no source/test/doc mutation except authorized analysis deliverable. Local reconciles affected documentation and adds targeted risk-based tests only; no blanket 80% coverage, full-global docs alignment or unrelated full-suite prerequisite. Broad plans relevant integration/full suite and justified measured coverage within authorized scope.
       3. Preserve requirements/ACs; document deviations as findings, not acceptance additions/removals to bless current code. do not skip failing tests. Relevant baseline failure blocks mutation without explicit safe disposition, not study; bugs return to owner, not incidental repair.
       4. Run applicable baseline tests/build/lint in actual domain; capture commands/exits/source/test/config hashes and pre-existing failures. Characterize approved observable interfaces/results/errors/data/side effects/concurrency/security/caller boundaries as implicated. Refactor tests need not fail first.
@@ -166,7 +171,7 @@ input:
       2. Update only affected authorized references/design Change Log, counts/paths. Measure applicable coverage with same method/scope before/after; unmeasured is a gap, not maintained. Preserve tracing/redaction; no forced setup.
       3. Bind evidence/review to actual source/test/config hashes. Report engineering delivery separately from stakeholder outcome not measured; study is recommendations, not achieved structural improvement. Edits invalidate affected evidence; retain unrelated IDs/history/evidence.
       4. Fill full original task_completion_output with actual links/counts/principles/goals and supplied legacy/dynamic attributes. Designated score strings may say not measured; no sentinel in numeric tool schema or synthetic aggregate score. Coverage strings and comparison status explicitly allow null; explain not measured/non-applicability in report. A required missing measurement blocks that claim, not unrelated study delivery.
-      5. Workflow-mode completion depends on actual mandatory code_refactor gates and completed refactor report, not study-only. Return exact refactor-report mapping to owner for one authorized write/readback; no child app mutation or successors. Candidate readiness/study evidence is distinct from larger-task closure or publication.
+      5. Default code_refactor is optional; no evidenced need means no task/report/action write. When requested or needed, genuine execution and its actual report are required for done; study-only is not structural completion. Owner performs one authorized write/readback and respects any customized mandatory action. Candidate readiness is not publication.
     </action>
     <output>Original task output, report, revision-bound comparison and honest blockers</output>
   </step_5>
@@ -242,7 +247,7 @@ task_completion_output:
   <checkpoint required="true"><name>Quality comparison</name><verification>Named measured or qualitative improvement versus baseline with trade-off; study recommendations only; no invented score/outcome.</verification></checkpoint>
   <checkpoint required="true"><name>Current verification</name><verification>Required risk checks pass at current hashes; failures/unavailable checks named, new regressions block.</verification></checkpoint>
   <checkpoint required="true"><name>Bounded records</name><verification>Affected references only, tracing/redaction preserved, dirty bytes protected, default no commit.</verification></checkpoint>
-  <checkpoint required="conditional"><name>Independent review</name><verification>Meaningful workflow/executable/safety/public-contract change reviewed; unavailable blocks pertinent completion/publication, not drafting.</verification></checkpoint>
+  <checkpoint required="conditional"><name>Independent review</name><verification>Explicit review request or concrete high-risk uncertainty receives current scoped independent review; ordinary workflow/executable/public-contract edits use targeted checks and self-review. Missing required review blocks pertinent completion/publication, not drafting.</verification></checkpoint>
   <checkpoint required="conditional"><name>App gates</name><verification>Actual mandatory action/predecessors/contexts/refactor-report and owner readback; no study shortcut or fake done.</verification></checkpoint>
   <checkpoint required="true"><name>Original handoff</name><verification>Full original/dynamic task fields and actual tool results retained; one owner no duplicate registration/routing or successor.</verification></checkpoint>
 </definition_of_done>

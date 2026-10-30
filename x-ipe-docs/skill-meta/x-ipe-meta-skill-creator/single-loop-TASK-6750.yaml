@@ -1,0 +1,91 @@
+task_id: TASK-6750
+owner: Ember
+scope: Root creator candidate, task-specific metadata, and new focused tests only
+status: candidate_ready
+publication_state: not_promoted
+source_of_truth: .github_to_be_refactor/skills/x-ipe-meta-skill-creator
+scaffold: Existing relocated creator package and existing candidate; no subtype rewrite
+source_article: https://claude.com/resources/articles/building-agents-when-to-fold-subagents-into-your-main-agent-loop
+
+decisions:
+  - Default planning, drafting, verification, revision and tool-skill procedures to one model/context loop.
+  - Delegate only for documented context degradation, substantial independent parallel work, or genuine instruction/tool/permission isolation needs.
+  - Independent review is conditional on concrete security/trust/permission or destructive risk, explicit user review, or unresolved ambiguity/observed failures.
+  - Ordinary executable, workflow and public-contract edits do not automatically require a fresh reviewer.
+  - Remove scheduling tags, default agent DAGs, model-tier prescriptions, judge rounds and aggregate score/coverage gates from authoring scaffolds and examples.
+  - Preserve all eight subtype mappings; category and workflow continue sharing the workflow scaffold.
+  - Preserve actual user approvals, three interaction modes, existing task/output schemas, goal contracts and lesson ownership/settlement gates.
+  - Keep validator/publisher source unchanged, candidate staging, 1000-line ceiling, path/concurrency/ownership checks and recovery/parity requirements.
+  - Load references/tools progressively; preserve bounded lesson selection rather than historical raw lesson concatenation.
+
+evidence:
+  command: PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -B -m pytest -q -p no:cacheprovider tests/test_single_loop_authoring.py
+  result: 33 passed
+  duration_reported_by_pytest: 0.07s
+  whitespace_check: git diff --check passed for candidate and new test path
+  coverage_kind: Static contract checks plus actual unchanged deterministic validator against a disposable project-local package copy
+  validator_source: Relocated installed creator, not an edited helper
+  validation_project: Unique .working/task-6750-authoring-* directory, removed after each test
+  cache_fixture: Existing exact source-bound interpreter-cache copier; unknown files retained for validation
+  validated_contracts:
+    - Eight subtype defaults and seven scaffold section/output-contract parity checks
+    - Ten golden authoring policy scenarios; not live-agent executions
+    - Conditional review and unavailable-required-review promotion blocker
+    - No hidden scheduling tags, judge/score/coverage-percentage gates or premium-model prescriptions
+    - Three modes, task schemas, document-local goal contract and actual approval boundaries
+    - Publication/lesson evidence safeguards and unchanged validator/publisher source bytes
+    - Complete candidate resources and deterministic validation of the real candidate copy
+  limitations:
+    - No measured token or latency savings; pytest duration is not agent-performance evidence.
+    - No live-agent end-to-end outcome evaluation or user outcome claim.
+    - No production publication, production parity claim, board mutation, commit or push.
+    - Integration owner must validate the final restored tree and combined delivery workflow delta.
+
+lessons:
+  operation: Read-only select using relocated installed lesson_ops source
+  summaries: []
+  critical_overflow: []
+  notices: []
+  protected:
+    - skill: x-ipe-meta-skill-creator
+      reason: Target skill does not exist
+  explanation: Canonical .github skill location is temporarily absent during the authorized relocation; no path-validation bypass, invented adoption, or queue write was attempted.
+  settlement: pending; no selected owned mapping or compatible production publication/test receipt
+
+candidate_completeness:
+  existing_production_paths: All retained
+  new_publishable_resource: references/single-loop-authoring.md
+  preexisting_differences: Existing metadata cleanup remnants and differing interpreter cache bytes were preserved, not silently adopted or removed.
+  metadata_cleanup_contract: Existing validator exclusion for metadata/review-findings.md and metadata/test-cases.yaml unchanged
+  deterministic_copy_validation: passed
+  production_byte_parity: not applicable before promotion
+  blockers: []
+  handoff: Main task owner handles aggregate review, restoration and any authorized manifest-safe publication.
+
+files_changed:
+  - candidate/SKILL.md
+  - candidate/references/single-loop-authoring.md
+  - candidate/references/skill-general-guidelines-v2.md
+  - candidate/references/consumer-integration.md
+  - candidate/references/validation-publication.md
+  - candidate/references/2. reference-section-order.md
+  - candidate/references/3. example-step-based-code-review.md
+  - candidate/references/4. example-step-based-feature-implementation.md
+  - candidate/references/5. example-function-based-validation.md
+  - candidate/references/6. example-function-based-analysis.md
+  - candidate/references/10. example-gate-conditions.md
+  - candidate/references/11. reference-quality-standards.md
+  - candidate/references/12. reference-production-patterns.md
+  - candidate/references/skill-type-comparison.md
+  - candidate/references/examples.md
+  - candidate/templates/x-ipe-task-based.md
+  - candidate/templates/x-ipe-tool.md
+  - candidate/templates/x-ipe-workflow-orchestration.md
+  - candidate/templates/x-ipe-meta.md
+  - candidate/templates/x-ipe-knowledge.md
+  - candidate/templates/x-ipe-assistant.md
+  - candidate/templates/x-ipe-dao.md
+  - candidate/templates/skill-meta-x-ipe-meta.md
+  - candidate/templates/skill-meta-x-ipe-task-based.md
+  - single-loop-TASK-6750.yaml
+  - tests/test_single_loop_authoring.py (project-root-relative)

@@ -466,5 +466,22 @@ evaluation:
 - [Recovered verification receipt](publication-receipt-TASK-6749-R2.json); prior history above remains historical, not current parity evidence.
 - Hybrid inner guidance and human completion/route boundary independently reviewed at exact R2 hash; documented expected behavior and failing-before/fixed-after regression evidence retained. Prior-worker promotion time is unknown; no production replay or atomic writer journal claimed.
 
+## TASK-6750 single-loop delivery revision
 
+Published after deterministic validation, bounded workflow safety review, and real manifest-safe publication; prior metadata above remains version history.
 
+- Current revision: `5b94f2e36e2f29f127333603989b410126037d2b676411a1b78ee2acde1e9d7e`
+- Previous revision: `e3410950f38bb6e6b987302d77176220e1e22519d61d0d589b31b7719740f2e0`
+- Evidence: `single-loop-TASK-6750.json`, `publication-receipt-TASK-6750.json`, `validation-receipt-TASK-6750.json`.
+- Same-loop delivery/default risk-based verification; unchanged resources and protected bytes retained.
+- Token/latency savings not measured; no live-agent efficacy claim.
+
+## TASK-6752 proportional-delivery revision
+
+Published through the installed manifest-safe publisher after bounded compatibility review, correction of its TypeScript test-path finding, deterministic validation and affected post-publication regressions. Prior metadata remains historical.
+
+- Current revision: `32704aa6dde1a64091e4ce3bbc86f225de8eda089bc7ae4d5deea995f7be4af3`
+- Previous revision: `5b94f2e36e2f29f127333603989b410126037d2b676411a1b78ee2acde1e9d7e`
+- Evidence: `lean-delivery-TASK-6752.json`, `publication-receipt-TASK-6752.json`, `validation-receipt-TASK-6752.json`.
+- Verification: 599 selected checks passed; exact installed/candidate byte parity. No resource removals, mirror synchronization or Git mutation.
+- Live-agent efficacy, token/latency savings and stakeholder outcome remain unmeasured.

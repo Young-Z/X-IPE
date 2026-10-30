@@ -92,9 +92,9 @@ acceptance_criteria:
       expected: "### Input Initialization with <input_init> XML block"
   could:
     - id: AC-C01
-      description: Independent review used for meaningful workflow, executable, or safety changes
+      description: Independent review is conditional on concrete risk, explicit user review, or unresolved ambiguity/failures
       test_method: structure_validation
-      expected: "Risk-based review with recorded findings, not a fixed number of agents"
+      expected: "Same-loop checks by default; artifact type alone does not trigger review"
   wont:
     - id: AC-W01
       description: Runtime code generation
@@ -106,12 +106,12 @@ evaluation:
     - "Line count validation"
     - "Section order validation"
     - "Keyword vs emoji check"
-  judge_agent:
-    - "Quality of execution procedure clarity"
-    - "Completeness of acceptance criteria coverage"
+  independent_review:
+    trigger: "Security/trust/permission or destructive change, explicit user review, or unresolved ambiguity/observed failures"
+    evidence: "Bounded findings when triggered; otherwise same-loop self-review"
 
 workflow:
-  sub_agent_dag: risk_based
+  execution: single_loop
   test_driven: true
   supports_iteration: true
 
@@ -143,10 +143,10 @@ dependencies:
 | Interface | inputs | Yes | Required and optional parameters |
 | Interface | outputs | Yes | skill_package and skill_meta |
 | Acceptance | must | Yes | All must pass for merge |
-| Acceptance | should | Yes | 80% must pass |
+| Acceptance | should | Yes | Record unmet recommendations and their impact; no aggregate score gate |
 | Testing | test_scenarios | Recommended | happy_path, edge_cases, error_cases |
 | Evaluation | self_check | Yes | Automated checks |
-| Evaluation | judge_agent | Optional | Quality assessment |
+| Evaluation | independent_review | Conditional | Concrete risk/user/failure-triggered review, not an artifact-type gate |
 
 ---
 

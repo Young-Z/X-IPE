@@ -14,6 +14,11 @@ Produce the Epic context and real artifacts needed by Feature Breakdown.
 
 ## Important Notes
 
+Load the [single-loop delivery policy](.github/skills/x-ipe-workflow-task-execution/references/agent-loop.md)
+once in the current context. Execute this skill in the same agent loop; another
+skill is expertise, not a new agent. Use proportional checks and reuse current
+evidence; independent review is conditional on concrete risk, not the skill name.
+
 BLOCKING: Use the [shared lifecycle](.github/skills/x-ipe-workflow-task-execution/references/lifecycle.md)
 once: caller supplies readiness; direct entry loads the workflow and calls its
 Orient/Plan entry, returning here without recursively dispatching this skill.
@@ -169,7 +174,7 @@ for reuse, risk, conflict and workflow verification rules before domain work.
     <action>
       1. Verify DoD, link targets, language, IDs, conflict decisions, split integrity and current source/document/config revisions. Rerun affected checks if changed; retain known failures.
       1a. Require honest goal coverage for every new/changed requirement: source/stakeholder/outcome, contribution, success scenario, constraints/non-goals and planned validation. Preserve legacy story so-that inference labels; do not assert observed outcome from artifact delivery or planned tests.
-      2. Use proportionate review: meaningful workflow/public-contract/security/destructive or broad impacts require independent review; unavailable review blocks the relevant claim, not drafting. Cosmetic bounded documentation may use justified self-review.
+      2. Use self-checks and targeted tests by default; independent review is required only for an explicit request or concrete high-risk uncertainty under the shared single-loop policy. Reuse suitable current review; missing required review blocks the affected claim, not drafting.
       3. In workflow-mode perform the completion action exactly once by this child, after domain gates pass; if lifecycle already performed the agreed write, verify it instead. Load app interactor and use installed workflow_update_action.py with --workflow, --action requirement_gathering, --status done, --deliverables keyed JSON and --format json.
       4. Supply BOTH requirement-doc = actual active populated file and requirements-folder = scalar x-ipe-docs/requirements directory. Verify exit 0 and workflow_get_state.py readback at shared.requirement.actions.requirement_gathering: status done plus exact verified deliverables. Writer success alone is insufficient.
       5. Missing action/state, missing or invalid artifacts, failed write/readback or unsatisfied mandatory prerequisite blocks completion. Never mark prerequisites done/skipped to unlock; free-mode does not mutate app state and returns workflow_action_updated false.

@@ -137,3 +137,23 @@ The code-implementation slice remains candidate-only until its main reviewer.
 - Current production/candidate fingerprint: 8a542b7595b566778f29127307fdcdcf00c740820e15063d070bebba5dd90aca.
 - [Recovered verification receipt](publication-receipt-TASK-6749-R2.json); prior history above remains historical, not current parity evidence.
 - Hybrid inner guidance and human completion/route boundary independently reviewed at exact R2 hash. Prior-worker promotion time is unknown; no production replay or atomic writer journal claimed.
+
+## TASK-6750 single-loop delivery revision
+
+Published after deterministic validation, bounded workflow safety review, and real manifest-safe publication; prior metadata above remains version history.
+
+- Current revision: `a583877806d925bb99de7690e10cfa6a238aad42c17de714842a7678a778c523`
+- Previous revision: `8a542b7595b566778f29127307fdcdcf00c740820e15063d070bebba5dd90aca`
+- Evidence: `single-loop-TASK-6750.json`, `publication-receipt-TASK-6750.json`, `validation-receipt-TASK-6750.json`.
+- Same-loop delivery/default risk-based verification; unchanged resources and protected bytes retained.
+- Token/latency savings not measured; no live-agent efficacy claim.
+
+## TASK-6752 proportional-delivery revision
+
+Published through the installed manifest-safe publisher after bounded compatibility review, correction of its TypeScript test-path finding, deterministic validation and affected post-publication regressions. Prior metadata remains historical.
+
+- Current revision: `3aed5a97ca72dfec5f6b6b699bd1f29bd2dee4cf8b211282b70b3aaf045f5051`
+- Previous revision: `a583877806d925bb99de7690e10cfa6a238aad42c17de714842a7678a778c523`
+- Evidence: `lean-delivery-TASK-6752.json`, `publication-receipt-TASK-6752.json`, `validation-receipt-TASK-6752.json`.
+- Verification: 599 selected checks passed; exact installed/candidate byte parity. No resource removals, mirror synchronization or Git mutation.
+- Live-agent efficacy, token/latency savings and stakeholder outcome remain unmeasured.

@@ -11,6 +11,19 @@ Produce an evidence-based CR assessment by inspecting local code at Quick, Stand
 
 ## Important Notes
 
+Load the [single-loop delivery policy](.github/skills/x-ipe-workflow-task-execution/references/agent-loop.md)
+once in the current context. Execute this skill in the same agent loop; another
+skill is expertise, not a new agent. Use proportional checks and reuse current
+evidence; independent review is conditional on concrete risk, not the skill name.
+
+Load `x-ipe-workflow-task-execution` and its
+[common lifecycle](.github/skills/x-ipe-workflow-task-execution/references/lifecycle.md).
+Reuse the supplied task/readiness; direct entry calls Orient/Plan once without
+recursively dispatching this skill. One owner handles task/feature/app writes,
+Git and the next boundary. Return full output; do not register or execute a
+successor. Within-skill questions follow the three existing interaction modes;
+clear inputs need no question or DAO call. Explicit human approvals still bind.
+
 BLOCKING: Learn `x-ipe-workflow-task-execution` before execution.
 BLOCKING: Never modify the assessed codebase or directly compose final HTML in reasoning.
 MANDATORY: Read [assessment method](.github/skills/x-ipe-task-based-evaluate-change-request-efforts/references/assessment-method.md) and validate against the bundled schema.
@@ -72,7 +85,6 @@ BLOCKING: Do not publish until every model total reconciles and every AI product
 ```xml
 <procedure name="evaluate-change-request-efforts">
   <execute_dor_checks_before_starting/>
-  <schedule_dod_checks_with_sub_agent_before_starting/>
   <phase_1 name="博学之 — Study Broadly">
     <step_1_1><name>Load and Validate</name><action>1. Resolve case_folder and depth. 2. Parse CaseRecord and latest snapshot. 3. Read required evidence and assessment-method.md. 4. Load benchmarks-v1.json and report-model-v1.schema.json.</action><output>Validated context and provenance</output></step_1_1>
     <step_1_2><name>Inspect Repository</name><action>1. For quick inspect targets and immediate implementation/tests. 2. For standard add dependencies, integrations, data and regression impact. 3. For deep add full reachable baseline and systemic risk. 4. Tag every finding observed, inferred, or unverified with project-relative evidence.</action><output>Coverage and evidence inventory</output></step_1_2>
@@ -90,7 +102,6 @@ BLOCKING: Do not publish until every model total reconciles and every AI product
     <step_5_1><name>Publish Reports</name><action>1. Run `python .github/skills/x-ipe-task-based-evaluate-change-request-efforts/scripts/publish_reports.py --case-folder {case_folder} --model {model_path}`. 2. If nonzero, preserve prior latest version and report the non-sensitive error. 3. If zero, parse the JSON receipt and verify every output.</action><output>Publication receipt and four artifacts</output></step_5_1>
     <step_5_2><name>Complete</name><action>1. Verify DoD. 2. Present latest report links and qualified gaps. 3. Require human review for commercial use.</action><output>Task completion output</output></step_5_2>
   </phase_5>
-  <phase_6 name="继续执行（Continue Execute）"><step_6_1><name>Decide Next Action</name><action>1. Return reports for review. 2. Do not initiate implementation or negotiation automatically.</action><output>Next action decided</output></step_6_1></phase_6>
 </procedure>
 ```
 
@@ -101,7 +112,8 @@ task_completion_output:
   category: standalone
   status: "completed | blocked"
   next_task_based_skill: null
-  process_preference: {interaction_mode: "{from input}"}
+  process_preference:
+    interaction_mode: "{from input}"
   execution_mode: "{from input}"
   workflow: {name: "{from input}"}
   task_output_links: ["{CaseRecord}", "{effort_report}", "{design_report}", "{report_model}"]

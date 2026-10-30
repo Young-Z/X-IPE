@@ -313,3 +313,13 @@ evaluation:
         3: Acceptable - main sections present, some gaps
         2: Poor - missing key sections or unclear
         1: Fail - does not meet minimum requirements
+
+## TASK-6750 single-loop delivery revision
+
+Published after deterministic validation, bounded workflow safety review, and real manifest-safe publication; prior metadata above remains version history.
+
+- Current revision: `0f5a885d43222f320617a26057b3f131a34bce87db6e5d47c7f531cf674fdcdf`
+- Previous revision: `df76d4fe483fe3526be3fccbdbbcb7d4e58c6b7238542f083275d05701985c4f`
+- Evidence: `single-loop-TASK-6750.json`, `publication-receipt-TASK-6750.json`, `validation-receipt-TASK-6750.json`.
+- Same-loop delivery/default risk-based verification; unchanged resources and protected bytes retained.
+- Token/latency savings not measured; no live-agent efficacy claim.

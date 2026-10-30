@@ -21,16 +21,15 @@ one write; already current verified done is read-only resume, not replay.
 No new workflow_action output key: owner records actual evidence in its existing
 dynamic context/report. Free-mode no workflow mutation.
 
-The helper can allow closing while code_refactor pending in an open stage, absent
-context or unexecuted report. Writer success alone is insufficient. Independently
-verify current complete acceptance, specification/implementation identity and every
-preceding mandatory gate done, not skipped; outputs must actually exist where
-declared. Current code_refactor is mandatory despite conditional quality need.
-Do not fabricate need, churn, skipped/done/report to clear it: workflow closing
-blocked until legitimate evidenced existing gate fulfillment or separately
-authorized future integration change. Empty closing outputs are valid and are
-NOT this blocker. A locked validation stage with incomplete implementation rejects.
-No compulsory refactoring analysis added by closing; no app/config changes here.
+Writer success alone is insufficient: verify current complete acceptance,
+specification/implementation identity and all actual preceding mandatory gates.
+Default code_refactor is optional. No need means direct closing, with no refactor
+report, compulsory assessment, invented churn or agent-authored skip/done record.
+Optional actions are initialized as skipped by the service; do not treat that as
+refactoring evidence. A project may explicitly customize mandatory actions;
+honor its actual template. Acceptance and closing remain required. Empty closing
+outputs are valid, not a blocker. An incomplete required implementation still
+locks validation.
 
 Tests explicitly characterize permissive temporary writer done with empty mapping,
 not actual semantic feature completion. They never mark refactor done to fake
@@ -81,11 +80,7 @@ never claim goal achieved or stakeholder approved without actual cited evidence.
 
 ## Docs, review, status and original output
 
-Proportionate code-to-docs review is risk-based: meaningful workflow/executable/
-safety/public-contract risk needs independent review. A fresh applicable prior
-independent review at the same revision may be reused. Bounded cosmetic/doc-only
-work may use deterministic/self-review with rationale. Missing required review
-blocks domain completion/promotion, not drafting. No invented subagent review.
+Use self-checks and targeted tests by default; independent review is required only for an explicit request or concrete high-risk uncertainty under the shared single-loop policy. Reuse suitable current review; missing required review blocks the affected claim, not drafting.
 Only misleading authorized docs need changes; no blanket spec/design/test rewrite.
 No implementation changes. Code violating AC is defect, not authoritative new
 acceptance: never weaken AC/tests to match faulty code without an approved CR.

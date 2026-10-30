@@ -127,14 +127,11 @@ human asks human within skill; full DAO and hybrid use bounded guidance. Owner
 requires human completion/route confirmation for human and hybrid; full DAO
 selects only authorized successors. Explicit human approval/release binds in every mode.
 
-Refactor recommendation is conditional on inspected quality/preservation need.
-Current workflow-template.json nevertheless declares code_refactor mandatory
-(optional false) and acceptance next_actions_suggested code_refactor; live helper
-recommends that pending action. The rule is no fake skip, no fake done/report, no mandatory
-code churn or invented need just to clear the template. No-need free-mode can
-suggest closing; workflow-mode records routing blocker until legitimate existing
-gate completion or separately authorized future configuration migration. Current
-helper may accept closing in an already open stage despite pending refactor;
-owner must separately enforce mandatory prior actions. This candidate changes no
-app/config and makes no blanket routing compatibility claim. Acceptance delivery
-and its verified action can be supported while closing route remains blocked.
+Refactor recommendation is conditional on an evidenced quality/preservation need
+or explicit request. Both default templates make code_refactor optional; acceptance
+suggests feature_closing first and code_refactor second. No need means closing
+directly without a new report, code churn or agent-authored skip/done record.
+The service initializes optional actions as skipped; that is not evidence that
+refactoring ran. Project-customized mandatory actions still bind and must be
+resolved honestly. Current acceptance, specification and actual implementation
+evidence remain required for closing. Reuse unchanged checks through closing.

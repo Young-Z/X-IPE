@@ -30,15 +30,18 @@ content analysis for frontend/fullstack, not existence or newer timestamps alone
 Read actual `stages.implement.technical_design` in tools.json. Ignore `_order`
 and other metadata keys for activation; preserve `_extra_instruction` for
 consultation. Missing/empty/metadata-only means all discovered implementation
-tools eligible. Explicit tool booleans mean opt-in, force-enable general.
+tools eligible. Explicit tool booleans mean opt-in; no force-enable general.
 Malformed values are a configuration question, not truthy enablement.
+Use [capability routing](.github/skills/x-ipe-workflow-task-execution/references/capability-routing.md)
+for read-only resolution and config/catalog revision checks.
 
 Match descriptions/When to Use to actual type/stack/responsibility: Python/Flask
 practices from Python, vanilla HTML/CSS/JS from HTML5, TypeScript/React from
 TypeScript, Java/Spring from Java, FastMCP/MCP SDK protocol from MCP. These are
 examples from installed declarations, not a hardcoded routing registry. MCP
-may also need runtime-specific consultation. General is eligible fallback for
-unmatched/disabled-specific scope. Record matched/excluded rationale; never run
+may also need runtime-specific consultation. General is eligible fallback only
+when enabled and suitable. No enabled match is a disclosed capability gap.
+Record matched/excluded rationale; never run
 Operations or implement/fix/refactor. Availability does not change Part 2 format.
 
 ## Same-owner completion handoff

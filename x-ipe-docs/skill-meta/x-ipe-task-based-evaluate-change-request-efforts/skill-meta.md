@@ -57,3 +57,13 @@ evaluation:
     - Candidate and production trees have parity after merge
   judge_agent:
     - {criterion: Production readiness, rubric: "5 ready; 4 minor issues; 3 gaps; 2 major issues; 1 fail"}
+
+## TASK-6750 single-loop delivery revision
+
+Published after deterministic validation, bounded workflow safety review, and real manifest-safe publication; prior metadata above remains version history.
+
+- Current revision: `bf5673e2fe351ed432093d7232b5d1e9cb68d88b968779ff04d154b7a150501c`
+- Previous revision: `a78ceca0f7f3542b02e6e5fd2f4810dace8ecec564348084faa2b69141ca141d`
+- Evidence: `single-loop-TASK-6750.json`, `publication-receipt-TASK-6750.json`, `validation-receipt-TASK-6750.json`.
+- Same-loop delivery/default risk-based verification; unchanged resources and protected bytes retained.
+- Token/latency savings not measured; no live-agent efficacy claim.

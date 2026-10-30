@@ -90,7 +90,10 @@ Mandatory diagnostic data unavailable means named gap/blocker, not invented trac
 Existing bug artifact stores original report, intended source/parent/subgoal/
 story/GWT AC/type, qualitative success, constraints/non-goals, all-required branches
 or selected alternative, reproduction, root cause/callers, conflicts/authority,
-design impact and actual red/green/full-suite/browser/review evidence. No new output
+design impact and actual red/green/affected-regression/browser/review evidence.
+One risk/impact plan controls test scope; full-suite escalation needs coupling,
+observed regression or binding policy. Reuse unchanged evidence at handoff.
+No new output
 keys, board fields or goals database. Restore behavior, not a new product outcome.
 
 Real source/design/tests/config/review hashes and commands/exits bind claims;

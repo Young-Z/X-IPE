@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "ok": true,
+  "operation": "publish",
+  "state": "published",
+  "name": "x-ipe-tool-infographic-syntax",
+  "added": [],
+  "changed": [
+    "SKILL.md"
+  ],
+  "removed": [],
+  "protected": [],
+  "baseline_hash": "e6063ebf70630eab8d8b80e10d960a5c9c572ccbc3aeee4b4f98952c612911c6",
+  "candidate_hash": "a228b72c9c09052ee4b36e9af01e026b31799fd6f237be7c3bdb5a52f5576671",
+  "files": {
+    "SKILL.md": "827256453f807ecedcfef221f0e958168203ed8a3435e7f60a0d494f5be11bee",
+    "references/prompt.md": "defac2a05823fbf086c21dee99e1d0175da43352ea6babd2f0df11eade75527e"
+  },
+  "excluded_files": {},
+  "transaction": "/Users/yzhang/Documents/projects/X-IPE/.github/.skill-publication/x-ipe-tool-infographic-syntax-qirvboo8",
+  "byte_parity": true
+}

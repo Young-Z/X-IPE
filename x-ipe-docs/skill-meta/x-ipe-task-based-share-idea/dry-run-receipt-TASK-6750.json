@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "ok": true,
+  "operation": "publish",
+  "state": "dry_run",
+  "name": "x-ipe-task-based-share-idea",
+  "added": [],
+  "changed": [
+    "SKILL.md"
+  ],
+  "removed": [],
+  "protected": [],
+  "baseline_hash": "48c11ca5d6d760937dbb5dd819fccd4e82c9e5bab3ade87b19f3957169b8ad6d",
+  "candidate_hash": "2dbf6001c09ac77044db4f83544d4aa16fa22072bc457bc2ae708b819f4c1955",
+  "files": {
+    "SKILL.md": "7de9548012a2c7e95bde3e92d29447621c6670233d3c1e9528fc85342e769cb7"
+  },
+  "excluded_files": {}
+}

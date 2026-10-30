@@ -38,8 +38,8 @@ inputs:
   required:
     - name: operation
       type: string
-      description: "Always 'implement'"
-      validation: "Must be 'implement'"
+      description: "Implementation, bug restoration or behavior-preserving refactoring"
+      validation: "Must be 'implement', 'fix' or 'refactor'"
 
     - name: aaa_scenarios
       type: array
@@ -51,7 +51,7 @@ inputs:
 
     - name: feature_context
       type: object
-      description: "Feature metadata (id, title, design link, spec link)"
+      description: "Feature metadata required for implement; optional for fix/refactor under the existing tool-local synthetic-context contract"
 
   optional:
     - name: test_code_path
@@ -218,3 +218,13 @@ evaluation:
         3: Acceptable - works but doesn't follow stack conventions
         2: Poor - significant issues, some tests fail
         1: Fail - cannot implement for the stack
+
+## TASK-6752 proportional-delivery revision
+
+Published through the installed manifest-safe publisher after bounded compatibility review, correction of its TypeScript test-path finding, deterministic validation and affected post-publication regressions. Prior metadata remains historical.
+
+- Current revision: `d04f8b43d5da08ede625a39cfcf2ff4a6f946a93fdfad2a473f7b34cef176a27`
+- Previous revision: `a0b78283646e609c08313847d77179c119efc8dd7411cab384ec9819bb25d4ac`
+- Evidence: `lean-delivery-TASK-6752.json`, `publication-receipt-TASK-6752.json`, `validation-receipt-TASK-6752.json`.
+- Verification: 599 selected checks passed; exact installed/candidate byte parity. No resource removals, mirror synchronization or Git mutation.
+- Live-agent efficacy, token/latency savings and stakeholder outcome remain unmeasured.

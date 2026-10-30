@@ -18,6 +18,11 @@ AI Agents follow this skill to implement code for any tech stack by:
 
 ## Important Notes
 
+Apply the caller's single risk/impact verification plan in the same agent loop.
+Run affected tests and implicated integrations; broaden for coupling, observed
+regressions or binding policy. Reuse current evidence at handoff, never claim an
+unrun suite passed. No child board/Git/checkpoint actions.
+
 BLOCKING: This skill is invoked by the `x-ipe-task-based-code-implementation` orchestrator. Do NOT invoke directly unless testing.
 
 CRITICAL: Always research before implementing. This skill handles unfamiliar tech stacks — blind implementation without research leads to anti-pattern code.
@@ -99,7 +104,7 @@ input:
   </checkpoint>
   <checkpoint required="true">
     <name>Feature context complete</name>
-    <verification>feature_id and technical_design_link are provided</verification>
+    <verification>For implement, feature_id and technical_design_link are provided; fix/refactor may omit feature_context as declared</verification>
   </checkpoint>
 </definition_of_ready>
 ```
@@ -177,7 +182,7 @@ input:
        - Only change what is necessary to make the test pass
        - Follow existing code conventions from Step 3
     8. RUN test → MUST PASS
-    9. RUN all existing tests → no regressions
+    9. RUN affected regression selection and implicated integrations; broaden when the verification plan requires it
     10. RUN linting with discovered linting tool
     11. RETURN standard output
   </action>
@@ -196,7 +201,7 @@ input:
     2. RESEARCH best practices: documentation, testing frameworks, linting tools for detected language
     3. LEARN existing code structure in source_code_path
     4. IF feature_context is absent: generate synthetic context (feature_id: "REFACTOR-{task_id}", technical_design_link: "N/A")
-    5. RUN existing tests → establish baseline (all must pass)
+    5. RUN affected preservation selection → establish baseline (all selected checks must pass)
        - IF any test fails → STOP, report: "Cannot refactor — baseline tests failing"
     6. RESTRUCTURE code per AAA scenario target state:
        a. FOR EACH AAA scenario:
@@ -204,7 +209,7 @@ input:
           - Apply structural changes following detected language best practices
           - Preserve external behavior
     7. UPDATE imports and references across affected files
-    8. RUN all tests → MUST pass (behavior preserved)
+    8. RUN the same preservation selection plus affected integrations → MUST pass (behavior preserved); broaden for observed risk/failures or binding policy
        - IF tests fail → report failed scenarios with details; do NOT auto-revert (orchestrator decides)
     9. RUN linting with discovered linting tool
     10. RETURN standard output
@@ -213,7 +218,7 @@ input:
     - BLOCKING: Steps 1-2 (identify + research) MUST complete before Step 6 (restructure)
     - BLOCKING: Baseline tests must pass before refactoring (Step 5)
     - CRITICAL: Preserve behavior — no functional changes
-    - CRITICAL: Do NOT manage git commits — orchestrator handles checkpointing
+    - CRITICAL: Do NOT manage git commits/checkpoints — only the owner may act with explicit authority
     - MANDATORY: Feature_context is OPTIONAL — use synthetic fallback if absent
   </constraints>
   <output>Standard tool skill output (implementation_files, test_files, test_results, lint_status)</output>

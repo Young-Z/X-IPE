@@ -1,0 +1,16 @@
+{
+  "body_lines": 307,
+  "candidate_hash": "333ab2554f39b7e969915f29c3cfd7d7c4d75be23619e9608a06420f157880a8",
+  "errors": [],
+  "excluded_files": {},
+  "files": {
+    "SKILL.md": "eb136d8f18d27803e501f2fd0d618a7968021baea81041e44f887b8bc2c41bae",
+    "references/examples.md": "117a0a68b64e1dc8885542ab9a93d0a2e5de8c277248cfd2f28fc8885665bad5"
+  },
+  "name": "x-ipe-tool-implementation-java",
+  "ok": true,
+  "operation": "validate",
+  "schema": 1,
+  "skill_type": "x-ipe-tool",
+  "warnings": []
+}

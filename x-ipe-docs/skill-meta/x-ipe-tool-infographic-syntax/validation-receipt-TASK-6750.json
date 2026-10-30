@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "operation": "validate",
+  "name": "x-ipe-tool-infographic-syntax",
+  "skill_type": "x-ipe-tool",
+  "ok": true,
+  "errors": [],
+  "warnings": [],
+  "excluded_files": {},
+  "body_lines": 333,
+  "files": {
+    "SKILL.md": "827256453f807ecedcfef221f0e958168203ed8a3435e7f60a0d494f5be11bee",
+    "references/prompt.md": "defac2a05823fbf086c21dee99e1d0175da43352ea6babd2f0df11eade75527e"
+  },
+  "candidate_hash": "a228b72c9c09052ee4b36e9af01e026b31799fd6f237be7c3bdb5a52f5576671"
+}

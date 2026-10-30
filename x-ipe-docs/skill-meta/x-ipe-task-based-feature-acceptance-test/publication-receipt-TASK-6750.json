@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "ok": true,
+  "operation": "publish",
+  "state": "published",
+  "name": "x-ipe-task-based-feature-acceptance-test",
+  "added": [],
+  "changed": [
+    "SKILL.md",
+    "references/detailed-procedures.md",
+    "references/examples.md",
+    "references/integration.md",
+    "templates/acceptance-test-cases.md"
+  ],
+  "removed": [],
+  "protected": [],
+  "baseline_hash": "1914c1922c58995fa5380e995c312e1a6b811313acd40c74ea01db73d1170644",
+  "candidate_hash": "58d73c6792c7ee6bd2b4aea8d3d25ec7b039474c97a9e81f636138666e6abaab",
+  "files": {
+    "SKILL.md": "83f9166b80fb34f066f70ec2666aeb2b9bb3f7aeb5cf775682eda52d3da136c3",
+    "references/detailed-procedures.md": "cb940d74ba7545c130210e267c75d8a9aeb03de8b604aad805280f0684d1a6b2",
+    "references/examples.md": "a1c433d977d919a54b1fd553c71febe49c0ef7b6c9ca2782f6adc18cc95612b1",
+    "references/integration.md": "268adde1a365636b00d8e94239c5d70307253504b455bef47436eb854b859a9e",
+    "scripts/verify_evidence.py": "9b9473189b12d1228a7b204fe73074e53e579ee03e35f643cf115f398b1c4fed",
+    "templates/acceptance-test-cases.md": "6365656cd6b0883cf95362780cfb04bffa0e8f25f45d08993374100bd726f4c7"
+  },
+  "excluded_files": {},
+  "transaction": "/Users/yzhang/Documents/projects/X-IPE/.github/.skill-publication/x-ipe-task-based-feature-acceptance-test-vljonhvq",
+  "byte_parity": true
+}

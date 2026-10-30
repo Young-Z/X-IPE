@@ -201,11 +201,12 @@
             "$output-folder:test-folder"
           ],
           "next_actions_suggested": [
+            "feature_closing",
             "code_refactor"
           ]
         },
         "code_refactor": {
-          "optional": false,
+          "optional": true,
           "action_context": {
             "tech-design": {
               "required": true,

@@ -18,26 +18,18 @@ Create architecture diagrams and system design visualizations for refined ideas 
 
 ## Important Notes
 
-BLOCKING: Learn `x-ipe-workflow-task-execution` and `x-ipe+all+task-board-management` skills before executing this skill.
+Load the [single-loop delivery policy](.github/skills/x-ipe-workflow-task-execution/references/agent-loop.md)
+once in the current context. Execute this skill in the same agent loop; another
+skill is expertise, not a new agent. Use proportional checks and reuse current
+evidence; independent review is conditional on concrete risk, not the skill name.
 
-**Note:** If Agent does not have skill capability, go to `.github/skills/` folder to learn skills. SKILL.md is the entry point.
-
-### High-Level Architecture Focus
-
-CRITICAL: Architecture diagrams must focus on system-level design, not implementation specifics. Detailed design comes later during Technical Design.
-
-| Focus On | Ignore |
-|----------|--------|
-| System components and their relationships | Implementation details (code structure) |
-| Data flow between components | UI/UX design elements |
-| Integration points and APIs | Visual styling and colors |
-| Technology stack overview | Database schema details |
-| Scalability considerations | Specific library choices |
-| Security boundaries | Deployment scripts |
-
-IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-interact"`, NEVER stop to ask the human. Instead, call `x-ipe-assistant-user-representative-Engineer` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
-
----
+Load `x-ipe-workflow-task-execution` and its
+[common lifecycle](.github/skills/x-ipe-workflow-task-execution/references/lifecycle.md).
+Reuse the supplied task/readiness; direct entry calls Orient/Plan once without
+recursively dispatching this skill. One owner handles task/feature/app writes,
+Git and the next boundary. Return full output; do not register or execute a
+successor. Within-skill questions follow the three existing interaction modes;
+clear inputs need no question or DAO call. Explicit human approvals still bind.
 
 ## Input Parameters
 
@@ -76,7 +68,7 @@ input:
 
 ```xml
 <input_init>
-  <field name="task_id" source="x-ipe+all+task-board-management (auto-generated)" />
+  <field name="task_id" source="existing lifecycle task/readiness; no duplicate registration" />
   <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
   <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
   <field name="process_preference.interaction_mode" source="from caller (x-ipe-workflow-task-execution) or default 'interact-with-human'" />
@@ -113,244 +105,54 @@ input:
 
 ```xml
 <definition_of_ready>
-  <checkpoint required="true">
-    <name>Idea folder is set</name>
-    <verification>current_idea_folder is not null and folder exists on disk</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Idea summary exists</name>
-    <verification>idea-summary-vN.md found in current_idea_folder</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Tools config accessible</name>
-    <verification>x-ipe-docs/config/tools.json is readable</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Architecture tool available</name>
-    <verification>At least one tool enabled in config OR human accepts manual mode</verification>
-  </checkpoint>
+  <checkpoint required="true"><name>Scope and owner</name><verification>Approved current task/readiness, idea identity and permitted artifact paths are known.</verification></checkpoint>
+  <checkpoint required="true"><name>Source</name><verification>Selected idea sources resolve safely; broken explicit links or conflicting identities are not hidden.</verification></checkpoint>
+  <checkpoint required="true"><name>Capabilities</name><verification>Applicable configuration and required capabilities are known; unavailable work is explicit.</verification></checkpoint>
 </definition_of_ready>
 ```
 
----
-
 ## Execution Flow
 
-| Phase | Step | Name | Action | Gate |
-|-------|------|------|--------|------|
-| 1. 博学之 (Study Broadly) | 1.1 | Validate Folder | Verify current_idea_folder exists with idea summary | Folder validated |
-| | 1.2 | Load Config | Read architecture section from tools config | Config loaded |
-| | 1.3 | Read Idea Summary | Load latest idea-summary-vN.md | Summary parsed |
-| 2. 审问之 (Inquire Thoroughly) | 2.1 | Identify Architecture Needs | Extract system components, analyze diagram requirements | Needs identified |
-| 3. 慎思之 (Think Carefully) | — | SKIP | Architecture decisions are at idea level, not implementation | — |
-| 4. 明辨之 (Discern Clearly) | 4.1 | Select Diagram Types | Choose diagram types and prioritize | Types selected |
-| 5. 笃行之 (Practice Earnestly) | 5.1 | Create Diagrams | Generate diagrams using enabled tools | Diagrams created |
-| | 5.2 | Save Artifacts | Store in `{current_idea_folder}/architecture/` | Artifacts saved |
-| | 5.3 | Update Summary | Create new idea-summary version with diagram links | Summary updated |
-| | 5.4 | Complete | Verify DoD, output summary | Task complete |
-| 继续执行 | 6.1 | Decide Next Action | DAO-assisted next task decision | Next action decided |
-| 继续执行 | 6.2 | Execute Next Action | Load skill, generate plan, execute | Execution started |
-
-BLOCKING: Step 1.1 halts if current_idea_folder is null -- ask human for folder path.
-BLOCKING: Step 5.1 halts if no tools available AND human declines manual mode.
-BLOCKING (manual/stop_for_question): Step 5.4 - present diagrams, ask if architecture captures the right components.
-
----
+| Step | Work | Evidence |
+| --- | --- | --- |
+| 1 | Read the Idea and Bound the Diagram | Source-backed high-level architecture needs |
+| 2 | Generate the Useful Views | Selected diagrams and new linked summary version |
+| 3 | Verify and Return | Original architecture result with bounded evidence |
 
 ## Execution Procedure
 
 ```xml
 <procedure name="idea-to-architecture">
-  <!-- CRITICAL: Both DoR/DoD check elements below are MANDATORY -->
   <execute_dor_checks_before_starting/>
-  <schedule_dod_checks_with_sub_agent_before_starting/>
-
-  <phase_1 name="博学之 — Study Broadly">
-
-    <step_1_1>
-      <name>Validate Current Idea Folder</name>
-      <action>
-        1. IF current_idea_folder is null:
-           - List folders under x-ipe-docs/ideas/
-           - Ask "Which idea folder for architecture?" with available options
-           - Set current_idea_folder = selected folder
-
-           Response source (based on interaction_mode):
-           IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-             → Resolve via x-ipe-assistant-user-representative-Engineer
-           ELSE (interact-with-human/dao-represent-human-to-interact-for-questions-in-skill):
-             → Ask human for selection
-        2. Verify folder exists on disk
-        3. Verify idea-summary-vN.md exists in folder
-      </action>
-      <constraints>
-        - BLOCKING: Stop if folder not found
-        - BLOCKING: Stop if no idea summary -- run Ideation first
-      </constraints>
-      <output>Validated current_idea_folder path</output>
-    </step_1_1>
-
-    <step_1_2>
-      <name>Load Architecture Tool Configuration</name>
-      <action>
-        1. Read x-ipe-docs/config/tools.json
-        2. Extract stages.ideation.architecture section
-        3. Identify enabled tools (value = true)
-        4. Load extra_instructions (human value > config _extra_instruction > null)
-      </action>
-      <output>List of enabled architecture tools, extra_instructions value</output>
-    </step_1_2>
-
-    <step_1_3>
-      <name>Read Idea Summary</name>
-      <action>
-        1. Find latest idea-summary-vN.md (highest version number)
-        2. Parse summary content
-        3. Extract: overview, key features, technical mentions,
-           integration requirements, data flow
-      </action>
-      <output>Parsed idea summary with architecture-relevant sections</output>
-    </step_1_3>
-
-  </phase_1>
-
-  <phase_2 name="审问之 — Inquire Thoroughly">
-
-    <step_2_1>
-      <name>Identify Architecture Needs</name>
-      <action>
-        1. Analyze: multiple system components? --> System Architecture (C4)
-        2. Analyze: data processing or flow? --> Data Flow Diagram
-        3. Analyze: user interactions with multiple systems? --> Sequence Diagram
-        4. Analyze: integrations or external services? --> Integration Architecture
-        5. Apply extra_instructions to component identification if set
-      </action>
-      <output>List of architecture needs with analysis rationale</output>
-    </step_2_1>
-
-  </phase_2>
-
-  <phase_3 name="慎思之 — Think Carefully">
-    <skip reason="Architecture decisions are at idea level, not implementation level. No trade-offs or risk assessment needed — diagram generation is straightforward given identified needs." />
-  </phase_3>
-
-  <phase_4 name="明辨之 — Discern Clearly">
-
-    <step_4_1>
-      <name>Select Diagram Types</name>
-      <action>
-        1. Based on architecture needs from step 2.1, select diagram types to create
-        2. Prioritize diagram list by relevance to the idea
-        3. Match diagram types to available tools (mermaid, excalidraw, manual)
-        4. Document selection rationale
-      </action>
-      <output>Prioritized list of diagrams to create with tool assignments</output>
-    </step_4_1>
-
-  </phase_4>
-
-  <phase_5 name="笃行之 — Practice Earnestly">
-
-    <step_5_1>
-      <name>Create Architecture Diagrams</name>
-      <action>
-        1. For each prioritized diagram type:
-           - IF mermaid enabled: generate C4/flowchart/sequence in markdown
-           - IF excalidraw enabled: create .excalidraw diagram
-           - IF no tools: create architecture-description.md
-        2. Use templates from references/architecture-patterns.md
-      </action>
-      <constraints>
-        - CRITICAL: Focus on system-level components, not implementation details
-        - MANDATORY: All internal markdown links MUST use full project-root-relative paths (e.g., `x-ipe-docs/requirements/EPIC-XXX/specification.md`, `.github/skills/x-ipe-task-based-XXX/SKILL.md`). Do NOT use relative paths like `../` or `./`.
-        - BLOCKING: Stop if no tools AND human declines manual mode (auto: DAO decides whether to proceed with manual mode)
-      </constraints>
-      <output>Generated diagram files</output>
-    </step_5_1>
-
-    <step_5_2>
-      <name>Save Artifacts</name>
-      <action>
-        1. Create {current_idea_folder}/architecture/ directory if needed
-        2. Save diagrams as {diagram-type}-v{version}.{ext}
-           (e.g., system-architecture-v1.md)
-        3. Record list of saved artifact paths
-      </action>
-      <output>List of saved artifact paths</output>
-    </step_5_2>
-
-    <step_5_3>
-      <name>Update Idea Summary</name>
-      <action>
-        1. DO NOT modify existing idea-summary files
-        2. Create new version: idea-summary-v{N+1}.md
-        3. Add architecture diagram references table
-        4. Use template from references/architecture-patterns.md
-      </action>
-      <output>New idea summary version with diagram links</output>
-    </step_5_3>
-
-    <step_5_4>
-      <name>Complete</name>
-      <action>
-        1. Verify all DoD checkpoints are met
-        2. IF manual/stop_for_question:
-              → Present diagrams to human
-              → Ask if architecture captures the right components and relationships
-              → IF human identifies issues → revise specific components
-        3. Compile output result
-      </action>
-      <success_criteria>
-        - All diagrams created and saved
-        - New idea summary version references all diagrams
-      </success_criteria>
-      <output>Completed task output</output>
-    </step_5_4>
-
-  </phase_5>
-
-  <phase_6 name="继续执行（Continue Execute）">
-    <step_6_1>
-      <name>Decide Next Action</name>
-      <action>
-        Collect the full context and task_completion_output from this skill execution.
-
-        IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-          → Invoke x-ipe-assistant-user-representative-Engineer with:
-            type: "routing"
-            completed_skill_output: {full task_completion_output YAML from this skill}
-            next_task_based_skill: "{from output}"
-            context: "Skill completed. Study the context and full output to decide best next action."
-          → DAO studies the complete context and decides the best next action
-        ELSE (interact-with-human):
-          → Present next task suggestion to human and wait for instruction
-      </action>
-      <constraints>
-        - BLOCKING (manual): Human MUST confirm or redirect before proceeding
-        - BLOCKING (auto): Proceed after DoD verification; auto-select next task via DAO
-      </constraints>
-      <output>Next action decided with execution context</output>
-    </step_6_1>
-    <step_6_2>
-      <name>Execute Next Action</name>
-      <action>
-        Based on the decision from Step 6.1:
-        1. Load the target task-based skill's SKILL.md
-        2. Generate an execution plan from the skill's Execution Flow table
-        3. Start execution from the skill's first phase/step
-      </action>
-      <constraints>
-        - MUST load the skill before executing — do not skip skill loading
-        - Execution follows the target skill's procedure, not this skill's
-      </constraints>
-      <output>Next task execution started</output>
-    </step_6_2>
-  </phase_6>
-
+  <step_1>
+    <name>Read the Idea and Bound the Diagram</name>
+    <action>
+      1. Resolve current_idea_folder from explicit input or previous output; load highest numeric summary in refined-idea/ or legacy folder. Broken explicit links and ambiguous identity block, never select another idea by date.
+      2. Read only relevant system components, relationships, integrations, data flows, constraints and trust boundaries. Stay high-level: no unrequested detailed schema, deployment scripts or UI styling.
+      3. Inspect tools.json stages.ideation.architecture, literal true capabilities and _extra_instruction. Load only selected diagram expertise; configured availability is not a requirement to generate every diagram type.
+    </action>
+    <output>Source-backed high-level architecture needs</output>
+  </step_1>
+  <step_2>
+    <name>Generate the Useful Views</name>
+    <action>
+      1. Choose only views needed to explain the idea: system/module, data flow, sequence or integration. One sufficient diagram is valid; additional perspectives require a concrete gap, not a quota.
+      2. Resolve material uncertainty through the shared mode policy. Use enabled diagram capability in the same loop; if none is available, use an explicitly agreed architecture-description.md and label it as text.
+      3. Save versioned diagrams under {current_idea_folder}/architecture/. Preserve existing summaries; create idea-summary-v{N+1}.md from the resolved summary with diagram links and decisions, all project-root-relative.
+    </action>
+    <output>Selected diagrams and new linked summary version</output>
+  </step_2>
+  <step_3>
+    <name>Verify and Return</name>
+    <action>
+      1. Self-check relevant components, relationships, data/trust boundaries, source consistency and selected DSL validity or rendered view where supported. No mandatory fresh-agent review or alternate diagram merely to satisfy process.
+      2. Return the original output fields and actual diagrams_created/current_idea_folder/version. There is no architecture app action in current ACTION_MAP: do not invent workflow action/status/deliverable tags.
+      3. Return to the existing owner for task recording and one authorized boundary. Recommend requirements, optional mockup or sharing without executing them.
+    </action>
+    <output>Original architecture result with bounded evidence</output>
+  </step_3>
 </procedure>
 ```
-
----
 
 ## Output Result
 
@@ -391,82 +193,17 @@ task_completion_output:
 
 ## Definition of Done
 
-CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
-
 ```xml
 <definition_of_done>
-  <checkpoint required="true">
-    <name>Idea folder validated</name>
-    <verification>current_idea_folder exists and contains idea summary</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Tools config parsed</name>
-    <verification>x-ipe-docs/config/tools.json loaded and architecture section extracted</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Idea summary analyzed</name>
-    <verification>Summary read and architecture needs identified</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Diagrams created</name>
-    <verification>At least one diagram created using enabled tools or manual mode</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Artifacts saved</name>
-    <verification>Files exist in {current_idea_folder}/architecture/</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Summary updated</name>
-    <verification>New idea-summary-v{N+1}.md created with diagram links</verification>
-  </checkpoint>
-  <checkpoint required="true">
-    <name>Architecture diagrams complete</name>
-    <verification>Architecture diagrams generated with all idea components represented</verification>
-  </checkpoint>
+  <checkpoint required="true"><name>Requested outcome</name><verification>Actual artifacts preserve source intent and meet the requested domain scope; unresolved required gaps remain blocked.</verification></checkpoint>
+  <checkpoint required="true"><name>Verified evidence</name><verification>Applicable checks ran or current suitable evidence was reused; no fabricated pass, score or observed stakeholder benefit.</verification></checkpoint>
+  <checkpoint required="true"><name>Original handoff</name><verification>Original output fields, real paths and conditional suggestions return to the same owner; no duplicate lifecycle or unauthorized app/Git work.</verification></checkpoint>
 </definition_of_done>
 ```
 
-MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution` to continue the task execution flow.
-
----
-
 ## Patterns & Anti-Patterns
 
-### Pattern: Tool-Based Diagram Generation
-
-**When:** Architecture tools are enabled in config
-**Then:**
-```
-1. Use enabled tools (mermaid/excalidraw) for diagram creation
-2. Generate multiple diagram types based on idea complexity
-3. Save all artifacts with versioned naming
-```
-
-### Pattern: Manual Architecture Description
-
-**When:** No tools enabled and human accepts manual mode
-**Then:**
-```
-1. Create architecture-description.md with component listing
-2. Document relationships and data flow as text
-3. Save to {current_idea_folder}/architecture/
-```
-
-See [references/architecture-patterns.md](.github/skills/x-ipe-task-based-idea-to-architecture/references/architecture-patterns.md#architecture-patterns) for additional patterns (microservices, simple web app, data pipeline, no technical details).
-
-### Anti-Patterns
-
-| Anti-Pattern | Why Bad | Do Instead |
-|--------------|---------|------------|
-| Creating diagrams before reading idea | May miss requirements | Always analyze idea first |
-| Ignoring tools.json config | Inconsistent tool usage | Always check config |
-| Too much detail in initial diagrams | Overwhelms review | Start high-level, add detail if requested |
-| Skipping DoD verification | May create wrong architecture | Always verify DoD checkpoints; ask specific questions in manual mode |
-| Using disabled tools | Violates config rules | Only use enabled tools |
-| Including implementation details | Architecture is high-level | Focus on components and relationships |
-| Creating only one diagram type | May miss important views | Consider multiple perspectives |
-
----
+Use the smallest set of views that explains the system. One adequate diagram is valid. Preserve high-level components/data/trust boundaries; do not add implementation detail or a diagram quota.
 
 ## Examples
 

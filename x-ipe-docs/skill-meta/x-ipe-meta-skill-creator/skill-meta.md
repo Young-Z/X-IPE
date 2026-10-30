@@ -500,3 +500,13 @@ Independent Round 2 reflection must review parser coverage, ownership provenance
 filesystem fault/recovery behavior, lifecycle/config compatibility, and all retained
 template differences. Generate tests then execute only in temporary projects in
 Round 3. Round 4 evaluates must/should results before any promotion decision.
+
+## TASK-6750 single-loop delivery revision
+
+Published after deterministic validation, bounded workflow safety review, and real manifest-safe publication; prior metadata above remains version history.
+
+- Current revision: `21f6be920a7568c8a1b3e2a9e39bda04d0152c20de10477290c6acfb972e2dc1`
+- Previous revision: `9970a327b4f64069db1ffb96fff8d89ae99af5cb198ec2bd718c5b3ba6066d32`
+- Evidence: `single-loop-TASK-6750.json`, `publication-receipt-TASK-6750.json`, `validation-receipt-TASK-6750.json`.
+- Same-loop delivery/default risk-based verification; unchanged resources and protected bytes retained.
+- Token/latency savings not measured; no live-agent efficacy claim.

@@ -177,3 +177,23 @@ version_history:
 - Current production/candidate fingerprint: 618798d24f0c149069d3ddbd50e3f0e92730840b75e595a1c05842a5733ae691.
 - [Recovered verification receipt](publication-receipt-TASK-6749-R2.json); prior history above remains historical, not current parity evidence.
 - Hybrid inner guidance and human completion/route boundary independently reviewed at exact R2 hash; study/local/broad, preservation and nullable honest measurements retained. Prior-worker promotion time is unknown; no production replay or atomic writer journal claimed.
+
+## TASK-6750 single-loop delivery revision
+
+Published after deterministic validation, bounded workflow safety review, and real manifest-safe publication; prior metadata above remains version history.
+
+- Current revision: `40c0cdd5c16ef4faeb8419f85256bb4b6195fdaa8281da370df7e28916fe2422`
+- Previous revision: `618798d24f0c149069d3ddbd50e3f0e92730840b75e595a1c05842a5733ae691`
+- Evidence: `single-loop-TASK-6750.json`, `publication-receipt-TASK-6750.json`, `validation-receipt-TASK-6750.json`.
+- Same-loop delivery/default risk-based verification; unchanged resources and protected bytes retained.
+- Token/latency savings not measured; no live-agent efficacy claim.
+
+## TASK-6752 proportional-delivery revision
+
+Published through the installed manifest-safe publisher after bounded compatibility review, correction of its TypeScript test-path finding, deterministic validation and affected post-publication regressions. Prior metadata remains historical.
+
+- Current revision: `ae3866637633d6423a0282d74da029be699b8358f115223e22caa1f52a54c17b`
+- Previous revision: `40c0cdd5c16ef4faeb8419f85256bb4b6195fdaa8281da370df7e28916fe2422`
+- Evidence: `lean-delivery-TASK-6752.json`, `publication-receipt-TASK-6752.json`, `validation-receipt-TASK-6752.json`.
+- Verification: 599 selected checks passed; exact installed/candidate byte parity. No resource removals, mirror synchronization or Git mutation.
+- Live-agent efficacy, token/latency savings and stakeholder outcome remain unmeasured.

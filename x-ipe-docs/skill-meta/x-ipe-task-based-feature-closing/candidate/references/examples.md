@@ -141,8 +141,9 @@ refactor-report. Owner uses deliverables {}, keeps closing report task artifact,
 checks actual feature/status/context/readback once. No closing-report extract tag.
 Actual CLI and runtime service reject the bogus tag even for a real report path.
 Empty mapping is valid, not fabricated missing evidence waiver. Required domain
-acceptance and prior code_refactor gate remain independently enforced; temporary
-permissive writer success with pending refactor is not semantic closure.
+acceptance remains independently enforced; code_refactor is optional by default.
+Honor an explicit project-customized mandatory refactor gate. A permissive writer
+success is never semantic proof of acceptance or of a required custom gate.
 
 change_request optional closing-report may be absent; required specification
 still actual. Explicit verified task artifact can be handed off, no automatic app

@@ -77,10 +77,10 @@ flowchart TD
 {Include if the idea involves common/established topics}
 
 ### Applied Principles
-- **Principle 1:** {Description} - [Source](URL)
-- **Principle 2:** {Description} - [Source](URL)
+- **Principle 1:** {Description} - [Source]({source_url})
+- **Principle 2:** {Description} - [Source]({source_url})
 
 ### Further Reading
-- [Resource 1](URL) - {Brief description}
-- [Resource 2](URL) - {Brief description}
+- [Resource 1]({resource_url}) - {Brief description}
+- [Resource 2]({resource_url}) - {Brief description}
 ```

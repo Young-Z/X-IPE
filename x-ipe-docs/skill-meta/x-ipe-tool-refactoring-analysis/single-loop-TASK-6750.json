@@ -1,0 +1,38 @@
+{
+  "task_id": "TASK-6750",
+  "role": "Ember",
+  "recorded_at": "2026-10-30T01:50:10.489921+00:00",
+  "publication_state": "published",
+  "revision": "c0d56d08b5c3d2de3ec53e1deff4069ac52ae842c3fc2a40027ce7e1609a732e",
+  "baseline_revision": "f1c848402913264155e36e76397512d2ea9fa11a7571eb8e25a926b84ce17d97",
+  "changed": [
+    "SKILL.md"
+  ],
+  "added": [],
+  "removed": [],
+  "protected_preserved": [],
+  "body_lines": 245,
+  "review": {
+    "agent_id": "23bfb191-259d-4bb9-8b2f-c63242968134",
+    "result": "No blockers found in bounded workflow safety review",
+    "limit": "Reviewer environment could not collect Flask-dependent tests; main agent ran the installed regression suite successfully."
+  },
+  "validation": {
+    "python": {
+      "passed": 777,
+      "log_sha256": "41bb51cb63c4e9c5c8e9cae5e922d600c0d737508a39581c60ad647880dd89a1"
+    },
+    "frontend": {
+      "passed": 22,
+      "files": [
+        "single-loop-workflow.test.js",
+        "workflow-stage-suggestions.test.js",
+        "workflow-stage-running.test.js"
+      ]
+    },
+    "candidate_and_production_byte_parity": true,
+    "live_agent_trials": "not run",
+    "tokens_and_latency": "not measured"
+  },
+  "lesson_disposition": "Read-only select: zero summaries; protected creator LL-001 requires separate reviewed legacy migration. No planned/applied or queue writes."
+}

@@ -17,13 +17,25 @@ Execute **Human Playground** tasks by:
 
 ## Important Notes
 
+Load the [single-loop delivery policy](.github/skills/x-ipe-workflow-task-execution/references/agent-loop.md)
+once in the current context. Execute this skill in the same agent loop; another
+skill is expertise, not a new agent. Use proportional checks and reuse current
+evidence; independent review is conditional on concrete risk, not the skill name.
+
+Load `x-ipe-workflow-task-execution` and its
+[common lifecycle](.github/skills/x-ipe-workflow-task-execution/references/lifecycle.md).
+Reuse the supplied task/readiness; direct entry calls Orient/Plan once without
+recursively dispatching this skill. One owner handles task/feature/app writes,
+Git and the next boundary. Return full output; do not register or execute a
+successor. Within-skill questions follow the three existing interaction modes;
+clear inputs need no question or DAO call. Explicit human approvals still bind.
+
 ⚠️ **HUMAN-INITIATED ONLY:** This skill should ONLY be invoked when the human explicitly requests a playground (e.g., "create playground", "I want to test this interactively", "set up a demo"). It is NOT part of the standard engineering pipeline. The standard pipeline ends at `feature_closing`. Agents MUST NOT auto-suggest this skill as the next step after any pipeline stage.
 
 BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skill.
 
 **Note:** If Agent does not have skill capability, go to `.github/skills/` folder to learn skills. SKILL.md is the entry point.
 
-IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-interact"`, NEVER stop to ask the human. Instead, call `x-ipe-assistant-user-representative-Engineer` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
 
 ---
 
@@ -66,7 +78,7 @@ input:
 
 ```xml
 <input_init>
-  <field name="task_id" source="x-ipe-tool-task-board-manager (auto-generated)" />
+  <field name="task_id" source="existing lifecycle task/readiness; no duplicate registration" />
   <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
   <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
   <field name="process_preference.interaction_mode" source="from caller (x-ipe-workflow-task-execution) or default 'interact-with-human'" />
@@ -77,14 +89,14 @@ input:
       3. ELSE → IF interaction_mode == "dao-represent-human-to-interact": derive from workflow context or x-ipe-assistant-user-representative-Engineer; ELSE: ask human for feature_id
     </steps>
   </field>
-  <field name="feature_title" source="feature specification OR features.json">
+  <field name="feature_title" source="feature specification OR features.md">
     <steps>
       1. Query feature board for feature_id → extract title
       2. ELIF x-ipe-docs/features/{feature_id}/specification.md exists → extract title
       3. ELSE → IF interaction_mode == "dao-represent-human-to-interact": derive from feature_id context; ELSE: ask human
     </steps>
   </field>
-  <field name="feature_version" source="features.json OR default '1.0.0'">
+  <field name="feature_version" source="features.md OR default '1.0.0'">
     <steps>
       1. Query feature board for feature_id → extract version
       2. ELIF not found → default to "1.0.0"
@@ -126,12 +138,11 @@ input:
 | 4 | Validate | Run playground command and verify exit code 0 | Command succeeds |
 | 5 | Run Tests | Execute human simulation tests | All tests pass |
 | 6 | Complete | Verify DoD, output summary, inform human playground is ready | Playground delivered |
-| 7.1 | Decide Next Action | DAO-assisted next task decision | Next action decided |
-| 7.2 | Execute Next Action | Load skill, generate plan, execute | Execution started |
 
 BLOCKING: Step 4 is blocked until playground command runs without error.
 BLOCKING: Step 5 is blocked until human simulation tests pass.
-BLOCKING: Step 6 requires validation before Feature Closing (manual/stop_for_question: human validation; auto: skipped).
+Step 6 returns a verified playground to the owner. Actual required human validation
+must not be skipped by an interaction-mode setting.
 
 ---
 
@@ -139,25 +150,7 @@ BLOCKING: Step 6 requires validation before Feature Closing (manual/stop_for_que
 
 ```xml
 <procedure name="human-playground">
-  <!-- CRITICAL: Both DoR/DoD check elements below are MANDATORY -->
   <execute_dor_checks_before_starting/>
-  <schedule_dod_checks_with_sub_agent_before_starting/>
-
-  <phase_0 name="Board — Register Task">
-    <step_0_1>
-      <name>Create Task on Board</name>
-      <action>
-        Call `x-ipe-tool-task-board-manager` → `task_create.py`:
-        - task_type: "Human Playground"
-        - description: summarize work from input context
-        - status: "in_progress"
-        - role: from input context
-        - assignee: from input context
-        Store returned task_id for later update.
-      </action>
-      <output>Task created on board with status in_progress</output>
-    </step_0_1>
-  </phase_0>
 
   <step_1>
     <name>Create Runnable Examples</name>
@@ -166,11 +159,11 @@ BLOCKING: Step 6 requires validation before Feature Closing (manual/stop_for_que
       2. TOOL SKILL ROUTING (config-filtered):
          a. DISCOVER: Scan .github/skills/x-ipe-tool-implementation-*/
          b. READ CONFIG: Read x-ipe-docs/config/tools.json → stages.feedback.human_playground
-            - IF section missing/empty → config_active = false (all tools enabled)
-            - ELSE → config_active = true (opt-in); force-enable general
-         c. FILTER: IF config_active → only ENABLED tools participate
+            - Use [capability routing](.github/skills/x-ipe-workflow-task-execution/references/capability-routing.md): missing/empty/metadata-only retains discovery
+            - Explicit booleans activate opt-in: true enables, false/undeclared disables; nonbooleans block
+         c. FILTER: Only eligible tools participate; never force-enable general. Refresh changed config/catalog revisions
          d. SEMANTIC MATCH: Match tech_stack to enabled tool skill
-         e. IF no match → fall back to Python defaults (.py, uv run python)
+         e. IF no match → use enabled suitable general only; otherwise return a capability gap, not Python defaults
       3. DETERMINE file extension and run command from matched tool:
          - Python: ext=.py, cmd="uv run python"
          - TypeScript: ext=.ts, cmd="npx tsx"
@@ -248,77 +241,18 @@ BLOCKING: Step 6 requires validation before Feature Closing (manual/stop_for_que
   <step_6>
     <name>Enable Interaction</name>
     <action>
-      1. IF execution_mode == "workflow-mode":
-         a. Run the workflow update script via bash (`python3 .github/skills/x-ipe-tool-x-ipe-app-interactor/scripts/workflow_update_action.py`) with:
-            - workflow_name: {from context}
-            - action: "human_playground"
-            - status: "done"
-            - feature_id: {feature_id}
-            - deliverables: {"playground-url": "{path}"}
-         b. Log: "Workflow action status updated to done"
+      1. Return actual playground path, verification evidence and required validation gaps to owner. In workflow-mode only the owner verifies the current human_playground action, writes its exact configured deliverables and checks readback once; free-mode performs no app write.
       2. Provide start/stop commands
       3. Include sample data
-      4. Add reset capability
+      4. Include a safe reset only for isolated sample state when actually needed
       5. Log outputs for debugging
       6. Inform that playground is ready for testing
 
-        Completion gate (based on interaction_mode):
-        IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-          → Auto-proceed after DoD verification
-        ELSE (interact-with-human/dao-represent-human-to-interact-for-questions-in-skill):
-          → Ask human to validate playground
+        Return to owner for the shared mode-aware completion boundary.
     </action>
     <output>Playground ready for human validation</output>
   </step_6>
 
-  <step_6_1>
-    <name>Update Task on Board</name>
-    <action>
-      Call `x-ipe-tool-task-board-manager` → `task_update.py`:
-      - task_id: from Phase 0
-      - status: "done"
-      - output_links: list of deliverables produced in this skill execution
-    </action>
-    <output>Task marked done on board</output>
-  </step_6_1>
-
-  <phase_7 name="继续执行（Continue Execute）">
-    <step_7_1>
-      <name>Decide Next Action</name>
-      <action>
-        Collect the full context and task_completion_output from this skill execution.
-
-        IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-          → Invoke x-ipe-assistant-user-representative-Engineer with:
-            type: "routing"
-            completed_skill_output: {full task_completion_output YAML from this skill}
-            next_task_based_skill: "{from output}"
-            context: "Skill completed. Study the context and full output to decide best next action."
-          → DAO studies the complete context and decides the best next action
-        ELSE (interact-with-human):
-          → Present next task suggestion to human and wait for instruction
-      </action>
-      <constraints>
-        - BLOCKING (manual): Human MUST confirm or redirect before proceeding
-        - BLOCKING (auto): Proceed after DoD verification; auto-select next task via DAO
-      </constraints>
-      <output>Next action decided with execution context</output>
-    </step_7_1>
-    <step_7_2>
-      <name>Execute Next Action</name>
-      <action>
-        Based on the decision from Step 7.1:
-        1. Load the target task-based skill's SKILL.md
-        2. Generate an execution plan from the skill's Execution Flow table
-        3. Start execution from the skill's first phase/step
-      </action>
-      <constraints>
-        - MUST load the skill before executing — do not skip skill loading
-        - Execution follows the target skill's procedure, not this skill's
-      </constraints>
-      <output>Next task execution started</output>
-    </step_7_2>
-  </phase_7>
 
 </procedure>
 ```
@@ -355,7 +289,7 @@ task_completion_output:
 
 ## Definition of Done
 
-CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
+Verify the applicable outcomes in the current loop; use independent review only when concrete risk warrants it.
 
 ```xml
 <definition_of_done>

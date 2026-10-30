@@ -81,7 +81,7 @@ def test_common_contract_and_existing_output_fields():
     assert "Do not reject a child solely for omitting require_human_review" in common
     assert "completed/cancelled/skipped are terminal" in common
     assert "Tools/assistants retain operation_output" in common
-    assert "reads this reference" in common or "read this reference" in common
+    assert "Load this reference once per agent context" in common
     assert "references/lifecycle.md" in text
     model = yaml.safe_load((CANDIDATE / "templates/task-record.yaml").read_text())
     assert "interaction_mode" not in model

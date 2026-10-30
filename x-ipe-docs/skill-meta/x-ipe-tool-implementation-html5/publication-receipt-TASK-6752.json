@@ -1,0 +1,22 @@
+{
+  "added": [],
+  "baseline_hash": "1d1c4cea1c81cb7cd8d07088bb7758e2f3d5551bcb96b7d8a7290528c87ebf81",
+  "byte_parity": true,
+  "candidate_hash": "76377632fa04922a4ed151251704f03bcc1fff14ea7acc9de64ece35d72ff08e",
+  "changed": [
+    "SKILL.md"
+  ],
+  "excluded_files": {},
+  "files": {
+    "SKILL.md": "70ed384c96646330310c8c3e1cf3691cf0345a9b0112fb1ba69ba011134d8160",
+    "references/examples.md": "135a40833d11f93f24a3a2bb8258959c24dac2c0b24a520f6d04eb46778f8799"
+  },
+  "name": "x-ipe-tool-implementation-html5",
+  "ok": true,
+  "operation": "publish",
+  "protected": [],
+  "removed": [],
+  "schema": 1,
+  "state": "published",
+  "transaction": "/Users/yzhang/Documents/projects/X-IPE/.github/.skill-publication/x-ipe-tool-implementation-html5-_ilqfla0"
+}

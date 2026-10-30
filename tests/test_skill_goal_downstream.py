@@ -19,7 +19,7 @@ import xml.etree.ElementTree as ET
 import pytest
 import yaml
 
-from tests.publication_recovery_6749 import recovered_publication, resource_inventory
+from tests.publication_recovery_6749 import current_publication, recovered_publication, resource_inventory
 from tests.skill_validation_harness_6749 import load_source, validate_resources
 
 from tests.test_goal_oriented_skills import (
@@ -145,8 +145,8 @@ def test_design_validator_inventory_output_and_single_lifecycle():
         publication = json.loads(published.read_text())
         assert publication["baseline"] == baseline
         assert publication["byte_parity"] is True
-        current = recovered_publication(NAME)
-        assert current["baseline_hash"] == v.fingerprint(publication["files"])
+        current = current_publication(NAME)
+        assert recovered_publication(NAME)["baseline_hash"] == v.fingerprint(publication["files"])
         assert v.tree_bytes(ROOT / ".github/skills" / NAME, ROOT) == v.tree_bytes(CANDIDATE, ROOT)
     else:
         assert v.manifest(v.tree_bytes(ROOT / ".github/skills" / NAME, ROOT)) == baseline
@@ -180,7 +180,7 @@ def test_real_design_action_config_and_matching_declarations():
     assert "tech_stack contains HTML5, CSS3, JavaScript" in declared
     assert "vanilla" in declared and "## Operations" in declared
     entry = (CANDIDATE / "SKILL.md").read_text()
-    for clause in ("metadata-only", "force-enable general", "semantically", "INFORMATIONAL ONLY", "not filename suffix", "not mandatory execution", "no-op resume", "sensitive parameter/log redaction"):
+    for clause in ("metadata-only", "no force-enable general", "semantically", "INFORMATIONAL ONLY", "not filename suffix", "not mandatory execution", "no-op resume", "sensitive parameter/log redaction"):
         assert clause in entry
 
 
@@ -367,8 +367,8 @@ def test_implementation_complete_inventory_original_output_and_single_owner():
         publication = json.loads(publication_path.read_text())
         assert publication["baseline"] == baseline
         assert publication["byte_parity"] is True
-        current = recovered_publication(IMPL_NAME)
-        assert current["baseline_hash"] == v.fingerprint(publication["files"])
+        current = current_publication(IMPL_NAME)
+        assert recovered_publication(IMPL_NAME)["baseline_hash"] == v.fingerprint(publication["files"])
         assert v.tree_bytes(ROOT / ".github/skills" / IMPL_NAME, ROOT) == v.tree_bytes(IMPL, ROOT)
         assert publication["candidate_hash"] == v.fingerprint(publication["files"])
     else:
@@ -410,7 +410,7 @@ def test_implementation_actual_config_semantic_routing_specials_tdd_tracing():
     assert "code_implementation" in config and "implementation" not in config
     assert config["code_implementation"]["x-ipe-tool-implementation-html5"] is True
     entry = (IMPL / "SKILL.md").read_text()
-    for clause in ("stages.implement.code_implementation", "metadata-only", "undeclared", "force-enable general",
+    for clause in ("stages.implement.code_implementation", "metadata-only", "undeclared", "No force-enable general",
                    "sequentially", "semantically", "before scenario generation and semantic routing",
                    "original Assert clauses", "fail before", "regression", "every scoped AC",
                    "relevant inputs", "existing tracing infrastructure", "no mandatory setup",
@@ -642,10 +642,10 @@ def test_acceptance_all_resources_config_action_outputs_and_owner():
     if published.exists():
         publication = json.loads(published.read_text())
         assert publication["baseline"] == baseline and publication["byte_parity"] is True
-        current = recovered_publication(ACCEPT_NAME)
+        current = current_publication(ACCEPT_NAME)
         assert current["files"] == receipt["files"]
         assert current["candidate_hash"] == receipt["candidate_hash"]
-        assert current["baseline_hash"] == publication["candidate_hash"]
+        assert recovered_publication(ACCEPT_NAME)["baseline_hash"] == publication["candidate_hash"]
         assert resource_inventory(ROOT / ".github/skills" / ACCEPT_NAME) == resource_inventory(ACCEPT)
     else:
         assert validator().manifest(validator().tree_bytes(ROOT / ".github/skills" / ACCEPT_NAME, ROOT)) == baseline
@@ -665,7 +665,7 @@ def test_acceptance_all_resources_config_action_outputs_and_owner():
                    "Orient/Plan", "without recursively dispatching", "actual browser",
                    "all scoped ACs", "original assertions", "not measured", "not goal achievement",
                    "acceptance_testing", "test-report", "test-folder", "conditional", "mandatory",
-                   "no fake skip", "one owner", "CLI", "library"):
+                   "agent-authored skip", "one owner", "CLI", "library"):
         assert clause in resources
     for obsolete in ("task_create.py", "task_update.py", "phase_0", "phase_6", 'type: "routing"',
                      "Execute Next Action", "Linked Date >=", "stages.quality.testing", "all tools enabled by default"):
@@ -674,7 +674,7 @@ def test_acceptance_all_resources_config_action_outputs_and_owner():
     action = template["stages"]["validation"]["actions"]["acceptance_testing"]
     assert action["deliverables"] == ["$output:test-report", "$output-folder:test-folder"]
     assert {k for k, v in action["action_context"].items() if v["required"]} == {"specification", "impl-files"}
-    assert template["stages"]["validation"]["actions"]["code_refactor"]["optional"] is False
+    assert template["stages"]["validation"]["actions"]["code_refactor"]["optional"] is True
     js = (ROOT / "src/x_ipe/static/js/features/workflow-stage.js").read_text()
     assert re.search(r"acceptance_testing:.*skill: '" + ACCEPT_NAME + "'", js)
 
@@ -797,8 +797,8 @@ def test_acceptance_actual_helper_tags_context_conditional_refactor_and_readonly
     action = state["features"][0]["validation"]["actions"]["acceptance_testing"]
     assert action["status"] == "done" and action["deliverables"] == links
     assert action["context"] == before["features"][0]["validation"]["actions"]["acceptance_testing"]["context"]
-    assert action["next_actions_suggested"] == ["code_refactor"]
-    assert state["features"][0]["validation"]["actions"]["code_refactor"]["status"] == "pending"
+    assert action["next_actions_suggested"] == ["feature_closing", "code_refactor"]
+    assert state["features"][0]["validation"]["actions"]["code_refactor"]["status"] == "skipped"
     assert state["features"][0]["validation"]["actions"]["feature_closing"]["status"] == "pending"
     assert (project / links["test-report"]).is_file() and (project / links["test-folder"]).is_dir()
     # Owner/category transition is separate; helper writes do not prove report results.
@@ -840,7 +840,7 @@ def test_acceptance_permissive_writer_never_proves_acceptance_or_closing(accepta
     assert result.returncode == 0 and payload["success"]  # gap, not a domain pass
     integration = (ACCEPT / "references/integration.md").read_text()
     assert "writer success alone is insufficient" in integration
-    assert "no fake skip" in integration and "mandatory" in integration
+    assert "No need means closing" in integration and "mandatory" in integration
     assert "not goal achievement" in (ACCEPT / "SKILL.md").read_text()
 
 
@@ -897,17 +897,17 @@ def test_acceptance_evidence_cli_nonzero_on_stale_input_without_writes(acceptanc
     assert frozen == {str(p): p.read_bytes() for p in root.rglob("*") if p.is_file()}
 
 
-def test_acceptance_actual_closing_helper_does_not_enforce_refactor_semantics(acceptance_project):
+def test_acceptance_actual_closing_helper_allows_optional_refactor_untouched(acceptance_project):
     project, state_path, record, links = acceptance_project
     assert write_acceptance(project, record, links)[0].returncode == 0
     result, payload = run_helper(project, "workflow_update_action.py", "--workflow", "pilot",
                                  "--action", "feature_closing", "--feature-id", record["feature_id"], "--status", "done")
-    assert result.returncode == 0 and payload["success"]  # permissive same-stage helper, not authorized closing
+    assert result.returncode == 0 and payload["success"]  # Still not semantic proof of acceptance.
     _, state = run_helper(project, "workflow_get_state.py", "--workflow", "pilot")
-    assert state["features"][0]["validation"]["actions"]["code_refactor"]["status"] == "pending"
+    assert state["features"][0]["validation"]["actions"]["code_refactor"]["status"] == "skipped"
     integration = (ACCEPT / "references/integration.md").read_text()
-    assert "already open stage despite pending refactor" in integration
-    assert "owner must separately enforce mandatory prior actions" in integration
+    assert "code_refactor optional" in integration
+    assert "implementation" in integration and "evidence remain required" in integration
 
 
 def test_acceptance_actual_feedback_gate_remains_locked_without_refactor(acceptance_project):
@@ -926,7 +926,7 @@ def test_acceptance_metadata_candidate_only_and_complete_contract():
     assert len(blocks) == 1
     meta = yaml.safe_load(blocks[0])
     current = validate_resources(validator(), ROOT, ACCEPT, ACCEPT_NAME, "x-ipe-task-based")
-    assert recovered_publication(ACCEPT_NAME)["files"] == current["files"]
+    assert current_publication(ACCEPT_NAME)["files"] == current["files"]
     receipt = json.loads((ACCEPT_META / "validation-receipt-goal-TASK-6749.json").read_text())
     assert meta["skill_name"] == ACCEPT_NAME and meta["task_id"] == "TASK-6749"
     assert meta["candidate_hash"] == receipt["candidate_hash"]
@@ -1074,10 +1074,10 @@ def test_closing_complete_inventory_output_schema_and_lifecycle():
     assert published["baseline"] == baseline
     receipt = v.validate(ROOT, CLOSE, CLOSE_NAME, "x-ipe-task-based")
     assert receipt["ok"], receipt["errors"]
-    current = recovered_publication(CLOSE_NAME)
+    current = current_publication(CLOSE_NAME)
     assert current["files"] == receipt["files"] == v.manifest(v.tree_bytes(ROOT / ".github/skills" / CLOSE_NAME, ROOT))
     assert current["candidate_hash"] == receipt["candidate_hash"]
-    assert current["baseline_hash"] == published["candidate_hash"]
+    assert recovered_publication(CLOSE_NAME)["baseline_hash"] == published["candidate_hash"]
     assert published["byte_parity"] is True and published["removed"] == []
     assert set(receipt["files"]) == set(baseline) | {"references/integration.md", "templates/closing-report.md"}
     for path in ("references/templates/pr-template.md", "references/templates/changelog-template.md"):
@@ -1172,7 +1172,7 @@ def test_closing_actual_empty_tags_done_readback_and_status_preservation(closing
     assert action["context"] == {"specification": record["specification_link"]}
     assert "closing-report" not in action["deliverables"] and report.is_file()
     # This is deliberately the real writer's permissiveness, not domain closing:
-    assert state["features"][0]["validation"]["actions"]["code_refactor"]["status"] == "pending"
+    assert state["features"][0]["validation"]["actions"]["code_refactor"]["status"] == "skipped"
     _, feature = run_board(project, "feature_query.py", "--feature-id", record["feature_id"])
     assert feature["data"]["feature"]["status"] == status  # writer does NOT complete board
     assert run_board(project, "feature_update.py", "--feature-id", record["feature_id"], "--updates", '{"status":"Completed"}')[0].returncode == 0
@@ -1257,7 +1257,7 @@ def test_closing_metadata_receipt_and_verified_promotion():
     assert len(blocks) == 1
     meta = yaml.safe_load(blocks[0])
     current = validator().validate(ROOT, CLOSE, CLOSE_NAME, "x-ipe-task-based")
-    assert recovered_publication(CLOSE_NAME)["files"] == current["files"]
+    assert current_publication(CLOSE_NAME)["files"] == current["files"]
     receipt = json.loads((CLOSE_META / "validation-receipt-goal-TASK-6749.json").read_text())
     assert meta["task_id"] == "TASK-6749" and meta["publication_state"] == "published"
     assert meta["independent_review"] == "completed_main_reviewer"

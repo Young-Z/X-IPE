@@ -15,7 +15,7 @@ import sys
 import pytest
 import yaml
 
-from tests.publication_recovery_6749 import recovered_publication
+from tests.publication_recovery_6749 import current_publication, publication_chain, recovered_publication
 from tests.skill_validation_harness_6749 import load_source
 
 
@@ -44,6 +44,20 @@ def validator():
 
 def assert_reviewed_live(name, live, baseline):
     """Allow only the untouched baseline or a fingerprinted goal publication."""
+    if (META / name / "publication-receipt-TASK-6750.json").exists():
+        current_publication(name, live)
+        before = json.loads((META / name / "baseline-TASK-6750.json").read_text())
+        original = json.loads((META / name / "promotion-receipt-goal-TASK-6749.json").read_text())
+        assert original["baseline_files"] == baseline
+        mode = META / name / "publication-receipt-mode-TASK-6749-R2.json"
+        if mode.exists():
+            previous = json.loads(mode.read_text())
+            assert previous["baseline_hash"] == original["candidate_hash"]
+            assert previous["candidate_hash"] == validator().fingerprint(before)
+            assert previous["files"] == before
+        else:
+            assert recovered_publication(name)["files"] == before
+        return
     path = META / name / "promotion-receipt-goal-TASK-6749.json"
     if not path.exists():
         assert live == baseline
@@ -254,10 +268,13 @@ def test_fresh_production_baseline_complete_candidate_and_original_output(name):
     expected = set(baseline)
     if name == NAMES[0]:
         expected.add("references/goal-contract.md")
+        expected.add("references/agent-loop.md")
     elif name == NAMES[3]:
         expected.add("references/integration.md")
         prior = json.loads((META / name / "prework-candidate-goal-TASK-6749.json").read_text())
         assert receipt["files"]["references/integration.md"] == prior["references/integration.md"]
+    for publication in publication_chain(ROOT, META / name, name):
+        expected.update(publication["added"])
     assert set(receipt["files"]) == expected
     def output(path):
         part = path.read_text().split("## Output Result", 1)[1]

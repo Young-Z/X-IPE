@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "operation": "validate",
+  "name": "x-ipe-task-based-code-implementation",
+  "skill_type": "x-ipe-task-based",
+  "ok": true,
+  "errors": [],
+  "warnings": [],
+  "excluded_files": {},
+  "body_lines": 269,
+  "files": {
+    "SKILL.md": "f7f1c44c247a8db6f354880f92d0bd9404062917e311d489c7d9d07e8efb9699",
+    "references/examples.md": "48a8d0ed3c8f8c5d3e8d73d5d1657619c6336595e2eb4175503e32c8b4531955",
+    "references/implementation-guidelines.md": "d35acf3408ddae67b02dd77f68ec707202855a17ff396480e046aec1fbf4b70d",
+    "references/integration.md": "674abf0f6a0ce564c90932bda352cfb611fd08a3153cace0ffb15a5be9662534"
+  },
+  "candidate_hash": "e8dfc5e09ace2e8763eaf50cbd5c39677229218efca2878f48c85ba8d7ea7c35"
+}

@@ -91,6 +91,9 @@ pruning, memory/board writes or invented ground truth without separate authority
 
 Follow SOLID, DRY, YAGNI and KISS. One writer handles app action/category updates;
 writer success alone is not domain completion. Mandatory workflow gates remain.
+Use one agent/context by default; load only needed expertise and reuse current
+evidence. Follow the shared `references/agent-loop.md` policy for bounded
+delegation and proportional verification, not one agent or full-suite run per step.
 Preserve preexisting files/staging/mirrors; no implicit switch/stash/reset/commit
 or network operations. Git needs explicit authority and exact owned paths, never
 broad staging. Rehash relevant sources/tests/config before evidence claims.
@@ -106,8 +109,10 @@ not authorize memory writes or override task exclusions.
 Creating/updating/validating X-IPE skills MUST use `x-ipe-meta-skill-creator`.
 Load guidelines/subtype templates and preserve contracts/resources. Edit complete
 `x-ipe-docs/skill-meta/{skill-name}/candidate/` packages first, never directly edit
-`.github/skills/{skill-name}/`. Validate and independently review meaningful
-workflow/executable/safety changes at the exact hash before authorized promotion.
+`.github/skills/{skill-name}/`. Validate at the exact candidate revision before
+authorized promotion. Use same-loop checks/self-review for ordinary changes;
+independent review is required for explicit review requests, concrete
+trust/permission/destructive risks, or unresolved ambiguity/observed failures.
 Version history advances only after exact production parity. Candidate readiness
 is not publication or larger-task completion. Do not sync AGENTS/CLAUDE/.claude/
 codex mirrors without explicit separate authority.

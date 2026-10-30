@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "ok": true,
+  "operation": "publish",
+  "state": "dry_run",
+  "name": "x-ipe-task-based-feature-closing",
+  "added": [],
+  "changed": [
+    "SKILL.md",
+    "references/examples.md",
+    "references/integration.md",
+    "templates/closing-report.md"
+  ],
+  "removed": [],
+  "protected": [],
+  "baseline_hash": "f297a531cdd72120073a585ba1a5158cb67ee8c4d4df9546fce84efd063e9899",
+  "candidate_hash": "0a0ceb8cac593a87d7685b1bc9d8ae0dac7a4c7b630ecf53d43d788c1d913ab5",
+  "files": {
+    "SKILL.md": "253f33352a6566f0d5e107a5c11f0c643156a20bca4f63835c5a33763e9e4707",
+    "references/examples.md": "a72b74a989dd0779c78e9bb8b6e2cc578a1de4f144aa984fdb277061af4fd1a1",
+    "references/integration.md": "1f5030d854999aac060ba4c343165c506aa37a3abf595585308c834c3250c6ca",
+    "references/templates/changelog-template.md": "2259cadc910e9fa7f79b080f34fffa161e71446db2a5615ed59f09a47f1c588d",
+    "references/templates/pr-template.md": "4625aec829719b8112252d58eb458bd523500fb86a4626c4d57181c56a2d5c9a",
+    "templates/closing-report.md": "64887e40d624e2019bbb1bea864204225d2ec95f626c6c3334daa3114e08b339"
+  },
+  "excluded_files": {}
+}

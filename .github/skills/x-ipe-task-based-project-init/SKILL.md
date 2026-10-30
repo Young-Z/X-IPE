@@ -17,11 +17,23 @@ Set up or onboard to a project with consistent folder structure and documentatio
 
 ## Important Notes
 
+Load the [single-loop delivery policy](.github/skills/x-ipe-workflow-task-execution/references/agent-loop.md)
+once in the current context. Execute this skill in the same agent loop; another
+skill is expertise, not a new agent. Use proportional checks and reuse current
+evidence; independent review is conditional on concrete risk, not the skill name.
+
+Load `x-ipe-workflow-task-execution` and its
+[common lifecycle](.github/skills/x-ipe-workflow-task-execution/references/lifecycle.md).
+Reuse the supplied task/readiness; direct entry calls Orient/Plan once without
+recursively dispatching this skill. One owner handles task/feature/app writes,
+Git and the next boundary. Return full output; do not register or execute a
+successor. Within-skill questions follow the three existing interaction modes;
+clear inputs need no question or DAO call. Explicit human approvals still bind.
+
 BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skill.
 
 **Note:** If Agent does not have skill capability, go to `.github/skills/` folder to learn skills. SKILL.md is the entry point.
 
-IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-interact"`, NEVER stop to ask the human. Instead, call `x-ipe-assistant-user-representative-Engineer` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
 
 ---
 
@@ -55,7 +67,7 @@ input:
 
 ```xml
 <input_init>
-  <field name="task_id" source="x-ipe-tool-task-board-manager (auto-generated)" />
+  <field name="task_id" source="existing lifecycle task/readiness; no duplicate registration" />
   <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
   <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
   <field name="process_preference.interaction_mode" source="from caller (x-ipe-workflow-task-execution) or default 'interact-with-human'" />
@@ -85,8 +97,6 @@ input:
 | 2 | Create Structure | Create `x-ipe-docs/` directories and root files | Folders created |
 | 3 | Init Task Board | Call x-ipe-tool-task-board-manager skill | Task board created |
 | 4 | Init Docs | Create `lessons_learned.md` | Docs initialized |
-| 5.1 | Decide Next Action | DAO-assisted next task decision | Next action decided |
-| 5.2 | Execute Next Action | Load skill, generate plan, execute | Execution started |
 
 BLOCKING: Step 3 MUST use x-ipe-tool-task-board-manager skill (not manual file creation).
 BLOCKING: Existing projects - only ADD missing files, do NOT restructure.
@@ -98,23 +108,7 @@ BLOCKING: Existing projects - only ADD missing files, do NOT restructure.
 ```xml
 <procedure name="project-init">
   <execute_dor_checks_before_starting/>
-  <schedule_dod_checks_with_sub_agent_before_starting/>
 
-  <phase_0 name="Board — Register Task">
-    <step_0_1>
-      <name>Create Task on Board</name>
-      <action>
-        Call `x-ipe-tool-task-board-manager` → `task_create.py`:
-        - task_type: "Project Init"
-        - description: summarize work from input context
-        - status: "in_progress"
-        - role: from input context
-        - assignee: from input context
-        Store returned task_id for later update.
-      </action>
-      <output>Task created on board with status in_progress</output>
-    </step_0_1>
-  </phase_0>
 
   <step_1>
     <name>Scan Existing Structure</name>
@@ -148,15 +142,16 @@ BLOCKING: Existing projects - only ADD missing files, do NOT restructure.
   </step_2>
 
   <step_3>
-    <name>Initialize Task Board</name>
+    <name>Verify Owner Task Registration</name>
     <action>
-      1. Load skill: x-ipe-tool-task-board-manager
-      2. Execute: Operation 1 - Init Task Board
+      1. Reuse the owner's registered task ID.
+      2. Have the owner query that task through x-ipe-tool-task-board-manager.
+      3. If registration is missing, return blocked to the owner; do not create a duplicate task or invent an init operation.
     </action>
     <constraints>
       - BLOCKING: Must use x-ipe-tool-task-board-manager skill, not manual file creation
     </constraints>
-    <output>Task board initialized (JSON files in x-ipe-docs/planning/tasks/)</output>
+    <output>Existing owner task verified in the JSON task board</output>
   </step_3>
 
   <step_4>
@@ -167,54 +162,7 @@ BLOCKING: Existing projects - only ADD missing files, do NOT restructure.
     <output>Baseline documentation files created</output>
   </step_4>
 
-  <step_4b>
-    <name>Update Task on Board</name>
-    <action>
-      Call `x-ipe-tool-task-board-manager` → `task_update.py`:
-      - task_id: from Phase 0
-      - status: "done"
-      - output_links: list of deliverables produced in this skill execution
-    </action>
-    <output>Task marked done on board</output>
-  </step_4b>
 
-  <phase_5 name="继续执行（Continue Execute）">
-    <step_5_1>
-      <name>Decide Next Action</name>
-      <action>
-        Collect the full context and task_completion_output from this skill execution.
-
-        IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-          → Invoke x-ipe-assistant-user-representative-Engineer with:
-            type: "routing"
-            completed_skill_output: {full task_completion_output YAML from this skill}
-            next_task_based_skill: "{from output}"
-            context: "Skill completed. Study the context and full output to decide best next action."
-          → DAO studies the complete context and decides the best next action
-        ELSE (interact-with-human):
-          → Present next task suggestion to human and wait for instruction
-      </action>
-      <constraints>
-        - BLOCKING (manual): Human MUST confirm or redirect before proceeding
-        - BLOCKING (auto): Proceed after DoD verification; auto-select next task via DAO
-      </constraints>
-      <output>Next action decided with execution context</output>
-    </step_5_1>
-    <step_5_2>
-      <name>Execute Next Action</name>
-      <action>
-        Based on the decision from Step 5.1:
-        1. Load the target task-based skill's SKILL.md
-        2. Generate an execution plan from the skill's Execution Flow table
-        3. Start execution from the skill's first phase/step
-      </action>
-      <constraints>
-        - MUST load the skill before executing — do not skip skill loading
-        - Execution follows the target skill's procedure, not this skill's
-      </constraints>
-      <output>Next task execution started</output>
-    </step_5_2>
-  </phase_5>
 
 </procedure>
 ```
@@ -249,7 +197,7 @@ task_completion_output:
 
 ## Definition of Done
 
-CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
+Verify the applicable outcomes in the current loop; use independent review only when concrete risk warrants it.
 
 ```xml
 <definition_of_done>

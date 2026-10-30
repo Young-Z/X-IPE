@@ -1,0 +1,16 @@
+{
+  "body_lines": 302,
+  "candidate_hash": "1206f640bb1df07fe35ab0a3982189381583a3a1ff718e76a4322907d144c6eb",
+  "errors": [],
+  "excluded_files": {},
+  "files": {
+    "SKILL.md": "63a49a7d3e61af9bd13254be79359ef045f754f70804a7550df1a2ef2703288a",
+    "references/examples.md": "70292a00df3ee19a37c7ff6168d86cb7ce693897ac9ceaef8752636ab22b68f0"
+  },
+  "name": "x-ipe-tool-implementation-python",
+  "ok": true,
+  "operation": "validate",
+  "schema": 1,
+  "skill_type": "x-ipe-tool",
+  "warnings": []
+}

@@ -54,6 +54,10 @@ does_not_handle:
 
 ## Important Notes
 
+Default to one model/context open-ended loop; apply tool skills in the same loop.
+Use [authoring policy](.github/skills/x-ipe-meta-skill-creator/references/single-loop-authoring.md)
+for bounded delegation and risk-triggered independent review, not per-step agents.
+
 BLOCKING: {Critical prerequisite or constraint}
 
 CRITICAL: {Important consideration that affects quality}
@@ -134,9 +138,8 @@ BLOCKING: All input fields with non-trivial initialization MUST be documented he
 
 ```xml
 <procedure name="{skill-name}">
-  <!-- Check DoR; schedule independent DoD review when risk warrants it. -->
+  <!-- Check readiness in the same loop. -->
   <execute_dor_checks_before_starting/>
-  <schedule_dod_checks_with_sub_agent_before_starting/>
 
   <step_1>
     <name>{Step Name}</name>
@@ -200,7 +203,9 @@ task_completion_output:
 
 ## Definition of Done
 
-CRITICAL: Use deterministic DoD checks and require independent review for meaningful workflow, executable, or safety-policy changes. Cosmetic/document-only changes may use a documented lightweight self-review.
+Use deterministic checks and self-review in the same loop. Independent review
+requires a concrete security/trust/permission, destructive, user-requested, or
+unresolved ambiguity/failure trigger; artifact type alone is not a trigger.
 
 ```xml
 <definition_of_done>
@@ -322,29 +327,9 @@ patterns:
       - Update version
 ```
 
-### Sub-Agent Pattern for Meta Skills
+### Execution ownership
 
-Meta skills may use sub-agents where isolation or parallelism adds value. The following DAG is illustrative, not a compulsory four-round flow. Choose review by risk, not step count:
-
-```yaml
-sub_agent_workflow:
-  round_1_parallel:
-    - agent: "meta_analyzer"
-      task: "Analyze input and plan"
-    - agent: "template_loader"
-      task: "Load appropriate templates"
-      
-  round_2_sequential:
-    - agent: "content_creator"
-      task: "Create skill content"
-      
-  round_3_parallel:
-    - agent: "validator"
-      task: "Validate output"
-    - agent: "test_generator"
-      task: "Generate tests"
-      
-  round_4_sequential:
-    - agent: "finalizer"
-      task: "Finalize and register"
-```
+Keep scope, template loading, drafting, tests, and revision together. Delegate
+only for documented context degradation, substantial independent parallel work,
+or genuine instruction/tool/permission isolation needs; use the authoring policy.
+Do not generate an agent DAG merely because this is a meta skill.

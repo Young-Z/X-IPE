@@ -1,0 +1,15 @@
+{
+  "schema": 1,
+  "operation": "validate",
+  "name": "x-ipe-task-based-share-idea",
+  "skill_type": "x-ipe-task-based",
+  "ok": true,
+  "errors": [],
+  "warnings": [],
+  "excluded_files": {},
+  "body_lines": 267,
+  "files": {
+    "SKILL.md": "7de9548012a2c7e95bde3e92d29447621c6670233d3c1e9528fc85342e769cb7"
+  },
+  "candidate_hash": "2dbf6001c09ac77044db4f83544d4aa16fa22072bc457bc2ae708b819f4c1955"
+}

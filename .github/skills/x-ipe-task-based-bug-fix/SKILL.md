@@ -14,6 +14,11 @@ engineering delivery separate from an observed stakeholder outcome or not measur
 
 ## Important Notes
 
+Load the [single-loop delivery policy](.github/skills/x-ipe-workflow-task-execution/references/agent-loop.md)
+once in the current context. Execute this skill in the same agent loop; another
+skill is expertise, not a new agent. Use proportional checks and reuse current
+evidence; independent review is conditional on concrete risk, not the skill name.
+
 BLOCKING: Load [shared workflow](.github/skills/x-ipe-workflow-task-execution/SKILL.md),
 [common lifecycle](.github/skills/x-ipe-workflow-task-execution/references/lifecycle.md)
 and [goal contract](.github/skills/x-ipe-workflow-task-execution/references/goal-contract.md).
@@ -101,7 +106,7 @@ input:
 | 5 | Conflict Analysis | Actual logic and original request | Unexpected conflicts resolved |
 | 6 | Write Test | mini AAA in actual domain | Behavioral red before fix |
 | 7 | Implement | Enabled tool operation fix sequentially | Same test green; no new regressions |
-| 8 | Verify and Return | Reproduction, full suite, evidence | Domain DoD; one owner handoff |
+| 8 | Verify and Return | Reproduction, affected regression, evidence | Domain DoD; one owner handoff |
 
 BLOCKING: Conflict analysis precedes failing-test/fix execution. Key interface,
 data model or workflow design impact updates approved technical design and Design
@@ -157,7 +162,7 @@ revision and unchanged assertions; never fabricate another failure or commit gat
       1. Conflict Detector examines actual affected logic, callers/dependents, interfaces, data models, assumptions and workflows, not fix prose alone. Conflict Validator compares each consequence to ORIGINAL report, expected behavior and source constraints, not revised fix design.
       2. Record expected/unexpected classifications with exact clause/code/revision, consequence, severity and disposition. No-conflict claim lists inspected sources. Expected restoration within authority proceeds without repeated approval.
       3. Unexpected conflicts require authorized narrowing/mitigation or real consequential decision per mode; unresolved conflicts block Step 6. Scope/acceptance changes still need actual human authority in all modes. DAO cannot authorize lost guest access, relaxed expiry or another boundary.
-      4. Meaningful workflow/executable/safety/public-contract changes require independent review; unavailable review blocks relevant completion/publication claims, not analysis/candidate drafting. Never invent detector/validator execution.
+      4. Use self-checks and targeted tests by default; independent review is required only for an explicit request or concrete high-risk uncertainty under the shared single-loop policy. Reuse suitable current review; missing required review blocks the affected claim, not drafting. Never invent detector/validator execution.
     </action>
     <output>Conflict evidence, preserved boundaries and authorized resolution</output>
   </step_5>
@@ -165,7 +170,7 @@ revision and unchanged assertions; never fabricate another failure or commit gat
     <name>Write Failing Test and Route mini AAA</name>
     <action>
       1. Prepare mini AAA: Arrange actual bug preconditions/environment/source/AC, Act original failing action, Assert intended correct behavior and each constraint/regression branch; one assertion per Assert clause. Preserve GWT AC and actual domain types, no text matching as runtime proof.
-      2. Read stages.feedback.bug_fix enabled tools and exact operation interfaces; semantically group relevant stack/layer scenarios and pass operation: fix, aaa_scenarios scenario_text, source_code_path, test_code_path and actual feature_context when available. See integration for ephemeral tool-only synthetic fallback, never actual IDs.
+      2. Read stages.feedback.bug_fix enabled tools and exact operation interfaces using [capability routing](.github/skills/x-ipe-workflow-task-execution/references/capability-routing.md); refresh changed config/catalog revisions and never force-enable a fallback. Semantically group relevant stack/layer scenarios and pass operation: fix, aaa_scenarios scenario_text, source_code_path, test_code_path and actual feature_context when available. See integration for ephemeral tool-only synthetic fallback, never actual IDs.
       3. Python/server/CLI/library uses project pytest conventions; JS/TS behavior uses real Vitest/Jest/component runtime; fullstack covers both; Java/MCP/skills use actual domain runners/protocol or disposable helper scenarios. Missing runner setup needs authorized scope, else blocked.
       4. Tool fix operation owns red then minimal fix then green sequence. Before allowing its fix stage, run/record test failing for intended behavioral assertion against unfixed revision. If already green, refine reproduction/test without changing source contract; setup failure does not satisfy gate.
     </action>
@@ -175,8 +180,8 @@ revision and unchanged assertions; never fabricate another failure or commit gat
     <name>Implement Minimal Fix</name>
     <action>
       1. Continue the selected operation fix exactly once, sequentially per group; preserve one same-task context and cross-layer boundaries. Tool operation_output is not task_completion_output; collect actual implementation_files/test_files/assert-level test_results/lint_status/errors without dropping fields.
-      2. Only after behavioral red implement minimal approved fix; unchanged test MUST pass against fixed revision. Recheck original expected behavior, side effects and regression branches, then run all existing tests/full suite and applicable lint.
-      3. All existing tests must pass for all-green completion; new regressions block. Pre-existing failures stay named with before/after evidence and block all-green claim, never delete/skip/weaken assertions or claim full completion. Unavailable suites are gaps, not passed.
+      2. Only after behavioral red implement minimal approved fix; unchanged test MUST pass against fixed revision. Run the reproducer, affected tests/applicable lint and implicated integrations under one risk/impact verification plan. Broaden to full suite for shared coupling, observed regressions or explicit project policy, not every bug or handoff.
+      3. Required checks must pass for completion; new regressions block. Pre-existing failures stay named with before/after evidence and block all-green claim, never delete/skip/weaken assertions. Unrun suites remain explicitly unrun, not passed; a bounded passing selection is not a full-suite claim.
       4. Bound fixes/retries to affected scope; after three failed iterations escalate with actual partial outputs. Tool failure returns blocked, no destructive rollback or forced tracing installation.
     </action>
     <output>Minimal fixed bytes and current green/regression evidence or blocker</output>
@@ -184,7 +189,7 @@ revision and unchanged assertions; never fabricate another failure or commit gat
   <step_8>
     <name>Verify Fix and Return Once</name>
     <action>
-      1. Repeat original reproduction at fixed revision, run full regression and smoke checks; UI enabled/available browser route validates original interaction, fixed snapshot/console and surrounding visual behavior. Failed required browser checks block; authored fixture or jsdom is not browser evidence.
+      1. Verify original reproduction and planned regression/smoke checks at the fixed revision, reusing suitable current Step 7 evidence rather than running it twice. Rerun affected checks after relevant source/test/config/environment changes. UI enabled/available browser route validates original interaction, fixed snapshot/console and surrounding visual behavior. Failed required browser checks block; authored fixture or jsdom is not browser evidence.
       2. Document root cause, exact fix/why, design impact, boundaries/conflicts, side effects, retained constraints and before/after results. Bind source/spec/design/tests/config/review hashes and commands/exits; edits invalidate affected evidence and require rerun.
       3. Verify every scoped existing goal/subgoal/AC/type and all-required branch has current restoration/regression evidence. Report engineering delivery separately from observed stakeholder outcome or not measured; tests, plans, fixtures and DAO are not stakeholder observations.
       4. Return entire original output declaration and dynamic fields unchanged; actual links only, completed only when all applicable domain gates pass. Blocked preserves partial source/test/report links, cause and unresolved conflicts. Existing optional legacy fields such as require_human_review, if supplied, pass through to owner; never fabricate them as mandatory.

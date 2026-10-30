@@ -1,0 +1,22 @@
+{
+  "added": [],
+  "baseline_hash": "a49282252dc9469a6d9f35f0a0ed047eb759f7092f401de5bfaa7d1b04bb9173",
+  "byte_parity": true,
+  "candidate_hash": "9228dd7f590d247f4c64a41d323c566e7e0113aec7005960a074238c6c6188e1",
+  "changed": [
+    "SKILL.md"
+  ],
+  "excluded_files": {},
+  "files": {
+    "SKILL.md": "ee58f3c9c5e7c5d2c95c4a19ba4b0508aa07abb93e49d27354de12464a4391fb",
+    "references/examples.md": "33e642204578266f1469d092f4d5a5919de539fe0be00acbe19de8a45b5abb4b"
+  },
+  "name": "x-ipe-tool-implementation-mcp",
+  "ok": true,
+  "operation": "publish",
+  "protected": [],
+  "removed": [],
+  "schema": 1,
+  "state": "published",
+  "transaction": "/Users/yzhang/Documents/projects/X-IPE/.github/.skill-publication/x-ipe-tool-implementation-mcp-ivphii_p"
+}

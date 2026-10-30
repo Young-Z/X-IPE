@@ -17,6 +17,11 @@ AI Agents follow this skill to implement Java code by:
 
 ## Important Notes
 
+Apply the caller's single risk/impact verification plan in the same agent loop.
+Run affected tests and implicated integrations; broaden for coupling, observed
+regressions or binding policy. Reuse current evidence at handoff, never claim an
+unrun suite passed. No child board/Git/checkpoint actions.
+
 BLOCKING: This skill is invoked by the `x-ipe-task-based-code-implementation` orchestrator. Do NOT invoke directly unless testing.
 
 CRITICAL: No research step is needed — Java best practices are built into this skill. Skip identification/research and go straight to learning existing code.
@@ -61,6 +66,18 @@ input:
 
 ---
 
+### Input Initialization
+
+```xml
+<input_init>
+  <field name="operation" source="Caller selects implement, fix or refactor" />
+  <field name="aaa_scenarios" source="Caller's scoped acceptance/preservation scenarios" />
+  <field name="source_code_path" source="Caller-approved source directory" />
+  <field name="test_code_path" source="Caller or existing project test convention" />
+  <field name="feature_context" source="Required for implement; optional for fix/refactor under their documented tool-local synthetic context" />
+</input_init>
+```
+
 ## Definition of Ready
 
 ```xml
@@ -75,7 +92,7 @@ input:
   </checkpoint>
   <checkpoint required="true">
     <name>Feature context complete</name>
-    <verification>feature_id and technical_design_link are provided</verification>
+    <verification>For implement, feature_id and technical_design_link are provided; fix/refactor may omit feature_context as declared</verification>
   </checkpoint>
 </definition_of_ready>
 ```
@@ -183,7 +200,7 @@ input:
        - Code style, proper exception handling, existing conventions
        - Only change what is necessary to make the test pass
     6. RUN test → MUST PASS
-    7. RUN all existing tests → no regressions
+    7. RUN affected regression selection and implicated integrations; broaden when the verification plan requires it
     8. RUN linting: checkstyle or spotless (if configured)
     9. RETURN standard output
   </action>
@@ -200,7 +217,7 @@ input:
   <action>
     1. LEARN existing code: scan source_code_path for conventions, build system, patterns
     2. IF feature_context is absent: generate synthetic context (feature_id: "REFACTOR-{task_id}", technical_design_link: "N/A")
-    3. RUN existing tests → establish baseline (all must pass)
+    3. RUN affected preservation selection → establish baseline (all selected checks must pass)
        - IF any test fails → STOP, report: "Cannot refactor — baseline tests failing"
     4. RESTRUCTURE code per AAA scenario target state:
        a. FOR EACH AAA scenario:
@@ -208,7 +225,7 @@ input:
           - Apply structural changes following Java best practices
           - Preserve external behavior
     5. UPDATE imports and references across affected files
-    6. RUN all tests → MUST pass (behavior preserved)
+    6. RUN the same preservation selection plus affected integrations → MUST pass (behavior preserved); broaden for observed risk/failures or binding policy
        - IF tests fail → report failed scenarios with details; do NOT auto-revert
     7. RUN linting: checkstyle or spotless (if configured)
     8. RETURN standard output
@@ -216,7 +233,7 @@ input:
   <constraints>
     - BLOCKING: Baseline tests must pass before refactoring (Step 3)
     - CRITICAL: Preserve behavior — no functional changes
-    - CRITICAL: Do NOT manage git commits — orchestrator handles checkpointing
+    - CRITICAL: Do NOT manage git commits/checkpoints — only the owner may act with explicit authority
     - MANDATORY: Feature_context is OPTIONAL — use synthetic fallback if absent
   </constraints>
   <output>Standard tool skill output (implementation_files, test_files, test_results, lint_status)</output>

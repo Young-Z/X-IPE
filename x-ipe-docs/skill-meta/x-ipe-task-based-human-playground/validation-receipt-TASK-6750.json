@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "operation": "validate",
+  "name": "x-ipe-task-based-human-playground",
+  "skill_type": "x-ipe-task-based",
+  "ok": true,
+  "errors": [],
+  "warnings": [],
+  "excluded_files": {},
+  "body_lines": 358,
+  "files": {
+    "SKILL.md": "02224524c0c8994bfc269e2528fb050f0fc13c03a01f0888d54bd34d761d4260",
+    "references/examples.md": "f38a7d96d79187242fa64791327fa8cd2aa1832e13936ba781f9ba9f55ae36d7"
+  },
+  "candidate_hash": "99300e005ef5e062929f20013a09e6f35a7c639e46bc581426c74d06070899e7"
+}

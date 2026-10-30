@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "operation": "validate",
+  "name": "x-ipe-task-based-knowledge-referencer",
+  "skill_type": "x-ipe-task-based",
+  "ok": true,
+  "errors": [],
+  "warnings": [],
+  "excluded_files": {},
+  "body_lines": 349,
+  "files": {
+    "SKILL.md": "329409e1653de9a181f1332a31b246f6b209ce5c73d536ec70dc7cac849342f7",
+    "references/examples.md": "4b56f6d99e1a3d571eca552d2667c910b8f06985836d65fbe60813a0eb084e09"
+  },
+  "candidate_hash": "7bc88bc331328fb0712471647e2816cc1b10d6ab036e0e34f760f71ffec7c698"
+}

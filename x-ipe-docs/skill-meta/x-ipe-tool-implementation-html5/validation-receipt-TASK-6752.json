@@ -1,0 +1,16 @@
+{
+  "body_lines": 305,
+  "candidate_hash": "76377632fa04922a4ed151251704f03bcc1fff14ea7acc9de64ece35d72ff08e",
+  "errors": [],
+  "excluded_files": {},
+  "files": {
+    "SKILL.md": "70ed384c96646330310c8c3e1cf3691cf0345a9b0112fb1ba69ba011134d8160",
+    "references/examples.md": "135a40833d11f93f24a3a2bb8258959c24dac2c0b24a520f6d04eb46778f8799"
+  },
+  "name": "x-ipe-tool-implementation-html5",
+  "ok": true,
+  "operation": "validate",
+  "schema": 1,
+  "skill_type": "x-ipe-tool",
+  "warnings": []
+}

@@ -63,11 +63,12 @@ Independent review: actual record or pending. Candidate_ready is not published.
 
 ## Actual Workflow Disposition
 
-Free-mode no app write. Workflow-mode actual code_refactor remains mandatory until
-verified integration changes; required tech-design/specification, optional test-report,
-predecessors/feature context and actual refactor-report file. Conditional owner
-write/readback only after genuine completion; study is not fake done/skipped.
-Writer acceptance does not prove readiness or report existence.
+Free-mode has no app write. Default code_refactor is optional: no-need delivery
+goes directly from acceptance to closing. For requested/evidenced refactoring,
+retain required tech-design/specification, optional test-report and actual report.
+Owner writes/readbacks only after genuine execution; study is not fake done.
+Honor an explicitly customized mandatory project action. Writer success is not
+proof that the report exists or the work ran.
 
 ## Original Output and Owner Handoff
 

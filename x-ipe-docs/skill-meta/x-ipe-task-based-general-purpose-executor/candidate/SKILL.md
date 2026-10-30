@@ -18,11 +18,23 @@ Execute a goal by following provided instructions, using knowledge base referenc
 
 ## Important Notes
 
+Load the [single-loop delivery policy](.github/skills/x-ipe-workflow-task-execution/references/agent-loop.md)
+once in the current context. Execute this skill in the same agent loop; another
+skill is expertise, not a new agent. Use proportional checks and reuse current
+evidence; independent review is conditional on concrete risk, not the skill name.
+
+Load `x-ipe-workflow-task-execution` and its
+[common lifecycle](.github/skills/x-ipe-workflow-task-execution/references/lifecycle.md).
+Reuse the supplied task/readiness; direct entry calls Orient/Plan once without
+recursively dispatching this skill. One owner handles task/feature/app writes,
+Git and the next boundary. Return full output; do not register or execute a
+successor. Within-skill questions follow the three existing interaction modes;
+clear inputs need no question or DAO call. Explicit human approvals still bind.
+
 BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skill.
 
 **Note:** If Agent does not have skill capability, go to `.github/skills/` folder to learn skills. SKILL.md is the entry point.
 
-IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-interact"`, NEVER stop to ask the human. Instead, call `x-ipe-assistant-user-representative-Engineer` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
 
 ---
 
@@ -66,7 +78,7 @@ input:
 
 ```xml
 <input_init>
-  <field name="task_id" source="x-ipe-tool-task-board-manager (auto-generated)" />
+  <field name="task_id" source="existing lifecycle task/readiness; no duplicate registration" />
   <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
   <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
   <field name="process_preference.interaction_mode" source="from caller (x-ipe-workflow-task-execution) or default 'interact-with-human'" />
@@ -123,8 +135,6 @@ input:
 | 5.1 | Execute Instructions | Run each step with manual guidance | Steps executed |
 | 5.2 | Complete | Verify all steps, report results | Results reported |
 | 5.3 | Update Task | Mark task done on board | Board updated |
-| 6.1 | Decide Next Action | DAO-assisted next task decision | Next action decided |
-| 6.2 | Execute Next Action | Load skill, generate plan, execute | Execution started |
 
 BLOCKING: Step 2.1 must complete before Step 5.1 — do NOT execute with unresolved ambiguities.
 BLOCKING: Step 5.1 must complete before Step 5.2 — do NOT report until all steps are attempted.
@@ -135,9 +145,7 @@ BLOCKING: Step 5.1 must complete before Step 5.2 — do NOT report until all ste
 
 ```xml
 <procedure name="general-purpose-executor">
-  <!-- CRITICAL: Both DoR/DoD check elements below are MANDATORY -->
   <execute_dor_checks_before_starting/>
-  <schedule_dod_checks_with_sub_agent_before_starting/>
 
   <step_0>
     <name>Create Task on Board</name>
@@ -208,7 +216,7 @@ BLOCKING: Step 5.1 must complete before Step 5.2 — do NOT report until all ste
              Attach returned instructions to the step (resolved)
            → IF referencer returns clarity_score &lt; clarity_threshold:
              Response source (based on interaction_mode):
-             IF process_preference.interaction_mode == "dao-represent-human-to-interact":
+             IF process_preference.interaction_mode IN ["dao-represent-human-to-interact", "dao-represent-human-to-interact-for-questions-in-skill"]:
                → Resolve via x-ipe-assistant-user-representative-Engineer
              ELSE:
                → Ask human: "The manual says '{instruction_text}' but it's unclear.
@@ -270,7 +278,7 @@ BLOCKING: Step 5.1 must complete before Step 5.2 — do NOT report until all ste
                → Log mismatch, infer best-effort resolution, continue
              ELSE:
                Response source (based on interaction_mode):
-               IF process_preference.interaction_mode == "dao-represent-human-to-interact":
+               IF process_preference.interaction_mode IN ["dao-represent-human-to-interact", "dao-represent-human-to-interact-for-questions-in-skill"]:
                  → Resolve via x-ipe-assistant-user-representative-Engineer
                ELSE:
                  → Ask human for guidance
@@ -301,56 +309,9 @@ BLOCKING: Step 5.1 must complete before Step 5.2 — do NOT report until all ste
       <output>Execution summary with overall status and step results</output>
     </step_5_2>
 
-    <step_5_3>
-      <name>Update Task on Board</name>
-      <action>
-        Call `x-ipe-tool-task-board-manager` → `task_update.py`:
-        - task_id: from Step 0
-        - status: "done"
-        - output_links: list of deliverables produced (if any)
-      </action>
-      <output>Task marked done on board</output>
-    </step_5_3>
   </phase_5>
 
   <!-- Phase 6: 继续执行 (Continue Execute) -->
-  <phase_6 name="继续执行（Continue Execute）">
-    <step_6_1>
-      <name>Decide Next Action</name>
-      <action>
-        Collect the full context and task_completion_output from this skill execution.
-
-        IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-          → Invoke x-ipe-assistant-user-representative-Engineer with:
-            type: "routing"
-            completed_skill_output: {full task_completion_output YAML from this skill}
-            next_task_based_skill: "{from output}"
-            context: "Skill completed. Study the context and full output to decide best next action."
-          → DAO studies the complete context and decides the best next action
-        ELSE (interact-with-human):
-          → Present execution summary to human and wait for instruction
-      </action>
-      <constraints>
-        - BLOCKING (interact-with-human): Human MUST confirm or redirect before proceeding
-        - BLOCKING (auto): Proceed after DoD verification; auto-select next task via DAO
-      </constraints>
-      <output>Next action decided with execution context</output>
-    </step_6_1>
-    <step_6_2>
-      <name>Execute Next Action</name>
-      <action>
-        Based on the decision from Step 6.1:
-        1. Load the target task-based skill's SKILL.md
-        2. Generate an execution plan from the skill's Execution Flow table
-        3. Start execution from the skill's first phase/step
-      </action>
-      <constraints>
-        - MUST load the skill before executing — do not skip skill loading
-        - Execution follows the target skill's procedure, not this skill's
-      </constraints>
-      <output>Next task execution started</output>
-    </step_6_2>
-  </phase_6>
 
 </procedure>
 ```
@@ -383,7 +344,7 @@ task_completion_output:
 
 ## Definition of Done
 
-CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
+Verify the applicable outcomes in the current loop; use independent review only when concrete risk warrants it.
 
 ```xml
 <definition_of_done>

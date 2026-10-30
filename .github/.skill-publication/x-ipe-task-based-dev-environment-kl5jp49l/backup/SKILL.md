@@ -1,0 +1,404 @@
+---
+name: x-ipe-task-based-dev-environment
+description: Set up development environment with appropriate tech stack (Python with uv or Node.js with npm/yarn), project structure, and git version control. Use when initializing project environments or preparing workspace for development. Triggers on requests like "set up environment", "create dev environment", "configure workspace", "initialize project".
+---
+
+# Task-Based Skill: Development Environment Setup
+
+## Purpose
+
+Set up a development environment by:
+1. Determining the tech stack (Python/Node.js) from context or user input
+2. Initializing the package manager and standard folder structure
+3. Initializing git with a tech-stack-specific .gitignore
+4. Documenting the setup and creating an initial commit
+
+---
+
+## Important Notes
+
+BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skill.
+
+**Note:** If Agent does not have skill capability, go to `.github/skills/` folder to learn skills. SKILL.md is the entry point.
+
+IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-interact"`, NEVER stop to ask the human. Instead, call `x-ipe-assistant-user-representative-Engineer` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
+
+---
+
+## Input Parameters
+
+```yaml
+input:
+  # Task attributes (from task board)
+  task_id: "{TASK-XXX}"
+  task_based_skill: "x-ipe-task-based-dev-environment"
+
+  # Execution context (passed by x-ipe-workflow-task-execution)
+  execution_mode: "free-mode | workflow-mode"  # default: free-mode
+  workflow:
+    name: "N/A"  # workflow name, default: N/A
+
+  # Task type attributes
+  category: "standalone"
+  next_task_based_skill:
+    - skill: "x-ipe-task-based-ideation"
+      condition: "Start ideating on a new project"
+    - skill: "x-ipe-task-based-requirement-gathering"
+      condition: "Begin gathering requirements if they already exist"
+  process_preference:
+    interaction_mode: "{from input process_preference.interaction_mode}"
+
+  # Required inputs
+
+  # Git strategy (from .x-ipe.yaml, passed by workflow)
+  git_strategy: "main-branch-only | dev-session-based"
+  git_main_branch: "{auto-detected}"
+
+  # Context (from previous task or project)
+  project_root: "{absolute path to project root}"
+  project_name: "{project name}"
+```
+
+### Input Initialization
+
+```xml
+<input_init>
+  <field name="task_id" source="x-ipe-tool-task-board-manager (auto-generated)" />
+  <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+  <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
+  <field name="process_preference.interaction_mode" source="from caller (x-ipe-workflow-task-execution) or default 'interact-with-human'" />
+  <field name="git_strategy" source="from .x-ipe.yaml" />
+  <field name="git_main_branch" source="auto-detect via `git symbolic-ref refs/remotes/origin/HEAD`" />
+  <field name="project_root" source="current working directory" />
+  <field name="project_name" source="from package.json/pyproject.toml name field or directory name" />
+</input_init>
+```
+
+---
+
+## Definition of Ready
+
+```xml
+<definition_of_ready>
+  <checkpoint required="true">
+    <name>Project root directory exists</name>
+    <verification>Verify directory at {project_root} exists and is writable</verification>
+  </checkpoint>
+  <checkpoint required="true">
+    <name>Project name determined</name>
+    <verification>Check {project_name} is set from task board or user input</verification>
+  </checkpoint>
+</definition_of_ready>
+```
+
+---
+
+## Execution Flow
+
+| Step | Name | Action | Gate |
+|------|------|--------|------|
+| 1 | Determine Stack | Identify tech stack from context or ask user | Stack selected |
+| 2 | Init Package Manager | Run `uv init` or `npm init`, create src/tests folders | Package manager ready |
+| 3 | Init Git | Call x-ipe-tool-git-version-control skill for repo and .gitignore | Git initialized |
+| 4 | Document Setup | Create `x-ipe-docs/environment/setup.md` | Documentation created |
+| 5 | Commit | Stage and commit all setup files | Initial commit done |
+| 6.1 | Decide Next Action | DAO-assisted next task decision | Next action decided |
+| 6.2 | Execute Next Action | Load skill, generate plan, execute | Execution started |
+
+BLOCKING: Step 2 cannot start until tech stack is confirmed.
+BLOCKING: Step 3 cannot proceed if x-ipe-tool-git-version-control skill fails.
+
+---
+
+## Execution Procedure
+
+```xml
+<procedure name="dev-environment-setup">
+  <execute_dor_checks_before_starting/>
+  <schedule_dod_checks_with_sub_agent_before_starting/>
+
+  <phase_0 name="Board — Register Task">
+    <step_0_1>
+      <name>Create Task on Board</name>
+      <action>
+        Call `x-ipe-tool-task-board-manager` → `task_create.py`:
+        - task_type: "Dev Environment"
+        - description: summarize work from input context
+        - status: "in_progress"
+        - role: from input context
+        - assignee: from input context
+        Store returned task_id for later update.
+      </action>
+      <output>Task created on board with status in_progress</output>
+    </step_0_1>
+  </phase_0>
+
+  <step_1>
+    <name>Determine Tech Stack</name>
+    <action>
+      1. Check if user explicitly specified tech stack in request
+      2. If not specified, analyze context clues (see references/tech-stack-details.md for detection hints)
+      3. If still unclear:
+         Ask "Which tech stack?" with options:
+           1. Python Application (default) - Python with uv
+           2. Node.js Application - Node.js with npm/yarn
+
+         Response source (based on interaction_mode):
+         IF process_preference.interaction_mode == "dao-represent-human-to-interact":
+           → Resolve via x-ipe-assistant-user-representative-Engineer (default: Python if unresolvable)
+         ELSE (interact-with-human/dao-represent-human-to-interact-for-questions-in-skill):
+           → Ask human for selection
+      4. Default to Python if no preference given
+    </action>
+    <output>tech_stack: python | nodejs</output>
+  </step_1>
+
+  <step_2>
+    <name>Initialize Package Manager</name>
+    <action>
+      1. IF tech_stack = "python":
+         a. Run: uv init
+         b. Run: uv venv
+         c. Create src/__init__.py and tests/__init__.py
+      2. ELSE (tech_stack = "nodejs"):
+         a. Ask for npm or yarn preference (default: npm)
+
+            Response source (based on interaction_mode):
+            IF process_preference.interaction_mode == "dao-represent-human-to-interact":
+              → Default to npm (most common)
+            ELSE (interact-with-human/dao-represent-human-to-interact-for-questions-in-skill):
+              → Ask human for preference
+         b. Run: npm init -y OR yarn init -y
+         c. Create src/index.js and tests/index.test.js
+      3. Verify standard folder structure exists (src/, tests/)
+    </action>
+    <constraints>
+      - BLOCKING: Must not proceed without confirmed tech stack
+      - CRITICAL: Always create both src/ and tests/ directories
+    </constraints>
+    <output>Package manager initialized, folder structure created</output>
+  </step_2>
+
+  <step_3>
+    <name>Initialize Git Repository</name>
+    <action>
+      1. Call x-ipe-tool-git-version-control skill:
+         operation: init
+         directory: {project_root}
+      2. Call x-ipe-tool-git-version-control skill:
+         operation: create_gitignore
+         directory: {project_root}
+         tech_stack: {tech_stack}
+    </action>
+    <constraints>
+      - BLOCKING: If x-ipe-tool-git-version-control skill fails, halt and report
+      - If .git already exists, skip init and update .gitignore only
+    </constraints>
+    <output>Git repository initialized with tech-stack-specific .gitignore</output>
+  </step_3>
+
+  <step_4>
+    <name>Document Setup</name>
+    <action>
+      1. Create x-ipe-docs/environment/ directory if not exists
+      2. Generate setup.md using template from templates/ folder:
+         - Python: templates/setup-python.md
+         - Node.js: templates/setup-nodejs.md
+      3. If templates unavailable, use inline templates from references/tech-stack-details.md
+    </action>
+    <output>x-ipe-docs/environment/setup.md created</output>
+  </step_4>
+
+  <step_5>
+    <name>Commit Setup</name>
+    <action>
+      1. Call x-ipe-tool-git-version-control skill:
+         operation: add
+         directory: {project_root}
+         files: null (all files)
+      2. Call x-ipe-tool-git-version-control skill:
+         operation: commit
+         directory: {project_root}
+         task_data: {current_task_data_model}
+    </action>
+    <output>Initial commit created with structured message</output>
+  </step_5>
+
+  <step_5_1>
+    <name>Update Task on Board</name>
+    <action>
+      Call `x-ipe-tool-task-board-manager` → `task_update.py`:
+      - task_id: from Phase 0
+      - status: "done"
+      - output_links: list of deliverables produced in this skill execution
+    </action>
+    <output>Task marked done on board</output>
+  </step_5_1>
+
+  <phase_6 name="继续执行（Continue Execute）">
+    <step_6_1>
+      <name>Decide Next Action</name>
+      <action>
+        Collect the full context and task_completion_output from this skill execution.
+
+        IF process_preference.interaction_mode == "dao-represent-human-to-interact":
+          → Invoke x-ipe-assistant-user-representative-Engineer with:
+            type: "routing"
+            completed_skill_output: {full task_completion_output YAML from this skill}
+            next_task_based_skill: "{from output}"
+            context: "Skill completed. Study the context and full output to decide best next action."
+          → DAO studies the complete context and decides the best next action
+        ELSE (interact-with-human):
+          → Present next task suggestion to human and wait for instruction
+      </action>
+      <constraints>
+        - BLOCKING (manual): Human MUST confirm or redirect before proceeding
+        - BLOCKING (auto): Proceed after DoD verification; auto-select next task via DAO
+      </constraints>
+      <output>Next action decided with execution context</output>
+    </step_6_1>
+    <step_6_2>
+      <name>Execute Next Action</name>
+      <action>
+        Based on the decision from Step 6.1:
+        1. Load the target task-based skill's SKILL.md
+        2. Generate an execution plan from the skill's Execution Flow table
+        3. Start execution from the skill's first phase/step
+      </action>
+      <constraints>
+        - MUST load the skill before executing — do not skip skill loading
+        - Execution follows the target skill's procedure, not this skill's
+      </constraints>
+      <output>Next task execution started</output>
+    </step_6_2>
+  </phase_6>
+
+</procedure>
+```
+
+---
+
+## Output Result
+
+```yaml
+task_completion_output:
+  category: "standalone"
+  status: completed | blocked
+  next_task_based_skill:
+    - skill: "x-ipe-task-based-ideation"
+      condition: "Start ideating on a new project"
+    - skill: "x-ipe-task-based-requirement-gathering"
+      condition: "Begin gathering requirements if they already exist"
+  process_preference:
+    interaction_mode: "{from input process_preference.interaction_mode}"
+  execution_mode: "{from input}"
+  workflow:
+    name: "{from input}"
+  task_output_links:
+    - "x-ipe-docs/environment/setup.md"
+    - ".gitignore"
+    - "README.md"
+  # Dynamic attributes
+  tech_stack: python | nodejs
+  package_manager: uv | npm | yarn
+  git_initialized: true | false
+  initial_commit_hash: "{commit-hash} | null"
+```
+
+---
+
+## Definition of Done
+
+CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
+
+```xml
+<definition_of_done>
+  <checkpoint required="true">
+    <name>Directory structure created</name>
+    <verification>Verify src/ and tests/ directories exist with entry-point files</verification>
+  </checkpoint>
+  <checkpoint required="true">
+    <name>Package manager initialized</name>
+    <verification>Verify pyproject.toml (Python) or package.json (Node.js) exists</verification>
+  </checkpoint>
+  <checkpoint required="true">
+    <name>Git repository initialized</name>
+    <verification>Verify .git/ directory exists</verification>
+  </checkpoint>
+  <checkpoint required="true">
+    <name>.gitignore created</name>
+    <verification>Verify .gitignore contains tech-stack-specific patterns</verification>
+  </checkpoint>
+  <checkpoint required="true">
+    <name>Setup documented</name>
+    <verification>Verify x-ipe-docs/environment/setup.md exists with setup instructions</verification>
+  </checkpoint>
+  <checkpoint required="true">
+    <name>Initial commit created</name>
+    <verification>Run `git log --oneline -1` and verify structured commit message</verification>
+  </checkpoint>
+</definition_of_done>
+```
+
+MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution` to continue the task execution flow.
+
+---
+
+## Patterns & Anti-Patterns
+
+### Pattern: Explicit Stack Request
+
+**When:** User specifies tech stack in request (e.g., "set up FastAPI project")
+**Then:**
+```
+1. Extract stack from request
+2. Skip selection prompt
+3. Proceed with initialization
+```
+
+### Pattern: Context Detection
+
+**When:** Project files hint at tech stack (pyproject.toml, package.json)
+**Then:**
+```
+1. Detect existing config files
+2. Recommend detected stack
+3. Confirm with user before proceeding
+```
+
+### Pattern: Existing Git Repo
+
+**When:** .git folder already exists
+**Then:**
+```
+1. Skip git init
+2. Update .gitignore if needed
+3. Proceed with package manager setup
+```
+
+### Anti-Patterns
+
+| Anti-Pattern | Why Bad | Do Instead |
+|--------------|---------|------------|
+| Skip git init | No version control | Always initialize git |
+| Wrong .gitignore | Tracks unwanted files | Use tech-stack-specific template |
+| Missing src/tests | Inconsistent structure | Always create standard folders |
+| No initial commit | Loses setup state | Commit after setup |
+| Assume tech stack | Wrong environment | Ask or detect from context |
+| Skip venv (Python) | Global package pollution | Always create virtual environment |
+
+---
+
+## Examples
+
+See [references/examples.md](.github/skills/x-ipe-task-based-dev-environment/references/examples.md) for concrete execution examples including:
+- Python project setup with uv and venv
+- Node.js project setup with npm
+- Missing setup guide (blocked scenario)
+- Existing VS Code config (merge mode)
+
+See [references/tech-stack-details.md](.github/skills/x-ipe-task-based-dev-environment/references/tech-stack-details.md) for:
+- Auto-detection hints table
+- Detailed initialization commands per stack
+- Setup document templates
+- Troubleshooting and validation commands

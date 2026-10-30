@@ -87,8 +87,7 @@ No secret/PII exposure or forced annotations just to claim a quality score.
 Analysis output or disclosed adapter must exist before targeted sync. Baseline
 and authority precede mutation, not study. Public-contract expansion needs actual
 human CR authority before behavior change; DAO guidance is not permission.
-Meaningful changes need independent review; unavailable review blocks pertinent
-completion/publication, not drafting. Creator candidate_ready is not published.
+Use self-checks and targeted tests by default; independent review is required only for an explicit request or concrete high-risk uncertainty under the shared single-loop policy. Reuse suitable current review; missing required review blocks the affected claim, not drafting. Creator candidate_ready is not published.
 Current app mandatory action/context/tag/readback gates remain per integration.
 
 ## Output guidance

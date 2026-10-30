@@ -72,7 +72,7 @@ approved analysis deliverable; no global prerequisites or achieved refactor clai
 An explicit legacy so-that supplies inferred parent intent with anchor only;
 missing intent blocks pertinent outcome claims, not unrelated delivery checks.
 
-Current workflow code_refactor is mandatory. Study-only is not app done, nor
+Default workflow code_refactor is optional. Study-only is not app done, nor
 permission to mark it skipped. Return report and exact context to owner; actual
 completion still needs required tech-design/specification, predecessor checks,
 accepted deliverable and readback under the unchanged integration. Report writer

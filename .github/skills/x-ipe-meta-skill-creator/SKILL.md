@@ -10,7 +10,7 @@ description: Create or update X-IPE skills from subtype templates using candidat
 Create and maintain concise, complete skill packages by:
 1. Resolving scope, subtype, risk, and the smallest justified delta.
 2. Drafting metadata and all resources in a complete candidate bundle.
-3. Validating contracts and behavior with proportionate independent review.
+3. Validating contracts and behavior in the same agent loop, with risk-triggered review.
 4. Publishing only a reviewed, concurrency-checked manifest with recovery.
 
 ## About
@@ -56,8 +56,14 @@ conversion is implied. See the validation reference for the compatibility rule.
 BLOCKING: Load [general guidelines](.github/skills/x-ipe-meta-skill-creator/references/skill-general-guidelines-v2.md)
 and the selected templates before drafting. Preserve subtype-specific contracts.
 
+Default to one model/context open-ended loop. Loading a tool skill means applying
+its procedure in the same loop, not spawning another agent. Keep sequential
+planning, drafting, tests, and revision together. Use
+[authoring policy](.github/skills/x-ipe-meta-skill-creator/references/single-loop-authoring.md)
+when deciding delegation, review, or evaluation scope; no per-step reviewer DAG.
+
 Load [consumer integration](.github/skills/x-ipe-meta-skill-creator/references/consumer-integration.md)
-for actual installed lesson select/settle calls and task-template goal adoption.
+when selecting/settling lessons or adopting the task-template goal contract.
 Selection is read-only; queue writes require explicit scope, current revisions
 and owned evidence. If excluded, report settlement pending, never implied applied.
 
@@ -164,7 +170,7 @@ input:
       1. Compare requested behavior with current package; plan the smallest delta.
       2. Invoke installed lesson_ops.select with explicit project_root, owner skills and relevant_to target per consumer integration; retain summaries, critical_overflow, protected and notices. Select up to five relevant valid summaries within approximately 120 lines; zero is valid. No filesystem-wide raw lesson concatenation.
       3. Legacy undated/raw records require verification, not automatic freshness or expiry. Record selected lesson-to-change/scenario mapping in metadata. When queue writes are authorized, load its revision and invoke settle(status=planned) only for an actual existing open owned task and canonical candidate; otherwise record pending. Do not migrate historical status.
-      4. IF cosmetic/document-only and no semantics change, use lightweight checks; ELSE require independent review for workflow, executable, or safety-policy changes.
+      4. Use same-loop deterministic checks and self-review by default, including ordinary workflow, executable, and public-contract edits. Require independent review for security/trust/permission or destructive changes, explicit user review, or meaningful ambiguity/observed failures that same-loop checks cannot resolve. Record the concrete trigger or no-trigger disposition; artifact type alone is not a trigger.
       5. Route genuine questions through the resolved interaction policy; DAO cannot invent release permission.
     </action>
     <output>delta plan, selected lesson mappings, scenarios, risk/review plan</output>
@@ -186,8 +192,8 @@ input:
     <action>
       1. Run .github/skills/x-ipe-meta-skill-creator/scripts/validate_skill.py with project root, target name, subtype, and target candidate; capture its JSON receipt outside the bundle. Tooling belongs to the installed creator, not the target skill's candidate/scripts. During an authorized creator bootstrap only, use the reviewed creator candidate helper and record that override in external metadata.
       2. Execute applicable scenarios against temporary projects, never production; record commands, results, fingerprints, and known failures.
-      3. Obtain independent review when required by risk; unavailable review blocks promotion, not drafting. Cosmetic work can use deterministic and self-review evidence.
-      4. Correct blocking findings and rerun affected checks; changed content invalidates receipts. Escalate after three failed iterations rather than claiming completion.
+      3. Obtain bounded independent review only for a documented Step 1 trigger; unavailable required review blocks promotion, not drafting. Otherwise use deterministic and same-loop self-review evidence; no mandatory judge, score, or reviewer rounds.
+      4. Correct blocking findings and rerun affected checks; changed content invalidates receipts. If failures remain unresolved, report them instead of cycling through fixed review rounds or claiming completion.
       5. Verify external workflow/config consumers separately; structural validation does not prove runtime compatibility or semantic correctness.
     </action>
     <output>validation receipt, scenario evidence, independent review or justified lightweight disposition</output>
@@ -241,7 +247,7 @@ task_completion_output:
   <checkpoint required="true"><name>Scope and resources</name><verification>Template-derived metadata, complete candidate, and explicit delta/removals match authorized scope.</verification></checkpoint>
   <checkpoint required="true"><name>Contracts valid</name><verification>Frontmatter, subtype contract, local resources, line boundary, and checkpoint limits pass deterministic validation.</verification></checkpoint>
   <checkpoint required="true"><name>Behavior evidenced</name><verification>Applicable scenarios pass; known failures and unavailable evidence are not concealed.</verification></checkpoint>
-  <checkpoint required="true"><name>Review proportionate</name><verification>Independent review covers meaningful workflow/executable/safety changes; lightweight exceptions have rationale.</verification></checkpoint>
+  <checkpoint required="true"><name>Review proportionate</name><verification>Concrete security/trust/permission, destructive, user-requested, or unresolved ambiguity/failure triggers receive bounded independent review; otherwise same-loop checks and self-review suffice.</verification></checkpoint>
   <checkpoint required="true"><name>Publication honest</name><verification>Candidate-only outcome is explicit; published outcome requires authorized manifest, fresh baseline, recovery record, and exact byte parity.</verification></checkpoint>
   <checkpoint required="true"><name>Records accurate</name><verification>History changes only after promotion; selected lessons need publication and test evidence before applied status.</verification></checkpoint>
 </definition_of_done>
@@ -258,6 +264,7 @@ for the creator itself; do not fabricate replacements from scratch.
 ## Examples and References
 
 - [Examples](.github/skills/x-ipe-meta-skill-creator/references/examples.md): current subtype drafting, verification, and candidate-only examples.
+- [Single-loop authoring](.github/skills/x-ipe-meta-skill-creator/references/single-loop-authoring.md): bounded delegation, conditional review, and outcome evaluation.
 - [Validation and publication](.github/skills/x-ipe-meta-skill-creator/references/validation-publication.md): API, receipt, ownership, and recovery contract.
 - [Production patterns](.github/skills/x-ipe-meta-skill-creator/references/12.%20reference-production-patterns.md): bounded lessons, explicit dependencies, configuration gating.
 - [Type comparison](.github/skills/x-ipe-meta-skill-creator/references/skill-type-comparison.md): subtype responsibilities.

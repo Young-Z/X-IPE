@@ -97,3 +97,13 @@ evaluation:
 version_history:
   - {version: "2.0.0", date: 2026-10-14, task_id: TASK-6749, candidate_hash: a9e1adf0066f237d4600b78be44f9ba205afba2fd9af3514488fc49768074753, change: Authorized patch promotion verified after adopting harmless production EOF blanks in candidate; no substantive delta from reviewed content}
 ```
+
+## TASK-6750 single-loop delivery revision
+
+Published after deterministic validation, bounded workflow safety review, and real manifest-safe publication; prior metadata above remains version history.
+
+- Current revision: `22af375c169530743a5a31fa97632009b020eb96d5f471d2f9699fa559fa4704`
+- Previous revision: `a9e1adf0066f237d4600b78be44f9ba205afba2fd9af3514488fc49768074753`
+- Evidence: `single-loop-TASK-6750.json`, `publication-receipt-TASK-6750.json`, `validation-receipt-TASK-6750.json`.
+- Same-loop delivery/default risk-based verification; unchanged resources and protected bytes retained.
+- Token/latency savings not measured; no live-agent efficacy claim.

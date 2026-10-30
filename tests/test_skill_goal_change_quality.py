@@ -17,7 +17,7 @@ import xml.etree.ElementTree as ET
 import pytest
 import yaml
 
-from tests.publication_recovery_6749 import recovered_publication
+from tests.publication_recovery_6749 import current_publication, recovered_publication
 
 from tests.test_goal_oriented_skills import rows, render_table_from_scaffold, validator
 from tests.test_skill_pipeline_refactor import helper_project, output_contract, run_helper
@@ -101,8 +101,8 @@ def test_complete_candidate_exact_original_output_and_baselines():
     baseline = json.loads((META / "baseline-goal-TASK-6749.json").read_text())
     publication = json.loads((META / "publication-receipt-goal-TASK-6749.json").read_text())
     assert publication["baseline_hash"] == v.fingerprint(baseline)
-    current = recovered_publication(NAME, v.manifest(v.tree_bytes(LIVE, ROOT)))
-    assert current["baseline_hash"] == publication["candidate_hash"]
+    current = current_publication(NAME, v.manifest(v.tree_bytes(LIVE, ROOT)))
+    assert recovered_publication(NAME)["baseline_hash"] == publication["candidate_hash"]
     receipt = v.validate(ROOT, CANDIDATE, NAME, "x-ipe-task-based")
     assert receipt["ok"] and not receipt["warnings"], receipt
     assert receipt["files"] == current["files"] and publication["byte_parity"]
@@ -291,7 +291,7 @@ def test_readiness_metadata_receipt_exact_promotion_and_must_coverage():
     cases = yaml.safe_load((META / "test-cases.yaml").read_text())
     receipt = json.loads((META / "validation-receipt-goal-TASK-6749.json").read_text())
     current = validator().validate(ROOT, CANDIDATE, NAME, "x-ipe-task-based")
-    assert recovered_publication(NAME)["files"] == current["files"]
+    assert current_publication(NAME)["files"] == current["files"]
     assert validator().fingerprint(receipt["files"]) == receipt["candidate_hash"]
     assert meta["task_id"] == cases["task_id"] == "TASK-6749"
     assert meta["publication_state"] == cases["publication_state"] == "published"
@@ -493,7 +493,7 @@ def test_bug_reviewed_metadata_receipt_exact_promotion():
     meta = yaml.safe_load(re.search(r"```yaml\n(.*?)\n```", meta_text, re.S)[1])
     cases = yaml.safe_load((BUG_META / "test-cases.yaml").read_text())
     current = validator().validate(ROOT, BUG, BUG_NAME, "x-ipe-task-based")
-    recovered = recovered_publication(BUG_NAME)
+    recovered = current_publication(BUG_NAME)
     historical = json.loads((BUG_META / "validation-receipt-goal-TASK-6749.json").read_text())
     assert meta["candidate_hash"] == cases["candidate_hash"] == historical["candidate_hash"]
     assert meta["task_id"] == cases["task_id"] == "TASK-6749"
@@ -507,7 +507,7 @@ def test_bug_reviewed_metadata_receipt_exact_promotion():
     assert publication["publication_state"] == "published" and publication["byte_parity"]
     assert publication["method"] == "authorized_edit_tools"
     assert historical["files"] == publication["files"]
-    assert recovered["baseline_hash"] == publication["candidate_hash"]
+    assert recovered_publication(BUG_NAME)["baseline_hash"] == publication["candidate_hash"]
     assert validator().manifest(validator().tree_bytes(ROOT / ".github/skills" / BUG_NAME, ROOT)) == current["files"] == recovered["files"]
     historical = meta_text.split("## Historical metadata (verbatim prework snapshot)\n\n```text\n", 1)[1].rsplit("```", 1)[0]
     assert hashlib.sha256(historical.encode()).hexdigest() == "9cd7d3037abbd1bb44a8654b2ebd0ea4a7acaf7b3fe31f53e9a07227862c7611"
@@ -564,8 +564,8 @@ def test_refactor_complete_resources_frozen_original_output_and_publication_stat
         publication = json.loads(publication_path.read_text())
         assert publication["publication_state"] == "published" and publication["byte_parity"]
         assert publication["baseline_hash"] == validator().fingerprint(baseline)
-        current = recovered_publication(REFACTOR_NAME, live)
-        assert current["baseline_hash"] == publication["candidate_hash"]
+        current = current_publication(REFACTOR_NAME, live)
+        assert recovered_publication(REFACTOR_NAME)["baseline_hash"] == publication["candidate_hash"]
         assert current["candidate_hash"] == receipt["candidate_hash"]
         assert live == receipt["files"] == current["files"]
         assert publication["added"] == ["references/integration.md", "templates/refactor-report.md"]
@@ -654,10 +654,10 @@ def test_refactor_negative_authored_quality_claims(old, new):
         check_quality_example(text.replace(old, new))
 
 
-def test_refactor_real_config_mandatory_app_action_and_conditional_report():
+def test_refactor_real_config_optional_app_action_and_conditional_report():
     template = json.loads((ROOT / "x-ipe-docs/config/workflow-template.json").read_text())
     action = template["stages"]["validation"]["actions"]["code_refactor"]
-    assert action["optional"] is False
+    assert action["optional"] is True
     assert action["deliverables"] == ["$output:refactor-report"]
     assert action["action_context"]["tech-design"]["required"] is True
     assert action["action_context"]["specification"]["required"] is True
@@ -671,7 +671,7 @@ def test_refactor_real_config_mandatory_app_action_and_conditional_report():
     text = " ".join((REFACTOR / "references/integration.md").read_text().split()).lower()
     for clause in ("stages.validation.code_refactor", "explicit false", "no inline production fallback",
                    "x-ipe-meta-skill-creator", "candidate", "not arbitrary production edits",
-                   "refactor-report", "mandatory until integration", "writer success alone is insufficient",
+                   "refactor-report", "explicit customized mandatory action", "writer success alone is insufficient",
                    "no fake done", "enabled", "operation: refactor", "synthetic", "tracing_enabled"):
         assert clause in text
 
@@ -752,7 +752,7 @@ def test_refactor_root_metadata_schema_receipt_and_review_gate():
     meta = yaml.safe_load(re.search(r"```yaml\n(.*?)\n```", text, re.S)[1])
     cases = yaml.safe_load((REFACTOR_META / "test-cases.yaml").read_text())
     receipt = validator().validate(ROOT, REFACTOR, REFACTOR_NAME, "x-ipe-task-based")
-    assert recovered_publication(REFACTOR_NAME)["files"] == receipt["files"]
+    assert current_publication(REFACTOR_NAME)["files"] == receipt["files"]
     historical = json.loads((REFACTOR_META / "validation-receipt-goal-TASK-6749.json").read_text())
     publication = json.loads((REFACTOR_META / "publication-receipt-goal-TASK-6749.json").read_text())
     assert historical["files"] == publication["files"]
@@ -819,11 +819,13 @@ def test_sync_complete_original_fields_live_parity_and_no_lifecycle():
         publication = json.loads(publication_path.read_text())
         assert publication["publication_state"] == "published" and publication["byte_parity"]
         assert publication["baseline_hash"] == validator().fingerprint(baseline)
-        assert publication["candidate_hash"] == current["candidate_hash"]
-        assert live == current["files"] == publication["files"]
+        newest = current_publication(SYNC_NAME)
+        assert newest["baseline_hash"] == publication["candidate_hash"]
+        assert newest["candidate_hash"] == current["candidate_hash"]
+        assert live == current["files"] == newest["files"]
         assert live_bytes == validator().tree_bytes(SYNC, ROOT)
         assert publication["changed"] == sorted(baseline)
-        assert publication["added"] == sorted(set(current["files"]) - set(baseline))
+        assert publication["added"] == sorted(set(publication["files"]) - set(baseline))
         assert publication["removed"] == []
         assert analysis_output(ROOT / ".github/skills" / SYNC_NAME / "SKILL.md") == expected
     else:
@@ -1094,7 +1096,10 @@ def test_sync_root_metadata_current_receipt_case_mapping_and_review_boundary():
     meta = yaml.safe_load(re.search(r"```yaml\n(.*?)\n```", (SYNC_META / "skill-meta.md").read_text(), re.S)[1])
     cases = yaml.safe_load((SYNC_META / "test-cases.yaml").read_text())
     current = validator().validate(ROOT, SYNC, SYNC_NAME, "x-ipe-tool")
-    assert current == json.loads((SYNC_META / "validation-receipt-goal-TASK-6749.json").read_text())
+    assert current["ok"] and current["files"] == current_publication(SYNC_NAME)["files"]
+    # Prior authoring metadata is immutable version history, not a claim about
+    # the current candidate. Check it against its own original receipt.
+    current = json.loads((SYNC_META / "validation-receipt-goal-TASK-6749.json").read_text())
     assert meta["skill_type"] == "x-ipe-tool" and meta["task_id"] == cases["task_id"] == "TASK-6749"
     assert meta["candidate_hash"] == cases["candidate_hash"] == current["candidate_hash"]
     publication_path = SYNC_META / "publication-receipt-goal-TASK-6749.json"
@@ -1117,9 +1122,9 @@ def test_sync_root_metadata_current_receipt_case_mapping_and_review_boundary():
 
 def test_refactor_dependency_contracts_are_revision_specific_after_migration():
     text = " ".join((REFACTOR / "references/integration.md").read_text().split())
-    for clause in ("pre-migration dependency snapshot", "current entry/output schema",
-                   "nullable numeric evidence", "analysis migration does not migrate full_sync",
-                   "unsupported consumer handoffs as gaps"):
+    for clause in ("Current full_analysis/full_sync operations", "study-only/local/broad",
+                   "actual operation_output", "unknown is null/explicit not measured",
+                   "consumer handoff until verified integration"):
         assert clause in text
 
 
@@ -1247,8 +1252,10 @@ def test_analysis_complete_tool_bundle_original_keys_and_no_task_logic():
         publication = json.loads(publication_path.read_text())
         assert publication["publication_state"] == "published" and publication["byte_parity"]
         assert publication["baseline_hash"] == validator().fingerprint(baseline)
-        assert publication["candidate_hash"] == result["candidate_hash"]
-        assert live == result["files"] == publication["files"]
+        newest = current_publication(ANALYSIS_NAME)
+        assert newest["baseline_hash"] == publication["candidate_hash"]
+        assert newest["candidate_hash"] == result["candidate_hash"]
+        assert live == result["files"] == newest["files"]
         assert publication["changed"] == sorted(baseline)
         assert publication["added"] == publication["removed"] == []
         assert analysis_output(ROOT / ".github/skills" / ANALYSIS_NAME / "SKILL.md") == expected
@@ -1451,7 +1458,8 @@ def test_analysis_disposable_cap_unavailable_and_executed_failure_distinct(tmp_p
 
 def test_analysis_current_receipt_metadata_cases_and_reviewed_publication_state():
     current = validator().validate(ROOT, ANALYSIS, ANALYSIS_NAME, "x-ipe-tool")
-    assert current == json.loads((ANALYSIS_META / "validation-receipt-goal-TASK-6749.json").read_text())
+    assert current["ok"] and current["files"] == current_publication(ANALYSIS_NAME)["files"]
+    current = json.loads((ANALYSIS_META / "validation-receipt-goal-TASK-6749.json").read_text())
     meta = yaml.safe_load(re.search(r"```yaml\n(.*?)\n```", (ANALYSIS_META / "skill-meta.md").read_text(), re.S)[1])
     cases = yaml.safe_load((ANALYSIS_META / "test-cases.yaml").read_text())
     assert meta["skill_type"] == "x-ipe-tool"

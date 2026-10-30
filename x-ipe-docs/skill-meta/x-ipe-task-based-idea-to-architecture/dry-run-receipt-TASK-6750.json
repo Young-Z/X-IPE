@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "ok": true,
+  "operation": "publish",
+  "state": "dry_run",
+  "name": "x-ipe-task-based-idea-to-architecture",
+  "added": [],
+  "changed": [
+    "SKILL.md"
+  ],
+  "removed": [],
+  "protected": [],
+  "baseline_hash": "cfd778afd790a6095f6c9757b144601f4e977eb1aa43893d65c94634c93d5406",
+  "candidate_hash": "54e20d33284ab00c9824ddc77d7b671f07f0dedea7d39a5df130fff6743a4c06",
+  "files": {
+    "SKILL.md": "b24fe76caae956e35c65477f1a8c1348ef92912107221e8815151cae04eeb36e",
+    "references/architecture-patterns.md": "dffc4b16a360b64b0a30592ca48ce82fb4ad783b286692bc059d1436c39f9f4e",
+    "references/examples.md": "02a120cafacb5d6d22e24f0e10ee14532a43cd717ec691d74d395286cfcaa302"
+  },
+  "excluded_files": {}
+}

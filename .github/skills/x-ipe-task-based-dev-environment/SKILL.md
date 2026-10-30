@@ -17,11 +17,23 @@ Set up a development environment by:
 
 ## Important Notes
 
+Load the [single-loop delivery policy](.github/skills/x-ipe-workflow-task-execution/references/agent-loop.md)
+once in the current context. Execute this skill in the same agent loop; another
+skill is expertise, not a new agent. Use proportional checks and reuse current
+evidence; independent review is conditional on concrete risk, not the skill name.
+
+Load `x-ipe-workflow-task-execution` and its
+[common lifecycle](.github/skills/x-ipe-workflow-task-execution/references/lifecycle.md).
+Reuse the supplied task/readiness; direct entry calls Orient/Plan once without
+recursively dispatching this skill. One owner handles task/feature/app writes,
+Git and the next boundary. Return full output; do not register or execute a
+successor. Within-skill questions follow the three existing interaction modes;
+clear inputs need no question or DAO call. Explicit human approvals still bind.
+
 BLOCKING: Learn `x-ipe-workflow-task-execution` skill before executing this skill.
 
 **Note:** If Agent does not have skill capability, go to `.github/skills/` folder to learn skills. SKILL.md is the entry point.
 
-IMPORTANT: When `process_preference.interaction_mode == "dao-represent-human-to-interact"`, NEVER stop to ask the human. Instead, call `x-ipe-assistant-user-representative-Engineer` to get the answer. The DAO skill acts as the human representative and will provide the guidance needed to continue.
 
 ---
 
@@ -63,7 +75,7 @@ input:
 
 ```xml
 <input_init>
-  <field name="task_id" source="x-ipe-tool-task-board-manager (auto-generated)" />
+  <field name="task_id" source="existing lifecycle task/readiness; no duplicate registration" />
   <field name="execution_mode" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
   <field name="workflow.name" source="x-ipe-workflow-task-execution (from --workflow-mode@{name})" />
   <field name="process_preference.interaction_mode" source="from caller (x-ipe-workflow-task-execution) or default 'interact-with-human'" />
@@ -101,9 +113,7 @@ input:
 | 2 | Init Package Manager | Run `uv init` or `npm init`, create src/tests folders | Package manager ready |
 | 3 | Init Git | Call x-ipe-tool-git-version-control skill for repo and .gitignore | Git initialized |
 | 4 | Document Setup | Create `x-ipe-docs/environment/setup.md` | Documentation created |
-| 5 | Commit | Stage and commit all setup files | Initial commit done |
-| 6.1 | Decide Next Action | DAO-assisted next task decision | Next action decided |
-| 6.2 | Execute Next Action | Load skill, generate plan, execute | Execution started |
+| 5 | Return | Verify setup and return to existing owner | Actual setup evidence |
 
 BLOCKING: Step 2 cannot start until tech stack is confirmed.
 BLOCKING: Step 3 cannot proceed if x-ipe-tool-git-version-control skill fails.
@@ -115,23 +125,7 @@ BLOCKING: Step 3 cannot proceed if x-ipe-tool-git-version-control skill fails.
 ```xml
 <procedure name="dev-environment-setup">
   <execute_dor_checks_before_starting/>
-  <schedule_dod_checks_with_sub_agent_before_starting/>
 
-  <phase_0 name="Board — Register Task">
-    <step_0_1>
-      <name>Create Task on Board</name>
-      <action>
-        Call `x-ipe-tool-task-board-manager` → `task_create.py`:
-        - task_type: "Dev Environment"
-        - description: summarize work from input context
-        - status: "in_progress"
-        - role: from input context
-        - assignee: from input context
-        Store returned task_id for later update.
-      </action>
-      <output>Task created on board with status in_progress</output>
-    </step_0_1>
-  </phase_0>
 
   <step_1>
     <name>Determine Tech Stack</name>
@@ -144,9 +138,9 @@ BLOCKING: Step 3 cannot proceed if x-ipe-tool-git-version-control skill fails.
            2. Node.js Application - Node.js with npm/yarn
 
          Response source (based on interaction_mode):
-         IF process_preference.interaction_mode == "dao-represent-human-to-interact":
+         IF process_preference.interaction_mode IN ["dao-represent-human-to-interact", "dao-represent-human-to-interact-for-questions-in-skill"]:
            → Resolve via x-ipe-assistant-user-representative-Engineer (default: Python if unresolvable)
-         ELSE (interact-with-human/dao-represent-human-to-interact-for-questions-in-skill):
+         ELSE (interact-with-human):
            → Ask human for selection
       4. Default to Python if no preference given
     </action>
@@ -164,9 +158,9 @@ BLOCKING: Step 3 cannot proceed if x-ipe-tool-git-version-control skill fails.
          a. Ask for npm or yarn preference (default: npm)
 
             Response source (based on interaction_mode):
-            IF process_preference.interaction_mode == "dao-represent-human-to-interact":
+            IF process_preference.interaction_mode IN ["dao-represent-human-to-interact", "dao-represent-human-to-interact-for-questions-in-skill"]:
               → Default to npm (most common)
-            ELSE (interact-with-human/dao-represent-human-to-interact-for-questions-in-skill):
+            ELSE (interact-with-human):
               → Ask human for preference
          b. Run: npm init -y OR yarn init -y
          c. Create src/index.js and tests/index.test.js
@@ -210,68 +204,18 @@ BLOCKING: Step 3 cannot proceed if x-ipe-tool-git-version-control skill fails.
   </step_4>
 
   <step_5>
-    <name>Commit Setup</name>
+    <name>Verify and Return</name>
     <action>
-      1. Call x-ipe-tool-git-version-control skill:
-         operation: add
-         directory: {project_root}
-         files: null (all files)
-      2. Call x-ipe-tool-git-version-control skill:
-         operation: commit
-         directory: {project_root}
-         task_data: {current_task_data_model}
+      1. Check the actual configured package manager, environment, applicable
+         structure and documented run command; reuse existing suitable evidence.
+      2. Return original output and real paths to the owner; initial_commit_hash
+         is null unless the user separately authorized an actual commit.
+      3. No broad staging or automatic commit. Owner alone records the task and
+         handles one authorized mode-aware next boundary.
     </action>
-    <output>Initial commit created with structured message</output>
+    <output>Verified setup and original owner handoff</output>
   </step_5>
 
-  <step_5_1>
-    <name>Update Task on Board</name>
-    <action>
-      Call `x-ipe-tool-task-board-manager` → `task_update.py`:
-      - task_id: from Phase 0
-      - status: "done"
-      - output_links: list of deliverables produced in this skill execution
-    </action>
-    <output>Task marked done on board</output>
-  </step_5_1>
-
-  <phase_6 name="继续执行（Continue Execute）">
-    <step_6_1>
-      <name>Decide Next Action</name>
-      <action>
-        Collect the full context and task_completion_output from this skill execution.
-
-        IF process_preference.interaction_mode == "dao-represent-human-to-interact":
-          → Invoke x-ipe-assistant-user-representative-Engineer with:
-            type: "routing"
-            completed_skill_output: {full task_completion_output YAML from this skill}
-            next_task_based_skill: "{from output}"
-            context: "Skill completed. Study the context and full output to decide best next action."
-          → DAO studies the complete context and decides the best next action
-        ELSE (interact-with-human):
-          → Present next task suggestion to human and wait for instruction
-      </action>
-      <constraints>
-        - BLOCKING (manual): Human MUST confirm or redirect before proceeding
-        - BLOCKING (auto): Proceed after DoD verification; auto-select next task via DAO
-      </constraints>
-      <output>Next action decided with execution context</output>
-    </step_6_1>
-    <step_6_2>
-      <name>Execute Next Action</name>
-      <action>
-        Based on the decision from Step 6.1:
-        1. Load the target task-based skill's SKILL.md
-        2. Generate an execution plan from the skill's Execution Flow table
-        3. Start execution from the skill's first phase/step
-      </action>
-      <constraints>
-        - MUST load the skill before executing — do not skip skill loading
-        - Execution follows the target skill's procedure, not this skill's
-      </constraints>
-      <output>Next task execution started</output>
-    </step_6_2>
-  </phase_6>
 
 </procedure>
 ```
@@ -309,7 +253,7 @@ task_completion_output:
 
 ## Definition of Done
 
-CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
+Verify the applicable outcomes in the current loop; use independent review only when concrete risk warrants it.
 
 ```xml
 <definition_of_done>
@@ -334,8 +278,8 @@ CRITICAL: Use a sub-agent to validate DoD checkpoints independently.
     <verification>Verify x-ipe-docs/environment/setup.md exists with setup instructions</verification>
   </checkpoint>
   <checkpoint required="true">
-    <name>Initial commit created</name>
-    <verification>Run `git log --oneline -1` and verify structured commit message</verification>
+    <name>Git authority preserved</name>
+    <verification>No implicit commit or broad staging; actual authorized commit hash or null returned.</verification>
   </checkpoint>
 </definition_of_done>
 ```
@@ -383,7 +327,7 @@ MANDATORY: After completing this skill, return to `x-ipe-workflow-task-execution
 | Skip git init | No version control | Always initialize git |
 | Wrong .gitignore | Tracks unwanted files | Use tech-stack-specific template |
 | Missing src/tests | Inconsistent structure | Always create standard folders |
-| No initial commit | Loses setup state | Commit after setup |
+| Automatic initial commit | Mutates user-owned Git without consent | Return setup evidence; owner commits only if authorized |
 | Assume tech stack | Wrong environment | Ask or detect from context |
 | Skip venv (Python) | Global package pollution | Always create virtual environment |
 
