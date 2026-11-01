@@ -67,17 +67,22 @@ class SkillTranslator:
         project_root: Path,
         template_path: Optional[Path] = None,
         dao_intercept: bool = False,
+        language: str = "en",
     ) -> Optional[Path]:
         """Generate CLI-specific instruction file from canonical template."""
         if adapter.name == 'copilot':
             return None  # No-op
 
         if template_path is None:
-            template_name = INSTRUCTIONS_TEMPLATE if dao_intercept else 'instructions-template-no-dao.md'
-            template_path = (
-                Path(__file__).parent.parent
-                / 'resources' / 'templates' / template_name
-            )
+            if language not in {"en", "zh"}:
+                raise ValueError(f"Unsupported instruction language: {language}")
+            resources = Path(__file__).parent.parent / 'resources'
+            if language == "zh":
+                suffix = "" if dao_intercept else "-no-dao"
+                template_path = resources / f"copilot-instructions-zh{suffix}.md"
+            else:
+                template_name = INSTRUCTIONS_TEMPLATE if dao_intercept else 'instructions-template-no-dao.md'
+                template_path = resources / 'templates' / template_name
 
         if not template_path.exists():
             logger.error(f"Instructions template not found: {template_path}")

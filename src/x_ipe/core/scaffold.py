@@ -159,7 +159,9 @@ class ScaffoldManager:
             if not self.dry_run:
                 from x_ipe.services.skill_translator import SkillTranslator
                 translator = SkillTranslator()
-                translator.generate_instructions(adapter, self.project_root, dao_intercept=dao_intercept)
+                translator.generate_instructions(
+                    adapter, self.project_root, dao_intercept=dao_intercept, language=language
+                )
             self.created.append(target)
             return
         
@@ -189,7 +191,18 @@ class ScaffoldManager:
                     existing_content = target.read_text()
                     
                     # Check if X-IPE section already exists
-                    if "# Copilot Instructions" in existing_content and "## Before You Start" in existing_content:
+                    legacy_block = (
+                        "# Copilot Instructions" in existing_content
+                        and "## Before You Start" in existing_content
+                    )
+                    current_block = (
+                        "# AI Agent Instructions" in existing_content
+                        and "## Skill-First" in existing_content
+                    ) or (
+                        "# AI Agent 使用指南" in existing_content
+                        and "## 技能优先" in existing_content
+                    )
+                    if legacy_block or current_block:
                         self.skipped.append(target)
                         return
                     

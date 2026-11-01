@@ -148,6 +148,15 @@ can lag; audit drift before using or explicitly synchronizing them. See the
 and [opt-in evaluation](.github/skills/x-ipe-workflow-task-execution/references/evaluation.md).
 Static checks and smaller instruction files alone do not prove token or latency savings.
 
+`x-ipe init --cli <adapter> --lang en|zh` installs this policy at the adapter's
+instruction path: `.github/copilot-instructions.md` (Copilot), `Agents.md`
+(OpenCode), `AGENTS.md` (Codex), or `.claude/CLAUDE.md` (Claude Code). DAO interception
+remains opt-in; it runs in the same loop by default. Existing non-Copilot
+instructions are preserved unless `--force` is used. Copilot appends its policy
+to local instructions only once; replacing an existing policy requires `--force`.
+Language switching through `x-ipe upgrade --lang` updates the active adapter's
+instructions. This does not synchronize unrelated skill installations.
+
 * I will share more details in the upcoming blog series on mindset shifts, process changes, and tool evolution needed to thrive in the AI age of software delivery.
 
 ---
