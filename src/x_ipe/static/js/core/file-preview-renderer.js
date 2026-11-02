@@ -215,7 +215,7 @@ class FilePreviewRenderer {
         if (type === 'markdown') {
             this._renderMarkdown(container, text, filePath);
         } else if (type === 'html') {
-            this._renderHtml(container, text);
+            this._renderHtml(container, text, filePath);
         } else {
             this._renderCode(container, text, filePath.split('.').pop().toLowerCase());
         }
@@ -304,8 +304,22 @@ td, th { border: 1px solid #e2e8f0; padding: 6px 10px; }
         this._createBlobIframe(container, styledHtml, 'text/html', 'allow-same-origin');
     }
 
-    _renderHtml(container, html) {
-        this._createBlobIframe(container, html, 'text/html', 'allow-scripts allow-same-origin');
+    _renderHtml(container, html, filePath) {
+        if (!filePath) {
+            this._createBlobIframe(container, html, 'text/html', 'allow-scripts allow-same-origin');
+            return;
+        }
+        this._revokeBlobUrl();
+        const projectPath = this._options.apiEndpoint.startsWith('/api/kb/files/')
+            ? 'x-ipe-docs/memory/' + filePath
+            : filePath;
+        container.innerHTML = '';
+        const iframe = document.createElement('iframe');
+        iframe.src = '/api/file/preview/'
+            + projectPath.split('/').map(encodeURIComponent).join('/');
+        iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+        iframe.style.cssText = 'width:100%;height:100%;border:none';
+        container.appendChild(iframe);
     }
 
     _createBlobIframe(container, content, mimeType, sandbox) {

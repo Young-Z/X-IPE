@@ -201,9 +201,9 @@ describe('CR-008: FilePreviewRenderer', () => {
     });
   });
 
-  // AC-18f: HTML in blob URL iframe
+  // AC-18f: Saved HTML in a sandboxed iframe with relative asset support
   describe('AC-18f: HTML rendering', () => {
-    it('should render HTML in blob iframe with scripts allowed', async () => {
+    it('should render saved HTML at its project URL with scripts allowed', async () => {
       globalThis.fetch = vi.fn().mockResolvedValue({
         ok: true,
         text: async () => '<html><body>Hello</body></html>',
@@ -219,7 +219,8 @@ describe('CR-008: FilePreviewRenderer', () => {
       const iframe = container.querySelector('iframe');
       expect(iframe).not.toBeNull();
       expect(iframe.getAttribute('sandbox')).toBe('allow-scripts allow-same-origin');
-      expect(URL.createObjectURL).toHaveBeenCalled();
+      expect(iframe.getAttribute('src')).toBe('/api/file/preview/page.html');
+      expect(URL.createObjectURL).not.toHaveBeenCalled();
     });
   });
 
@@ -470,7 +471,7 @@ describe('CR-008: FilePreviewRenderer', () => {
         apiEndpoint: '/api/ideas/file?path={path}',
         endpointStyle: 'query'
       });
-      await renderer.renderPreview('page.html', container);
+      renderer._renderHtml(container, '<html>test</html>');
 
       expect(URL.createObjectURL).toHaveBeenCalled();
       renderer.destroy();
@@ -488,7 +489,7 @@ describe('CR-008: FilePreviewRenderer', () => {
         apiEndpoint: '/api/ideas/file?path={path}',
         endpointStyle: 'query'
       });
-      await renderer.renderPreview('page1.html', container);
+      renderer._renderHtml(container, '<html>test</html>');
       await renderer.renderPreview('page2.html', container);
 
       // First blob URL should have been revoked when second render started

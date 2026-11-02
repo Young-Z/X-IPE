@@ -909,6 +909,14 @@ Improvements include:
 
 Open **Workplace → CR Assessment**, save the case evidence, choose an assessment depth, and select **AI Estimation**. X-IPE opens its existing Console and types the assessment command for review without submitting it automatically.
 
+Saved HTML previews in Ideation, the Content Viewer, and shared file previews
+(including Memory) load relative CSS, JavaScript, images, and links from the
+file's project directory. `/api/file/preview/<project-relative-path>` serves
+these files within the active project; raw HTML requests to
+`/api/file/content?path=...&raw=true` redirect there. Root-relative asset URLs
+such as `/assets/app.js` still refer to the application origin, not the project
+directory. In-memory HTML and converted documents retain their separate previews.
+
 ### 🔜 Planned
 
 | Feature | Description | Status |

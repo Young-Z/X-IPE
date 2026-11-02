@@ -130,6 +130,7 @@ class ContentRenderer {
      */
     render(data) {
         const { content, type, path, extension } = data;
+        this.currentPath = path || null;
         
         if (type === 'markdown') {
             this.renderMarkdown(content);
@@ -224,22 +225,26 @@ class ContentRenderer {
      * Render HTML content in an iframe for preview
      */
     renderHtml(content) {
-        // Create a blob URL for the HTML content
-        const blob = new Blob([content], { type: 'text/html' });
-        const blobUrl = URL.createObjectURL(blob);
-        
-        // Store for cleanup
         if (this._htmlBlobUrl) {
             URL.revokeObjectURL(this._htmlBlobUrl);
+            this._htmlBlobUrl = null;
         }
-        this._htmlBlobUrl = blobUrl;
+        let previewUrl;
+        if (this.currentPath) {
+            previewUrl = '/api/file/preview/'
+                + this.currentPath.split('/').map(encodeURIComponent).join('/');
+        } else {
+            const blob = new Blob([content], { type: 'text/html' });
+            this._htmlBlobUrl = URL.createObjectURL(blob);
+            previewUrl = this._htmlBlobUrl;
+        }
         
         this.container.innerHTML = `
             <div class="html-preview">
                 <div class="html-preview-toolbar">
                     <span class="badge bg-success"><i class="bi bi-eye"></i> HTML Preview</span>
                 </div>
-                <iframe class="html-preview-iframe" src="${blobUrl}" sandbox="allow-scripts allow-same-origin"></iframe>
+                <iframe class="html-preview-iframe" src="${previewUrl}" sandbox="allow-scripts allow-same-origin"></iframe>
             </div>
         `;
     }

@@ -1316,22 +1316,26 @@ class WorkplaceManager {
      * Render HTML file as iframe preview
      */
     _renderHtmlPreview(content) {
-        // Create a blob URL for the HTML content
-        const blob = new Blob([content], { type: 'text/html' });
-        const blobUrl = URL.createObjectURL(blob);
-        
-        // Store for cleanup
         if (this._htmlBlobUrl) {
             URL.revokeObjectURL(this._htmlBlobUrl);
+            this._htmlBlobUrl = null;
         }
-        this._htmlBlobUrl = blobUrl;
+        let previewUrl;
+        if (this.currentPath) {
+            previewUrl = '/api/file/preview/'
+                + this.currentPath.split('/').map(encodeURIComponent).join('/');
+        } else {
+            const blob = new Blob([content], { type: 'text/html' });
+            this._htmlBlobUrl = URL.createObjectURL(blob);
+            previewUrl = this._htmlBlobUrl;
+        }
         
         return `
             <div class="workplace-preview">
                 <div class="workplace-preview-toolbar">
                     <span class="badge bg-success"><i class="bi bi-eye"></i> Preview</span>
                 </div>
-                <iframe class="workplace-preview-iframe" src="${blobUrl}" sandbox="allow-scripts allow-same-origin"></iframe>
+                <iframe class="workplace-preview-iframe" src="${previewUrl}" sandbox="allow-scripts allow-same-origin"></iframe>
             </div>
         `;
     }

@@ -12,7 +12,7 @@ Provides:
 """
 import os
 from pathlib import Path
-from flask import Blueprint, render_template, jsonify, request, current_app, send_file
+from flask import Blueprint, render_template, jsonify, request, current_app, send_file, redirect, url_for
 
 from flask import Response
 
@@ -79,16 +79,18 @@ def get_project_structure():
 
 
 @main_bp.route('/api/file/content')
+@main_bp.route('/api/file/preview/<path:preview_path>')
 @x_ipe_tracing()
-def get_file_content():
+def get_file_content(preview_path=None):
     """
     GET /api/file/content?path=<relative_path>&raw=<true/false>
+    GET /api/file/preview/<relative_path>
     
     Returns the content of a file with metadata for rendering.
     If raw=true or file is binary (images, etc.), serves the raw file content.
     """
-    file_path = request.args.get('path')
-    raw = request.args.get('raw', 'false').lower() == 'true'
+    file_path = preview_path if preview_path is not None else request.args.get('path')
+    raw = preview_path is not None or request.args.get('raw', 'false').lower() == 'true'
     
     if not file_path:
         return jsonify({'error': 'Path parameter required'}), 400
@@ -106,19 +108,26 @@ def get_file_content():
     
     try:
         # Resolve path
-        full_path = (Path(project_root) / file_path).resolve()
+        root = Path(project_root).resolve()
+        full_path = (root / file_path).resolve()
         
         # Security check: ensure path is within project root
-        if not str(full_path).startswith(str(Path(project_root).resolve())):
+        if not full_path.is_relative_to(root):
             return jsonify({'error': 'Access denied'}), 403
         
-        if not full_path.exists():
+        if not full_path.is_file():
             return jsonify({'error': 'File not found'}), 404
         
         ext = full_path.suffix.lower()
         
         # Auto-detect binary files or use raw parameter
         if raw or ext in binary_extensions:
+            if ext in {'.html', '.htm'} and preview_path is None:
+                return redirect(url_for(
+                    'main.get_file_content',
+                    preview_path=full_path.relative_to(root).as_posix(),
+                ))
+
             # Determine MIME type
             mime_types = {
                 '.png': 'image/png',
@@ -144,7 +153,9 @@ def get_file_content():
                 '.zip': 'application/zip',
                 '.rar': 'application/vnd.rar',
             }
-            mime_type = mime_types.get(ext, 'application/octet-stream')
+            mime_type = mime_types.get(
+                ext, None if preview_path is not None else 'application/octet-stream'
+            )
             
             return send_file(full_path, mimetype=mime_type)
         
